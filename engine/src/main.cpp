@@ -1,4 +1,19 @@
 #include "stdafx.h"
+#include "neko_platform.h"
+
+inline int runMain()
+{
+  neko::platform::initialize();
+  neko::platform::prepareProcess();
+
+  MessageBox( 0, L"hello", L"", MB_OK );
+
+  neko::platform::shutdown();
+
+  return 0;
+}
+
+#ifdef NEKO_PLATFORM_WINDOWS
 
 int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
 {
@@ -14,7 +29,32 @@ int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCm
   // CRT memory allocation breakpoints can be set here
   //_CrtSetBreakAlloc( x );
 
-  MessageBoxA( 0, "fuck yeah", "", MB_OK );
+  neko::platform::g_instance = hInstance;
 
-  return EXIT_SUCCESS;
+  int retval = EXIT_SUCCESS;
+
+#ifndef _DEBUG
+  try
+#endif
+  {
+    retval = runMain();
+  }
+#ifndef _DEBUG
+  catch ( neko::Exception& e )
+  {
+    MessageBoxA( 0, e.getFullDescription().c_str(), "Exception", MB_ICONERROR | MB_OK | MB_TASKMODAL );
+    return EXIT_FAILURE;
+  }
+  catch ( ... )
+  {
+    MessageBoxA( 0, "Unknown exception!", "Exception", MB_ICONERROR | MB_OK | MB_TASKMODAL );
+    return EXIT_FAILURE;
+  }
+#endif
+
+  return retval;
 }
+
+#else
+# error Unsupported platform!
+#endif

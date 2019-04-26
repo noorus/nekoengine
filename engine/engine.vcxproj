@@ -21,14 +21,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -57,13 +57,14 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)..\SDK\SDL2\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\SDL2\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;_ALLOW_MSC_VER_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;V8_I18N_SUPPORT;V8_USE_EXTERNAL_STARTUP_DATA;USING_V8_SHARED;V8_SHARED;V8_DEPRECATION_WARNINGS;ENABLE_HANDLE_ZAPPING;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;_ALLOW_MSC_VER_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;V8_I18N_SUPPORT;V8_USE_EXTERNAL_STARTUP_DATA;USING_V8_SHARED;V8_SHARED;V8_DEPRECATION_WARNINGS;ENABLE_HANDLE_ZAPPING;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\SDL2\lib\;$(SolutionDir)..\SDK\v8\lib\$(Configuration)\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2maind.lib;SDL2d.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2maind.lib;SDL2d.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;libboost_thread-vc141-mt-gd-x64-1_67.lib;libboost_date_time-vc141-mt-gd-x64-1_67.lib;libboost_system-vc141-mt-gd-x64-1_67.lib;libboost_atomic-vc141-mt-gd-x64-1_67.lib;libboost_chrono-vc141-mt-gd-x64-1_67.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -74,18 +75,21 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)..\SDK\SDL2\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\SDL2\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;WIN32;WIN64;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;_ALLOW_MSC_VER_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;V8_I18N_SUPPORT;V8_USE_EXTERNAL_STARTUP_DATA;USING_V8_SHARED;V8_SHARED;V8_DEPRECATION_WARNINGS;ENABLE_HANDLE_ZAPPING;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;WIN32;WIN64;_ALLOW_MSC_VER_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;V8_I18N_SUPPORT;V8_USE_EXTERNAL_STARTUP_DATA;USING_V8_SHARED;V8_SHARED;V8_DEPRECATION_WARNINGS;ENABLE_HANDLE_ZAPPING;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\SDL2\lib\;$(SolutionDir)..\SDK\v8\lib\$(Configuration)\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2main.lib;SDL2.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2main.lib;SDL2.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;libboost_thread-vc141-mt-x64-1_67.lib;libboost_date_time-vc141-mt-x64-1_67.lib;libboost_system-vc141-mt-x64-1_67.lib;libboost_atomic-vc141-mt-x64-1_67.lib;libboost_chrono-vc141-mt-x64-1_67.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\shared\src\exception.cpp" />
+    <ClCompile Include="..\shared\src\platform_windows.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -93,7 +97,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\neko_types.h" />
+    <ClInclude Include="..\shared\include\neko_config.h" />
+    <ClInclude Include="..\shared\include\neko_exception.h" />
+    <ClInclude Include="..\shared\include\neko_platform.h" />
+    <ClInclude Include="..\shared\include\neko_platform_windows.h" />
+    <ClInclude Include="..\shared\include\neko_types.h" />
     <ClInclude Include="include\stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

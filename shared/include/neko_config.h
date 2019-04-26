@@ -1,0 +1,4 @@
+#pragma once
+
+#define NEKO_PLATFORM_WINDOWS
+#define NEKO_VERBOSE_COMPILE
