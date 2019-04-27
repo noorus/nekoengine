@@ -59,7 +59,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\SDL2\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)..\SDK\glew\include\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\SDL2\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;_ALLOW_MSC_VER_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;V8_I18N_SUPPORT;V8_USE_EXTERNAL_STARTUP_DATA;USING_V8_SHARED;V8_SHARED;V8_DEPRECATION_WARNINGS;ENABLE_HANDLE_ZAPPING;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -74,8 +74,8 @@
       <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\SDL2\lib\;$(SolutionDir)..\SDK\v8\lib\$(Configuration)\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2maind.lib;SDL2d.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;libboost_thread-vc141-mt-gd-x64-1_67.lib;libboost_date_time-vc141-mt-gd-x64-1_67.lib;libboost_system-vc141-mt-gd-x64-1_67.lib;libboost_atomic-vc141-mt-gd-x64-1_67.lib;libboost_chrono-vc141-mt-gd-x64-1_67.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\SDL2\lib;$(SolutionDir)..\SDK\glew\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2maind.lib;SDL2d.lib;opengl32.lib;glew32d.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;libboost_thread-vc141-mt-gd-x64-1_67.lib;libboost_date_time-vc141-mt-gd-x64-1_67.lib;libboost_system-vc141-mt-gd-x64-1_67.lib;libboost_atomic-vc141-mt-gd-x64-1_67.lib;libboost_chrono-vc141-mt-gd-x64-1_67.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -100,7 +100,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\SDL2\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)..\SDK\glew\include\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\SDL2\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;WIN64;_ALLOW_MSC_VER_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;V8_I18N_SUPPORT;V8_USE_EXTERNAL_STARTUP_DATA;USING_V8_SHARED;V8_SHARED;V8_DEPRECATION_WARNINGS;ENABLE_HANDLE_ZAPPING;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -119,8 +119,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\SDL2\lib\;$(SolutionDir)..\SDK\v8\lib\$(Configuration)\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2main.lib;SDL2.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;libboost_thread-vc141-mt-x64-1_67.lib;libboost_date_time-vc141-mt-x64-1_67.lib;libboost_system-vc141-mt-x64-1_67.lib;libboost_atomic-vc141-mt-x64-1_67.lib;libboost_chrono-vc141-mt-x64-1_67.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\SDL2\lib;$(SolutionDir)..\SDK\glew\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2main.lib;SDL2.lib;opengl32.lib;glew32.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;libboost_thread-vc141-mt-x64-1_67.lib;libboost_date_time-vc141-mt-x64-1_67.lib;libboost_system-vc141-mt-x64-1_67.lib;libboost_atomic-vc141-mt-x64-1_67.lib;libboost_chrono-vc141-mt-x64-1_67.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <SubSystem>Windows</SubSystem>
@@ -137,11 +137,14 @@
     <ClCompile Include="..\shared\src\platform_windows.cpp" />
     <ClCompile Include="src\console.cpp" />
     <ClCompile Include="src\consolewindow_windows.cpp" />
+    <ClCompile Include="src\engine.cpp" />
+    <ClCompile Include="src\gfx.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\subsystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\shared\include\neko_config.h" />
@@ -153,6 +156,9 @@
     <ClInclude Include="include\consolelistener.h" />
     <ClInclude Include="include\consolewindow.h" />
     <ClInclude Include="include\consolewindow_windows.h" />
+    <ClInclude Include="include\engine.h" />
+    <ClInclude Include="include\forwards.h" />
+    <ClInclude Include="include\gfx.h" />
     <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\subsystem.h" />

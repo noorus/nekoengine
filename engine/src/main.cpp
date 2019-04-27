@@ -2,6 +2,7 @@
 #include "neko_platform.h"
 #include "console.h"
 #include "consolewindow.h"
+#include "engine.h"
 
 using namespace neko;
 
@@ -13,7 +14,7 @@ inline int runMain()
   platform::initialize();
   platform::prepareProcess();
 
-  Console console;
+  /*Console console;
 
   platform::Thread consoleWindowThread( c_consoleThreadName,
     []( platform::Event& running, platform::Event& wantStop, void* argument ) -> bool
@@ -25,14 +26,22 @@ inline int runMain()
     return true;
   }, &console );
 
-  consoleWindowThread.start();
-  while ( true )
+  consoleWindowThread.start();*/
+
+  EnginePtr engine = make_shared<Engine>();
+  engine->initialize( Engine::Options() );
+  engine->run();
+  engine->shutdown();
+  engine.reset();
+
+  /*while ( true )
   {
     if ( !consoleWindowThread.check() )
       break;
     Sleep( 1000 );
   }
-  consoleWindowThread.stop();
+
+  consoleWindowThread.stop();*/
 
   platform::shutdown();
 

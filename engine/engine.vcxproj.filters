@@ -48,6 +48,15 @@
     <ClCompile Include="src\stdafx.cpp">
       <Filter>Source Files\junk</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -71,9 +80,6 @@
     <ClInclude Include="include\utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\subsystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\console.h">
       <Filter>Header Files\console</Filter>
     </ClInclude>
@@ -87,6 +93,18 @@
       <Filter>Header Files\console</Filter>
     </ClInclude>
     <ClInclude Include="include\nekomath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\subsystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\forwards.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

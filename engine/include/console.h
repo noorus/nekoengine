@@ -3,6 +3,7 @@
 #include "neko_platform.h"
 #include "utilities.h"
 #include "consolelistener.h"
+#include "forwards.h"
 
 namespace neko {
 

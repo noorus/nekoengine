@@ -35,7 +35,7 @@ namespace neko {
       float dpiScaling_;
       WNDPROC baseCmdlineProc_;
       WNDPROC baseLogProc_;
-      Console* console_;
+      ConsolePtr console_;
       StringVector linesBuffer_;
       platform::RWLock lock_;
       HWND unpauseButton_;

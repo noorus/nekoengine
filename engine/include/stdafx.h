@@ -110,6 +110,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
+// OpenGL
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 // FMOD
 #include <fmod.hpp>
 #include <fmod_errors.h>

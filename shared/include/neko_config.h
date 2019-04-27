@@ -12,4 +12,4 @@
 #undef NEKO_TEST_WINVISTACOMPAT
 
 // Set this to use doubles for all math primitives. Otherwise using floats.
-#define NEKO_MATH_DOUBLE
+#undef NEKO_MATH_DOUBLE

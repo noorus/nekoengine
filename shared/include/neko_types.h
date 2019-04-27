@@ -47,6 +47,7 @@ namespace neko {
   using std::make_shared;
   using std::make_unique;
   using std::enable_shared_from_this;
+  using std::move;
 
   using boost::noncopyable;
 
@@ -64,7 +65,7 @@ namespace neko {
   using mat2 = glm::dmat2x2;
   using mat3 = glm::dmat3x3;
   using mat4 = glm::dmat4x4;
-#elif
+#else
   using Real = float;
 # define NEKO_ZERO 0.0f
 # define NEKO_HALF 0.5f
@@ -72,13 +73,15 @@ namespace neko {
   namespace math {
     using namespace boost::math::float_constants;
   }
-  using glm::vec2;
-  using glm::vec3;
-  using glm::vec4;
-  using mat2 = glm::mat2x2;
-  using mat3 = glm::mat3x3;
-  using mat4 = glm::mat4x4;
+  using vec2 = glm::vec2;
+  using vec3 = glm::vec3;
+  using vec4 = glm::vec4;
+  //using mat2 = glm::mat2x2;
+  //using mat3 = glm::mat3x3;
+  using mat4 = glm::mat4;
 #endif
+
+  using GameTime = double;
 
   using StringVector = vector<string>;
 
@@ -105,5 +108,22 @@ namespace neko {
     uint16_t minute;  //!< Minute
     uint16_t second;  //!< Second
   };
+
+#pragma pack(push,1)
+  struct vertex {
+    float x, y, z;
+    float s, t;
+    inline void set( const float& x_, const float& y_, const float& z_, const float& s_, const float& t_ )
+    {
+      x = x_;
+      y = y_;
+      z = z_;
+      s = s_;
+      t = t_;
+    }
+  };
+#pragma pack(pop)
+
+  typedef vector<vertex> VertexVector;
 
 }
