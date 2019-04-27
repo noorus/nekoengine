@@ -14,34 +14,32 @@ inline int runMain()
   platform::initialize();
   platform::prepareProcess();
 
-  /*Console console;
+  ConsolePtr console = make_shared<Console>();
 
   platform::Thread consoleWindowThread( c_consoleThreadName,
     []( platform::Event& running, platform::Event& wantStop, void* argument ) -> bool
   {
-    auto cnsl = (Console*)argument;
-    platform::ConsoleWindowPtr window = make_shared<platform::ConsoleWindow>( cnsl, c_consoleTitle, 220, 220, 640, 320 );
+    auto console = ( (Console*)argument )->shared_from_this();
+    platform::ConsoleWindowPtr window = make_shared<platform::ConsoleWindow>( console, c_consoleTitle, 220, 220, 640, 320 );
     running.set();
     window->messageLoop( wantStop );
     return true;
-  }, &console );
+  }, console.get() );
 
-  consoleWindowThread.start();*/
+  consoleWindowThread.start();
 
-  EnginePtr engine = make_shared<Engine>();
+  EnginePtr engine = make_shared<Engine>( console );
   engine->initialize( Engine::Options() );
   engine->run();
+
+  if ( consoleWindowThread.check() )
+    consoleWindowThread.stop();
+  consoleWindowThread.waitFor();
+
   engine->shutdown();
   engine.reset();
 
-  /*while ( true )
-  {
-    if ( !consoleWindowThread.check() )
-      break;
-    Sleep( 1000 );
-  }
-
-  consoleWindowThread.stop();*/
+  console.reset();
 
   platform::shutdown();
 
@@ -64,7 +62,7 @@ int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCm
   // CRT memory allocation breakpoints can be set here
   //_CrtSetBreakAlloc( x );
 
-  neko::platform::g_instance = hInstance;
+  platform::g_instance = hInstance;
 
   int retval = EXIT_SUCCESS;
 

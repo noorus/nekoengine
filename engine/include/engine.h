@@ -30,7 +30,7 @@ namespace neko {
     volatile Signal signal_;
   public:
     //! Constructor.
-    Engine();
+    Engine( ConsolePtr console );
     //! Destructor.
     ~Engine();
     //! Raises a stop signal on the next cycle.

@@ -144,10 +144,10 @@ namespace neko {
       position = 0;
     }
 
-    ConsoleWindow::ConsoleWindow( Console* console, const string& title, int x, int y, int w, int h ):
+    ConsoleWindow::ConsoleWindow( ConsolePtr console, const string& title, int x, int y, int w, int h ):
       Window( g_instance, wndProc, this ),
       cmdline_( nullptr ), log_( nullptr ),
-      console_( console )
+      console_( move( console ) )
     {
       // Check and set a global flag for whether GetDpiForSystem API exists on this system (Windows 10 only)
       g_haveSysDpiCall = ( GetProcAddress( LoadLibraryW( L"user32.dll" ), "GetDpiForSystem" ) != nullptr );

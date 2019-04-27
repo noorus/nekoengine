@@ -99,8 +99,26 @@ namespace neko {
 
   using ConCmdPtr = unique_ptr<ConCmd>;
 
-  class Console {
+  //! A console message source.
+  struct ConsoleSource {
+    string name;
+    vec3 color;
+  };
+
+  class Console: public enable_shared_from_this<Console> {
     friend class ConBase;
+  public:
+    //! Message source types.
+    enum Source: unsigned long {
+      srcEngine = 0,  //!< Message from the engine
+      srcGfx,         //!< Message from the graphics subsystem
+      srcSound,       //!< Message from the sound subsystem
+      srcPhysics,     //!< Message from the physics subsystem
+      srcScripting,   //!< Message from the scripting subsystem
+      srcInput,       //!< Message from the input subsystem
+      srcGame,        //!< Message from the game logic
+      srcGUI          //!< Message from the gui subsystem
+    };
   private:
     unique_ptr<TextFileWriter> fileOut_;
     CVarList cvars_; //!< Registered commands & variables
@@ -114,6 +132,8 @@ namespace neko {
     ConCmdPtr helpCmd_;
     ConCmdPtr findCmd_;
     ConCmdPtr execCmd_;
+    EnginePtr engine_;
+    map<Source, ConsoleSource> sources_;
     void writeStartBanner();
     void writeStopBanner();
     //! Registers a console variable or command.
@@ -125,18 +145,34 @@ namespace neko {
     static void callbackExec( Console* console, ConCmd* command, StringVector& arguments );
   public:
     Console();
+    void setEngine( EnginePtr engine );
+    void resetEngine();
+    //! Describes the given console command or variable.
     void describe( ConBase* base );
+    //! Adds a listener.
     void addListener( ConsoleListener* listener );
+    //! Removes a listener.
     void removeListener( ConsoleListener* listener );
+    //! Registers a message source.
+    Source registerSource( const string& name, vec3 color );
+    //! Unregisters a message source.
+    void unregisterSource( Source source );
+    //! Automatic completion search for given command line.
     void autoComplete( const string& line, CVarList& matches );
     void start();
     void stop();
     void queueCommand( const string& commandLine );
+    //! Queues a command for execution on next update call.
     void executeBuffered();
-    void print( const char* str );
-    inline void print( const string& str ) { print( str.c_str() ); }
-    void printf( const char* str, ... );
+    //! Prints a message.
+    void print( Source source, const char* str );
+    //! Prints a message.
+    inline void print( Source source, const string& str ) { print( source, str.c_str() ); }
+    //! Prints a message.
+    void printf( Source source, const char* str, ... );
+    //! Executes a command line.
     void execute( string commandLine, const bool echo = true );
+    //! Executes a file.
     void executeFile( const string& filename );
   };
 

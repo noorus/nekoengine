@@ -74,7 +74,7 @@ namespace neko {
       void flushBuffer();
       void forwardExecute( const wstring& command );
     public:
-      ConsoleWindow( Console* console, const string& title, int x, int y, int w, int h );
+      ConsoleWindow( ConsolePtr console, const string& title, int x, int y, int w, int h );
       void onConsolePrint( Console* console, const string& str ) override;
       void clearCmdline();
       void setCmdline( const string& line );

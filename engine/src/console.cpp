@@ -13,7 +13,7 @@
 
 namespace neko {
 
-  const char* c_fileLogFormat = "[%02d:%02d] %s\r\n";
+  const char* c_fileLogFormat = "[%0#*.2f][%s] %s\r\n";
   const int c_sprintfBufferSize = 1024;
 
   CVarList Console::precreated_;
@@ -135,8 +135,24 @@ namespace neko {
     value_.str = value;
   }
 
+  constexpr vec3 rgbToVec3( uint8_t r, uint8_t g, uint8_t b )
+  {
+    return vec3( (Real)r / 255.0f, (Real)g / 255.0f, (Real)b / 255.0f );
+  }
+
   Console::Console()
   {
+    // Register default sources
+    registerSource( "engine", rgbToVec3( 60, 64, 76 ) );
+    registerSource( "gfx", rgbToVec3( 79, 115, 44 ) );
+    registerSource( "sound", rgbToVec3( 181, 80, 10 ) );
+    registerSource( "physics", rgbToVec3( 78, 29, 153 ) );
+    registerSource( "scripts", rgbToVec3( 34, 70, 197 ) );
+    registerSource( "input", rgbToVec3( 219, 38, 122 ) );
+    registerSource( "game", rgbToVec3( 4, 127, 77 ) );
+    registerSource( "gui", rgbToVec3( 79, 115, 44 ) );
+
+    // Create core commands
     listCmd_ = std::make_unique<ConCmd>( "list", "List all cvars.", callbackList );
     helpCmd_ = std::make_unique<ConCmd>( "help", "Get help on a variable/command.", callbackHelp );
     findCmd_ = std::make_unique<ConCmd>( "find", "List cvars with name containing given string.", callbackFind );
@@ -152,9 +168,24 @@ namespace neko {
     } );
   }
 
+  Console::Source Console::registerSource( const string& name, vec3 color )
+  {
+    ScopedRWLock lock( &lock_ );
+    ConsoleSource tmp = { name, color };
+    auto index = (Console::Source)sources_.size();
+    sources_[index] = tmp;
+    return index;
+  }
+
+  void Console::unregisterSource( Source source )
+  {
+    ScopedRWLock lock( &lock_ );
+    sources_.erase( source );
+  }
+
   void Console::describe( ConBase* base )
   {
-    printf( "%s: (%s) - %s",
+    printf( srcEngine, "%s: (%s) - %s",
       base->name().c_str(),
       base->isCommand() ? "command" : "variable",
       base->description().c_str() );
@@ -170,7 +201,7 @@ namespace neko {
   {
     if ( arguments.size() < 2 )
     {
-      console->print( "Format: help <variable/command>" );
+      console->print( srcEngine, "Format: help <variable/command>" );
       return;
     }
 
@@ -183,14 +214,14 @@ namespace neko {
       }
     }
 
-    console->printf( R"(Error: Unknown command "%s")", arguments[1].c_str() );
+    console->printf( srcEngine, R"(Error: Unknown command "%s")", arguments[1].c_str() );
   }
 
   void Console::callbackFind( Console* console, ConCmd* command, StringVector& arguments )
   {
     if ( arguments.size() < 2 )
     {
-      console->print( "Format: find <text>" );
+      console->print( srcEngine, "Format: find <text>" );
       return;
     }
     using StringRange = const boost::iterator_range<string::const_iterator>;
@@ -213,7 +244,7 @@ namespace neko {
   {
     if ( arguments.size() < 2 )
     {
-      console->print( "Format: exec <filename>" );
+      console->print( srcEngine, "Format: exec <filename>" );
       return;
     }
 
@@ -230,6 +261,21 @@ namespace neko {
 
     var->onRegister();
     cvars_.push_back( var );
+  }
+
+
+  void Console::setEngine( EnginePtr engine )
+  {
+    if ( !engine )
+      return resetEngine();
+    engine_ = move( engine );
+    start();
+  }
+
+  void Console::resetEngine()
+  {
+    stop();
+    engine_.reset();
   }
 
   void Console::start()
@@ -253,8 +299,8 @@ namespace neko {
     DateTime now;
     platform::getDateTime( now );
 
-    printf( NEKO_LOGTITLE " [Debug Log]" );
-    printf( "Starting on %04d-%02d-%02d %02d:%02d:%02d",
+    printf( srcEngine, NEKO_LOGTITLE " [Debug Log]" );
+    printf( srcEngine, "Starting on %04d-%02d-%02d %02d:%02d:%02d",
       now.year, now.month, now.day, now.hour, now.minute, now.second );
   }
 
@@ -263,7 +309,7 @@ namespace neko {
     DateTime now;
     platform::getDateTime( now );
 
-    printf( "Stopping on %04d-%02d-%02d %02d:%02d:%02d",
+    printf( srcEngine, "Stopping on %04d-%02d-%02d %02d:%02d:%02d",
       now.year, now.month, now.day, now.hour, now.minute, now.second );
   }
 
@@ -291,14 +337,14 @@ namespace neko {
     }
   }
 
-  void Console::print( const char* str )
+  void Console::print( Source source, const char* str )
   {
-    auto realTime = 0; // utils::ticksToTime( ticks );
-    unsigned int minutes = ( realTime / 60 );
-    unsigned int seconds = ( realTime % 60 );
+    float ftime = 0.0f;
+
+    auto &src = sources_[source];
 
     char fullbuf[c_sprintfBufferSize + 128];
-    sprintf_s( fullbuf, c_sprintfBufferSize + 128, c_fileLogFormat, minutes, seconds, str );
+    sprintf_s( fullbuf, c_sprintfBufferSize + 128, c_fileLogFormat, 8, ftime, src.name.c_str(), str );
 
     if ( fileOut_ )
       fileOut_->write( fullbuf );
@@ -315,7 +361,7 @@ namespace neko {
 #endif
   }
 
-  void Console::printf( const char* str, ... )
+  void Console::printf( Source source, const char* str, ... )
   {
     va_list va_alist;
     char buffer[c_sprintfBufferSize];
@@ -323,7 +369,7 @@ namespace neko {
     _vsnprintf_s( buffer, c_sprintfBufferSize, str, va_alist );
     va_end( va_alist );
 
-    print( buffer );
+    print( srcEngine, buffer );
   }
 
   StringVector Console::tokenize( const string& str )
@@ -397,7 +443,7 @@ namespace neko {
       return;
 
     if ( echo )
-      printf( "> %s", commandLine.c_str() );
+      printf( srcEngine, "> %s", commandLine.c_str() );
 
     ScopedRWLock lock( &lock_ );
 
@@ -421,7 +467,7 @@ namespace neko {
           else
           {
             lock.unlock();
-            printf( R"(%s is "%s")",
+            printf( srcEngine, R"(%s is "%s")",
               var->name().c_str(),
               var->as_s().c_str() );
           }
@@ -432,7 +478,7 @@ namespace neko {
 
     lock.unlock();
 
-    printf( R"(Unknown command "%s")", command.c_str() );
+    printf( srcEngine, R"(Unknown command "%s")", command.c_str() );
   }
 
   void Console::stop()
@@ -461,11 +507,11 @@ namespace neko {
 
   void Console::executeFile( const string& filename )
   {
-    printf( "Executing %s", filename.c_str() );
+    printf( srcEngine, "Executing %s", filename.c_str() );
 
     if ( !platform::fileExists( filename ) )
     {
-      printf( R"(Error: Cannot execute "%s", file does not exist)", filename.c_str() );
+      printf( srcEngine, R"(Error: Cannot execute "%s", file does not exist)", filename.c_str() );
       return;
     }
 

@@ -13,9 +13,8 @@ namespace neko {
   GameTime fLogicStep = 1.0 / 60.0;
   LARGE_INTEGER hpcFrequency;
 
-  Engine::Engine()
+  Engine::Engine( ConsolePtr console ): console_( move( console ) )
   {
-    //
   }
 
   Engine::~Engine()
@@ -41,11 +40,11 @@ namespace neko {
 
   void Engine::initialize( const Options& options )
   {
+    console_->setEngine( shared_from_this() );
+
     // Fetch HPC frequency
     if ( !QueryPerformanceFrequency( &hpcFrequency ) )
       NEKO_EXCEPT( "Couldn't query HPC frequency" );
-
-    console_ = make_shared<Console>();
 
     gfx_ = make_shared<Gfx>( shared_from_this() );
     gfx_->postInitialize();
@@ -101,7 +100,8 @@ namespace neko {
   void Engine::shutdown()
   {
     gfx_.reset();
-    console_.reset();
+
+    console_->resetEngine();
   }
 
 }
