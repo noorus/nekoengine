@@ -1,14 +1,40 @@
 #include "stdafx.h"
 #include "neko_platform.h"
+#include "console.h"
+#include "consolewindow.h"
+
+using namespace neko;
+
+const string c_consoleThreadName = "hiveConsole";
+const string c_consoleTitle = "hivemind//console";
 
 inline int runMain()
 {
-  neko::platform::initialize();
-  neko::platform::prepareProcess();
+  platform::initialize();
+  platform::prepareProcess();
 
-  MessageBox( 0, L"hello", L"", MB_OK );
+  Console console;
 
-  neko::platform::shutdown();
+  platform::Thread consoleWindowThread( c_consoleThreadName,
+    []( platform::Event& running, platform::Event& wantStop, void* argument ) -> bool
+  {
+    auto cnsl = (Console*)argument;
+    platform::ConsoleWindowPtr window = make_shared<platform::ConsoleWindow>( cnsl, c_consoleTitle, 220, 220, 640, 320 );
+    running.set();
+    window->messageLoop( wantStop );
+    return true;
+  }, &console );
+
+  consoleWindowThread.start();
+  while ( true )
+  {
+    if ( !consoleWindowThread.check() )
+      break;
+    Sleep( 1000 );
+  }
+  consoleWindowThread.stop();
+
+  platform::shutdown();
 
   return 0;
 }

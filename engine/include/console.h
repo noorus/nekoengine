@@ -107,7 +107,7 @@ namespace neko {
     platform::RWLock lock_; //!< Execution lock
     platform::RWLock listenerLock_; //!< Listener add/remove/callback lock
     platform::RWLock bufferLock_; //!< Command buffer lock
-    set<ConsoleListenerPtr> listeners_;
+    set<ConsoleListener*> listeners_;
     StringVector bufferedCommands_;
     ConCmdPtr listCmd_;
     ConCmdPtr helpCmd_;
@@ -125,8 +125,8 @@ namespace neko {
   public:
     Console();
     void describe( ConBase* base );
-    void addListener( ConsoleListenerPtr listener );
-    void removeListener( ConsoleListenerPtr listener );
+    void addListener( ConsoleListener* listener );
+    void removeListener( ConsoleListener* listener );
     void autoComplete( const string& line, CVarList& matches );
     void gameBegin();
     void gameEnd();

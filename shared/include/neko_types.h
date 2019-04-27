@@ -43,6 +43,7 @@ namespace neko {
 
   using std::make_shared;
   using std::make_unique;
+  using std::enable_shared_from_this;
 
   using boost::noncopyable;
 

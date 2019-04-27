@@ -8,14 +8,19 @@
 
 // Platform specifics
 #ifdef NEKO_PLATFORM_WINDOWS
-#define NTDDI_VERSION NTDDI_VISTASP1
-#define _WIN32_WINNT _WIN32_WINNT_VISTA
 
 #if !defined(_DEBUG) && !defined(NEKO_VERBOSE_COMPILE)
 # define _CRT_SECURE_NO_WARNINGS
 # define _SCL_SECURE_NO_WARNINGS
 #endif
 
+#ifdef NEKO_TEST_WINVISTACOMPAT
+# define NTDDI_VERSION NTDDI_VISTASP4
+# define _WIN32_WINNT _WIN32_WINNT_VISTA
+#else
+# define NTDDI_VERSION NTDDI_WIN10
+# define _WIN32_WINNT _WIN32_WINNT_WIN10
+#endif
 #include <sdkddkver.h>
 
 #include <windows.h>          // Windows

@@ -36,6 +36,9 @@
     <ClCompile Include="src\console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\consolewindow_windows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -67,6 +70,12 @@
     </ClInclude>
     <ClInclude Include="include\consolelistener.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\consolewindow_windows.h">
+      <Filter>Header Files\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="include\consolewindow.h">
+      <Filter>Header Files\Shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

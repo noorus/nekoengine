@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "console.h"
 #include "utilities.h"
 #include "neko_exception.h"
@@ -286,13 +286,13 @@ namespace neko {
       now.year, now.month, now.day, now.hour, now.minute, now.second );
   }
 
-  void Console::addListener( ConsoleListenerPtr listener )
+  void Console::addListener( ConsoleListener* listener )
   {
     ScopedRWLock lock( &listenerLock_ );
     listeners_.insert( listener );
   }
 
-  void Console::removeListener( ConsoleListenerPtr listener )
+  void Console::removeListener( ConsoleListener* listener )
   {
     ScopedRWLock lock( &listenerLock_ );
     listeners_.erase( listener );
@@ -348,7 +348,7 @@ namespace neko {
 
   StringVector Console::tokenize( const string& str )
   {
-    // this implementation is na�ve, but hardly critical
+    // this implementation is naïve, but hardly critical
 
     bool quoted = false;
     bool escaped = false;
