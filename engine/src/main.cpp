@@ -5,8 +5,8 @@
 
 using namespace neko;
 
-const string c_consoleThreadName = "hiveConsole";
-const string c_consoleTitle = "hivemind//console";
+const string c_consoleThreadName = "nekoConsole";
+const string c_consoleTitle = "nekoengine//console";
 
 inline int runMain()
 {

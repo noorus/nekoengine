@@ -3,13 +3,17 @@
 #include "utilities.h"
 #include "neko_exception.h"
 
-// don't ask
+// Used in the log filename and in the log startup banner.
+#define NEKO_LOGNAME "nekoengine"
+#define NEKO_LOGTITLE "Nekoengine Alpha"
+
+// Don't ask
 #pragma warning(disable: 4073)
 #pragma init_seg(lib)
 
 namespace neko {
 
-  const char* c_fileLogFormat = "%06d [%02d:%02d] %s\r\n";
+  const char* c_fileLogFormat = "[%02d:%02d] %s\r\n";
   const int c_sprintfBufferSize = 1024;
 
   CVarList Console::precreated_;
@@ -131,29 +135,6 @@ namespace neko {
     value_.str = value;
   }
 
-  // TextFile
-
-  struct DumbDate {
-    uint16_t year;    //!< Year
-    uint16_t month;   //!< Month
-    uint16_t day;     //!< Day
-    uint16_t hour;    //!< Hour
-    uint16_t minute;  //!< Minute
-    uint16_t second;  //!< Second
-  };
-
-  void getDateTime( DumbDate& out )
-  {
-    SYSTEMTIME time;
-    GetLocalTime( &time );
-    out.year = time.wYear;
-    out.month = time.wMonth;
-    out.day = time.wDay;
-    out.hour = time.wHour;
-    out.minute = time.wMinute;
-    out.second = time.wSecond;
-  }
-
   Console::Console()
   {
     listCmd_ = std::make_unique<ConCmd>( "list", "List all cvars.", callbackList );
@@ -251,15 +232,15 @@ namespace neko {
     cvars_.push_back( var );
   }
 
-  void Console::gameBegin()
+  void Console::start()
   {
-    DumbDate now;
-    getDateTime( now );
+    DateTime now;
+    platform::getDateTime( now );
 
     fileOut_.reset();
 
     char filename[64];
-    sprintf_s( filename, 64, "%04d%02d%02d_hivemind_game-%02d%02d%02d.log",
+    sprintf_s( filename, 64, "%04d%02d%02d_" NEKO_LOGNAME "-%02d%02d%02d.log",
       now.year, now.month, now.day, now.hour, now.minute, now.second );
 
     fileOut_ = make_unique<TextFileWriter>( filename );
@@ -269,20 +250,20 @@ namespace neko {
 
   void Console::writeStartBanner()
   {
-    DumbDate now;
-    getDateTime( now );
+    DateTime now;
+    platform::getDateTime( now );
 
-    printf( "HIVEMIND StarCraft II AI [Debug Log]" );
-    printf( "Game starting on %04d-%02d-%02d %02d:%02d:%02d",
+    printf( NEKO_LOGTITLE " [Debug Log]" );
+    printf( "Starting on %04d-%02d-%02d %02d:%02d:%02d",
       now.year, now.month, now.day, now.hour, now.minute, now.second );
   }
 
   void Console::writeStopBanner()
   {
-    DumbDate now;
-    getDateTime( now );
+    DateTime now;
+    platform::getDateTime( now );
 
-    printf( "Game ending on %04d-%02d-%02d %02d:%02d:%02d",
+    printf( "Stopping on %04d-%02d-%02d %02d:%02d:%02d",
       now.year, now.month, now.day, now.hour, now.minute, now.second );
   }
 
@@ -312,13 +293,12 @@ namespace neko {
 
   void Console::print( const char* str )
   {
-    auto ticks = 0;
     auto realTime = 0; // utils::ticksToTime( ticks );
     unsigned int minutes = ( realTime / 60 );
     unsigned int seconds = ( realTime % 60 );
 
     char fullbuf[c_sprintfBufferSize + 128];
-    sprintf_s( fullbuf, c_sprintfBufferSize + 128, c_fileLogFormat, ticks, minutes, seconds, str );
+    sprintf_s( fullbuf, c_sprintfBufferSize + 128, c_fileLogFormat, minutes, seconds, str );
 
     if ( fileOut_ )
       fileOut_->write( fullbuf );
@@ -331,7 +311,7 @@ namespace neko {
     listenerLock_.unlockShared();
 
 #ifdef _DEBUG
-    OutputDebugStringA( fullbuf );
+    platform::outputDebugString( fullbuf );
 #endif
   }
 
@@ -455,7 +435,7 @@ namespace neko {
     printf( R"(Unknown command "%s")", command.c_str() );
   }
 
-  void Console::gameEnd()
+  void Console::stop()
   {
     writeStopBanner();
 

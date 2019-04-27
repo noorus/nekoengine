@@ -92,6 +92,11 @@
 #include <boost/thread.hpp>
 
 // GLM
+#define GLM_FORCE_SIZE_T_LENGTH
+#define GLM_FORCE_UNRESTRICTED_GENTYPE
+#if !defined(NEKO_VERBOSE_COMPILE) && !defined(_DEBUG)
+# define GLM_FORCE_SILENT_WARNINGS
+#endif
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
@@ -121,3 +126,4 @@
 
 // Local types
 #include "neko_types.h"
+#include "nekomath.h"

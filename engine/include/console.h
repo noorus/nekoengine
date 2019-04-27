@@ -128,8 +128,8 @@ namespace neko {
     void addListener( ConsoleListener* listener );
     void removeListener( ConsoleListener* listener );
     void autoComplete( const string& line, CVarList& matches );
-    void gameBegin();
-    void gameEnd();
+    void start();
+    void stop();
     void queueCommand( const string& commandLine );
     void executeBuffered();
     void print( const char* str );

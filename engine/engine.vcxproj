@@ -102,7 +102,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\SDL2\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;WIN32;WIN64;_ALLOW_MSC_VER_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;V8_I18N_SUPPORT;V8_USE_EXTERNAL_STARTUP_DATA;USING_V8_SHARED;V8_SHARED;V8_DEPRECATION_WARNINGS;ENABLE_HANDLE_ZAPPING;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;WIN64;_ALLOW_MSC_VER_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;V8_I18N_SUPPORT;V8_USE_EXTERNAL_STARTUP_DATA;USING_V8_SHARED;V8_SHARED;V8_DEPRECATION_WARNINGS;ENABLE_HANDLE_ZAPPING;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
@@ -153,6 +153,7 @@
     <ClInclude Include="include\consolelistener.h" />
     <ClInclude Include="include\consolewindow.h" />
     <ClInclude Include="include\consolewindow_windows.h" />
+    <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\subsystem.h" />
     <ClInclude Include="include\utilities.h" />

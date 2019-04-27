@@ -13,18 +13,24 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Shared">
-      <UniqueIdentifier>{f38c7be2-c3de-415b-9560-6c3aa6d63f78}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\shared">
       <UniqueIdentifier>{b223d8b6-cfc3-473b-a478-a9b0206658ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\shared">
+      <UniqueIdentifier>{f38c7be2-c3de-415b-9560-6c3aa6d63f78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\console">
+      <UniqueIdentifier>{58783148-17c9-4c73-865c-db8ed0b31638}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\console">
+      <UniqueIdentifier>{6764a4ae-1eb9-4f6f-93df-7a4c1b4e79bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\junk">
+      <UniqueIdentifier>{acf6fcf6-3217-4f22-9a55-ca737ab1ba0d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\shared\src\platform_windows.cpp">
@@ -34,10 +40,13 @@
       <Filter>Source Files\shared</Filter>
     </ClCompile>
     <ClCompile Include="src\console.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\console</Filter>
     </ClCompile>
     <ClCompile Include="src\consolewindow_windows.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\console</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stdafx.cpp">
+      <Filter>Source Files\junk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,22 +54,19 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_exception.h">
-      <Filter>Header Files\Shared</Filter>
+      <Filter>Header Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_platform.h">
-      <Filter>Header Files\Shared</Filter>
+      <Filter>Header Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_platform_windows.h">
-      <Filter>Header Files\Shared</Filter>
+      <Filter>Header Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_types.h">
-      <Filter>Header Files\Shared</Filter>
+      <Filter>Header Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_config.h">
-      <Filter>Header Files\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="include\console.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="include\utilities.h">
       <Filter>Header Files</Filter>
@@ -68,14 +74,20 @@
     <ClInclude Include="include\subsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\consolelistener.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\console.h">
+      <Filter>Header Files\console</Filter>
     </ClInclude>
-    <ClInclude Include="include\consolewindow_windows.h">
-      <Filter>Header Files\Shared</Filter>
+    <ClInclude Include="include\consolelistener.h">
+      <Filter>Header Files\console</Filter>
     </ClInclude>
     <ClInclude Include="include\consolewindow.h">
-      <Filter>Header Files\Shared</Filter>
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="include\consolewindow_windows.h">
+      <Filter>Header Files\console</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nekomath.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

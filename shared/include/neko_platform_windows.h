@@ -258,8 +258,33 @@ namespace neko {
       return ( attributes != INVALID_FILE_ATTRIBUTES && !( attributes & FILE_ATTRIBUTE_DIRECTORY ) );
     }
 
+    //! Get current date and time.
+    inline void getDateTime( DateTime& out )
+    {
+      SYSTEMTIME time;
+      GetLocalTime( &time );
+      out.year = time.wYear;
+      out.month = time.wMonth;
+      out.day = time.wDay;
+      out.hour = time.wHour;
+      out.minute = time.wMinute;
+      out.second = time.wSecond;
+    }
+
+    //! Outputs a global debug string.
+    inline void outputDebugString( const char* str ) throw()
+    {
+      OutputDebugStringA( str );
+    }
+
+    //! Outputs a global debug string.
+    inline void outputDebugString( const string& str ) throw()
+    {
+      outputDebugString( str.c_str() );
+    }
+
     //! UTF-8 to wide string conversion.
-    inline wstring utf8ToWide( const string& in ) throw( )
+    inline wstring utf8ToWide( const string& in ) throw()
     {
       int length = MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, nullptr, 0 );
       if ( length == 0 )

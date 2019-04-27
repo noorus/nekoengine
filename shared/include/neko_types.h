@@ -1,5 +1,7 @@
 #pragma once
 
+#include "neko_config.h"
+
 #include <exception>
 #include <memory>
 #include <vector>
@@ -19,6 +21,7 @@
 #include <unordered_map>
 #include <utility>
 #include <set>
+#include <boost/math/constants/constants.hpp>
 
 namespace neko {
 
@@ -47,14 +50,38 @@ namespace neko {
 
   using boost::noncopyable;
 
+#ifdef NEKO_MATH_DOUBLE
+  using Real = double;
+# define NEKO_ZERO 0.0
+# define NEKO_HALF 0.5
+# define NEKO_ONE 1.0
+  namespace math {
+    using namespace boost::math::double_constants;
+  }
+  using vec2 = glm::dvec2;
+  using vec3 = glm::dvec3;
+  using vec4 = glm::dvec4;
+  using mat2 = glm::dmat2x2;
+  using mat3 = glm::dmat3x3;
+  using mat4 = glm::dmat4x4;
+#elif
   using Real = float;
-  using StringVector = vector<string>;
-
+# define NEKO_ZERO 0.0f
+# define NEKO_HALF 0.5f
+# define NEKO_ONE 1.0f
+  namespace math {
+    using namespace boost::math::float_constants;
+  }
   using glm::vec2;
   using glm::vec3;
-  // typedef b2Mat22 mat2;
-  // typedef b2Mat33 mat3;
-  using glm::mat4;
+  using glm::vec4;
+  using mat2 = glm::mat2x2;
+  using mat3 = glm::mat3x3;
+  using mat4 = glm::mat4x4;
+#endif
+
+  using StringVector = vector<string>;
+
   using vec2i = glm::i64vec2;
   using vec3i = glm::i64vec3;
   using vec4i = glm::i64vec4;
@@ -68,6 +95,15 @@ namespace neko {
     COLON = 58,
     SEMICOLON = 59,
     BACKSLASH = 92
+  };
+
+  struct DateTime {
+    uint16_t year;    //!< Year
+    uint16_t month;   //!< Month
+    uint16_t day;     //!< Day
+    uint16_t hour;    //!< Hour
+    uint16_t minute;  //!< Minute
+    uint16_t second;  //!< Second
   };
 
 }

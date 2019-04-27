@@ -120,7 +120,7 @@ namespace neko {
     const string c_consoleFont = "Lucida Console";
     const long c_consoleFontSize = 160; // in TWIPs. if you can figure out what the fuck that means in human terms, congratulations.
 
-    const string c_consoleClassname = "hiveConsole"; // does not matter
+    const string c_consoleClassname = "nekoConsole"; // does not matter
 
     const int headerHeight = 6;
     const int ctrlMargin = 3;
