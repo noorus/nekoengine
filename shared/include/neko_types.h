@@ -18,6 +18,7 @@
 #include <queue>
 #include <unordered_map>
 #include <utility>
+#include <set>
 
 namespace neko {
 
@@ -40,9 +41,13 @@ namespace neko {
   using std::shared_ptr;
   using std::unique_ptr;
 
+  using std::make_shared;
+  using std::make_unique;
+
   using boost::noncopyable;
 
   using Real = float;
+  using StringVector = vector<string>;
 
   using glm::vec2;
   using glm::vec3;

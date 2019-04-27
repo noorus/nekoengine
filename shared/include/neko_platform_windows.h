@@ -191,11 +191,16 @@ namespace neko {
     protected:
       HANDLE file_;
     public:
-      FileWriter( const string& filename ): file_( INVALID_HANDLE_VALUE )
+      FileWriter( const string& filename, const bool append = false ): file_( INVALID_HANDLE_VALUE )
       {
-        file_ = CreateFileA( filename.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+        file_ = CreateFileA( filename.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr,
+          append ? OPEN_ALWAYS : CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+
         if ( file_ == INVALID_HANDLE_VALUE )
           NEKO_EXCEPT( "File creation failed" );
+
+        if ( append )
+          SetFilePointer( file_, 0, nullptr, FILE_END );
       }
       ~FileWriter()
       {

@@ -102,6 +102,7 @@
   <ItemGroup>
     <ClCompile Include="..\shared\src\exception.cpp" />
     <ClCompile Include="..\shared\src\platform_windows.cpp" />
+    <ClCompile Include="src\console.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -114,7 +115,11 @@
     <ClInclude Include="..\shared\include\neko_platform.h" />
     <ClInclude Include="..\shared\include\neko_platform_windows.h" />
     <ClInclude Include="..\shared\include\neko_types.h" />
+    <ClInclude Include="include\console.h" />
+    <ClInclude Include="include\consolelistener.h" />
     <ClInclude Include="include\stdafx.h" />
+    <ClInclude Include="include\subsystem.h" />
+    <ClInclude Include="include\utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="manifest\neko.manifest" />
