@@ -15,4 +15,7 @@ namespace neko {
   class Console;
   using ConsolePtr = shared_ptr<Console>;
 
+  class Scripting;
+  using ScriptingPtr = shared_ptr<Scripting>;
+
 }

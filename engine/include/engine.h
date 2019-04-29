@@ -27,7 +27,12 @@ namespace neko {
   protected:
     ConsolePtr console_;
     GfxPtr gfx_;
+    ScriptingPtr scripting_;
     volatile Signal signal_;
+  public:
+    inline ConsolePtr console() throw() { return console_; }
+    inline GfxPtr gfx() throw() { return gfx_; }
+    inline ScriptingPtr scripting() throw() { return scripting_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console );

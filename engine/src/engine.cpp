@@ -4,6 +4,7 @@
 #include "console.h"
 #include "neko_exception.h"
 #include "gfx.h"
+#include "scripting.h"
 
 namespace neko {
 
@@ -48,6 +49,9 @@ namespace neko {
 
     gfx_ = make_shared<Gfx>( shared_from_this() );
     gfx_->postInitialize();
+
+    scripting_ = make_shared<Scripting>( shared_from_this() );
+    scripting_->initialize();
   }
 
   void Engine::signalStop()
@@ -99,6 +103,7 @@ namespace neko {
 
   void Engine::shutdown()
   {
+    scripting_.reset();
     gfx_.reset();
 
     console_->resetEngine();

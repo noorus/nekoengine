@@ -8,7 +8,7 @@ namespace neko {
   glm::mat4 identityMatrix;
   glm::mat4 framebufferProjectionMatrix;
 
-  const char cWindowTitle[] = "asdfasdfsdf";
+  const char cWindowTitle[] = "nekoengine-render";
   const vec4 cClearColor = vec4( 0.175f, 0.175f, 0.5f, 1.0f );
 
   Gfx::Gfx( EnginePtr engine ): Subsystem( move( engine ) ),

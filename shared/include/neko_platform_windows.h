@@ -252,10 +252,40 @@ namespace neko {
       }
     };
 
-    inline bool fileExists( const string& path )
+    //! UTF-8 to wide string conversion.
+    inline wstring utf8ToWide( const string& in ) throw( )
     {
-      DWORD attributes = GetFileAttributesA( path.c_str() );
+      int length = MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, nullptr, 0 );
+      if ( length == 0 )
+        return wstring();
+      vector<wchar_t> conversion( length );
+      MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, &conversion[0], length );
+      return wstring( &conversion[0] );
+    }
+
+    //! Wide string to UTF-8 conversion.
+    inline string wideToUtf8( const wstring& in ) throw( )
+    {
+      int length = WideCharToMultiByte( CP_UTF8, 0, in.c_str(), -1, nullptr, 0, 0, FALSE );
+      if ( length == 0 )
+        return string();
+      vector<char> conversion( length );
+      WideCharToMultiByte( CP_UTF8, 0, in.c_str(), -1, &conversion[0], length, 0, FALSE );
+      return string( &conversion[0] );
+    }
+
+    inline bool fileExists( const utfString& path )
+    {
+      DWORD attributes = GetFileAttributesW( utf8ToWide( path ).c_str() );
       return ( attributes != INVALID_FILE_ATTRIBUTES && !( attributes & FILE_ATTRIBUTE_DIRECTORY ) );
+    }
+
+    inline utfString getCurrentDirectory()
+    {
+      wchar_t currentDirectory[MAX_PATH];
+      if ( !GetCurrentDirectoryW( MAX_PATH, currentDirectory ) )
+        NEKO_EXCEPT( "Current directory fetch failed" );
+      return wideToUtf8( currentDirectory );
     }
 
     //! Get current date and time.
@@ -281,28 +311,6 @@ namespace neko {
     inline void outputDebugString( const string& str ) throw()
     {
       outputDebugString( str.c_str() );
-    }
-
-    //! UTF-8 to wide string conversion.
-    inline wstring utf8ToWide( const string& in ) throw()
-    {
-      int length = MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, nullptr, 0 );
-      if ( length == 0 )
-        return wstring();
-      vector<wchar_t> conversion( length );
-      MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, &conversion[0], length );
-      return wstring( &conversion[0] );
-    }
-
-    //! Wide string to UTF-8 conversion.
-    inline string wideToUtf8( const wstring& in ) throw( )
-    {
-      int length = WideCharToMultiByte( CP_UTF8, 0, in.c_str(), -1, nullptr, 0, 0, FALSE );
-      if ( length == 0 )
-        return string();
-      vector<char> conversion( length );
-      WideCharToMultiByte( CP_UTF8, 0, in.c_str(), -1, &conversion[0], length, 0, FALSE );
-      return string( &conversion[0] );
     }
 
     //! Assign a thread name that will be visible in debuggers
