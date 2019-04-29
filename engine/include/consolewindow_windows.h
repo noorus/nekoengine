@@ -29,6 +29,12 @@ namespace neko {
     };
 
     class ConsoleWindow: public Window, public ConsoleListener, public enable_shared_from_this<ConsoleWindow> {
+    public:
+      struct LineEntry {
+        wstring str;
+        COLORREF clr;
+      };
+      using LineEntryVector = vector<LineEntry>;
     private:
       HWND log_;
       HWND cmdline_;
@@ -36,7 +42,7 @@ namespace neko {
       WNDPROC baseCmdlineProc_;
       WNDPROC baseLogProc_;
       ConsolePtr console_;
-      StringVector linesBuffer_;
+      LineEntryVector linesBuffer_;
       platform::RWLock lock_;
       HWND unpauseButton_;
       RECT logFit_;
@@ -75,7 +81,7 @@ namespace neko {
       void forwardExecute( const wstring& command );
     public:
       ConsoleWindow( ConsolePtr console, const string& title, int x, int y, int w, int h );
-      void onConsolePrint( Console* console, const string& str ) override;
+      void onConsolePrint( Console* console, vec3 color, const string& str ) override;
       void clearCmdline();
       void setCmdline( const string& line );
       void print( COLORREF color, const wstring& line );

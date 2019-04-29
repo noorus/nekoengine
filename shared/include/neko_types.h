@@ -22,6 +22,7 @@
 #include <utility>
 #include <set>
 #include <boost/math/constants/constants.hpp>
+#include <glm/glm.hpp>
 
 namespace neko {
 

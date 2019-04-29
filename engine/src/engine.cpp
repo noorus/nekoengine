@@ -8,13 +8,9 @@
 
 namespace neko {
 
-  GameTime fTime = 0.0;
-  GameTime fTimeDelta = 0.0;
-  GameTime fTimeAccumulator = 0.0;
-  GameTime fLogicStep = 1.0 / 60.0;
-  LARGE_INTEGER hpcFrequency;
+  GameTime cLogicStep = 1.0 / 60.0; //!< 60 fps
 
-  Engine::Engine( ConsolePtr console ): console_( move( console ) )
+  Engine::Engine( ConsolePtr console ): console_( move( console ) ), time_( 0.0 )
   {
   }
 
@@ -43,15 +39,17 @@ namespace neko {
   {
     console_->setEngine( shared_from_this() );
 
-    // Fetch HPC frequency
-    if ( !QueryPerformanceFrequency( &hpcFrequency ) )
-      NEKO_EXCEPT( "Couldn't query HPC frequency" );
+    platform::PerformanceTimer timer;
 
+    timer.start();
     gfx_ = make_shared<Gfx>( shared_from_this() );
     gfx_->postInitialize();
+    console_->printf( Console::srcGfx, "Gfx init took %dms", (int)timer.stop() );
 
+    timer.start();
     scripting_ = make_shared<Scripting>( shared_from_this() );
     scripting_->initialize();
+    console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
   }
 
   void Engine::signalStop()
@@ -66,37 +64,30 @@ namespace neko {
 
   void Engine::run()
   {
-    LARGE_INTEGER timeCurrent;
-    LARGE_INTEGER tickDelta;
-    LARGE_INTEGER timeNew;
+    clock_.init();
+    time_ = 0.0;
 
-    QueryPerformanceCounter( &timeCurrent );
-
-    fTime = 0.0;
-    fTimeAccumulator = 0.0;
+    GameTime accumulator = 0.0;
+    GameTime delta = 0.0;
 
     while ( signal_ != Signal_Stop )
     {
-      gfx_->preUpdate( fTime );
+      console_->executeBuffered();
+      gfx_->preUpdate( time_ );
 
-      QueryPerformanceCounter( &timeNew );
+      delta = clock_.update();
+      accumulator += delta;
 
-      tickDelta.QuadPart = timeNew.QuadPart - timeCurrent.QuadPart;
-      timeCurrent = timeNew;
-
-      fTimeDelta = (GameTime)tickDelta.QuadPart / (GameTime)hpcFrequency.QuadPart;
-      fTimeAccumulator += fTimeDelta;
-
-      while ( fTimeAccumulator >= fLogicStep )
+      while ( accumulator >= cLogicStep )
       {
-        gfx_->tick( fLogicStep, fTime );
-        fTime += fLogicStep;
-        fTimeAccumulator -= fLogicStep;
+        gfx_->tick( cLogicStep, time_ );
+        time_ += cLogicStep;
+        accumulator -= cLogicStep;
       }
 
-      if ( fTimeDelta > 0.0 && signal_ != Signal_Stop )
+      if ( delta > 0.0 && signal_ != Signal_Stop )
       {
-        gfx_->postUpdate( fTimeDelta, fTime );
+        gfx_->postUpdate( delta, time_ );
       }
     }
   }

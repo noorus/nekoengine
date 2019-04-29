@@ -66,8 +66,6 @@ namespace neko {
     isolate_ = Isolate::New( params );
     if ( !isolate_ )
       NEKO_EXCEPT( "V8 default isolation creation failed" );
-
-    engine_->console()->printf( Console::srcScripting, "Constructor done" );
   }
 
   void Scripting::initialize()

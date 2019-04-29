@@ -2,6 +2,7 @@
 #include "console.h"
 #include "utilities.h"
 #include "neko_exception.h"
+#include "engine.h"
 
 // Used in the log filename and in the log startup banner.
 #define NEKO_LOGNAME "nekoengine"
@@ -274,8 +275,11 @@ namespace neko {
 
   void Console::resetEngine()
   {
-    stop();
-    engine_.reset();
+    if ( engine_ )
+    {
+      stop();
+      engine_.reset();
+    }
   }
 
   void Console::start()
@@ -339,12 +343,11 @@ namespace neko {
 
   void Console::print( Source source, const char* str )
   {
-    float ftime = 0.0f;
-
     auto &src = sources_[source];
+    auto time = ( engine_ ? (float)engine_->time() : 0.0f );
 
     char fullbuf[c_sprintfBufferSize + 128];
-    sprintf_s( fullbuf, c_sprintfBufferSize + 128, c_fileLogFormat, 8, ftime, src.name.c_str(), str );
+    sprintf_s( fullbuf, c_sprintfBufferSize + 128, c_fileLogFormat, 8, time, src.name.c_str(), str );
 
     if ( fileOut_ )
       fileOut_->write( fullbuf );
@@ -352,7 +355,7 @@ namespace neko {
     listenerLock_.lockShared();
     for ( auto listener : listeners_ )
     {
-      listener->onConsolePrint( this, fullbuf );
+      listener->onConsolePrint( this, src.color, fullbuf );
     }
     listenerLock_.unlockShared();
 
@@ -369,7 +372,7 @@ namespace neko {
     _vsnprintf_s( buffer, c_sprintfBufferSize, str, va_alist );
     va_end( va_alist );
 
-    print( srcEngine, buffer );
+    print( source, buffer );
   }
 
   StringVector Console::tokenize( const string& str )

@@ -28,11 +28,14 @@ namespace neko {
     ConsolePtr console_;
     GfxPtr gfx_;
     ScriptingPtr scripting_;
+    platform::PerformanceClock clock_;
+    GameTime time_;
     volatile Signal signal_;
   public:
     inline ConsolePtr console() throw() { return console_; }
     inline GfxPtr gfx() throw() { return gfx_; }
     inline ScriptingPtr scripting() throw() { return scripting_; }
+    inline GameTime time() const throw() { return time_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console );

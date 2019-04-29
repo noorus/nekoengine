@@ -85,7 +85,8 @@ namespace neko {
     public:
       PerformanceTimer()
       {
-        QueryPerformanceFrequency( &frequency_ );
+        if ( !QueryPerformanceFrequency( &frequency_ ) )
+          NEKO_EXCEPT( "Couldn't query HPC frequency" );
       }
       void start()
       {
@@ -99,6 +100,32 @@ namespace neko {
         delta /= frequency_.QuadPart;
         double ms = (double)delta / 1000.0;
         return ms;
+      }
+    };
+
+    class PerformanceClock {
+    private:
+      LARGE_INTEGER current_;
+      GameTime frequency_;
+    public:
+      PerformanceClock()
+      {
+        LARGE_INTEGER frequency;
+        if ( !QueryPerformanceFrequency( &frequency ) )
+          NEKO_EXCEPT( "Couldn't query HPC frequency" );
+        frequency_ = (GameTime)frequency.QuadPart;
+      }
+      inline void init()
+      {
+        QueryPerformanceCounter( &current_ );
+      }
+      inline GameTime update()
+      {
+        LARGE_INTEGER new_;
+        QueryPerformanceCounter( &new_ );
+        LONGLONG delta = ( new_.QuadPart - current_.QuadPart );
+        current_ = new_;
+        return ( (GameTime)delta / frequency_ );
       }
     };
 

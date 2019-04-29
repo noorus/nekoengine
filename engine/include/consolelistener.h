@@ -7,7 +7,7 @@ namespace neko {
 
   class ConsoleListener {
   public:
-    virtual void onConsolePrint( Console* console, const string& str ) = 0;
+    virtual void onConsolePrint( Console* console, vec3 color, const string& str ) = 0;
   };
 
   using ConsoleListenerPtr = shared_ptr<ConsoleListener>;
