@@ -11,6 +11,7 @@ namespace neko {
     SDL_Renderer* renderer_;
     SDL_DisplayMode displayMode_;
     SDL_GLContext glContext_;
+    ShadersPtr shaders_;
     void preInitialize();
   public:
     void postInitialize();

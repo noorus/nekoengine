@@ -21,4 +21,7 @@ namespace neko {
   class Memory;
   using MemoryPtr = shared_ptr<Memory>;
 
+  class Shaders;
+  using ShadersPtr = shared_ptr<Shaders>;
+
 }

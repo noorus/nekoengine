@@ -143,6 +143,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory.cpp" />
     <ClCompile Include="src\scripting.cpp" />
+    <ClCompile Include="src\shaders.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -166,6 +167,7 @@
     <ClInclude Include="include\memory.h" />
     <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\scripting.h" />
+    <ClInclude Include="include\shaders.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\subsystem.h" />
     <ClInclude Include="include\utilities.h" />

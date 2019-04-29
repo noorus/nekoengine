@@ -2,11 +2,17 @@
 #include "neko_exception.h"
 #include "engine.h"
 #include "gfx.h"
+#include "shaders.h"
 
 namespace neko {
 
   glm::mat4 identityMatrix;
   glm::mat4 framebufferProjectionMatrix;
+
+  GLuint gProgramID = 0;
+  GLint gVertexPos2DLocation = -1;
+  GLuint gVBO = 0;
+  GLuint gIBO = 0;
 
   const char cWindowTitle[] = "nekoengine-render";
   const vec4 cClearColor = vec4( 0.175f, 0.175f, 0.5f, 1.0f );
@@ -14,6 +20,15 @@ namespace neko {
   Gfx::Gfx( EnginePtr engine ): Subsystem( move( engine ) ),
     window_( nullptr ), screenSurface_( nullptr ), renderer_( nullptr )
   {
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 ); // 4
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 3 ); // 5
+    SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 ); // native depth buffer bits
+
+    SDL_GL_SetSwapInterval( 1 ); // vsync
+
     if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
       NEKO_EXCEPT( "SDL initialization failed" );
 
@@ -36,11 +51,6 @@ namespace neko {
     if ( !window_ )
       NEKO_EXCEPT( "Window creation failed" );
 
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2 );
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
     glContext_ = SDL_GL_CreateContext( window_ );
     if ( !glContext_ )
       NEKO_EXCEPT( "GL context creation failed" );
@@ -52,13 +62,24 @@ namespace neko {
     if ( glewInit() != GLEW_OK )
       NEKO_EXCEPT( "GLEW initialization failed" );
 
-    glClearColor( 0, 0, 0, 1 );
+    auto renderer = glGetString( GL_RENDERER );
+    if ( renderer )
+      engine_->console()->printf( Console::srcGfx, "Renderer: %s", renderer );
+
+    auto version = glGetString( GL_VERSION );
+    if ( version )
+      engine_->console()->printf( Console::srcGfx, "Version: %s", version );
+
+    glDisable( GL_DEPTH_TEST );
+    glDisable( GL_CULL_FACE );
+
+    /*glClearColor( 0, 0, 0, 1 );
 
     glEnable( GL_TEXTURE_2D );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LEQUAL );
     glEnable( GL_ALPHA_TEST );
-    glAlphaFunc( GL_GREATER, 0 );
+    glAlphaFunc( GL_GREATER, 0 );*/
 
     screenSurface_ = SDL_GetWindowSurface( window_ );
     if ( !screenSurface_ )
@@ -74,6 +95,13 @@ namespace neko {
     int width, height;
     if ( SDL_GetRendererOutputSize( renderer_, &width, &height ) != 0 )
       NEKO_EXCEPT( "Renderer output size fetch failed" );
+
+    // SDL_GetWindowSize
+    glViewport( 0, 0, width, height );
+    glClearColor( 0.125f, 0.125f, 0.125f, 1.0f );
+
+    shaders_ = make_shared<Shaders>( engine_ );
+    shaders_->initialize();
 
     engine_->operationContinueVideo();
   }
@@ -95,14 +123,16 @@ namespace neko {
 
   void Gfx::postUpdate( GameTime delta, GameTime time )
   {
-    glClearColor( 0.0f, 1.0f, 0.0f, 1.0f );
+    /*glClearColor( 0.0f, 1.0f, 0.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     glEnable( GL_DEPTH_TEST );
-    glDepthFunc( GL_LEQUAL );
+    glDepthFunc( GL_LEQUAL );*/
+
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     SDL_GL_SwapWindow( window_ );
   }
@@ -110,6 +140,9 @@ namespace neko {
   void Gfx::shutdown()
   {
     engine_->operationSuspendVideo();
+
+    shaders_->shutdown();
+    shaders_.reset();
 
     if ( renderer_ )
       SDL_DestroyRenderer( renderer_ );
