@@ -3,6 +3,8 @@
 #include "console.h"
 #include "consolewindow.h"
 #include "engine.h"
+#include "locator.h"
+#include "memory.h"
 
 using namespace neko;
 
@@ -63,6 +65,10 @@ int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCm
   //_CrtSetBreakAlloc( x );
 
   platform::g_instance = hInstance;
+
+  // Initialize & provide the (ideally pooled) memory service.
+  neko::MemoryPtr memoryService = make_shared<Memory>();
+  neko::Locator::provideMemory( memoryService );
 
   int retval = EXIT_SUCCESS;
 
