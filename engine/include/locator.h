@@ -10,8 +10,8 @@ namespace neko {
   private:
     static MemoryPtr memoryService_; //!< Currently provided memory service.
   public:
-    inline const bool hasMemory() const throw() { return ( memoryService_ ? true : false ); }
-    inline Memory& getMemory() { return *memoryService_; }
+    static const bool hasMemory() throw() { return ( memoryService_ ? true : false ); }
+    static Memory& getMemory() { return *memoryService_; }
     static void provideMemory( MemoryPtr memory )
     {
       memoryService_ = move( memory );
