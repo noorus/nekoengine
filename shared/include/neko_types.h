@@ -112,21 +112,4 @@ namespace neko {
     uint16_t second;  //!< Second
   };
 
-#pragma pack(push,1)
-  struct vertex {
-    float x, y, z;
-    float s, t;
-    inline void set( const float& x_, const float& y_, const float& z_, const float& s_, const float& t_ )
-    {
-      x = x_;
-      y = y_;
-      z = z_;
-      s = s_;
-      t = t_;
-    }
-  };
-#pragma pack(pop)
-
-  typedef vector<vertex> VertexVector;
-
 }

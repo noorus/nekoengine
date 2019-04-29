@@ -175,6 +175,10 @@
   <ItemGroup>
     <Manifest Include="manifest\neko.manifest" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\data\shaders\default_fp.glsl" />
+    <None Include="..\bin\data\shaders\default_vp.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

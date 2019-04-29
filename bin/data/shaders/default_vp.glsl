@@ -1,8 +1,8 @@
-#version 120
+#version 400
 
-attribute vec2 coord2d;
+in vec3 vp;
 
 void main()
 {
-  gl_Position = vec4(coord2d, 0.0, 1.0);
+  gl_Position = vec4(vp, 1.0);
 }

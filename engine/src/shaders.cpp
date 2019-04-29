@@ -68,7 +68,7 @@ namespace neko {
   }
 
   // Shaders
-  
+
   Shaders::Shaders( EnginePtr engine ): engine_( move( engine ) )
   {
   }
@@ -82,7 +82,7 @@ namespace neko {
       NEKO_EXCEPT( "Shader compiler is not present on this platform" );
 
     utfString rootDirectory = platform::getCurrentDirectory();
-    rootDirectory.append( "\\data\\shaders\\" );
+    rootDirectory.append( R"(\data\shaders\)" );
 
     shaders_.emplace_back( Shader::Vertex, rootDirectory + "default_vp.glsl" );
     shaders_.emplace_back( Shader::Fragment, rootDirectory + "default_fp.glsl" );

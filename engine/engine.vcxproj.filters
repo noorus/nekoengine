@@ -28,6 +28,9 @@
     <Filter Include="Source Files\junk">
       <UniqueIdentifier>{acf6fcf6-3217-4f22-9a55-ca737ab1ba0d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{87b502fa-0821-4532-b44c-6f740f3fcd7d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -136,5 +139,13 @@
     <Manifest Include="manifest\neko.manifest">
       <Filter>Resource Files</Filter>
     </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\data\shaders\default_fp.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\default_vp.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
