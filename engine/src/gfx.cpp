@@ -150,6 +150,8 @@ namespace neko {
     SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 ); // native depth buffer bits
 
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG );
+
     SDL_GL_SetSwapInterval( 1 ); // vsync
 
     if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -158,8 +160,26 @@ namespace neko {
     preInitialize();
   }
 
+  void Gfx::printInfo()
+  {
+    engine_->console()->print( Console::srcGfx, "GL Vendor: " + info_.vendor_ );
+    engine_->console()->print( Console::srcGfx, "GL Version: " + info_.version_ );
+    engine_->console()->print( Console::srcGfx, "GL Renderer: " + info_.renderer_ );
+  }
+
+  void Gfx::openglDebugCallbackFunction(
+    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam )
+  {
+    if ( !userParam )
+      return;
+    auto gfx = (Gfx*)userParam;
+    gfx->engine_->console()->printf( Console::srcGfx, "OpenGL Debug: %s", message );
+  }
+
   void Gfx::preInitialize()
   {
+    info_.clear();
+
     SDL_GetDesktopDisplayMode( 0, &displayMode_ );
 
     window_ = SDL_CreateWindow( cWindowTitle,
@@ -182,13 +202,18 @@ namespace neko {
     if ( glewInit() != GLEW_OK )
       NEKO_EXCEPT( "GLEW initialization failed" );
 
-    auto renderer = glGetString( GL_RENDERER );
-    if ( renderer )
-      engine_->console()->printf( Console::srcGfx, "Renderer: %s", renderer );
+    auto glstrGetClean = []( GLenum e, string& out )
+    {
+      auto str = glGetString( e );
+      if ( str )
+        out = (const char*)str;
+    };
 
-    auto version = glGetString( GL_VERSION );
-    if ( version )
-      engine_->console()->printf( Console::srcGfx, "Version: %s", version );
+    glstrGetClean( GL_RENDERER, info_.renderer_ );
+    glstrGetClean( GL_VERSION, info_.version_ );
+    glstrGetClean( GL_VENDOR, info_.vendor_ );
+
+    printInfo();
 
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_CULL_FACE );
@@ -200,6 +225,11 @@ namespace neko {
     glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
     glEnable( GL_LINE_SMOOTH );
     glEnable( GL_POLYGON_SMOOTH );
+
+    glEnable( GL_DEBUG_OUTPUT );
+    glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
+    glDebugMessageCallback( Gfx::openglDebugCallbackFunction, this );
+    glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true );
 
     screenSurface_ = SDL_GetWindowSurface( window_ );
     if ( !screenSurface_ )
@@ -217,7 +247,7 @@ namespace neko {
 
     engine_->console()->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
     glViewport( 0, 0, width, height );
-    glClearColor( 0.125f, 0.125f, 0.125f, 1.0f );
+    glClearColor( cClearColor.r, cClearColor.g, cClearColor.b, cClearColor.a );
 
     shaders_ = make_shared<Shaders>( engine_ );
     shaders_->initialize();
