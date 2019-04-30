@@ -42,6 +42,7 @@ namespace neko {
 
   class Shaders: public noncopyable {
   private:
+    mat4 model_;
     mat4 view_;
     mat4 projection_;
     EnginePtr engine_;
@@ -57,7 +58,7 @@ namespace neko {
     void initialize();
     void shutdown();
     ~Shaders();
-    void setMatrices( const mat4& view, const mat4& projection );
+    void setMatrices( const mat4& model, const mat4& view, const mat4& projection );
     ShaderProgram& get( size_t program );
     ShaderProgram& use( size_t program );
   };

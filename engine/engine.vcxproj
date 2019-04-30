@@ -135,9 +135,11 @@
   <ItemGroup>
     <ClCompile Include="..\shared\src\exception.cpp" />
     <ClCompile Include="..\shared\src\platform_windows.cpp" />
+    <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\console.cpp" />
     <ClCompile Include="src\consolewindow_windows.cpp" />
     <ClCompile Include="src\engine.cpp" />
+    <ClCompile Include="src\framebuffer.cpp" />
     <ClCompile Include="src\gfx.cpp" />
     <ClCompile Include="src\locator.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -156,12 +158,14 @@
     <ClInclude Include="..\shared\include\neko_platform.h" />
     <ClInclude Include="..\shared\include\neko_platform_windows.h" />
     <ClInclude Include="..\shared\include\neko_types.h" />
+    <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\console.h" />
     <ClInclude Include="include\consolelistener.h" />
     <ClInclude Include="include\consolewindow.h" />
     <ClInclude Include="include\consolewindow_windows.h" />
     <ClInclude Include="include\engine.h" />
     <ClInclude Include="include\forwards.h" />
+    <ClInclude Include="include\framebuffer.h" />
     <ClInclude Include="include\gfx.h" />
     <ClInclude Include="include\locator.h" />
     <ClInclude Include="include\memory.h" />

@@ -93,7 +93,12 @@ namespace neko {
     programs_.emplace_back( "default", 0, 1 );
 
     for ( auto& program : programs_ )
+    {
       linkProgram( program );
+      program.uniforms["model"] = glGetUniformLocation( program.id, "model" );
+      program.uniforms["view"] = glGetUniformLocation( program.id, "view" );
+      program.uniforms["projection"] = glGetUniformLocation( program.id, "projection" );
+    }
   }
 
   void Shaders::shutdown()
@@ -104,8 +109,9 @@ namespace neko {
       glDeleteProgram( program.id );
   }
 
-  void Shaders::setMatrices( const mat4& view, const mat4& projection )
+  void Shaders::setMatrices( const mat4& model, const mat4& view, const mat4& projection )
   {
+    model_ = model;
     view_ = view;
     projection_ = projection;
   }
@@ -118,6 +124,9 @@ namespace neko {
   ShaderProgram& Shaders::use( size_t program )
   {
     glUseProgram( programs_[program].id );
+    programs_[program].setUniformMatrix4fv( "model", 1, GL_FALSE, glm::value_ptr( model_ ) );
+    programs_[program].setUniformMatrix4fv( "view", 1, GL_FALSE, glm::value_ptr( view_ ) );
+    programs_[program].setUniformMatrix4fv( "projection", 1, GL_FALSE, glm::value_ptr( projection_ ) );
     return programs_[program];
   }
 

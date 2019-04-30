@@ -6,20 +6,41 @@
 
 namespace neko {
 
-  // MeshManager
+  namespace static_geometry {
 
-  size_t MeshManager::pushVBO( vector<Vertex> vertices )
-  {
-    VBO<Vertex> buf;
-    buf.storage_.swap( vertices );
-    buffers_.push_back( buf );
-    return ( buffers_.size() - 1 );
+    const vector<Vertex2D> quad2D =
+    { //  x     y     s     t
+      { 0.0f, 0.0f, 0.0f, 1.0f },
+      { 0.0f, 1.0f, 0.0f, 0.0f },
+      { 1.0f, 1.0f, 1.0f, 0.0f },
+      { 1.0f, 0.0f, 1.0f, 1.0f }
+    };
+
   }
 
-  void MeshManager::uploadVBOs()
+  // MeshManager
+
+  size_t MeshManager::pushVBO( vector<Vertex3D> vertices )
   {
-    vector<VBO<Vertex>*> dirties;
-    for ( auto& buf : buffers_ )
+    VBO<Vertex3D> buf;
+    buf.storage_.swap( vertices );
+    vbos3d_.push_back( buf );
+    return ( vbos3d_.size() - 1 );
+  }
+
+  size_t MeshManager::pushVBO( vector<Vertex2D> vertices )
+  {
+    VBO<Vertex2D> buf;
+    buf.storage_.swap( vertices );
+    vbos2d_.push_back( buf );
+    return ( vbos2d_.size() - 1 );
+  }
+
+  template <class T>
+  void vboUploadHelper( VBOVector<T>& vbos )
+  {
+    vector<VBO<T>*> dirties;
+    for ( auto& buf : vbos )
       if ( !buf.uploaded )
         dirties.push_back( &buf );
     vector<GLuint> ids;
@@ -28,17 +49,25 @@ namespace neko {
     for ( size_t i = 0; i < dirties.size(); ++i )
     {
       glBindBuffer( GL_ARRAY_BUFFER, ids[i] );
-      glBufferData( GL_ARRAY_BUFFER, dirties[i]->storage_.size() * sizeof( Vertex ), dirties[i]->storage_.data(), GL_STATIC_DRAW );
+      glBufferData( GL_ARRAY_BUFFER, dirties[i]->storage_.size() * sizeof( T ), dirties[i]->storage_.data(), GL_STATIC_DRAW );
       dirties[i]->id = ids[i];
       dirties[i]->uploaded = true;
     }
   }
 
-  size_t MeshManager::pushVAO( size_t verticesVBO )
+  void MeshManager::uploadVBOs()
   {
-    if ( verticesVBO >= buffers_.size() || !buffers_[verticesVBO].uploaded )
-      NEKO_EXCEPT( "VBO index out of bounds or VBO not uploaded while defining VAO" );
-    vaos_.emplace_back( verticesVBO );
+    vboUploadHelper( vbos3d_ );
+    vboUploadHelper( vbos2d_ );
+  }
+
+  size_t MeshManager::pushVAO( VAO::VBOType type, size_t verticesVBO )
+  {
+    if ( type == VAO::VBO_3D && ( verticesVBO >= vbos3d_.size() || !vbos3d_[verticesVBO].uploaded ) )
+      NEKO_EXCEPT( "VBO3D index out of bounds or VBO not uploaded while defining VAO" );
+    if ( type == VAO::VBO_2D && ( verticesVBO >= vbos2d_.size() || !vbos2d_[verticesVBO].uploaded ) )
+      NEKO_EXCEPT( "VBO2D index out of bounds or VBO not uploaded while defining VAO" );
+    vaos_.emplace_back( type, verticesVBO );
     return ( vaos_.size() - 1 );
   }
 
@@ -53,23 +82,44 @@ namespace neko {
     glGenVertexArrays( (GLsizei)dirties.size(), ids.data() );
     for ( size_t i = 0; i < dirties.size(); ++i )
     {
-      auto vbo = &( buffers_[dirties[i]->vbo_] );
-      if ( !vbo->uploaded )
-        NEKO_EXCEPT( "VBO used for VAO has not been uploaded" );
-      glBindVertexArray( ids[i] );
-      glEnableVertexAttribArray( 0 );
-      glBindBuffer( GL_ARRAY_BUFFER, vbo->id );
-      glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
-      dirties[i]->id = ids[i];
-      dirties[i]->size_ = vbo->storage_.size();
-      dirties[i]->uploaded_ = true;
+      if ( dirties[i]->vboType_ == VAO::VBO_3D )
+      {
+        auto vbo = &( vbos3d_[dirties[i]->vbo_] );
+        if ( !vbo->uploaded )
+          NEKO_EXCEPT( "VBO3D used for VAO has not been uploaded" );
+        glBindVertexArray( ids[i] );
+        glBindBuffer( GL_ARRAY_BUFFER, vbo->id );
+        glEnableVertexAttribArray( 0 );
+        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex3D ), nullptr ); // x, y, z
+        glEnableVertexAttribArray( 1 );
+        glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex3D ), (void*)( 3 * sizeof( float ) ) ); // s, t
+        dirties[i]->id = ids[i];
+        dirties[i]->size_ = vbo->storage_.size();
+        dirties[i]->uploaded_ = true;
+      }
+      else if ( dirties[i]->vboType_ == VAO::VBO_2D )
+      {
+        auto vbo = &( vbos2d_[dirties[i]->vbo_] );
+        if ( !vbo->uploaded )
+          NEKO_EXCEPT( "VBO2D used for VAO has not been uploaded" );
+        glBindVertexArray( ids[i] );
+        glBindBuffer( GL_ARRAY_BUFFER, vbo->id );
+        glEnableVertexAttribArray( 0 );
+        glVertexAttribPointer( 0, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex2D ), nullptr ); // x, y
+        glEnableVertexAttribArray( 1 );
+        glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex2D ), (void*)( 2 * sizeof( float ) ) ); // s, t
+        dirties[i]->id = ids[i];
+        dirties[i]->size_ = vbo->storage_.size();
+        dirties[i]->uploaded_ = true;
+      }
     }
+    glBindVertexArray( 0 );
   }
 
-  void VAO::draw()
+  void VAO::draw( GLenum mode )
   {
     glBindVertexArray( id );
-    glDrawArrays( GL_TRIANGLES, 0, (GLsizei)size_ );
+    glDrawArrays( mode, 0, (GLsizei)size_ );
   }
 
   void MeshManager::teardown()
@@ -162,6 +212,10 @@ namespace neko {
     width = screenSurface_->w;
     height = screenSurface_->h;
 
+    auto realResolution = vec2( (Real)width, (Real)height );
+    camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, 0.0f ) );
+
+    engine_->console()->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
     glViewport( 0, 0, width, height );
     glClearColor( 0.125f, 0.125f, 0.125f, 1.0f );
 
@@ -169,13 +223,9 @@ namespace neko {
     shaders_->initialize();
 
     meshes_ = make_shared<MeshManager>();
-    auto triangleVbo = meshes_->pushVBO({
-      { 0.0f, 0.5f, 0.0f },
-      { 0.5f, -0.5f, 0.0f },
-      { -0.5f, -0.5f, 0.0f }
-    });
+    auto quadVBO = meshes_->pushVBO( static_geometry::quad2D );
     meshes_->uploadVBOs();
-    auto triangleVao = meshes_->pushVAO( triangleVbo );
+    auto triangleVao = meshes_->pushVAO( VAO::VBO_2D, quadVBO );
     meshes_->uploadVAOs();
 
     engine_->operationContinueVideo();
@@ -194,14 +244,21 @@ namespace neko {
       if ( evt.type == SDL_QUIT )
         engine_->signalStop();
     }
+    camera_->update( tick, time );
   }
 
   void Gfx::postUpdate( GameTime delta, GameTime time )
   {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glDisable( GL_DEPTH_TEST );
+    glDepthMask( 0 );
+
+    mat4 model( 1.0f );
+    model = glm::scale( model, vec3( 100.0f, 100.0f, 1.0f ) );
+    shaders_->setMatrices( model, camera_->view(), camera_->projection() );
 
     shaders_->use( 0 );
-    meshes_->getVAO( 0 ).draw();
+    meshes_->getVAO( 0 ).draw( GL_QUADS );
 
     SDL_GL_SwapWindow( window_ );
   }
@@ -214,6 +271,8 @@ namespace neko {
 
     shaders_->shutdown();
     shaders_.reset();
+
+    camera_.reset();
 
     if ( glContext_ )
       SDL_GL_DeleteContext( glContext_ );
