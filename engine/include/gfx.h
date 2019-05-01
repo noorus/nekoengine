@@ -77,10 +77,7 @@ namespace neko {
     };
   protected:
     Info info_;
-    SDL_Window* window_;
-    SDL_Surface* screenSurface_;
-    SDL_DisplayMode displayMode_;
-    SDL_GLContext glContext_;
+    unique_ptr<sf::Window> window_;
     ShadersPtr shaders_;
     MeshManagerPtr meshes_;
     unique_ptr<Camera> camera_;

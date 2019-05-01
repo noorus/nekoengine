@@ -12,8 +12,8 @@ namespace neko {
     { //  x     y     s     t
       { 0.0f, 0.0f, 0.0f, 1.0f },
       { 0.0f, 1.0f, 0.0f, 0.0f },
-      { 1.0f, 1.0f, 1.0f, 0.0f },
-      { 1.0f, 0.0f, 1.0f, 1.0f }
+      { 1.0f, 0.0f, 1.0f, 0.0f },
+      { 1.0f, 1.0f, 1.0f, 1.0f }
     };
 
   }
@@ -111,15 +111,23 @@ namespace neko {
         dirties[i]->id = ids[i];
         dirties[i]->size_ = vbo->storage_.size();
         dirties[i]->uploaded_ = true;
-      }
+      } else
+        NEKO_EXCEPT( "Unknown VBO format" );
+
+      glDisableVertexAttribArray( 1 );
+      glDisableVertexAttribArray( 0 );
+      glBindBuffer( GL_ARRAY_BUFFER, 0 );
+      glBindVertexArray( 0 );
     }
-    glBindVertexArray( 0 );
   }
 
   void VAO::draw( GLenum mode )
   {
     glBindVertexArray( id );
+    glEnableVertexAttribArray( 0 );
+    glEnableVertexAttribArray( 1 );
     glDrawArrays( mode, 0, (GLsizei)size_ );
+    glBindVertexArray( 0 );
   }
 
   void MeshManager::teardown()
@@ -132,31 +140,8 @@ namespace neko {
   const char cWindowTitle[] = "nekoengine-render";
   const vec4 cClearColor = vec4( 0.175f, 0.175f, 0.5f, 1.0f );
 
-  Gfx::Gfx( EnginePtr engine ): Subsystem( move( engine ) ),
-    window_( nullptr ), screenSurface_( nullptr )
+  Gfx::Gfx( EnginePtr engine ): Subsystem( move( engine ) )
   {
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 4 );
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 5 );
-
-    SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
-    SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
-    SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 4 );
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
-    SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-    SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-    SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-    SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
-    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 ); // native depth buffer bits
-
-    SDL_GL_SetAttribute( SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG );
-
-    SDL_GL_SetSwapInterval( 1 ); // vsync
-
-    if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-      NEKO_EXCEPT( "SDL initialization failed" );
-
     preInitialize();
   }
 
@@ -180,23 +165,28 @@ namespace neko {
   {
     info_.clear();
 
-    SDL_GetDesktopDisplayMode( 0, &displayMode_ );
+    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    sf::VideoMode videoMode( 1280, 720, desktop.bitsPerPixel );
 
-    window_ = SDL_CreateWindow( cWindowTitle,
-      SDL_WINDOWPOS_CENTERED,
-      SDL_WINDOWPOS_CENTERED,
-      1280, 720,
-      SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN );
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.stencilBits = 8;
+    settings.antialiasingLevel = 0;
+    settings.majorVersion = 4;
+    settings.minorVersion = 5;
+    settings.attributeFlags = sf::ContextSettings::Attribute::Core | sf::ContextSettings::Attribute::Debug;
 
-    if ( !window_ )
-      NEKO_EXCEPT( "Window creation failed" );
+    // SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
+    // SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
+    // SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 4 );
+    // SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 
-    glContext_ = SDL_GL_CreateContext( window_ );
-    if ( !glContext_ )
-      NEKO_EXCEPT( "GL context creation failed" );
+    window_ = make_unique<sf::Window>( videoMode, "OpenGL", sf::Style::Default, settings );
 
-    if ( SDL_GL_SetSwapInterval( -1 ) == -1 )
-      SDL_GL_SetSwapInterval( 1 );
+    window_->setVerticalSyncEnabled( true ); // vsync
+    window_->setFramerateLimit( 0 ); // no sleep till Brooklyn
+
+    window_->setActive( true );
 
     glewExperimental = GL_TRUE;
     if ( glewInit() != GLEW_OK )
@@ -230,17 +220,13 @@ namespace neko {
     glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
     glDebugMessageCallback( Gfx::openglDebugCallbackFunction, this );
     glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true );
-
-    screenSurface_ = SDL_GetWindowSurface( window_ );
-    if ( !screenSurface_ )
-      NEKO_EXCEPT( "SDL window surface fetch failed" );
   }
 
   void Gfx::postInitialize()
   {
     int width, height;
-    width = screenSurface_->w;
-    height = screenSurface_->h;
+    width = window_->getSize().x;
+    height = window_->getSize().y;
 
     auto realResolution = vec2( (Real)width, (Real)height );
     camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, 0.0f ) );
@@ -268,17 +254,22 @@ namespace neko {
 
   void Gfx::tick( GameTime tick, GameTime time )
   {
-    SDL_Event evt;
-    if ( SDL_PollEvent( &evt ) != 0 )
+    sf::Event evt;
+
+    while ( window_->pollEvent( evt ) )
     {
-      if ( evt.type == SDL_QUIT )
+      if ( evt.type == sf::Event::Closed )
         engine_->signalStop();
     }
+
     camera_->update( tick, time );
   }
 
   void Gfx::postUpdate( GameTime delta, GameTime time )
   {
+    // activate as current context, just to be sure
+    window_->setActive( true );
+
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glDisable( GL_DEPTH_TEST );
     glDepthMask( 0 );
@@ -288,9 +279,9 @@ namespace neko {
     shaders_->setMatrices( model, camera_->view(), camera_->projection() );
 
     shaders_->use( 0 );
-    meshes_->getVAO( 0 ).draw( GL_QUADS );
+    meshes_->getVAO( 0 ).draw( GL_TRIANGLE_STRIP );
 
-    SDL_GL_SwapWindow( window_ );
+    window_->display();
   }
 
   void Gfx::shutdown()
@@ -304,15 +295,8 @@ namespace neko {
 
     camera_.reset();
 
-    if ( glContext_ )
-      SDL_GL_DeleteContext( glContext_ );
-    glContext_ = nullptr;
-
-    if ( window_ )
-      SDL_DestroyWindow( window_ );
-    window_ = nullptr;
-
-    screenSurface_ = nullptr;
+    window_->close();
+    window_.reset();
   }
 
   void Gfx::restart()
@@ -325,7 +309,6 @@ namespace neko {
   Gfx::~Gfx()
   {
     shutdown();
-    SDL_Quit();
   }
 
 }

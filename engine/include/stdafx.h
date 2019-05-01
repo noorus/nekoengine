@@ -107,14 +107,15 @@
 #include <glm/gtc/random.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// SDL
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
-
 // OpenGL
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+
+// SFML
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/OpenGL.hpp>
 
 // FMOD
 #include <fmod.hpp>
