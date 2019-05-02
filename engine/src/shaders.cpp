@@ -140,10 +140,10 @@ namespace neko {
     if ( blen > 1 )
     {
       GLsizei slen = 0;
-      auto compiler_log = (GLchar*)Locator::getMemory().alloc( Memory::Sector_Graphics, blen );
+      auto compiler_log = (GLchar*)Locator::memory().alloc( Memory::Graphics, blen );
       glGetInfoLogARB( target, blen, &slen, compiler_log );
       auto log = string( compiler_log );
-      Locator::getMemory().free( Memory::Sector_Graphics, compiler_log );
+      Locator::memory().free( Memory::Graphics, compiler_log );
       engine_->console()->printf( Console::srcGfx, "GL Shader error: %s", log.c_str() );
     }
   }

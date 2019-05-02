@@ -5,6 +5,8 @@
 #include "neko_platform.h"
 #include "engine.h"
 #include "console.h"
+#include "locator.h"
+#include "memory.h"
 
 namespace neko {
 
@@ -35,7 +37,25 @@ namespace neko {
     }
   };
 
-  Scripting::Scripting( EnginePtr engine ): Subsystem( move( engine ) ), isolate_( nullptr )
+  void* Scripting::Allocate( size_t length )
+  {
+    return Locator::memory().allocZeroed( Memory::Scripting, length );
+  }
+
+  void* Scripting::AllocateUninitialized( size_t length )
+  {
+    return Locator::memory().alloc( Memory::Scripting, length );
+  }
+
+  void Scripting::Free( void* data, size_t length )
+  {
+    Locator::memory().free( Memory::Scripting, data );
+  }
+
+  Scripting::Scripting( EnginePtr engine ):
+    Subsystem( move( engine ) ),
+    v8::ArrayBuffer::Allocator(),
+    isolate_( nullptr )
   {
     engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
 
@@ -59,10 +79,8 @@ namespace neko {
 
     v8::V8::Initialize();
 
-    allocator_ = unique_ptr<v8::ArrayBuffer::Allocator>( v8::ArrayBuffer::Allocator::NewDefaultAllocator() );
-
     Isolate::CreateParams params;
-    params.array_buffer_allocator = allocator_.get();
+    params.array_buffer_allocator = this;
     isolate_ = Isolate::New( params );
     if ( !isolate_ )
       NEKO_EXCEPT( "V8 default isolation creation failed" );
@@ -124,7 +142,6 @@ namespace neko {
     }
     v8::V8::Dispose();
     v8::V8::ShutdownPlatform();
-    allocator_.reset();
   }
 
 }

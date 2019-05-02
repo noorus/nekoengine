@@ -11,7 +11,7 @@ namespace neko {
     static MemoryPtr memoryService_; //!< Currently provided memory service.
   public:
     static const bool hasMemory() throw() { return ( memoryService_ ? true : false ); }
-    static Memory& getMemory() { return *memoryService_; }
+    static Memory& memory() { return *memoryService_; }
     static void provideMemory( MemoryPtr memory )
     {
       memoryService_ = move( memory );
