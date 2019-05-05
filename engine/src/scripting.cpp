@@ -37,24 +37,8 @@ namespace neko {
     }
   };
 
-  void* Scripting::Allocate( size_t length )
-  {
-    return Locator::memory().allocZeroed( Memory::Scripting, length );
-  }
-
-  void* Scripting::AllocateUninitialized( size_t length )
-  {
-    return Locator::memory().alloc( Memory::Scripting, length );
-  }
-
-  void Scripting::Free( void* data, size_t length )
-  {
-    Locator::memory().free( Memory::Scripting, data );
-  }
-
   Scripting::Scripting( EnginePtr engine ):
     Subsystem( move( engine ) ),
-    v8::ArrayBuffer::Allocator(),
     isolate_( nullptr )
   {
     engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
@@ -79,8 +63,13 @@ namespace neko {
 
     v8::V8::Initialize();
 
+    arrayAllocator_ = unique_ptr<v8::ArrayBuffer::Allocator>( move(
+      v8::ArrayBuffer::Allocator::NewDefaultAllocator() ) );
+    if ( !arrayAllocator_ )
+      NEKO_EXCEPT( "Failed to create default V8 array allocator" );
+
     Isolate::CreateParams params;
-    params.array_buffer_allocator = this;
+    params.array_buffer_allocator = arrayAllocator_.get();
     isolate_ = Isolate::New( params );
     if ( !isolate_ )
       NEKO_EXCEPT( "V8 default isolation creation failed" );

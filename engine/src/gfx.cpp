@@ -176,11 +176,6 @@ namespace neko {
     settings.minorVersion = 5;
     settings.attributeFlags = sf::ContextSettings::Attribute::Core | sf::ContextSettings::Attribute::Debug;
 
-    // SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
-    // SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
-    // SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 4 );
-    // SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
     window_ = make_unique<sf::Window>( videoMode, "OpenGL", sf::Style::Default, settings );
 
     window_->setVerticalSyncEnabled( true ); // vsync

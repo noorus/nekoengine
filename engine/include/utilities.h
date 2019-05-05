@@ -4,6 +4,15 @@
 
 namespace neko {
 
+  namespace utils {
+
+    constexpr size_t alignToNextMultiple( size_t offset, size_t alignment )
+    {
+      return ( ( offset + alignment - 1 ) / alignment ) * alignment;
+    }
+
+  }
+
   //! \class ScopedRWLock
   //! Automation for scoped acquisition and release of an RWLock.
   class ScopedRWLock: noncopyable {
