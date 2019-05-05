@@ -23,6 +23,8 @@
 #include <set>
 #include <boost/math/constants/constants.hpp>
 #include <glm/glm.hpp>
+#include <glbinding/gl45core/gl.h>
+#include <glbinding/glbinding.h>
 
 namespace neko {
 
@@ -54,6 +56,13 @@ namespace neko {
   using std::string_view;
 
   using boost::noncopyable;
+
+  using gl::GLuint;
+  using gl::GLsizei;
+  using gl::GLfloat;
+  using gl::GLboolean;
+  using gl::GLenum;
+  using gl::GLchar;
 
 #ifdef NEKO_MATH_DOUBLE
   using Real = double;

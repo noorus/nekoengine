@@ -16,7 +16,6 @@ namespace neko {
 # define NEKO_CONFIG_SUBDIRNAME "release"
 #endif
 
-  using v8::Handle;
   using v8::HandleScope;
   using v8::ObjectTemplate;
   using v8::Isolate;
@@ -24,21 +23,9 @@ namespace neko {
   using v8::Local;
   using v8::Global;
 
-  class IsolScope {
-  public:
-    Isolate* isol_;
-    IsolScope( Isolate* isol ): isol_( isol )
-    {
-      isol_->Enter();
-    }
-    ~IsolScope()
-    {
-      isol_->Exit();
-    }
-  };
-
   Scripting::Scripting( EnginePtr engine ):
     Subsystem( move( engine ) ),
+    v8::ArrayBuffer::Allocator(),
     isolate_( nullptr )
   {
     engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
@@ -63,13 +50,8 @@ namespace neko {
 
     v8::V8::Initialize();
 
-    arrayAllocator_ = unique_ptr<v8::ArrayBuffer::Allocator>( move(
-      v8::ArrayBuffer::Allocator::NewDefaultAllocator() ) );
-    if ( !arrayAllocator_ )
-      NEKO_EXCEPT( "Failed to create default V8 array allocator" );
-
     Isolate::CreateParams params;
-    params.array_buffer_allocator = arrayAllocator_.get();
+    params.array_buffer_allocator = this;
     isolate_ = Isolate::New( params );
     if ( !isolate_ )
       NEKO_EXCEPT( "V8 default isolation creation failed" );
@@ -77,7 +59,7 @@ namespace neko {
 
   void Scripting::initialize()
   {
-    IsolScope isolateScope( isolate_ );
+    Isolate::Scope isolateScope( isolate_ );
     HandleScope handleScope( isolate_ );
 
     Local<ObjectTemplate> global = ObjectTemplate::New( isolate_ );
@@ -93,6 +75,21 @@ namespace neko {
     context_.Reset( isolate_, context );
 
     // init natives here for global context
+  }
+
+  void* Scripting::Allocate( size_t length )
+  {
+    return Locator::memory().allocZeroed( Memory::Scripting, length );
+  }
+
+  void* Scripting::AllocateUninitialized( size_t length )
+  {
+    return  Locator::memory().alloc( Memory::Scripting, length );
+  }
+
+  void Scripting::Free( void* data, size_t length )
+  {
+    Locator::memory().free( Memory::Scripting, data );
   }
 
   void Scripting::shutdown()

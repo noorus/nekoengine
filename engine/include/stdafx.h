@@ -108,14 +108,12 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // OpenGL
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <glbinding/gl45core/gl.h>
+#include <glbinding/glbinding.h>
 
 // SFML
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
-#include <SFML/OpenGL.hpp>
 
 // FMOD
 #include <fmod.hpp>

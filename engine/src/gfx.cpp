@@ -6,6 +6,8 @@
 
 namespace neko {
 
+  using namespace gl;
+
   namespace static_geometry {
 
     const vector<Vertex2D> quad2D =
@@ -183,9 +185,7 @@ namespace neko {
 
     window_->setActive( true );
 
-    glewExperimental = GL_TRUE;
-    if ( glewInit() != GLEW_OK )
-      NEKO_EXCEPT( "GLEW initialization failed" );
+    glbinding::initialize( nullptr );
 
     auto glstrGetClean = []( GLenum e, string& out )
     {

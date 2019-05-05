@@ -8,6 +8,8 @@
 
 namespace neko {
 
+  using namespace gl;
+
   struct ShaderMapper {
     Shader::Type type;
     GLenum glType;
@@ -172,9 +174,9 @@ namespace neko {
     glShaderSource( shader_out, 1, &src, nullptr );
     glCompileShader( shader_out );
 
-    GLint isCompiled;
+    GLint isCompiled = 0;
     glGetShaderiv( shader_out, GL_COMPILE_STATUS, &isCompiled );
-    if ( isCompiled != GL_TRUE )
+    if ( !isCompiled )
     {
       dumpLog( shader_out );
       glDeleteShader( shader_out );
@@ -211,9 +213,9 @@ namespace neko {
     glAttachShader( program_out, fragment );
     glLinkProgram( program_out );
 
-    GLint linked = GL_FALSE;
-    glGetProgramiv( program_out, GL_LINK_STATUS, &linked );
-    if ( linked != GL_TRUE )
+    GLint isLinked = 0;
+    glGetProgramiv( program_out, GL_LINK_STATUS, &isLinked );
+    if ( !isLinked )
     {
       dumpLog( program_out, true );
       glDeleteProgram( program_out );

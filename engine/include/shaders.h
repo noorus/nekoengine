@@ -12,7 +12,7 @@ namespace neko {
       Geometry
     } type_;
     utfString filename_;
-    GLuint id_;
+    gl::GLuint id_;
     Shader( Type type, const utfString& filename ):
       type_( type ), filename_( filename ), id_( 0 ) {}
   };
@@ -21,7 +21,7 @@ namespace neko {
 
   struct ShaderProgram {
     string name;
-    GLuint id;
+    gl::GLuint id;
     size_t vp;
     size_t fp;
     map<string, GLuint> uniforms;
@@ -29,13 +29,13 @@ namespace neko {
       name( name_ ), vp( vertexProgram ), fp( fragmentProgram ), id( 0 ) {}
     void setUniform2f( const char *uniform, const float &f0, const float &f1 );
     void setUniform4f( const char *uniform, const float &f0, const float &f1, const float &f2, const float &f3 );
-    void setUniform4fv( const char *uniform, const GLsizei &count, const float *v );
-    void setUniformMatrix4fv( const char *uniform, const GLsizei &count, const GLboolean &transpose, const GLfloat *v );
-    void setUniform1i( const char *uniform, const GLint &i );
-    void setUniform1ui( const char *uniform, const GLuint &i );
-    void setUniform1f( const char* uniform, const GLfloat& f );
-    void setUniform1d( const char* uniform, const GLdouble& d );
-    GLuint getUBO( const char* name );
+    void setUniform4fv( const char *uniform, const gl::GLsizei &count, const float *v );
+    void setUniformMatrix4fv( const char *uniform, const gl::GLsizei &count, const gl::GLboolean &transpose, const gl::GLfloat *v );
+    void setUniform1i( const char *uniform, const gl::GLint &i );
+    void setUniform1ui( const char *uniform, const gl::GLuint &i );
+    void setUniform1f( const char* uniform, const gl::GLfloat& f );
+    void setUniform1d( const char* uniform, const gl::GLdouble& d );
+    gl::GLuint getUBO( const char* name );
   };
 
   using ShaderProgramVector = vector<ShaderProgram>;
@@ -48,10 +48,10 @@ namespace neko {
     EnginePtr engine_;
     ShaderVector shaders_;
     ShaderProgramVector programs_;
-    void dumpLog( const GLuint &target, const bool isProgram = false );
-    void linkProgram( GLuint vertex, GLuint fragment, GLuint& program_out );
+    void dumpLog( const gl::GLuint &target, const bool isProgram = false );
+    void linkProgram( gl::GLuint vertex, gl::GLuint fragment, gl::GLuint& program_out );
     void linkProgram( ShaderProgram& );
-    void compileShader( GLenum type, const std::string& source, GLuint& out );
+    void compileShader( gl::GLenum type, const std::string& source, gl::GLuint& out );
     void compileShader( Shader& shader );
   public:
     Shaders( EnginePtr engine );

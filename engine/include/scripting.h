@@ -5,12 +5,16 @@
 
 namespace neko {
 
-  class Scripting: public Subsystem {
+  class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {
   protected:
     v8::Isolate* isolate_;
     v8::Global<v8::Context> context_;
     unique_ptr<v8::Platform> platform_;
-    unique_ptr<v8::ArrayBuffer::Allocator> arrayAllocator_;
+  private:
+    //! v8::ArrayBuffer::Allocator implementation
+    virtual void* Allocate( size_t length ) override;
+    virtual void* AllocateUninitialized( size_t length ) override;
+    virtual void Free( void* data, size_t length ) override;
   public:
     Scripting( EnginePtr engine );
     void initialize();
