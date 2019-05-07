@@ -100,6 +100,7 @@ namespace neko {
       program.uniforms["model"] = glGetUniformLocation( program.id, "model" );
       program.uniforms["view"] = glGetUniformLocation( program.id, "view" );
       program.uniforms["projection"] = glGetUniformLocation( program.id, "projection" );
+      program.uniforms["tex"] = glGetUniformLocation( program.id, "tex" );
     }
   }
 
@@ -129,6 +130,7 @@ namespace neko {
     programs_[program].setUniformMatrix4fv( "model", 1, GL_FALSE, glm::value_ptr( model_ ) );
     programs_[program].setUniformMatrix4fv( "view", 1, GL_FALSE, glm::value_ptr( view_ ) );
     programs_[program].setUniformMatrix4fv( "projection", 1, GL_FALSE, glm::value_ptr( projection_ ) );
+    programs_[program].setUniform1i( "tex", 0 );
     return programs_[program];
   }
 

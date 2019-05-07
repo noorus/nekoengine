@@ -161,6 +161,8 @@
     <ClCompile Include="src\locator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory.cpp" />
+    <ClCompile Include="src\renderbuffer.cpp" />
+    <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\scripting.cpp" />
     <ClCompile Include="src\shaders.cpp" />
     <ClCompile Include="src\stdafx.cpp">
@@ -168,6 +170,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\subsystem.cpp" />
+    <ClCompile Include="src\surface.cpp" />
+    <ClCompile Include="src\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\shared\include\neko_config.h" />
@@ -184,6 +188,7 @@
     <ClInclude Include="include\forwards.h" />
     <ClInclude Include="include\framebuffer.h" />
     <ClInclude Include="include\gfx.h" />
+    <ClInclude Include="include\gfx_types.h" />
     <ClInclude Include="include\locator.h" />
     <ClInclude Include="include\memory.h" />
     <ClInclude Include="include\nekomath.h" />

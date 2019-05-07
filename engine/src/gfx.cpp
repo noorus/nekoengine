@@ -3,6 +3,7 @@
 #include "engine.h"
 #include "gfx.h"
 #include "shaders.h"
+#include "renderer.h"
 
 namespace neko {
 
@@ -18,7 +19,17 @@ namespace neko {
       { 1.0f, 1.0f, 1.0f, 1.0f }
     };
 
+    const vector<PixelRGBA> image4x4 =
+    {
+      { 255, 0, 0, 255 },
+      { 0, 255, 0, 255 },
+      { 0, 0, 255, 255 },
+      { 255, 0, 255, 255 }
+    };
+
   }
+
+  static TexturePtr g_texture;
 
   // MeshManager
 
@@ -223,6 +234,8 @@ namespace neko {
     width = window_->getSize().x;
     height = window_->getSize().y;
 
+    renderer_ = make_shared<Renderer>();
+
     auto realResolution = vec2( (Real)width, (Real)height );
     camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, 0.0f ) );
 
@@ -238,6 +251,8 @@ namespace neko {
     meshes_->uploadVBOs();
     auto triangleVao = meshes_->pushVAO( VAO::VBO_2D, quadVBO );
     meshes_->uploadVAOs();
+
+    g_texture = make_shared<Texture>( renderer_.get(), 2, 2, GL_RGBA8, (const void*)static_geometry::image4x4.data() );
 
     engine_->operationContinueVideo();
   }
@@ -274,6 +289,10 @@ namespace neko {
     shaders_->setMatrices( model, camera_->view(), camera_->projection() );
 
     shaders_->use( 0 );
+
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture( GL_TEXTURE_2D, g_texture->handle() );
+
     meshes_->getVAO( 0 ).draw( GL_TRIANGLE_STRIP );
 
     window_->display();
@@ -281,6 +300,7 @@ namespace neko {
 
   void Gfx::shutdown()
   {
+    g_texture.reset();
     engine_->operationSuspendVideo();
 
     meshes_->teardown();
