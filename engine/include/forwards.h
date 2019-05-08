@@ -30,4 +30,7 @@ namespace neko {
   class MeshManager;
   using MeshManagerPtr = shared_ptr<MeshManager>;
 
+  class Camera;
+  using CameraPtr = shared_ptr<Camera>;
+
 }

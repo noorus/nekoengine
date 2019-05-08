@@ -1,10 +1,20 @@
 #pragma once
-#include "subsystem.h"
-#include "forwards.h"
-#include "camera.h"
+#include <glbinding/gl45core/gl.h>
+#include <glbinding/glbinding.h>
 
 namespace neko {
 
+  using gl::GLuint;
+  using gl::GLsizei;
+  using gl::GLfloat;
+  using gl::GLboolean;
+  using gl::GLenum;
+  using gl::GLchar;
+
+  //! Some forwards for hinting at usage despite same underlying datatype.
+  using GLGraphicsFormat = gl::GLenum;
+
+  //! Packed structs we use with OpenGL
 #pragma pack( push, 1 )
   struct Vertex3D {
     float x, y, z; //!< Vertex coordinates
@@ -18,35 +28,5 @@ namespace neko {
     uint8_t r, g, b, a;
   };
 #pragma pack( pop )
-
-  template <class T>
-  class VBO {
-  public:
-    vector<T> storage_;
-    GLuint id;
-    bool uploaded;
-    VBO(): id( 0 ), uploaded( false ) {}
-  };
-
-  template <class T>
-  class VBOVector: public vector<VBO<T>> {};
-
-  class VAO {
-  public:
-    enum VBOType {
-      VBO_3D,
-      VBO_2D
-    } vboType_;
-    size_t vbo_;
-    GLuint id;
-    bool uploaded_;
-    size_t size_;
-    void draw( GLenum mode );
-    VAO( VBOType type, size_t vbo ): vboType_( type ), vbo_( vbo ), id( 0 ), size_( 0 ), uploaded_( false ) {}
-  };
-
-  using VAOVector = vector<VAO>;
-
-  using GLGraphicsFormat = gl::GLenum;
 
 }

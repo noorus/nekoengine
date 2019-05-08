@@ -4,32 +4,11 @@
 #include "gfx.h"
 #include "shaders.h"
 #include "renderer.h"
+#include "camera.h"
 
 namespace neko {
 
   using namespace gl;
-
-  namespace static_geometry {
-
-    const vector<Vertex2D> quad2D =
-    { //  x     y     s     t
-      { 0.0f, 0.0f, 0.0f, 1.0f },
-      { 0.0f, 1.0f, 0.0f, 0.0f },
-      { 1.0f, 0.0f, 1.0f, 0.0f },
-      { 1.0f, 1.0f, 1.0f, 1.0f }
-    };
-
-    const vector<PixelRGBA> image4x4 =
-    {
-      { 255, 0, 0, 255 },
-      { 0, 255, 0, 255 },
-      { 0, 0, 255, 255 },
-      { 255, 0, 255, 255 }
-    };
-
-  }
-
-  static TexturePtr g_texture;
 
   // Gfx
 
@@ -117,7 +96,7 @@ namespace neko {
     width = window_->getSize().x;
     height = window_->getSize().y;
 
-    renderer_ = make_shared<Renderer>();
+    renderer_ = make_shared<Renderer>( engine_ );
 
     auto realResolution = vec2( (Real)width, (Real)height );
     camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, 0.0f ) );
@@ -125,17 +104,6 @@ namespace neko {
     engine_->console()->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
     glViewport( 0, 0, width, height );
     glClearColor( cClearColor.r, cClearColor.g, cClearColor.b, cClearColor.a );
-
-    shaders_ = make_shared<Shaders>( engine_ );
-    shaders_->initialize();
-
-    meshes_ = make_shared<MeshManager>();
-    auto quadVBO = meshes_->pushVBO( static_geometry::quad2D );
-    meshes_->uploadVBOs();
-    auto triangleVao = meshes_->pushVAO( VAO::VBO_2D, quadVBO );
-    meshes_->uploadVAOs();
-
-    g_texture = make_shared<Texture>( renderer_.get(), 2, 2, GL_RGBA8, (const void*)static_geometry::image4x4.data() );
 
     engine_->operationContinueVideo();
   }
@@ -163,33 +131,14 @@ namespace neko {
     // activate as current context, just to be sure
     window_->setActive( true );
 
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glDisable( GL_DEPTH_TEST );
-    glDepthMask( 0 );
-
-    mat4 model( 1.0f );
-    model = glm::scale( model, vec3( 100.0f, 100.0f, 1.0f ) );
-    shaders_->setMatrices( model, camera_->view(), camera_->projection() );
-
-    shaders_->use( 0 );
-
-    glActiveTexture( GL_TEXTURE0 );
-    glBindTexture( GL_TEXTURE_2D, g_texture->handle() );
-
-    meshes_->getVAO( 0 ).draw( GL_TRIANGLE_STRIP );
+    renderer_->draw( camera_ );
 
     window_->display();
   }
 
   void Gfx::shutdown()
   {
-    g_texture.reset();
     engine_->operationSuspendVideo();
-
-    meshes_->teardown();
-
-    shaders_->shutdown();
-    shaders_.reset();
 
     camera_.reset();
 

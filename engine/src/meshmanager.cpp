@@ -1,7 +1,11 @@
 #include "stdafx.h"
+#include "gfx_types.h"
 #include "meshmanager.h"
+#include "neko_exception.h"
 
 namespace neko {
+
+  using namespace gl;
 
   // MeshManager
 

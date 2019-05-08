@@ -91,10 +91,12 @@ namespace neko {
     GLuint implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format );
     void implDeleteRenderbuffer( GLuint handle );
   protected:
+    EnginePtr engine_;
     ShadersPtr shaders_;
     MeshManagerPtr meshes_;
   public:
-    Renderer();
+    Renderer( EnginePtr engine );
+    void draw( CameraPtr camera );
     ~Renderer();
   };
 

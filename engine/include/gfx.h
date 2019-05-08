@@ -1,7 +1,6 @@
 #pragma once
 #include "subsystem.h"
 #include "forwards.h"
-#include "camera.h"
 #include "gfx_types.h"
 
 namespace neko {
@@ -32,7 +31,7 @@ namespace neko {
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;
-    unique_ptr<Camera> camera_;
+    CameraPtr camera_;
     RendererPtr renderer_;
     void preInitialize();
     void printInfo();
