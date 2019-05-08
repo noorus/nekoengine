@@ -90,6 +90,9 @@ namespace neko {
     void implDeleteTexture( GLuint handle );
     GLuint implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format );
     void implDeleteRenderbuffer( GLuint handle );
+  protected:
+    ShadersPtr shaders_;
+    MeshManagerPtr meshes_;
   public:
     Renderer();
     ~Renderer();

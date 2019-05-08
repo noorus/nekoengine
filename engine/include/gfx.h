@@ -6,22 +6,14 @@
 
 namespace neko {
 
-  class MeshManager {
-  private:
-    VBOVector<Vertex3D> vbos3d_;
-    VBOVector<Vertex2D> vbos2d_;
-    VAOVector vaos_;
-  public:
-    size_t pushVBO( vector<Vertex3D> vertices );
-    size_t pushVBO( vector<Vertex2D> vertices );
-    void uploadVBOs();
-    size_t pushVAO( VAO::VBOType type, size_t verticesVBO );
-    VAO& getVAO( size_t index ) { return vaos_[index]; }
-    void uploadVAOs();
-    void teardown();
+  struct GfxContextInfo {
+    short glVersionMinor; //!< Major GL version
+    short glVersionMajor; //!< Minor GL version
+    short depthBits; //!< Depth buffer bits per pixel
+    short stencilBits; //!< Stencil buffer bits per pixel
+    inline bool hasDepth() const throw( ) { return ( depthBits > 0 ); }
+    inline bool hasStencil() const throw( ) { return ( stencilBits > 0 ); }
   };
-
-  using MeshManagerPtr = shared_ptr<MeshManager>;
 
   class Gfx: public Subsystem {
   public:
@@ -40,8 +32,6 @@ namespace neko {
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;
-    ShadersPtr shaders_;
-    MeshManagerPtr meshes_;
     unique_ptr<Camera> camera_;
     RendererPtr renderer_;
     void preInitialize();

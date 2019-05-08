@@ -27,4 +27,7 @@ namespace neko {
   class Renderer;
   using RendererPtr = shared_ptr<Renderer>;
 
+  class MeshManager;
+  using MeshManagerPtr = shared_ptr<MeshManager>;
+
 }

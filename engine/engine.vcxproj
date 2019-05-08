@@ -161,6 +161,7 @@
     <ClCompile Include="src\locator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory.cpp" />
+    <ClCompile Include="src\meshmanager.cpp" />
     <ClCompile Include="src\renderbuffer.cpp" />
     <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\scripting.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="include\gfx_types.h" />
     <ClInclude Include="include\locator.h" />
     <ClInclude Include="include\memory.h" />
+    <ClInclude Include="include\meshmanager.h" />
     <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\renderer.h" />
     <ClInclude Include="include\scripting.h" />
