@@ -143,13 +143,11 @@ namespace neko {
     assert( index >= 0 && index < ebos_.size() );
   }
 
-  void VAO::draw( GLenum mode, EBO& ebo )
+  void VAO::draw( GLenum mode )
   {
     glBindVertexArray( id );
     glEnableVertexAttribArray( MeshAttrib_Position );
     glEnableVertexAttribArray( MeshAttrib_Texcoord );
-    //glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo.id_ );
-    //glDrawElementsBaseVertex( mode, ebo.storage_.size(), GL_UNSIGNED_INT, nullptr, 0 );
     glDrawArrays( mode, 0, (GLsizei)size_ );
     glBindVertexArray( 0 );
   }

@@ -38,7 +38,7 @@ namespace neko {
     GLuint id;
     bool uploaded_;
     size_t size_;
-    void draw( GLenum mode, EBO& ebo );
+    void draw( GLenum mode );
     VAO( VBOType type, size_t vbo ): vboType_( type ), vbo_( vbo ), id( 0 ), size_( 0 ), uploaded_( false ) {}
   };
 

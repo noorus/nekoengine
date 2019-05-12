@@ -21,19 +21,26 @@ namespace neko {
       { 255, 0, 255, 255 }
     };
 
-    const vector<GLuint> quadIndexes =
+    /*const vector<GLuint> quadIndexes =
     {
       0, 1, 2, 2, 3, 0
-    };
+    };*/
 
     const vector<Vertex2D> quad2D =
     { // x      y     s     t
     { -0.5f,  0.5f, 0.0f, 0.0f }, // 0
     {  0.5f,  0.5f, 1.0f, 0.0f }, // 1
-    {  0.5f, -0.5f, 1.0f, 1.0f }, // 2
     {  0.5f, -0.5f, 1.0f, 1.0f }, // 3
     { -0.5f, -0.5f, 0.0f, 1.0f }, // 4
     { -0.5f,  0.5f, 0.0f, 0.0f }  // 5
+    };
+
+    const vector<Vertex2D> quadStrip2D =
+    {   // x      y     s     t
+      { -0.5f, -0.5f, 0.0f, 1.0f },
+      {  0.5f, -0.5f, 1.0f, 1.0f },
+      { -0.5f,  0.5f, 0.0f, 0.0f },
+      {  0.5f,  0.5f, 1.0f, 0.0f },
     };
 
   }
@@ -46,12 +53,12 @@ namespace neko {
     shaders_->initialize();
 
     meshes_ = make_shared<MeshManager>();
-    auto quadVBO = meshes_->pushVBO( static_geometry::quad2D );
+    auto quadVBO = meshes_->pushVBO( static_geometry::quadStrip2D );
     meshes_->uploadVBOs();
     auto triangleVao = meshes_->pushVAO( VAO::VBO_2D, quadVBO );
     meshes_->uploadVAOs();
-    auto quadEBO = meshes_->pushEBO( static_geometry::quadIndexes );
-    meshes_->uploadEBOs();
+    /*auto quadEBO = meshes_->pushEBO( static_geometry::quadIndexes );
+    meshes_->uploadEBOs();*/
 
     g_texture = make_shared<Texture>( this, 2, 2, GL_RGBA8, (const void*)static_geometry::image4x4.data() );
 
@@ -84,19 +91,19 @@ namespace neko {
     glBindTexture( GL_TEXTURE_2D, handle );
 
     // assumptions for now
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
     // assumptions for now
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-    // glGenerateMipmap( GL_TEXTURE_2D );
 
     // 1 byte alignment
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
     glTexImage2D( GL_TEXTURE_2D, 0, format, (GLsizei)width, (GLsizei)height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+
+    glGenerateMipmap( GL_TEXTURE_2D );
 
     glBindTexture( GL_TEXTURE_2D, 0 );
 
@@ -152,7 +159,7 @@ namespace neko {
     else
       glBindTexture( GL_TEXTURE_2D, g_texture->handle() );
 
-    meshes_->getVAO( 0 ).draw( GL_TRIANGLES, meshes_->getEBO( 0 ) );
+    meshes_->getVAO( 0 ).draw( GL_TRIANGLE_STRIP );
   }
 
   Renderer::~Renderer()
