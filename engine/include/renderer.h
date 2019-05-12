@@ -1,6 +1,7 @@
 #pragma once
 #include "neko_types.h"
 #include "gfx_types.h"
+#include "neko_platform.h"
 
 namespace neko {
 
@@ -56,6 +57,24 @@ namespace neko {
 
   using TexturePtr = shared_ptr<Texture>;
 
+  struct ImageData {
+    unsigned int width_;
+    unsigned int height_;
+    vector<uint8_t> data_;
+    GLGraphicsFormat format_;
+  };
+
+  struct Material {
+    bool loaded_;
+    ImageData image_;
+    TexturePtr texture_;
+    Material(): loaded_( false ) {}
+  };
+
+  using MaterialPtr = shared_ptr<Material>;
+
+  using MaterialVector = vector<MaterialPtr>;
+
   //! \class Renderbuffer
   //! \brief A renderbuffer is an image surface optimized for render target usage, meant
   //!   primarily to be used as an attachment to a framebuffer.
@@ -94,8 +113,11 @@ namespace neko {
     EnginePtr engine_;
     ShadersPtr shaders_;
     MeshManagerPtr meshes_;
+    platform::RWLock loadLock_;
+    MaterialVector materials_;
   public:
     Renderer( EnginePtr engine );
+    void uploadTextures();
     void draw( CameraPtr camera );
     ~Renderer();
   };

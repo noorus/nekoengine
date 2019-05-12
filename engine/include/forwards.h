@@ -33,4 +33,7 @@ namespace neko {
   class Camera;
   using CameraPtr = shared_ptr<Camera>;
 
+  class ThreadedLoader;
+  using ThreadedLoaderPtr = shared_ptr<ThreadedLoader>;
+
 }

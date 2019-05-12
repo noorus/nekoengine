@@ -31,6 +31,12 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{87b502fa-0821-4532-b44c-6f740f3fcd7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\extern">
+      <UniqueIdentifier>{d2979126-582d-4ddd-8858-3cd6b896bb48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern">
+      <UniqueIdentifier>{ed28a3e2-1a28-4c0c-b43a-e8441df2b014}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -92,6 +98,12 @@
     </ClCompile>
     <ClCompile Include="src\meshmanager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\lodepng\lodepng.cpp">
+      <Filter>Source Files\extern</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +181,12 @@
     </ClInclude>
     <ClInclude Include="include\meshmanager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\lodepng\lodepng.h">
+      <Filter>Header Files\extern</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

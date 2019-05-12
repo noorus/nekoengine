@@ -51,7 +51,7 @@ namespace neko {
     settings.minorVersion = 6;
     settings.attributeFlags = sf::ContextSettings::Attribute::Core | sf::ContextSettings::Attribute::Debug;
 
-    window_ = make_unique<sf::Window>( videoMode, "OpenGL", sf::Style::Default, settings );
+    window_ = make_unique<sf::Window>( videoMode, cWindowTitle, sf::Style::Default, settings );
 
     window_->setVerticalSyncEnabled( true ); // vsync
     window_->setFramerateLimit( 0 ); // no sleep till Brooklyn
@@ -110,7 +110,7 @@ namespace neko {
 
   void Gfx::preUpdate( GameTime time )
   {
-    //
+    renderer_->uploadTextures();
   }
 
   void Gfx::tick( GameTime tick, GameTime time )

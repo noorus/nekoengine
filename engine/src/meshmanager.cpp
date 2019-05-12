@@ -42,6 +42,7 @@ namespace neko {
       dirties[i]->id = ids[i];
       dirties[i]->uploaded = true;
     }
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
   }
 
   void MeshManager::uploadVBOs()
@@ -76,44 +77,79 @@ namespace neko {
         auto vbo = &( vbos3d_[dirties[i]->vbo_] );
         if ( !vbo->uploaded )
           NEKO_EXCEPT( "VBO3D used for VAO has not been uploaded" );
+        dirties[i]->size_ = vbo->storage_.size();
         glBindVertexArray( ids[i] );
         glBindBuffer( GL_ARRAY_BUFFER, vbo->id );
-        glEnableVertexAttribArray( 0 );
-        glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex3D ), nullptr ); // x, y, z
-        glEnableVertexAttribArray( 1 );
-        glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex3D ), (void*)( 3 * sizeof( float ) ) ); // s, t
-        dirties[i]->id = ids[i];
+        glEnableVertexAttribArray( MeshAttrib_Position );
+        glVertexAttribPointer( MeshAttrib_Position, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex3D ), nullptr ); // x, y, z
+        glEnableVertexAttribArray( MeshAttrib_Texcoord );
+        glVertexAttribPointer( MeshAttrib_Texcoord, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex3D ), (void*)( 3 * sizeof( float ) ) ); // s, t
         dirties[i]->size_ = vbo->storage_.size();
-        dirties[i]->uploaded_ = true;
-      } else if ( dirties[i]->vboType_ == VAO::VBO_2D )
+      }
+      else if ( dirties[i]->vboType_ == VAO::VBO_2D )
       {
         auto vbo = &( vbos2d_[dirties[i]->vbo_] );
         if ( !vbo->uploaded )
           NEKO_EXCEPT( "VBO2D used for VAO has not been uploaded" );
         glBindVertexArray( ids[i] );
         glBindBuffer( GL_ARRAY_BUFFER, vbo->id );
-        glEnableVertexAttribArray( 0 );
-        glVertexAttribPointer( 0, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex2D ), nullptr ); // x, y
-        glEnableVertexAttribArray( 1 );
-        glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex2D ), (void*)( 2 * sizeof( float ) ) ); // s, t
-        dirties[i]->id = ids[i];
+        glEnableVertexAttribArray( MeshAttrib_Position );
+        glVertexAttribPointer( MeshAttrib_Position, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex2D ), nullptr ); // x, y
+        glEnableVertexAttribArray( MeshAttrib_Texcoord );
+        glVertexAttribPointer( MeshAttrib_Texcoord, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex2D ), (void*)( 2 * sizeof( float ) ) ); // s, t
         dirties[i]->size_ = vbo->storage_.size();
-        dirties[i]->uploaded_ = true;
       } else
         NEKO_EXCEPT( "Unknown VBO format" );
 
-      glDisableVertexAttribArray( 1 );
-      glDisableVertexAttribArray( 0 );
+      dirties[i]->id = ids[i];
+      dirties[i]->uploaded_ = true;
+
+      glDisableVertexAttribArray( MeshAttrib_Texcoord );
+      glDisableVertexAttribArray( MeshAttrib_Position );
       glBindBuffer( GL_ARRAY_BUFFER, 0 );
       glBindVertexArray( 0 );
     }
   }
 
-  void VAO::draw( GLenum mode )
+  size_t MeshManager::pushEBO( vector<GLuint> indexes )
+  {
+    EBO ebo;
+    ebo.storage_.swap( indexes );
+    ebos_.push_back( move( ebo ) );
+    return ( ebos_.size() - 1 );
+  }
+
+  void MeshManager::uploadEBOs()
+  {
+    vector<EBO*> dirties;
+    for ( auto& ebo : ebos_ )
+      if ( !ebo.uploaded_ )
+        dirties.push_back( &ebo );
+    vector<GLuint> ids;
+    ids.resize( dirties.size() );
+    glGenBuffers( (GLsizei)dirties.size(), ids.data() );
+    for ( size_t i = 0; i < dirties.size(); ++i )
+    {
+      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ids[i] );
+      glBufferData( GL_ELEMENT_ARRAY_BUFFER, dirties[i]->storage_.size(), dirties[i]->storage_.data(), GL_STATIC_DRAW );
+      dirties[i]->id_ = ids[i];
+      dirties[i]->uploaded_ = true;
+    }
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+  }
+
+  void MeshManager::useEBO( size_t index )
+  {
+    assert( index >= 0 && index < ebos_.size() );
+  }
+
+  void VAO::draw( GLenum mode, EBO& ebo )
   {
     glBindVertexArray( id );
-    glEnableVertexAttribArray( 0 );
-    glEnableVertexAttribArray( 1 );
+    glEnableVertexAttribArray( MeshAttrib_Position );
+    glEnableVertexAttribArray( MeshAttrib_Texcoord );
+    //glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo.id_ );
+    //glDrawElementsBaseVertex( mode, ebo.storage_.size(), GL_UNSIGNED_INT, nullptr, 0 );
     glDrawArrays( mode, 0, (GLsizei)size_ );
     glBindVertexArray( 0 );
   }

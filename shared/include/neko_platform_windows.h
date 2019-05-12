@@ -28,8 +28,10 @@ namespace neko {
     };
 
     class Event {
+    public:
+      using NativeType = HANDLE;
     private:
-      HANDLE handle_;
+      NativeType handle_;
     public:
       Event( bool initialState = false ): handle_( 0 )
       {
@@ -47,13 +49,26 @@ namespace neko {
       {
         return ( WaitForSingleObject( handle_, 0 ) == WAIT_OBJECT_0 );
       }
-      inline HANDLE get() const { return handle_; }
+      inline NativeType get() const { return handle_; }
       ~Event()
       {
         if ( handle_ )
           CloseHandle( handle_ );
       }
     };
+
+    using EventVector = vector<Event::NativeType>;
+
+    inline size_t waitForEvents( const EventVector& events, uint32_t milliseconds, bool waitAll = false, size_t timeoutValue = WAIT_TIMEOUT )
+    {
+      auto ret = WaitForMultipleObjects( (DWORD)events.size(), events.data(), waitAll, milliseconds );
+      if ( ret >= WAIT_OBJECT_0 && ret < ( WAIT_OBJECT_0 + events.size() ) )
+        return ( ret - WAIT_OBJECT_0 );
+      else if ( ret == WAIT_TIMEOUT )
+        return timeoutValue;
+      else
+        NEKO_EXCEPT( "WaitForMultipleObjects failed" );
+    }
 
     class Thread {
     public:

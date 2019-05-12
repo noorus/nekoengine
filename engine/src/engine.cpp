@@ -5,6 +5,7 @@
 #include "neko_exception.h"
 #include "gfx.h"
 #include "scripting.h"
+#include "loader.h"
 
 namespace neko {
 
@@ -40,6 +41,9 @@ namespace neko {
     console_->setEngine( shared_from_this() );
 
     platform::PerformanceTimer timer;
+
+    loader_ = make_shared<ThreadedLoader>();
+    loader_->start();
 
     timer.start();
     gfx_ = make_shared<Gfx>( shared_from_this() );
@@ -95,7 +99,13 @@ namespace neko {
   void Engine::shutdown()
   {
     scripting_.reset();
+
+    if ( loader_ )
+      loader_->stop();
+
     gfx_.reset();
+
+    loader_.reset();
 
     console_->resetEngine();
   }
