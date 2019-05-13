@@ -37,6 +37,12 @@
     <Filter Include="Source Files\extern">
       <UniqueIdentifier>{ed28a3e2-1a28-4c0c-b43a-e8441df2b014}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gfx">
+      <UniqueIdentifier>{74103ef0-6a27-45c8-b3bf-debf42fbbc8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gfx">
+      <UniqueIdentifier>{31f64350-b54e-4cb4-9f70-eae19d294ea6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -63,9 +69,6 @@
     <ClCompile Include="src\subsystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scripting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -75,28 +78,7 @@
     <ClCompile Include="src\locator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\shaders.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\framebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\surface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderbuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\meshmanager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\loader.cpp">
@@ -104,6 +86,30 @@
     </ClCompile>
     <ClCompile Include="..\extern\lodepng\lodepng.cpp">
       <Filter>Source Files\extern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\framebuffer.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gfx.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshmanager.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderbuffer.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shaders.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\surface.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\texture.cpp">
+      <Filter>Source Files\gfx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -149,9 +155,6 @@
     <ClInclude Include="include\subsystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\gfx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\forwards.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -164,22 +167,10 @@
     <ClInclude Include="include\memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\shaders.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\framebuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\renderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\gfx_types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\meshmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\loader.h">
@@ -187,6 +178,21 @@
     </ClInclude>
     <ClInclude Include="..\extern\lodepng\lodepng.h">
       <Filter>Header Files\extern</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gfx.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gfx_types.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\meshmanager.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\renderer.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shaders.h">
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
