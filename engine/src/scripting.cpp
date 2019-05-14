@@ -31,14 +31,19 @@ namespace neko {
     engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
 
     utfString rootDirectory = platform::getCurrentDirectory();
-    rootDirectory.append( "\\data\\v8\\" NEKO_CONFIG_SUBDIRNAME "\\" );
+    auto dataDirectory = rootDirectory;
+    dataDirectory.append( "\\data\\v8\\" NEKO_CONFIG_SUBDIRNAME "\\" );
 
-    if ( !v8::V8::InitializeICU( ( rootDirectory + "icudtl.dat" ).c_str() ) )
+    global_ = make_shared<ScriptingContext>();
+    global_->scriptDirectory_ = rootDirectory;
+    global_->scriptDirectory_.append( "\\script\\" );
+
+    if ( !v8::V8::InitializeICU( ( dataDirectory + "icudtl.dat" ).c_str() ) )
       NEKO_EXCEPT( "V8 ICU initialization failed" );
 
     v8::V8::InitializeExternalStartupData(
-      ( rootDirectory + "natives_blob.bin" ).c_str(),
-      ( rootDirectory + "snapshot_blob.bin" ).c_str()
+      ( dataDirectory + "natives_blob.bin" ).c_str(),
+      ( dataDirectory + "snapshot_blob.bin" ).c_str()
     );
 
     platform_ = move( v8::platform::NewDefaultPlatform(
@@ -75,6 +80,14 @@ namespace neko {
     context_.Reset( isolate_, context );
 
     // init natives here for global context
+
+    global_->console_ = engine_->console();
+    global_->isolate_ = isolate_;
+
+    utfString scriptFile = global_->scriptDirectory_ + "initialization.js";
+    Script script( global_, scriptFile );
+    script.compile( context_ );
+    script.execute( context_ );
   }
 
   void* Scripting::Allocate( size_t length )

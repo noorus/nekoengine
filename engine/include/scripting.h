@@ -5,11 +5,44 @@
 
 namespace neko {
 
+  class ScriptingContext;
+  using ScriptingContextPtr = shared_ptr<ScriptingContext>;
+
+  class Script {
+  public:
+    enum Status {
+      Status_Unknown,
+      Status_Compiled,
+      Status_CompileError,
+      Status_RuntimeError
+    };
+  private:
+    utfString name_;
+    utfString filename_;
+    Status status_;
+    v8::Persistent<v8::Script> script_;
+    ScriptingContextPtr globalContext_;
+  public:
+    Script( ScriptingContextPtr globalCtx, utfString name );
+    bool compile( v8::Global<v8::Context>& context );
+    void reportException( const v8::TryCatch& tryCatch );
+    bool execute( v8::Global<v8::Context>& context_ );
+  };
+
+  class ScriptingContext {
+  public:
+    utfString scriptDirectory_;
+    v8::Isolate* isolate_;
+    ConsolePtr console_;
+    inline v8::Isolate* isolate() const throw() { return isolate_; }
+  };
+
   class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {
   protected:
     v8::Isolate* isolate_;
     v8::Global<v8::Context> context_;
     unique_ptr<v8::Platform> platform_;
+    ScriptingContextPtr global_;
   private:
     //! v8::ArrayBuffer::Allocator implementation
     virtual void* Allocate( size_t length ) override;
