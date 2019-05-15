@@ -3,6 +3,7 @@
 #include "utilities.h"
 #include "neko_exception.h"
 #include "engine.h"
+#include <unicode/unistr.h>
 
 // Used in the log filename and in the log startup banner.
 #define NEKO_LOGNAME "nekoengine"
@@ -518,20 +519,14 @@ namespace neko {
       return;
     }
 
-    platform::FileReader reader( filename );
-    auto str = reader.readFullString();
-    const char* content = str.c_str();
+    TextFileReader reader( filename );
+    auto str = unicodePiece( reader.readFullAssumeUtf8().c_str() );
+    auto content = unicodeString::fromUTF8( str );
 
-    size_t i = 0;
-
-    const BYTE utf8BOM[3] = { 0xEF, 0xBB, 0xBF };
-    if ( !memcmp( content, utf8BOM, 3 ) )
-      i = 3;
-
-    // naive
+    // FIXME This will just crash and burn if there's a > ASCII character in the Unicode string.
     string line;
     line.reserve( 128 );
-    for ( i; i < str.length(); ++i )
+    for ( int32_t i = 0; i < content.length(); ++i )
     {
       if ( content[i] != 0 && content[i] != LF && content[i] != CR )
       {

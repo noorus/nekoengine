@@ -17,7 +17,7 @@ namespace neko {
   using v8::FunctionTemplate;
   using v8::Value;
 
-  Script::Script( ScriptingContextPtr globalCtx, utfString name ):
+  Script::Script( ScriptingContextPtr globalCtx, utf8String name ):
     globalContext_( move( globalCtx ) ),
     name_( name ), filename_( name )
   {
@@ -37,12 +37,10 @@ namespace neko {
 
     TryCatch tryCatch( globalContext_->isolate() );
 
-    utfString source;
+    utf8String source;
     {
-      platform::FileReader file( filename_ );
-      source.resize( file.size() + 1 );
-      file.read( &source[0], (uint32_t)file.size() );
-      source[file.size()] = '\0';
+      TextFileReader reader( filename_ );
+      source = move( reader.readFullAssumeUtf8() );
     }
 
     v8::ScriptOrigin origin( js::util::allocString( name_ ) );

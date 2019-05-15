@@ -127,6 +127,16 @@
 #pragma warning( disable: 4251 )
 #include <libplatform/libplatform.h>
 #include <v8.h>
+
+// ICU
+#include <unicode/utypes.h>
+#include <unicode/uchar.h>
+#include <unicode/locid.h>
+#include <unicode/ustring.h>
+#include <unicode/ucnv.h>
+#include <unicode/unistr.h>
+#include <unicode/utf8.h>
+#include <unicode/utf16.h>
 #pragma warning( pop )
 
 // Local types

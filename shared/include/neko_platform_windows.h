@@ -144,14 +144,38 @@ namespace neko {
       }
     };
 
+    //! UTF-8 to wide string conversion.
+    inline wstring utf8ToWide( const utf8String& in ) throw()
+    {
+      int length = MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, nullptr, 0 );
+      if ( length == 0 )
+        return wstring();
+      vector<wchar_t> conversion( length );
+      MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, &conversion[0], length );
+      return wstring( &conversion[0] );
+    }
+
+    //! Wide string to UTF-8 conversion.
+    inline utf8String wideToUtf8( const wstring& in ) throw()
+    {
+      int length = WideCharToMultiByte( CP_UTF8, 0, in.c_str(), -1, nullptr, 0, 0, FALSE );
+      if ( length == 0 )
+        return utf8String();
+      vector<char> conversion( length );
+      WideCharToMultiByte( CP_UTF8, 0, in.c_str(), -1, &conversion[0], length, 0, FALSE );
+      return utf8String( &conversion[0] );
+    }
+
     class FileReader {
     protected:
       HANDLE file_;
       uint64_t size_;
     public:
-      FileReader( const string& filename ): file_( INVALID_HANDLE_VALUE )
+      FileReader( const utf8String& filename ): file_( INVALID_HANDLE_VALUE )
       {
-        file_ = CreateFileA( filename.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
+        file_ = CreateFileW( utf8ToWide( filename ).c_str(), GENERIC_READ, FILE_SHARE_READ,
+          nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
+
         if ( file_ == INVALID_HANDLE_VALUE )
           NEKO_EXCEPT( "File open failed" );
 
@@ -160,7 +184,7 @@ namespace neko {
 
         size_ = ( (uint64_t)sizeHigh << 32 | sizeLow );
 
-        SetFilePointer( file_, 0, NULL, FILE_BEGIN );
+        SetFilePointer( file_, 0, nullptr, FILE_BEGIN );
       }
       inline const uint64_t size() const { return size_; }
       ~FileReader()
@@ -233,9 +257,9 @@ namespace neko {
     protected:
       HANDLE file_;
     public:
-      FileWriter( const string& filename, const bool append = false ): file_( INVALID_HANDLE_VALUE )
+      FileWriter( const utf8String& filename, const bool append = false ): file_( INVALID_HANDLE_VALUE )
       {
-        file_ = CreateFileA( filename.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr,
+        file_ = CreateFileW( utf8ToWide( filename ).c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr,
           append ? OPEN_ALWAYS : CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
 
         if ( file_ == INVALID_HANDLE_VALUE )
@@ -294,35 +318,13 @@ namespace neko {
       }
     };
 
-    //! UTF-8 to wide string conversion.
-    inline wstring utf8ToWide( const string& in ) throw( )
-    {
-      int length = MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, nullptr, 0 );
-      if ( length == 0 )
-        return wstring();
-      vector<wchar_t> conversion( length );
-      MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, &conversion[0], length );
-      return wstring( &conversion[0] );
-    }
-
-    //! Wide string to UTF-8 conversion.
-    inline string wideToUtf8( const wstring& in ) throw( )
-    {
-      int length = WideCharToMultiByte( CP_UTF8, 0, in.c_str(), -1, nullptr, 0, 0, FALSE );
-      if ( length == 0 )
-        return string();
-      vector<char> conversion( length );
-      WideCharToMultiByte( CP_UTF8, 0, in.c_str(), -1, &conversion[0], length, 0, FALSE );
-      return string( &conversion[0] );
-    }
-
-    inline bool fileExists( const utfString& path )
+    inline bool fileExists( const utf8String& path )
     {
       DWORD attributes = GetFileAttributesW( utf8ToWide( path ).c_str() );
       return ( attributes != INVALID_FILE_ATTRIBUTES && !( attributes & FILE_ATTRIBUTE_DIRECTORY ) );
     }
 
-    inline utfString getCurrentDirectory()
+    inline utf8String getCurrentDirectory()
     {
       wchar_t currentDirectory[MAX_PATH];
       if ( !GetCurrentDirectoryW( MAX_PATH, currentDirectory ) )

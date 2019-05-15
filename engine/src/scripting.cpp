@@ -30,7 +30,7 @@ namespace neko {
   {
     engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
 
-    utfString rootDirectory = platform::getCurrentDirectory();
+    auto rootDirectory = platform::getCurrentDirectory();
     auto dataDirectory = rootDirectory;
     dataDirectory.append( "\\data\\v8\\" NEKO_CONFIG_SUBDIRNAME "\\" );
 
@@ -84,7 +84,7 @@ namespace neko {
     global_->console_ = engine_->console();
     global_->isolate_ = isolate_;
 
-    utfString scriptFile = global_->scriptDirectory_ + "initialization.js";
+    utf8String scriptFile = global_->scriptDirectory_ + "initialization.js";
     Script script( global_, scriptFile );
     script.compile( context_ );
     script.execute( context_ );

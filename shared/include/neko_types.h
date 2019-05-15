@@ -23,6 +23,8 @@
 #include <set>
 #include <boost/math/constants/constants.hpp>
 #include <glm/glm.hpp>
+#include <unicode/ustring.h>
+#include <unicode/unistr.h>
 
 namespace neko {
 
@@ -45,7 +47,9 @@ namespace neko {
   using std::shared_ptr;
   using std::unique_ptr;
 
-  using utfString = std::string;
+  using utf8String = std::string; //!< Be careful. This is just a normal string but aliased to call to attention that it contains utf-8.
+  using unicodeString = icu::UnicodeString;
+  using unicodePiece = icu::StringPiece;
 
   using std::make_shared;
   using std::make_unique;

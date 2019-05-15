@@ -12,9 +12,9 @@ namespace neko {
       Fragment,
       Geometry
     } type_;
-    utfString filename_;
+    utf8String filename_;
     gl::GLuint id_;
-    Shader( Type type, const utfString& filename ):
+    Shader( Type type, const utf8String& filename ):
       type_( type ), filename_( filename ), id_( 0 ) {}
   };
 

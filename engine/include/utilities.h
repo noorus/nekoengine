@@ -53,9 +53,33 @@ namespace neko {
       impl_( filename, true )
     {
     }
-    void write( const string& str )
+    inline void write( const string& str )
     {
       impl_.writeBlob( (void*)str.c_str(), (uint32_t)str.size() );
+    }
+  };
+
+  //! \class TextFileReader
+  //! Simple text file reader that will read the full text file to memory and skip an utf-8 BOM.
+  class TextFileReader {
+  protected:
+    platform::FileReader impl_;
+  public:
+    TextFileReader( const utf8String& filename ):
+      impl_( filename )
+    {
+    }
+    inline utf8String readFullAssumeUtf8()
+    {
+      auto str = impl_.readFullString();
+      if ( str.length() < 3 )
+        return str;
+
+      const uint8_t utf8BOM[3] = { 0xEF, 0xBB, 0xBF };
+      if ( memcmp( str.data(), utf8BOM, 3 ) == 0 )
+        str.erase( 0, 3 );
+
+      return str;
     }
   };
 

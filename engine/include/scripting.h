@@ -17,13 +17,13 @@ namespace neko {
       Status_RuntimeError
     };
   private:
-    utfString name_;
-    utfString filename_;
+    utf8String name_;
+    utf8String filename_;
     Status status_;
     v8::Persistent<v8::Script> script_;
     ScriptingContextPtr globalContext_;
   public:
-    Script( ScriptingContextPtr globalCtx, utfString name );
+    Script( ScriptingContextPtr globalCtx, utf8String name );
     bool compile( v8::Global<v8::Context>& context );
     void reportException( const v8::TryCatch& tryCatch );
     bool execute( v8::Global<v8::Context>& context_ );
@@ -31,7 +31,7 @@ namespace neko {
 
   class ScriptingContext {
   public:
-    utfString scriptDirectory_;
+    utf8String scriptDirectory_;
     v8::Isolate* isolate_;
     ConsolePtr console_;
     inline v8::Isolate* isolate() const throw() { return isolate_; }

@@ -43,6 +43,18 @@
     <Filter Include="Header Files\gfx">
       <UniqueIdentifier>{31f64350-b54e-4cb4-9f70-eae19d294ea6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\scripting">
+      <UniqueIdentifier>{9c80dffe-02cb-4203-addb-ec38d79ab808}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scripting">
+      <UniqueIdentifier>{2f614dee-4f01-47df-aadd-e0f311111685}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\engine">
+      <UniqueIdentifier>{477a35cf-09ff-446c-a9bb-531f69793aa4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\engine">
+      <UniqueIdentifier>{24988d51-f061-4d37-a58e-e6e816ff2720}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -63,15 +75,6 @@
     <ClCompile Include="src\stdafx.cpp">
       <Filter>Source Files\junk</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\subsystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scripting.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\memory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -79,9 +82,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\loader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\extern\lodepng\lodepng.cpp">
@@ -112,7 +112,19 @@
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="src\script.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scripting.cpp">
+      <Filter>Source Files\scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subsystem.cpp">
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -152,31 +164,16 @@
     <ClInclude Include="include\nekomath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\engine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\subsystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\forwards.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\scripting.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\locator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\framebuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\extern\lodepng\lodepng.h">
@@ -197,8 +194,23 @@
     <ClInclude Include="include\shaders.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="include\scripting.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
     <ClInclude Include="include\js_util.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="include\engine.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\loader.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\memory.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\subsystem.h">
+      <Filter>Header Files\engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
