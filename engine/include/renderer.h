@@ -10,19 +10,28 @@ namespace neko {
   //! \class Surface
   //! \brief A surface.
   class Surface {
+  public:
+    enum PixelFormat {
+      PixFmtColorRGB8,
+      PixFmtColorRGBA8,
+      PixFmtDepthStencil24_8
+    };
   protected:
-    size_t width_;
-    size_t height_;
-    GLGraphicsFormat format_;
-    GLuint handle_;
+    size_t width_; //!< Width in pixels.
+    size_t height_; //!< Height in pixels.
+    PixelFormat format_; //!< Pixel format.
+    GLGraphicsFormat glFormat_;
+    GLGraphicsFormat internalFormat_;
+    GLGraphicsFormat internalType_;
+    GLuint handle_; //!< Internal GL handle.
     Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
   protected:
-    explicit Surface( Renderer* renderer, size_t width, size_t height, GLGraphicsFormat format );
+    explicit Surface( Renderer* renderer, size_t width, size_t height, PixelFormat format );
   public:
     Surface() = delete;
     inline size_t width() const throw() { return width_; }
     inline size_t height() const throw() { return height_; }
-    inline GLGraphicsFormat format() const throw() { return format_; }
+    inline PixelFormat format() const throw() { return format_; }
     //! Get the native handle for usage. Don't store it elsewhere so as to not violate RAII.
     inline GLuint handle() const throw() { return handle_; }
   };
@@ -51,7 +60,7 @@ namespace neko {
     Type type_;
   public:
     Texture() = delete;
-    Texture( Renderer* renderer, size_t width, size_t height, GLGraphicsFormat format, const void* data );
+    Texture( Renderer* renderer, size_t width, size_t height, PixelFormat format, const void* data );
     ~Texture();
   };
 
@@ -61,7 +70,7 @@ namespace neko {
     unsigned int width_;
     unsigned int height_;
     vector<uint8_t> data_;
-    GLGraphicsFormat format_;
+    Surface::PixelFormat format_;
   };
 
   struct Material {
@@ -83,7 +92,7 @@ namespace neko {
   class Renderbuffer: public Surface {
   public:
     Renderbuffer() = delete;
-    Renderbuffer( Renderer* renderer, size_t width, size_t height, GLGraphicsFormat format );
+    Renderbuffer( Renderer* renderer, size_t width, size_t height, PixelFormat format );
     ~Renderbuffer();
   };
 
@@ -94,27 +103,49 @@ namespace neko {
   //!   The OpenGL context has one default, final framebuffer, but others can be created.
   //!   Buffers to store the actual data must be bound to the framebuffer separately.
   //!   A framebuffer can have either textures or renderbuffers as its color, depth or stencil attachments.
-  //class Framebuffer {
-    //
-  //};
+  //!   A framebuffer is not a surface, since it does not in itself store the buffered data.
+  class Framebuffer {
+  protected:
+    size_t width_; //!< Width in pixels.
+    size_t height_; //!< Height in pixels.
+    GLuint handle_; //!< Internal GL handle.
+    Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
+    TexturePtr colorBuffer_;
+    RenderbufferPtr depthStencilBuffer_;
+  public:
+    Framebuffer() = delete;
+    Framebuffer( Renderer* renderer );
+    void recreate( size_t width, size_t height );
+    void destroy();
+    bool validate();
+    void begin();
+    void end();
+    inline TexturePtr texture() { return colorBuffer_; }
+    ~Framebuffer();
+  };
 
-  //using FramebufferPtr = shared_ptr<Framebuffer>;
+  using FramebufferPtr = shared_ptr<Framebuffer>;
 
   class Renderer {
     friend class Texture;
     friend class Renderbuffer;
-    //friend class Framebuffer;
+    friend class Framebuffer;
   private:
-    GLuint implCreateTexture( size_t width, size_t height, GLGraphicsFormat format, const void* data );
+    GLuint implCreateTexture( size_t width, size_t height,
+      GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
+      const void* data );
     void implDeleteTexture( GLuint handle );
     GLuint implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format );
     void implDeleteRenderbuffer( GLuint handle );
+    GLuint implCreateFramebuffer( size_t width, size_t height );
+    void implDeleteFramebuffer( GLuint handle );
   protected:
     EnginePtr engine_;
     ShadersPtr shaders_;
     MeshManagerPtr meshes_;
     platform::RWLock loadLock_;
     MaterialVector materials_;
+    void sceneDraw( CameraPtr camera );
   public:
     Renderer( EnginePtr engine );
     void uploadTextures();

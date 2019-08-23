@@ -43,9 +43,20 @@ namespace neko {
       {  0.5f,  0.5f, 1.0f, 0.0f },
     };
 
+    const vector<Vertex2D> screenQuad =
+    {   // x      y     s     t
+      { -1.0f,  1.0f, 0.0f, 1.0f },
+      { -1.0f, -1.0f, 0.0f, 0.0f },
+      {  1.0f, -1.0f, 1.0f, 0.0f },
+      { -1.0f,  1.0f, 0.0f, 1.0f },
+      {  1.0f, -1.0f, 1.0f, 0.0f },
+      {  1.0f,  1.0f, 1.0f, 1.0f },
+    };
+
   }
 
   static TexturePtr g_texture;
+  static FramebufferPtr g_framebuf;
 
   Renderer::Renderer( EnginePtr engine ): engine_( move( engine ) )
   {
@@ -54,17 +65,22 @@ namespace neko {
 
     meshes_ = make_shared<MeshManager>();
     auto quadVBO = meshes_->pushVBO( static_geometry::quadStrip2D );
+    auto screenVBO = meshes_->pushVBO( static_geometry::screenQuad );
     meshes_->uploadVBOs();
     auto triangleVao = meshes_->pushVAO( VAO::VBO_2D, quadVBO );
+    auto screenVAO = meshes_->pushVAO( VAO::VBO_2D, screenVBO );
     meshes_->uploadVAOs();
     /*auto quadEBO = meshes_->pushEBO( static_geometry::quadIndexes );
     meshes_->uploadEBOs();*/
 
-    g_texture = make_shared<Texture>( this, 2, 2, GL_RGBA8, (const void*)static_geometry::image4x4.data() );
+    g_texture = make_shared<Texture>( this, 2, 2, Surface::PixFmtColorRGBA8, (const void*)static_geometry::image4x4.data() );
 
     MaterialPtr myMat = make_shared<Material>();
     materials_.push_back( myMat );
     engine_->loader()->addLoadTask( { LoadTask( myMat, R"(data\textures\test.png)" ) } );
+
+    g_framebuf = make_shared<Framebuffer>( this );
+    g_framebuf->recreate( 1280, 720 );
   }
 
   void Renderer::uploadTextures()
@@ -82,7 +98,7 @@ namespace neko {
   }
 
   //! Called by Texture::Texture()
-  GLuint Renderer::implCreateTexture( size_t width, size_t height, GLGraphicsFormat format, const void* data )
+  GLuint Renderer::implCreateTexture( size_t width, size_t height, GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType, const void* data )
   {
     GLuint handle;
     glGenTextures( 1, &handle );
@@ -98,10 +114,11 @@ namespace neko {
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-    // 1 byte alignment
+    // 1 byte alignment - i.e. unaligned.
+    // could boost performance to use aligned memory in the future.
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
-    glTexImage2D( GL_TEXTURE_2D, 0, format, (GLsizei)width, (GLsizei)height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+    glTexImage2D( GL_TEXTURE_2D, 0, format, (GLsizei)width, (GLsizei)height, 0, internalFormat, internalType, data );
 
     glGenerateMipmap( GL_TEXTURE_2D );
 
@@ -126,9 +143,7 @@ namespace neko {
     glGenRenderbuffers( 1, &handle );
     assert( handle != 0 );
 
-    glBindRenderbuffer( GL_RENDERBUFFER, handle );
-    glRenderbufferStorage( GL_RENDERBUFFER, format, (GLsizei)width, (GLsizei)height );
-    glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+    glNamedRenderbufferStorage( handle, format, (GLsizei)width, (GLsizei)height );
 
     return handle;
   }
@@ -140,9 +155,27 @@ namespace neko {
     glDeleteRenderbuffers( 1, &handle );
   }
 
-  void Renderer::draw( CameraPtr camera )
+  //! Called by Framebuffer::create()
+  GLuint Renderer::implCreateFramebuffer( size_t width, size_t height )
   {
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    assert( width <= (size_t)GL_MAX_FRAMEBUFFER_WIDTH && height <= (size_t)GL_MAX_FRAMEBUFFER_HEIGHT );
+
+    GLuint handle;
+    glGenFramebuffers( 1, &handle );
+    assert( handle != 0 );
+
+    return handle;
+  }
+
+  //! Called by Framebuffer::destroy()
+  void Renderer::implDeleteFramebuffer( GLuint handle )
+  {
+    assert( handle );
+    glDeleteFramebuffers( 1, &handle );
+  }
+
+  void Renderer::sceneDraw( CameraPtr camera )
+  {
     glDisable( GL_DEPTH_TEST );
     glDepthMask( 0 );
 
@@ -162,9 +195,28 @@ namespace neko {
     meshes_->getVAO( 0 ).draw( GL_TRIANGLE_STRIP );
   }
 
+  void Renderer::draw( CameraPtr camera )
+  {
+    g_framebuf->begin();
+    sceneDraw( camera );
+    g_framebuf->end();
+
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    shaders_->use( 1 );
+
+    glDisable( GL_DEPTH_TEST );
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture( GL_TEXTURE_2D, g_framebuf->texture()->handle() );
+    meshes_->getVAO( 1 ).draw( GL_TRIANGLES );
+  }
+
   Renderer::~Renderer()
   {
     g_texture.reset();
+    g_framebuf.reset();
 
     meshes_->teardown();
 

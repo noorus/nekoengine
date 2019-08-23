@@ -6,10 +6,10 @@ namespace neko {
 
   using namespace gl;
 
-  Renderbuffer::Renderbuffer( Renderer* renderer, size_t width, size_t height, GLGraphicsFormat format ):
+  Renderbuffer::Renderbuffer( Renderer* renderer, size_t width, size_t height, PixelFormat format ):
     Surface( renderer, width, height, format )
   {
-    handle_ = renderer_->implCreateRenderbuffer( width_, height_, format_ );
+    handle_ = renderer_->implCreateRenderbuffer( width_, height_, glFormat_ );
     assert( handle_ );
   }
 
