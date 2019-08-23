@@ -1,4 +1,6 @@
 #pragma once
+#ifndef NEKO_NO_SCRIPTING
+
 #include "neko_types.h"
 #include "forwards.h"
 #include "subsystem.h"
@@ -61,3 +63,5 @@ namespace neko {
   };
 
 }
+
+#endif // !NEKO_NO_SCRIPTING

@@ -1,6 +1,9 @@
 #pragma once
+#ifndef NEKO_NO_SCRIPTING
+
 #include "neko_types.h"
 #include "neko_exception.h"
+
 #include <v8.h>
 
 namespace neko {
@@ -24,3 +27,5 @@ namespace neko {
   }
 
 }
+
+#endif // !NEKO_NO_SCRIPTING

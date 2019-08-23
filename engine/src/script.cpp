@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#ifndef NEKO_NO_SCRIPTING
+
 #include "scripting.h"
 #include "js_util.h"
 #include "neko_platform.h"
@@ -121,3 +123,5 @@ namespace neko {
   }
 
 }
+
+#endif // !NEKO_NO_SCRIPTING

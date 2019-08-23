@@ -3,7 +3,6 @@
 #include "utilities.h"
 #include "neko_exception.h"
 #include "engine.h"
-#include <unicode/unistr.h>
 
 // Used in the log filename and in the log startup banner.
 #define NEKO_LOGNAME "nekoengine"
@@ -519,6 +518,10 @@ namespace neko {
       return;
     }
 
+#ifdef NEKO_NO_ICU
+    NEKO_EXCEPT( "Cannot execute a console file because ICU was not compiled in." );
+#else
+
     TextFileReader reader( filename );
     auto str = unicodePiece( reader.readFullAssumeUtf8().c_str() );
     auto content = unicodeString::fromUTF8( str );
@@ -542,6 +545,8 @@ namespace neko {
 
     if ( !line.empty() )
       execute( line, true );
+
+#endif
   }
 
 }

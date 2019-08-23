@@ -50,10 +50,12 @@ namespace neko {
     gfx_->postInitialize();
     console_->printf( Console::srcGfx, "Gfx init took %dms", (int)timer.stop() );
 
+#ifndef NEKO_NO_SCRIPTING
     timer.start();
     scripting_ = make_shared<Scripting>( shared_from_this() );
     scripting_->initialize();
     console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
+#endif
   }
 
   void Engine::signalStop()

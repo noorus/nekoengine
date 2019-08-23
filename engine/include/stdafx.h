@@ -122,21 +122,27 @@
 #include <fsbank.h>
 #include <fsbank_errors.h>
 
-// V8
 #pragma warning( push )
 #pragma warning( disable: 4251 )
-#include <libplatform/libplatform.h>
-#include <v8.h>
 
+#ifndef NEKO_NO_SCRIPTING
+// V8
+# include <libplatform/libplatform.h>
+# include <v8.h>
+#endif // !NEKO_NO_SCRIPTING
+
+#ifndef NEKO_NO_ICU
 // ICU
-#include <unicode/utypes.h>
-#include <unicode/uchar.h>
-#include <unicode/locid.h>
-#include <unicode/ustring.h>
-#include <unicode/ucnv.h>
-#include <unicode/unistr.h>
-#include <unicode/utf8.h>
-#include <unicode/utf16.h>
+# include <unicode/utypes.h>
+# include <unicode/uchar.h>
+# include <unicode/locid.h>
+# include <unicode/ustring.h>
+# include <unicode/ucnv.h>
+# include <unicode/unistr.h>
+# include <unicode/utf8.h>
+# include <unicode/utf16.h>
+#endif // !NEKO_NO_ICU
+
 #pragma warning( pop )
 
 // Local types

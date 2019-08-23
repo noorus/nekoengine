@@ -13,3 +13,10 @@
 
 // Set this to use doubles for all math primitives. Otherwise using floats.
 #undef NEKO_MATH_DOUBLE
+
+// Set this to compile without scripting.
+#undef NEKO_NO_SCRIPTING
+
+#ifdef NEKO_NO_SCRIPTING
+# define NEKO_NO_ICU
+#endif
