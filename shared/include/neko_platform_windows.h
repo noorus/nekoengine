@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "neko_types.h"
 #include "neko_exception.h"
 //#include "consolelistener.h"
@@ -18,13 +18,13 @@ namespace neko {
     //! Reader-writer lock class for easy portability.
     class RWLock: noncopyable {
     protected:
-      SRWLOCK mLock;
+      SRWLOCK lock_;
     public:
-      RWLock() { InitializeSRWLock( &mLock ); }
-      void lock() { AcquireSRWLockExclusive( &mLock ); }
-      void unlock() { ReleaseSRWLockExclusive( &mLock ); }
-      void lockShared() { AcquireSRWLockShared( &mLock ); }
-      void unlockShared() { ReleaseSRWLockShared( &mLock ); }
+      RWLock() { InitializeSRWLock( &lock_ ); }
+      inline void lock() { AcquireSRWLockExclusive( &lock_ ); }
+      inline void unlock() { ReleaseSRWLockExclusive( &lock_ ); }
+      inline void lockShared() { AcquireSRWLockShared( &lock_ ); }
+      inline void unlockShared() { ReleaseSRWLockShared( &lock_ ); }
     };
 
     //! \class Event
@@ -61,6 +61,7 @@ namespace neko {
 
     using EventVector = vector<Event::NativeType>;
 
+    //! Synchronously wait for one or all of native events to fire, or timeout.
     inline size_t waitForEvents( const EventVector& events, uint32_t milliseconds, bool waitAll = false, size_t timeoutValue = WAIT_TIMEOUT )
     {
       auto ret = WaitForMultipleObjects( (DWORD)events.size(), events.data(), waitAll, milliseconds );
@@ -97,6 +98,8 @@ namespace neko {
       ~Thread();
     };
 
+    //! \class PerformanceTimer
+    //! Native performance timer implementation for high-precision timing of tasks.
     class PerformanceTimer {
     private:
       LARGE_INTEGER frequency_;
@@ -122,6 +125,8 @@ namespace neko {
       }
     };
 
+    //! \class PerformanceClock
+    //! Native performance clock implementation for high-precision gameloop timing.
     class PerformanceClock {
     private:
       LARGE_INTEGER current_;
@@ -170,6 +175,8 @@ namespace neko {
       return utf8String( &conversion[0] );
     }
 
+    //! \class FileReader
+    //! Native generic file reader implementation.
     class FileReader {
     protected:
       HANDLE file_;
@@ -257,6 +264,8 @@ namespace neko {
       }
     };
 
+    //! \class FileWriter
+    //! Native generic file writer implementation.
     class FileWriter {
     protected:
       HANDLE file_;
@@ -322,12 +331,15 @@ namespace neko {
       }
     };
 
+    //! Check whether a file exists at the specified path.
+    //! A directory is not seen as a file.
     inline bool fileExists( const utf8String& path )
     {
       DWORD attributes = GetFileAttributesW( utf8ToWide( path ).c_str() );
       return ( attributes != INVALID_FILE_ATTRIBUTES && !( attributes & FILE_ATTRIBUTE_DIRECTORY ) );
     }
 
+    //! Get a full path to the current directory.
     inline utf8String getCurrentDirectory()
     {
       wchar_t currentDirectory[MAX_PATH];
@@ -356,12 +368,12 @@ namespace neko {
     }
 
     //! Outputs a global debug string.
-    inline void outputDebugString( const string& str ) throw()
+    inline void outputDebugString( const utf8String& str ) throw()
     {
-      outputDebugString( str.c_str() );
+      OutputDebugStringW( utf8ToWide( str ).c_str() );
     }
 
-    //! Assign a thread name that will be visible in debuggers
+    //! Assign a thread name that will be visible in debuggers.
     inline void setDebuggerThreadName( DWORD threadID, const std::string& threadName )
     {
 #ifdef _DEBUG
