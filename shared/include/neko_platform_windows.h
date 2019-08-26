@@ -27,6 +27,8 @@ namespace neko {
       void unlockShared() { ReleaseSRWLockShared( &mLock ); }
     };
 
+    //! \class Event
+    //! Native event type abstraction for the current platform.
     class Event {
     public:
       using NativeType = HANDLE;
@@ -70,6 +72,8 @@ namespace neko {
         NEKO_EXCEPT( "WaitForMultipleObjects failed" );
     }
 
+    //! \class Thread
+    //! Native platform-dependent threading implementation for dedicated worker usage.
     class Thread {
     public:
       using Callback = bool(*)( Event& running, Event& wantStop, void* argument );
