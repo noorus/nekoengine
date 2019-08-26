@@ -59,9 +59,9 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;COMPONENT_BUILD;V8_I18N_SUPPORT;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_EMBEDDED_BUILTINS;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_TRACE_MAPS;V8_ENABLE_ALLOCATION_TIMEOUT;V8_ENABLE_FORCE_SLOW_PATH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_SNAPSHOT_NATIVE_CODE_COUNTERS;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_CHECK_MICROTASKS_SCOPES_CONSISTENCY;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_ENABLE_CHECKS;V8_TARGET_ARCH_X64;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_HANDLE_ZAPPING;ENABLE_DISASSEMBLER;ENABLE_MINOR_MC;OBJECT_PRINT;VERIFY_HEAP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/bigobj /utf-8</AdditionalOptions>
       <CompileAsManaged>false</CompileAsManaged>
@@ -76,7 +76,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glbindingd.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;v8_for_testing.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glbindingd.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;v8_d.dll.lib;v8_libbase_d.dll.lib;v8_libplatform_d.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
@@ -105,9 +105,9 @@
       <SDLCheck>
       </SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;WIN64;COMPONENT_BUILD;V8_I18N_SUPPORT;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_EMBEDDED_BUILTINS;V8_DEPRECATION_WARNINGS;V8_IMMINENT_DEPRECATION_WARNINGS;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;WIN64;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_I18N_SUPPORT;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_TARGET_ARCH_X64;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_MINOR_MC;OBJECT_PRINT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
@@ -125,12 +125,13 @@
       <CallingConvention>Cdecl</CallingConvention>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerListingLocation>$(SolutionDir)asm\</AssemblerListingLocation>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-main.lib;sfml-system.lib;sfml-window.lib;glbinding.lib;opengl32.lib;icui18n.dll.lib;icuuc.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-main.lib;sfml-system.lib;sfml-window.lib;glbinding.lib;opengl32.lib;icui18n.dll.lib;icuuc.dll.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <SubSystem>Windows</SubSystem>
@@ -156,6 +157,11 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4267</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4267</DisableSpecificWarnings>
     </ClCompile>
+    <ClCompile Include="..\extern\v8pp\v8pp\class.cpp" />
+    <ClCompile Include="..\extern\v8pp\v8pp\context.cpp" />
+    <ClCompile Include="..\extern\v8pp\v8pp\convert.cpp" />
+    <ClCompile Include="..\extern\v8pp\v8pp\json.cpp" />
+    <ClCompile Include="..\extern\v8pp\v8pp\throw_ex.cpp" />
     <ClCompile Include="..\shared\src\exception.cpp" />
     <ClCompile Include="..\shared\src\platform_windows.cpp" />
     <ClCompile Include="src\camera.cpp" />
@@ -184,6 +190,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extern\lodepng\lodepng.h" />
+    <ClInclude Include="..\extern\v8pp\v8pp\call_from_v8.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\call_v8.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\class.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\config.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\context.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\convert.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\factory.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\function.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\json.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\module.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\object.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\persistent.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\property.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\ptr_traits.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\throw_ex.hpp" />
+    <ClInclude Include="..\extern\v8pp\v8pp\utility.hpp" />
     <ClInclude Include="..\shared\include\neko_config.h" />
     <ClInclude Include="..\shared\include\neko_exception.h" />
     <ClInclude Include="..\shared\include\neko_platform.h" />
@@ -218,6 +240,8 @@
   <ItemGroup>
     <None Include="..\bin\data\shaders\default_fp.glsl" />
     <None Include="..\bin\data\shaders\default_vp.glsl" />
+    <None Include="..\bin\data\shaders\mainframebuf_fp.glsl" />
+    <None Include="..\bin\data\shaders\mainframebuf_vp.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
