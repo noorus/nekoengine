@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -19,16 +19,16 @@
 
 namespace v8pp {
 
-  v8::Local<v8::Value> throw_ex( v8::Isolate* isolate, char const* str );
+  Local<Value> throw_ex( Isolate* isolate, char const* str );
 
-  v8::Local<v8::Value> throw_ex( v8::Isolate* isolate, char const* str, v8::Local<v8::Value> ( *exception_ctor )( v8::Local<v8::String> ) );
+  Local<Value> throw_ex( Isolate* isolate, char const* str, Local<Value> ( *exception_ctor )( Local<String> ) );
 
-  inline v8::Local<v8::Value> throw_ex( v8::Isolate* isolate, std::string const& str )
+  inline Local<Value> throw_ex( Isolate* isolate, utf8String const& str )
   {
     return throw_ex( isolate, str.c_str() );
   }
 
-  inline v8::Local<v8::Value> throw_ex( v8::Isolate* isolate, std::string const& str, v8::Local<v8::Value> ( *exception_ctor )( v8::Local<v8::String> ) )
+  inline Local<Value> throw_ex( Isolate* isolate, utf8String const& str, Local<Value> ( *exception_ctor )( Local<String> ) )
   {
     return throw_ex( isolate, str.c_str(), exception_ctor );
   }

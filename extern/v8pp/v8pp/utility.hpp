@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -16,6 +16,8 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
+
+#include "v8pp/config.hpp"
 
 namespace v8pp {
   namespace detail {
@@ -168,66 +170,30 @@ namespace v8pp {
     template <typename F>
     using is_callable = std::integral_constant<bool, is_callable_impl<F, std::is_class<F>::value>::value>;
 
-#if ( __cplusplus > 201402L ) || ( defined( _MSC_FULL_VER ) && _MSC_FULL_VER >= 190023918 )
     using std::index_sequence;
     using std::make_index_sequence;
-#else
-    /////////////////////////////////////////////////////////////////////////////
-    //
-    // integer_sequence
-    //
-    template <typename T, T... I>
-    struct integer_sequence {
-      using type = T;
-      static size_t size() { return sizeof...( I ); }
-
-      template <T N>
-      using append = integer_sequence<T, I..., N>;
-
-      using next = append<sizeof...( I )>;
-    };
-
-    template <typename T, T Index, size_t N>
-    struct sequence_generator {
-      using type = typename sequence_generator<T, Index - 1, N - 1>::type::next;
-    };
-
-    template <typename T, T Index>
-    struct sequence_generator<T, Index, 0ul> {
-      using type = integer_sequence<T>;
-    };
-
-    template <size_t... I>
-    using index_sequence = integer_sequence<size_t, I...>;
-
-    template <typename T, T N>
-    using make_integer_sequence = typename sequence_generator<T, N, N>::type;
-
-    template <size_t N>
-    using make_index_sequence = make_integer_sequence<size_t, N>;
-#endif
 
     /// Type information for custom RTTI
-    class type_info {
+    class TypeInfo {
     public:
-      std::string const& name() const { return name_; }
-      bool operator==( type_info const& other ) const { return name_ == other.name_; }
-      bool operator!=( type_info const& other ) const { return name_ != other.name_; }
+      inline utf8String const& name() const { return name_; }
+      bool operator==( TypeInfo const& other ) const { return name_ == other.name_; }
+      bool operator!=( TypeInfo const& other ) const { return name_ != other.name_; }
 
     private:
       template <typename T>
-      friend type_info type_id();
-      type_info( char const* name, size_t size )
+      friend TypeInfo type_id();
+      TypeInfo( char const* name, size_t size )
         : name_( name, size )
       {
       }
-      std::string name_;
+      utf8String name_;
     };
 
     /// Get type information for type T
     /// The idea is borrowed from https://github.com/Manu343726/ctti
     template <typename T>
-    type_info type_id()
+    TypeInfo type_id()
     {
 #if defined( _MSC_VER )
 #define V8PP_PRETTY_FUNCTION __FUNCSIG__
@@ -249,7 +215,7 @@ namespace v8pp {
 #define V8PP_PRETTY_FUNCTION_PREFIX_LEN ( sizeof( V8PP_PRETTY_FUNCTION_PREFIX ) - 1 )
 #define V8PP_PRETTY_FUNCTION_SUFFIX_LEN ( sizeof( V8PP_PRETTY_FUNCTION_SUFFIX ) - 1 )
 
-      return type_info( V8PP_PRETTY_FUNCTION + V8PP_PRETTY_FUNCTION_PREFIX_LEN, V8PP_PRETTY_FUNCTION_LEN - V8PP_PRETTY_FUNCTION_PREFIX_LEN - V8PP_PRETTY_FUNCTION_SUFFIX_LEN );
+      return TypeInfo( V8PP_PRETTY_FUNCTION + V8PP_PRETTY_FUNCTION_PREFIX_LEN, V8PP_PRETTY_FUNCTION_LEN - V8PP_PRETTY_FUNCTION_PREFIX_LEN - V8PP_PRETTY_FUNCTION_SUFFIX_LEN );
 
 #undef V8PP_PRETTY_FUNCTION
 #undef V8PP_PRETTY_FUNCTION_PREFIX

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -21,15 +21,15 @@ namespace v8pp {
 
   /// Stringify V8 value to JSON
   /// return empty string for empty value
-  std::string json_str( v8::Isolate* isolate, v8::Local<v8::Value> value );
+  utf8String json_str( Isolate* isolate, Local<Value> value );
 
   /// Parse JSON string into V8 value
   /// return empty value for empty string
   /// return Error value on parse error
-  v8::Local<v8::Value> json_parse( v8::Isolate* isolate, std::string const& str );
+  Local<Value> json_parse( Isolate* isolate, utf8String const& str );
 
   /// Convert wrapped C++ object to JavaScript object with properties
   /// and optionally functions set from the C++ object
-  v8::Local<v8::Object> json_object( v8::Isolate* isolate, v8::Local<v8::Object> object, bool with_functions = false );
+  Local<Object> json_object( Isolate* isolate, Local<Object> object, bool with_functions = false );
 
 }

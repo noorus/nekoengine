@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -17,37 +17,37 @@
 
 namespace v8pp {
 
-  V8PP_IMPL std::string json_str( v8::Isolate* isolate, v8::Local<v8::Value> value )
+  utf8String json_str( Isolate* isolate, Local<Value> value )
   {
     if ( value.IsEmpty() )
     {
-      return std::string();
+      return utf8String();
     }
 
-    v8::HandleScope scope( isolate );
+    HandleScope scope( isolate );
 
-    v8::Local<v8::Context> context = isolate->GetCurrentContext();
-    v8::Local<v8::String> result = v8::JSON::Stringify( context, value ).ToLocalChecked();
-    v8::String::Utf8Value const str( isolate, result );
+    Local<Context> context = isolate->GetCurrentContext();
+    Local<String> result = v8::JSON::Stringify( context, value ).ToLocalChecked();
+    String::Utf8Value const str( isolate, result );
 
-    return std::string( *str, str.length() );
+    return utf8String( *str, str.length() );
   }
 
-  V8PP_IMPL v8::Local<v8::Value> json_parse( v8::Isolate* isolate, std::string const& str )
+  Local<Value> json_parse( Isolate* isolate, utf8String const& str )
   {
     if ( str.empty() )
     {
-      return v8::Local<v8::Value>();
+      return Local<Value>();
     }
 
-    v8::EscapableHandleScope scope( isolate );
+    EscapableHandleScope scope( isolate );
 
-    v8::Local<v8::Context> context = isolate->GetCurrentContext();
-    v8::Local<v8::String> value = v8::String::NewFromUtf8( isolate, str.data(),
+    Local<Context> context = isolate->GetCurrentContext();
+    Local<String> value = String::NewFromUtf8( isolate, str.data(),
       v8::NewStringType::kNormal, static_cast<int>( str.size() ) ).ToLocalChecked();
 
     v8::TryCatch try_catch( isolate );
-    v8::Local<v8::Value> result;
+    Local<Value> result;
     bool const is_empty_result = v8::JSON::Parse( context, value ).ToLocal( &result );
     (void)is_empty_result;
     if ( try_catch.HasCaught() )
@@ -57,26 +57,26 @@ namespace v8pp {
     return scope.Escape( result );
   }
 
-  V8PP_IMPL v8::Local<v8::Object> json_object( v8::Isolate* isolate, v8::Local<v8::Object> object, bool with_functions )
+  Local<Object> json_object( Isolate* isolate, Local<Object> object, bool with_functions )
   {
-    v8::EscapableHandleScope scope( isolate );
+    EscapableHandleScope scope( isolate );
 
-    v8::Local<v8::Context> context = isolate->GetCurrentContext();
-    v8::Local<v8::Object> result = v8::Object::New( isolate );
-    v8::Local<v8::Array> prop_names = object->GetPropertyNames( context ).ToLocalChecked();
+    Local<Context> context = isolate->GetCurrentContext();
+    Local<Object> result = Object::New( isolate );
+    Local<Array> prop_names = object->GetPropertyNames( context ).ToLocalChecked();
     for ( uint32_t i = 0, count = prop_names->Length(); i < count; ++i )
     {
-      v8::Local<v8::Value> name, value;
+      Local<Value> name, value;
       if ( prop_names->Get( context, i ).ToLocal( &name )
         && object->Get( context, name ).ToLocal( &value ) )
       {
         if ( value->IsFunction() )
         {
           if ( !with_functions ) continue;
-          value = value.As<v8::Function>()->ToString( context ).FromMaybe( v8::String::Empty( isolate ) );
+          value = value.As<Function>()->ToString( context ).FromMaybe( String::Empty( isolate ) );
         } else if ( value->IsObject() || value->IsArray() )
         {
-          value = v8::JSON::Stringify( context, value ).FromMaybe( v8::String::Empty( isolate ) );
+          value = v8::JSON::Stringify( context, value ).FromMaybe( String::Empty( isolate ) );
         }
         result->Set( context, name, value );
       }

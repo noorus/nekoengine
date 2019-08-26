@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -14,6 +14,7 @@
 
 #include <v8.h>
 
+#include "v8pp/config.hpp"
 #include "v8pp/convert.hpp"
 
 namespace v8pp {
@@ -25,8 +26,8 @@ namespace v8pp {
   /// To resolve this issue add move support in dervied class.
   /// See https://groups.google.com/d/topic/v8-users/KV_LZqz41Ac/discussion
   template <typename T>
-  struct persistent: public v8::Global<T> {
-    using base_class = v8::Global<T>;
+  struct persistent: public Global<T> {
+    using base_class = Global<T>;
 
     persistent()
       : base_class()
@@ -34,13 +35,13 @@ namespace v8pp {
     }
 
     template <typename S>
-    persistent( v8::Isolate* isolate, v8::Local<S> const& handle )
+    persistent( Isolate* isolate, Local<S> const& handle )
       : base_class( isolate, handle )
     {
     }
 
     template <typename S>
-    persistent( v8::Isolate* isolate, v8::PersistentBase<S> const& handle )
+    persistent( Isolate* isolate, PersistentBase<S> const& handle )
       : base_class( isolate, handle )
     {
     }
@@ -75,21 +76,21 @@ namespace v8pp {
 
     /// Create a persistent pointer from a  pointer to a wrapped object,
     /// store persistent handle to it
-    explicit persistent_ptr( v8::Isolate* isolate, T* value )
+    explicit persistent_ptr( Isolate* isolate, T* value )
       : value_()
     {
       reset( isolate, value );
     }
 
     /// Create a persistent pointer from V8 Value, store persistent handle
-    explicit persistent_ptr( v8::Isolate* isolate, v8::Local<v8::Value> handle )
+    explicit persistent_ptr( Isolate* isolate, Local<Value> handle )
       : value_()
     {
       reset( isolate, from_v8<T*>( isolate, handle ) );
     }
 
     persistent_ptr( persistent_ptr&& src )
-      : value_( src.value_ ), handle_( std::move( src.handle_ ) )
+      : value_( src.value_ ), handle_( move( src.handle_ ) )
     {
       src.value_ = nullptr;
     }
@@ -100,7 +101,7 @@ namespace v8pp {
       {
         value_ = src.value_;
         src.value_ = nullptr;
-        handle_ = std::move( src.handle_ );
+        handle_ = move( src.handle_ );
       }
       return *this;
     }
@@ -109,7 +110,7 @@ namespace v8pp {
     ~persistent_ptr() { reset(); }
 
     /// Reset with a new pointer to wrapped C++ object, replace persistent handle
-    void reset( v8::Isolate* isolate, T* value )
+    void reset( Isolate* isolate, T* value )
     {
       if ( value != value_ )
       {
@@ -176,7 +177,7 @@ namespace v8pp {
 
   private:
     T* value_;
-    v8::Global<v8::Value> handle_;
+    Global<Value> handle_;
   };
 
 }

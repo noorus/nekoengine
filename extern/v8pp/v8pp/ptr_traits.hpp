@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -13,6 +13,8 @@
 //
 
 #include <memory>
+
+#include "v8pp/config.hpp"
 
 namespace v8pp {
 
@@ -108,13 +110,13 @@ namespace v8pp {
     template <typename T, typename... Args>
     static object_pointer_type<T> create( Args&&... args )
     {
-      return std::make_shared<T>( std::forward<Args>( args )... );
+      return make_shared<T>( std::forward<Args>( args )... );
     }
 
     template <typename T>
     static object_pointer_type<T> clone( T const& src )
     {
-      return std::make_shared<T>( src );
+      return make_shared<T>( src );
     }
 
     template <typename T>

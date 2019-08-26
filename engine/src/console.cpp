@@ -154,10 +154,10 @@ namespace neko {
     registerSource( "gui", rgbToVec3( 79, 115, 44 ) );
 
     // Create core commands
-    listCmd_ = std::make_unique<ConCmd>( "list", "List all cvars.", callbackList );
-    helpCmd_ = std::make_unique<ConCmd>( "help", "Get help on a variable/command.", callbackHelp );
-    findCmd_ = std::make_unique<ConCmd>( "find", "List cvars with name containing given string.", callbackFind );
-    execCmd_ = std::make_unique<ConCmd>( "exec", "Execute a configuration file.", callbackExec );
+    listCmd_ = make_unique<ConCmd>( "list", "List all cvars.", callbackList );
+    helpCmd_ = make_unique<ConCmd>( "help", "Get help on a variable/command.", callbackHelp );
+    findCmd_ = make_unique<ConCmd>( "find", "List cvars with name containing given string.", callbackFind );
+    execCmd_ = make_unique<ConCmd>( "exec", "Execute a configuration file.", callbackExec );
 
     for ( ConBase* var : precreated_ )
       registerVariable( var );

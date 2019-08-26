@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "neko_types.h"
 #include "gfx_types.h"
 #include "forwards.h"
@@ -52,7 +52,7 @@ namespace neko {
     void dumpLog( const gl::GLuint &target, const bool isProgram = false );
     void linkProgram( gl::GLuint vertex, gl::GLuint fragment, gl::GLuint& program_out );
     void linkProgram( ShaderProgram& );
-    void compileShader( gl::GLenum type, const std::string& source, gl::GLuint& out );
+    void compileShader( gl::GLenum type, const utf8String& source, gl::GLuint& out );
     void compileShader( Shader& shader );
   public:
     Shaders( EnginePtr engine );

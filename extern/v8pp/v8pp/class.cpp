@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -19,9 +19,9 @@ namespace v8pp {
 
   namespace detail {
 
-    static V8PP_IMPL std::string pointer_str( void const* ptr )
+    static utf8String pointer_str( void const* ptr )
     {
-      std::string buf( sizeof( void* ) * 2 + 3, 0 ); // +3 for 0x and \0 terminator
+      utf8String buf( sizeof( void* ) * 2 + 3, 0 ); // +3 for 0x and \0 terminator
       int const len =
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
         sprintf_s( &buf[0], buf.size(), "%p", ptr );
@@ -36,13 +36,13 @@ namespace v8pp {
     //
     // class_info
     //
-    V8PP_IMPL class_info::class_info( type_info const& type, type_info const& traits )
+    ClassInfo::ClassInfo( TypeInfo const& type, TypeInfo const& traits )
       : type( type )
       , traits( traits )
     {
     }
 
-    V8PP_IMPL std::string class_info::class_name() const
+    utf8String ClassInfo::class_name() const
     {
       return "v8pp::class_<" + type.name() + ", " + traits.name() + ">";
     }
@@ -52,21 +52,21 @@ namespace v8pp {
     // object_registry
     //
     template<typename Traits>
-    V8PP_IMPL object_registry<Traits>::object_registry( v8::Isolate* isolate, type_info const& type, dtor_function&& dtor )
-      : class_info( type, type_id<Traits>() )
+    ObjectRegistry<Traits>::ObjectRegistry( Isolate* isolate, TypeInfo const& type, dtor_function&& dtor )
+      : ClassInfo( type, type_id<Traits>() )
       , isolate_( isolate )
       , ctor_() // no wrapped class constructor available by default
-      , dtor_( std::move( dtor ) )
+      , dtor_( move( dtor ) )
       , auto_wrap_objects_( false )
     {
-      v8::HandleScope scope( isolate_ );
+      HandleScope scope( isolate_ );
 
-      v8::Local<v8::FunctionTemplate> func = v8::FunctionTemplate::New( isolate_ );
-      v8::Local<v8::FunctionTemplate> js_func = v8::FunctionTemplate::New( isolate_,
-        []( v8::FunctionCallbackInfo<v8::Value> const& args )
+      Local<FunctionTemplate> func = FunctionTemplate::New( isolate_ );
+      Local<FunctionTemplate> js_func = FunctionTemplate::New( isolate_,
+        []( FunctionCallbackInfo<Value> const& args )
       {
-        v8::Isolate* isolate = args.GetIsolate();
-        object_registry* this_ = get_external_data<object_registry*>( args.Data() );
+        Isolate* isolate = args.GetIsolate();
+        ObjectRegistry* this_ = get_external_data<ObjectRegistry*>( args.Data() );
         try
         {
           return args.GetReturnValue().Set( this_->wrap_object( args ) );
@@ -87,16 +87,16 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    V8PP_IMPL object_registry<Traits>::~object_registry()
+    ObjectRegistry<Traits>::~ObjectRegistry()
     {
       remove_objects();
     }
 
     template<typename Traits>
-    V8PP_IMPL void object_registry<Traits>::add_base( object_registry& info, cast_function cast )
+    void ObjectRegistry<Traits>::add_base( ObjectRegistry& info, cast_function cast )
     {
       auto it = std::find_if( bases_.begin(), bases_.end(),
-        [&info]( base_class_info const& base ) { return &base.info == &info; } );
+        [&info]( BaseClassInfo const& base ) { return &base.info == &info; } );
       if ( it != bases_.end() )
       {
         //assert(false && "duplicated inheritance");
@@ -108,7 +108,7 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    V8PP_IMPL bool object_registry<Traits>::cast( pointer_type& ptr, type_info const& type ) const
+    bool ObjectRegistry<Traits>::cast( TPointer& ptr, TypeInfo const& type ) const
     {
       if ( this->type == type || !ptr )
       {
@@ -116,7 +116,7 @@ namespace v8pp {
       }
 
       // fast way - search a direct parent
-      for ( base_class_info const& base : bases_ )
+      for ( BaseClassInfo const& base : bases_ )
       {
         if ( base.info.type == type )
         {
@@ -126,9 +126,9 @@ namespace v8pp {
       }
 
       // slower way - walk on hierarhy
-      for ( base_class_info const& base : bases_ )
+      for ( BaseClassInfo const& base : bases_ )
       {
-        pointer_type p = base.cast( ptr );
+        TPointer p = base.cast( ptr );
         if ( base.info.cast( p, type ) )
         {
           ptr = p;
@@ -139,22 +139,22 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    V8PP_IMPL void object_registry<Traits>::remove_object( object_id const& obj )
+    void ObjectRegistry<Traits>::remove_object( object_id const& obj )
     {
       auto it = objects_.find( Traits::key( obj ) );
       assert( it != objects_.end() && "no object" );
       if ( it != objects_.end() )
       {
-        v8::HandleScope scope( isolate_ );
+        HandleScope scope( isolate_ );
         reset_object( it->first, it->second );
         objects_.erase( it );
       }
     }
 
     template<typename Traits>
-    V8PP_IMPL void object_registry<Traits>::remove_objects()
+    void ObjectRegistry<Traits>::remove_objects()
     {
-      v8::HandleScope scope( isolate_ );
+      HandleScope scope( isolate_ );
       for ( auto& object_wrapped : objects_ )
       {
         reset_object( object_wrapped.first, object_wrapped.second );
@@ -163,13 +163,13 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    V8PP_IMPL typename object_registry<Traits>::pointer_type
-      object_registry<Traits>::find_object( object_id id, type_info const& type ) const
+    typename ObjectRegistry<Traits>::TPointer
+      ObjectRegistry<Traits>::find_object( object_id id, TypeInfo const& type ) const
     {
       auto it = objects_.find( Traits::key( id ) );
       if ( it != objects_.end() )
       {
-        pointer_type ptr = it->first;
+        TPointer ptr = it->first;
         if ( cast( ptr, type ) )
         {
           return ptr;
@@ -179,7 +179,7 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    V8PP_IMPL v8::Local<v8::Object> object_registry<Traits>::find_v8_object( pointer_type const& ptr ) const
+    Local<Object> ObjectRegistry<Traits>::find_v8_object( TPointer const& ptr ) const
     {
       auto it = objects_.find( ptr );
       if ( it != objects_.end() )
@@ -187,7 +187,7 @@ namespace v8pp {
         return to_local( isolate_, it->second.pobj );
       }
 
-      v8::Local<v8::Object> result;
+      Local<Object> result;
       for ( auto const info : derivatives_ )
       {
         result = info->find_v8_object( ptr );
@@ -197,7 +197,7 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    V8PP_IMPL v8::Local<v8::Object> object_registry<Traits>::wrap_object( pointer_type const& object, bool call_dtor )
+    Local<Object> ObjectRegistry<Traits>::wrap( TPointer const& object, bool call_dtor )
     {
       auto it = objects_.find( object );
       if ( it != objects_.end() )
@@ -207,57 +207,57 @@ namespace v8pp {
           + " duplicate object " + pointer_str( Traits::pointer_id( object ) ) );
       }
 
-      v8::EscapableHandleScope scope( isolate_ );
+      EscapableHandleScope scope( isolate_ );
 
-      v8::Local<v8::Context> context = isolate_->GetCurrentContext();
-      v8::Local<v8::Object> obj = class_function_template()
+      Local<Context> context = isolate_->GetCurrentContext();
+      Local<Object> obj = class_function_template()
         ->GetFunction( context ).ToLocalChecked()->NewInstance( context ).ToLocalChecked();
 
       obj->SetAlignedPointerInInternalField( 0, Traits::pointer_id( object ) );
       obj->SetAlignedPointerInInternalField( 1, this );
 
-      v8::Global<v8::Object> pobj( isolate_, obj );
-      pobj.SetWeak( this, []( v8::WeakCallbackInfo<object_registry> const& data )
+      Global<Object> pobj( isolate_, obj );
+      pobj.SetWeak( this, []( WeakCallbackInfo<ObjectRegistry> const& data )
       {
         object_id object = data.GetInternalField( 0 );
-        object_registry* this_ = static_cast<object_registry*>( data.GetInternalField( 1 ) );
+        ObjectRegistry* this_ = static_cast<ObjectRegistry*>( data.GetInternalField( 1 ) );
         this_->remove_object( object );
-      }, v8::WeakCallbackType::kInternalFields );
-      objects_.emplace( object, wrapped_object{ std::move( pobj ), call_dtor } );
+      }, WeakCallbackType::kInternalFields );
+      objects_.emplace( object, wrapped_object{ move( pobj ), call_dtor } );
 
       return scope.Escape( obj );
     }
 
     template<typename Traits>
-    V8PP_IMPL v8::Local<v8::Object> object_registry<Traits>::wrap_object( v8::FunctionCallbackInfo<v8::Value> const& args )
+    Local<Object> ObjectRegistry<Traits>::wrap( FunctionCallbackInfo<Value> const& args )
     {
       if ( !ctor_ )
       {
         //assert(false && "create not allowed");
         throw std::runtime_error( class_name() + " has no constructor" );
       }
-      return wrap_object( ctor_( args ), true );
+      return wrap( ctor_( args ), true );
     }
 
     template<typename Traits>
-    V8PP_IMPL typename object_registry<Traits>::pointer_type
-      object_registry<Traits>::unwrap_object( v8::Local<v8::Value> value )
+    typename ObjectRegistry<Traits>::TPointer
+      ObjectRegistry<Traits>::unwrap( Local<Value> value )
     {
-      v8::HandleScope scope( isolate_ );
+      HandleScope scope( isolate_ );
 
       while ( value->IsObject() )
       {
-        v8::Local<v8::Object> obj = value.As<v8::Object>();
+        Local<Object> obj = value.As<Object>();
         if ( obj->InternalFieldCount() == 2 )
         {
           object_id id = obj->GetAlignedPointerFromInternalField( 0 );
           if ( id )
           {
-            auto registry = static_cast<object_registry*>(
+            auto registry = static_cast<ObjectRegistry*>(
               obj->GetAlignedPointerFromInternalField( 1 ) );
             if ( registry )
             {
-              pointer_type ptr = registry->find_object( id, type );
+              TPointer ptr = registry->find_object( id, type );
               if ( ptr )
               {
                 return ptr;
@@ -271,7 +271,7 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    V8PP_IMPL void object_registry<Traits>::reset_object( pointer_type const& object, wrapped_object& wrapped )
+    void ObjectRegistry<Traits>::reset_object( TPointer const& object, wrapped_object& wrapped )
     {
       if ( wrapped.call_dtor )
       {
@@ -285,10 +285,10 @@ namespace v8pp {
     // classes
     //
     template<typename Traits>
-    V8PP_IMPL object_registry<Traits>& classes::add( v8::Isolate* isolate, type_info const& type,
-      typename object_registry<Traits>::dtor_function&& dtor )
+    ObjectRegistry<Traits>& Classes::add( Isolate* isolate, TypeInfo const& type,
+      typename ObjectRegistry<Traits>::dtor_function&& dtor )
     {
-      classes* info = instance( operation::add, isolate );
+      Classes* info = instance( operation::add, isolate );
       auto it = info->find( type );
       if ( it != info->classes_.end() )
       {
@@ -296,26 +296,26 @@ namespace v8pp {
         throw std::runtime_error( ( *it )->class_name()
           + " is already exist in isolate " + pointer_str( isolate ) );
       }
-      info->classes_.emplace_back( new object_registry<Traits>( isolate, type, std::move( dtor ) ) );
-      return *static_cast<object_registry<Traits>*>( info->classes_.back().get() );
+      info->classes_.emplace_back( new ObjectRegistry<Traits>( isolate, type, move( dtor ) ) );
+      return *static_cast<ObjectRegistry<Traits>*>( info->classes_.back().get() );
     }
 
     template<typename Traits>
-    V8PP_IMPL void classes::remove( v8::Isolate* isolate, type_info const& type )
+    void Classes::remove( Isolate* isolate, TypeInfo const& type )
     {
-      classes* info = instance( operation::get, isolate );
+      Classes* info = instance( operation::get, isolate );
       if ( info )
       {
         auto it = info->find( type );
         if ( it != info->classes_.end() )
         {
-          type_info const& traits = type_id<Traits>();
+          TypeInfo const& traits = type_id<Traits>();
           if ( ( *it )->traits != traits )
           {
             throw std::runtime_error( ( *it )->class_name()
               + " is already registered in isolate "
               + pointer_str( isolate ) + " before of "
-              + class_info( type, traits ).class_name() );
+              + ClassInfo( type, traits ).class_name() );
           }
           info->classes_.erase( it );
           if ( info->classes_.empty() )
@@ -327,10 +327,10 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    V8PP_IMPL object_registry<Traits>& classes::find( v8::Isolate* isolate, type_info const& type )
+    ObjectRegistry<Traits>& Classes::find( Isolate* isolate, TypeInfo const& type )
     {
-      classes* info = instance( operation::get, isolate );
-      type_info const& traits = type_id<Traits>();
+      Classes* info = instance( operation::get, isolate );
+      TypeInfo const& traits = type_id<Traits>();
       if ( info )
       {
         auto it = info->find( type );
@@ -341,22 +341,22 @@ namespace v8pp {
             throw std::runtime_error( ( *it )->class_name()
               + " is already registered in isolate "
               + pointer_str( isolate ) + " before of "
-              + class_info( type, traits ).class_name() );
+              + ClassInfo( type, traits ).class_name() );
           }
-          return *static_cast<object_registry<Traits>*>( it->get() );
+          return *static_cast<ObjectRegistry<Traits>*>( it->get() );
         }
       }
       //assert(false && "class not registered");
-      throw std::runtime_error( class_info( type, traits ).class_name()
+      throw std::runtime_error( ClassInfo( type, traits ).class_name()
         + " is not registered in isolate " + pointer_str( isolate ) );
     }
 
-    V8PP_IMPL void classes::remove_all( v8::Isolate* isolate )
+    void Classes::remove_all( Isolate* isolate )
     {
       instance( operation::remove, isolate );
     }
 
-    V8PP_IMPL classes::classes_info::iterator classes::find( type_info const& type )
+    Classes::classes_info::iterator Classes::find( TypeInfo const& type )
     {
       return std::find_if( classes_.begin(), classes_.end(),
         [&type]( classes_info::value_type const& info )
@@ -365,10 +365,10 @@ namespace v8pp {
       } );
     }
 
-    V8PP_IMPL classes* classes::instance( operation op, v8::Isolate* isolate )
+    Classes* Classes::instance( operation op, Isolate* isolate )
     {
 #if defined(V8PP_ISOLATE_DATA_SLOT)
-      classes* info = static_cast<classes*>(
+      Classes* info = static_cast<Classes*>(
         isolate->GetData( V8PP_ISOLATE_DATA_SLOT ) );
       switch ( op )
       {
@@ -377,7 +377,7 @@ namespace v8pp {
         case operation::add:
           if ( !info )
           {
-            info = new classes;
+            info = new Classes;
             isolate->SetData( V8PP_ISOLATE_DATA_SLOT, info );
           }
           return info;
@@ -391,7 +391,7 @@ namespace v8pp {
           return nullptr;
       }
 #else
-      static std::unordered_map<v8::Isolate*, classes> instances;
+      static std::unordered_map<Isolate*, Classes> instances;
       switch ( op )
       {
         case operation::get:
@@ -409,28 +409,28 @@ namespace v8pp {
 #endif
     }
 
-    template class object_registry<raw_ptr_traits>;
-    template class object_registry<shared_ptr_traits>;
+    template class ObjectRegistry<raw_ptr_traits>;
+    template class ObjectRegistry<shared_ptr_traits>;
 
-    template object_registry<raw_ptr_traits> &classes::add<raw_ptr_traits>(
-      v8::Isolate *isolate, type_info const &type,
-      object_registry<raw_ptr_traits>::dtor_function &&dtor );
+    template ObjectRegistry<raw_ptr_traits> &Classes::add<raw_ptr_traits>(
+      Isolate *isolate, TypeInfo const &type,
+      ObjectRegistry<raw_ptr_traits>::dtor_function &&dtor );
 
-    template void classes::remove<raw_ptr_traits>( v8::Isolate *isolate,
-      type_info const &type );
+    template void Classes::remove<raw_ptr_traits>( Isolate *isolate,
+      TypeInfo const &type );
 
-    template object_registry<raw_ptr_traits> &
-      classes::find<raw_ptr_traits>( v8::Isolate *isolate, type_info const &type );
+    template ObjectRegistry<raw_ptr_traits> &
+      Classes::find<raw_ptr_traits>( Isolate *isolate, TypeInfo const &type );
 
-    template object_registry<shared_ptr_traits> &classes::add<shared_ptr_traits>(
-      v8::Isolate *isolate, type_info const &type,
-      object_registry<shared_ptr_traits>::dtor_function &&dtor );
+    template ObjectRegistry<shared_ptr_traits> &Classes::add<shared_ptr_traits>(
+      Isolate *isolate, TypeInfo const &type,
+      ObjectRegistry<shared_ptr_traits>::dtor_function &&dtor );
 
-    template void classes::remove<shared_ptr_traits>( v8::Isolate *isolate,
-      type_info const &type );
+    template void Classes::remove<shared_ptr_traits>( Isolate *isolate,
+      TypeInfo const &type );
 
-    template object_registry<shared_ptr_traits> &
-      classes::find<shared_ptr_traits>( v8::Isolate *isolate, type_info const &type );
+    template ObjectRegistry<shared_ptr_traits> &
+      Classes::find<shared_ptr_traits>( Isolate *isolate, TypeInfo const &type );
 
   }
 

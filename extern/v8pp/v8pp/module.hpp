@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -14,6 +14,7 @@
 
 #include <v8.h>
 
+#include "v8pp/config.hpp"
 #include "v8pp/function.hpp"
 #include "v8pp/property.hpp"
 
@@ -26,23 +27,23 @@ namespace v8pp {
   class module {
   public:
     /// Create new module in the specified V8 isolate
-    explicit module( v8::Isolate* isolate )
-      : isolate_( isolate ), obj_( v8::ObjectTemplate::New( isolate ) )
+    explicit module( Isolate* isolate )
+      : isolate_( isolate ), obj_( ObjectTemplate::New( isolate ) )
     {
     }
 
     /// Create new module in the specified V8 isolate for existing ObjectTemplate
-    explicit module( v8::Isolate* isolate, v8::Local<v8::ObjectTemplate> obj )
+    explicit module( Isolate* isolate, Local<ObjectTemplate> obj )
       : isolate_( isolate ), obj_( obj )
     {
     }
 
     /// v8::Isolate where the module belongs
-    v8::Isolate* isolate() { return isolate_; }
+    Isolate* isolate() { return isolate_; }
 
     /// Set a V8 value in the module with specified name
     template <typename Data>
-    module& set( char const* name, v8::Local<Data> value )
+    module& set( char const* name, Local<Data> value )
     {
       obj_->Set( v8pp::to_v8( isolate_, name ), value );
       return *this;
@@ -58,7 +59,7 @@ namespace v8pp {
     template <typename T, typename Traits>
     module& set( char const* name, class_<T, Traits>& cl )
     {
-      v8::HandleScope scope( isolate_ );
+      HandleScope scope( isolate_ );
 
       cl.class_function_template()->SetClassName( v8pp::to_v8( isolate_, name ) );
       return set( name, cl.js_function_template() );
@@ -77,16 +78,16 @@ namespace v8pp {
     typename std::enable_if<!detail::is_callable<Variable>::value, module&>::type
       set( char const* name, Variable& var, bool readonly = false )
     {
-      v8::HandleScope scope( isolate_ );
+      HandleScope scope( isolate_ );
 
-      v8::AccessorGetterCallback getter = &var_get<Variable>;
-      v8::AccessorSetterCallback setter = &var_set<Variable>;
+      AccessorGetterCallback getter = &var_get<Variable>;
+      AccessorSetterCallback setter = &var_set<Variable>;
       if ( readonly )
       {
         setter = nullptr;
       }
 
-      obj_->SetAccessor( v8pp::to_v8( isolate_, name ), getter, setter, detail::set_external_data( isolate_, &var ), v8::DEFAULT, v8::PropertyAttribute( v8::DontDelete | ( setter ? 0 : v8::ReadOnly ) ) );
+      obj_->SetAccessor( v8pp::to_v8( isolate_, name ), getter, setter, detail::set_external_data( isolate_, &var ), v8::DEFAULT, PropertyAttribute( v8::DontDelete | ( setter ? 0 : v8::ReadOnly ) ) );
       return *this;
     }
 
@@ -96,25 +97,25 @@ namespace v8pp {
     {
       using property_type = property_<GetFunction, SetFunction>;
 
-      v8::HandleScope scope( isolate_ );
+      HandleScope scope( isolate_ );
 
-      v8::AccessorGetterCallback getter = property_type::get;
-      v8::AccessorSetterCallback setter = property_type::set;
+      AccessorGetterCallback getter = property_type::get;
+      AccessorSetterCallback setter = property_type::set;
       if ( property_type::is_readonly )
       {
         setter = nullptr;
       }
 
-      obj_->SetAccessor( v8pp::to_v8( isolate_, name ), getter, setter, detail::set_external_data( isolate_, std::forward<property_type>( property ) ), v8::DEFAULT, v8::PropertyAttribute( v8::DontDelete | ( setter ? 0 : v8::ReadOnly ) ) );
+      obj_->SetAccessor( v8pp::to_v8( isolate_, name ), getter, setter, detail::set_external_data( isolate_, std::forward<property_type>( property ) ), v8::DEFAULT, PropertyAttribute( v8::DontDelete | ( setter ? 0 : v8::ReadOnly ) ) );
       return *this;
     }
 
     /// Set another module as a read-only property
     module& set_const( char const* name, module& m )
     {
-      v8::HandleScope scope( isolate_ );
+      HandleScope scope( isolate_ );
 
-      obj_->Set( v8pp::to_v8( isolate_, name ), m.obj_, v8::PropertyAttribute( v8::ReadOnly | v8::DontDelete ) );
+      obj_->Set( v8pp::to_v8( isolate_, name ), m.obj_, PropertyAttribute( v8::ReadOnly | v8::DontDelete ) );
       return *this;
     }
 
@@ -122,39 +123,39 @@ namespace v8pp {
     template <typename Value>
     module& set_const( char const* name, Value const& value )
     {
-      v8::HandleScope scope( isolate_ );
+      HandleScope scope( isolate_ );
 
-      obj_->Set( v8pp::to_v8( isolate_, name ), to_v8( isolate_, value ), v8::PropertyAttribute( v8::ReadOnly | v8::DontDelete ) );
+      obj_->Set( v8pp::to_v8( isolate_, name ), to_v8( isolate_, value ), PropertyAttribute( v8::ReadOnly | v8::DontDelete ) );
       return *this;
     }
 
     /// Create a new module instance in V8
-    v8::Local<v8::Object> new_instance()
+    Local<Object> new_instance()
     {
       return obj_->NewInstance( isolate_->GetCurrentContext() ).ToLocalChecked();
     }
 
   private:
     template <typename Variable>
-    static void var_get( v8::Local<v8::String>, v8::PropertyCallbackInfo<v8::Value> const& info )
+    static void var_get( Local<String>, PropertyCallbackInfo<Value> const& info )
     {
-      v8::Isolate* isolate = info.GetIsolate();
+      Isolate* isolate = info.GetIsolate();
 
       Variable* var = detail::get_external_data<Variable*>( info.Data() );
       info.GetReturnValue().Set( to_v8( isolate, *var ) );
     }
 
     template <typename Variable>
-    static void var_set( v8::Local<v8::String>, v8::Local<v8::Value> value, v8::PropertyCallbackInfo<void> const& info )
+    static void var_set( Local<String>, Local<Value> value, PropertyCallbackInfo<void> const& info )
     {
-      v8::Isolate* isolate = info.GetIsolate();
+      Isolate* isolate = info.GetIsolate();
 
       Variable* var = detail::get_external_data<Variable*>( info.Data() );
       *var = v8pp::from_v8<Variable>( isolate, value );
     }
 
-    v8::Isolate* isolate_;
-    v8::Local<v8::ObjectTemplate> obj_;
+    Isolate* isolate_;
+    Local<ObjectTemplate> obj_;
   };
 
 }

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -17,15 +17,14 @@
 
 namespace v8pp {
 
-  V8PP_IMPL v8::Local<v8::Value> throw_ex( v8::Isolate* isolate, char const* str )
+  Local<Value> throw_ex( Isolate* isolate, char const* str )
   {
-    return isolate->ThrowException( v8::String::NewFromUtf8( isolate, str ).ToLocalChecked() );
+    return isolate->ThrowException( String::NewFromUtf8( isolate, str ).ToLocalChecked() );
   }
 
-  V8PP_IMPL v8::Local<v8::Value> throw_ex( v8::Isolate* isolate, char const* str,
-    v8::Local<v8::Value>( *exception_ctor )( v8::Local<v8::String> ) )
+  Local<Value> throw_ex( Isolate* isolate, char const* str, Local<Value>( *exception_ctor )( Local<String> ) )
   {
-    return isolate->ThrowException( exception_ctor( v8::String::NewFromUtf8( isolate, str ).ToLocalChecked() ) );
+    return isolate->ThrowException( exception_ctor( String::NewFromUtf8( isolate, str ).ToLocalChecked() ) );
   }
 
 }

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -19,10 +19,10 @@ namespace v8pp {
 
   template struct convert<std::string>;
   template struct convert<char const*>;
-#ifdef _WIN32
+
   template struct convert<std::wstring>;
   template struct convert<wchar_t const*>;
-#endif
+
   template struct convert<bool>;
 
   template struct convert<char>;

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -15,27 +15,29 @@
 #include <functional>
 #include <v8.h>
 
+#include "v8pp/config.hpp"
 #include "v8pp/convert.hpp"
 #include "v8pp/utility.hpp"
 
 namespace v8pp {
   namespace detail {
 
-    template <typename F, size_t Offset = 0>
-    struct call_from_v8_traits {
+    template <typename F, size_t TOffset = 0>
+    struct call_from_v8_traits
+    {
       static bool const is_mem_fun = std::is_member_function_pointer<F>::value;
       using arguments = typename function_traits<F>::arguments;
 
       static size_t const arg_count =
-        std::tuple_size<arguments>::value - is_mem_fun - Offset;
+        std::tuple_size<arguments>::value - is_mem_fun - TOffset;
 
-      template <size_t Index, bool>
+      template <size_t TIndex, bool>
       struct tuple_element {
-        using type = typename std::tuple_element<Index, arguments>::type;
+        using type = typename std::tuple_element<TIndex, arguments>::type;
       };
 
-      template <size_t Index>
-      struct tuple_element<Index, false> {
+      template <size_t TIndex>
+      struct tuple_element<TIndex, false> {
         using type = void;
       };
 
@@ -48,21 +50,21 @@ namespace v8pp {
         typename Traits::template convert_ref<U>>::type,
         convert<typename std::remove_cv<T>::type>>::type;
 
-      template <size_t Index>
-      using arg_type = typename tuple_element < Index + is_mem_fun,
-        Index<( arg_count + Offset )>::type;
+      template <size_t TIndex>
+      using arg_type = typename tuple_element < TIndex + is_mem_fun,
+        TIndex<( arg_count + TOffset )>::type;
 
-      template <size_t Index, typename Traits>
-      using arg_convert = arg_converter<arg_type<Index>, Traits>;
+      template <size_t TIndex, typename Traits>
+      using arg_convert = arg_converter<arg_type<TIndex>, Traits>;
 
-      template <size_t Index, typename Traits>
-      static decltype( arg_convert<Index, Traits>::from_v8( std::declval<v8::Isolate*>(), std::declval<v8::Local<v8::Value>>() ) )
-        arg_from_v8( v8::FunctionCallbackInfo<v8::Value> const& args )
+      template <size_t TIndex, typename Traits>
+      static decltype( arg_convert<TIndex, Traits>::from_v8( std::declval<Isolate*>(), std::declval<Local<Value>>() ) )
+        arg_from_v8( FunctionCallbackInfo<Value> const& args )
       {
-        return arg_convert<Index, Traits>::from_v8( args.GetIsolate(), args[Index - Offset] );
+        return arg_convert<TIndex, Traits>::from_v8( args.GetIsolate(), args[TIndex - TOffset] );
       }
 
-      static void check( v8::FunctionCallbackInfo<v8::Value> const& args )
+      static void check( FunctionCallbackInfo<Value> const& args )
       {
         if ( args.Length() != arg_count )
         {
@@ -74,16 +76,17 @@ namespace v8pp {
     template <typename F>
     using isolate_arg_call_traits = call_from_v8_traits<F, 1>;
 
-    template <typename F, size_t Offset = 0>
-    struct v8_args_call_traits: call_from_v8_traits<F, Offset> {
+    template <typename F, size_t TOffset = 0>
+    struct v8_args_call_traits: call_from_v8_traits<F, TOffset>
+    {
       template <size_t Index, typename Traits>
-      static v8::FunctionCallbackInfo<v8::Value> const&
-        arg_from_v8( v8::FunctionCallbackInfo<v8::Value> const& args )
+      static FunctionCallbackInfo<Value> const&
+        arg_from_v8( FunctionCallbackInfo<Value> const& args )
       {
         return args;
       }
 
-      static void check( v8::FunctionCallbackInfo<v8::Value> const& )
+      static void check( FunctionCallbackInfo<Value> const& )
       {
       }
     };
@@ -91,60 +94,60 @@ namespace v8pp {
     template <typename F>
     using isolate_v8_args_call_traits = v8_args_call_traits<F, 1>;
 
-    template <typename F, size_t Offset>
-    using is_direct_args = std::integral_constant<bool, call_from_v8_traits<F>::arg_count == ( Offset + 1 ) && std::is_same<typename call_from_v8_traits<F>::template arg_type<Offset>, v8::FunctionCallbackInfo<v8::Value> const&>::value>;
+    template <typename F, size_t TOffset>
+    using is_direct_args = std::integral_constant<bool, call_from_v8_traits<F>::arg_count == ( TOffset + 1 ) && std::is_same<typename call_from_v8_traits<F>::template arg_type<TOffset>, FunctionCallbackInfo<Value> const&>::value>;
 
     template <typename F>
-    using is_first_arg_isolate = std::integral_constant<bool, call_from_v8_traits<F>::arg_count != 0 && std::is_same<typename call_from_v8_traits<F>::template arg_type<0>, v8::Isolate*>::value>;
+    using is_first_arg_isolate = std::integral_constant<bool, call_from_v8_traits<F>::arg_count != 0 && std::is_same<typename call_from_v8_traits<F>::template arg_type<0>, Isolate*>::value>;
 
     template <typename F>
     using select_call_traits = typename std::conditional<is_first_arg_isolate<F>::value, typename std::conditional<is_direct_args<F, 1>::value, isolate_v8_args_call_traits<F>, isolate_arg_call_traits<F>>::type, typename std::conditional<is_direct_args<F, 0>::value, v8_args_call_traits<F>, call_from_v8_traits<F>>::type>::type;
 
-    template <typename Traits, typename F, typename CallTraits, size_t... Indices>
+    template <typename Traits, typename F, typename TCallTraits, size_t... TIndices>
     typename function_traits<F>::return_type
-      call_from_v8_impl( F&& func, v8::FunctionCallbackInfo<v8::Value> const& args, CallTraits, index_sequence<Indices...> )
+      call_from_v8_impl( F&& func, FunctionCallbackInfo<Value> const& args, TCallTraits, index_sequence<TIndices...> )
     {
-      return func( CallTraits::template arg_from_v8<Indices, Traits>( args )... );
+      return func( TCallTraits::template arg_from_v8<TIndices, Traits>( args )... );
     }
 
-    template <typename Traits, typename T, typename F, typename CallTraits, size_t... Indices>
+    template <typename Traits, typename T, typename F, typename TCallTraits, size_t... TIndices>
     typename function_traits<F>::return_type
-      call_from_v8_impl( T& obj, F&& func, v8::FunctionCallbackInfo<v8::Value> const& args, CallTraits, index_sequence<Indices...> )
+      call_from_v8_impl( T& obj, F&& func, FunctionCallbackInfo<Value> const& args, TCallTraits, index_sequence<TIndices...> )
     {
-      return ( obj.*func )( CallTraits::template arg_from_v8<Indices, Traits>( args )... );
+      return ( obj.*func )( TCallTraits::template arg_from_v8<TIndices, Traits>( args )... );
     }
 
-    template <typename Traits, typename F, size_t... Indices>
+    template <typename Traits, typename F, size_t... TIndices>
     typename function_traits<F>::return_type
-      call_from_v8_impl( F&& func, v8::FunctionCallbackInfo<v8::Value> const& args, isolate_arg_call_traits<F>, index_sequence<Indices...> )
+      call_from_v8_impl( F&& func, FunctionCallbackInfo<Value> const& args, isolate_arg_call_traits<F>, index_sequence<TIndices...> )
     {
-      return func( args.GetIsolate(), isolate_arg_call_traits<F>::template arg_from_v8<Indices + 1, Traits>( args )... );
+      return func( args.GetIsolate(), isolate_arg_call_traits<F>::template arg_from_v8<TIndices + 1, Traits>( args )... );
     }
 
-    template <typename Traits, typename T, typename F, size_t... Indices>
+    template <typename Traits, typename T, typename F, size_t... TIndices>
     typename function_traits<F>::return_type
-      call_from_v8_impl( T& obj, F&& func, v8::FunctionCallbackInfo<v8::Value> const& args, isolate_arg_call_traits<F>, index_sequence<Indices...> )
+      call_from_v8_impl( T& obj, F&& func, FunctionCallbackInfo<Value> const& args, isolate_arg_call_traits<F>, index_sequence<TIndices...> )
     {
-      return ( obj.*func )( args.GetIsolate(), isolate_arg_call_traits<F>::template arg_from_v8<Indices + 1, Traits>( args )... );
+      return ( obj.*func )( args.GetIsolate(), isolate_arg_call_traits<F>::template arg_from_v8<TIndices + 1, Traits>( args )... );
     }
 
-    template <typename Traits, typename F, size_t... Indices>
+    template <typename Traits, typename F, size_t... TIndices>
     typename function_traits<F>::return_type
-      call_from_v8_impl( F&& func, v8::FunctionCallbackInfo<v8::Value> const& args, isolate_v8_args_call_traits<F>, index_sequence<Indices...> )
+      call_from_v8_impl( F&& func, FunctionCallbackInfo<Value> const& args, isolate_v8_args_call_traits<F>, index_sequence<TIndices...> )
     {
       return func( args.GetIsolate(), args );
     }
 
-    template <typename Traits, typename T, typename F, size_t... Indices>
+    template <typename Traits, typename T, typename F, size_t... TIndices>
     typename function_traits<F>::return_type
-      call_from_v8_impl( T& obj, F&& func, v8::FunctionCallbackInfo<v8::Value> const& args, isolate_v8_args_call_traits<F>, index_sequence<Indices...> )
+      call_from_v8_impl( T& obj, F&& func, FunctionCallbackInfo<Value> const& args, isolate_v8_args_call_traits<F>, index_sequence<TIndices...> )
     {
       return ( obj.*func )( args.GetIsolate(), args );
     }
 
     template <typename Traits, typename F>
     typename function_traits<F>::return_type
-      call_from_v8( F&& func, v8::FunctionCallbackInfo<v8::Value> const& args )
+      call_from_v8( F&& func, FunctionCallbackInfo<Value> const& args )
     {
       using call_traits = select_call_traits<F>;
       call_traits::check( args );
@@ -153,7 +156,7 @@ namespace v8pp {
 
     template <typename Traits, typename T, typename F>
     typename function_traits<F>::return_type
-      call_from_v8( T& obj, F&& func, v8::FunctionCallbackInfo<v8::Value> const& args )
+      call_from_v8( T& obj, F&& func, FunctionCallbackInfo<Value> const& args )
     {
       using call_traits = select_call_traits<F>;
       call_traits::check( args );

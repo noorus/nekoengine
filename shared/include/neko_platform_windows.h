@@ -374,7 +374,7 @@ namespace neko {
     }
 
     //! Assign a thread name that will be visible in debuggers.
-    inline void setDebuggerThreadName( DWORD threadID, const std::string& threadName )
+    inline void setDebuggerThreadName( DWORD threadID, const utf8String& threadName )
     {
 #ifdef _DEBUG
 #pragma pack( push, 8 )

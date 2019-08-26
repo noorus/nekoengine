@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -15,6 +15,8 @@
 #include <memory>
 #include <v8.h>
 
+#include "v8pp/config.hpp"
+
 namespace v8pp {
 
   // Factory that creates new C++ objects of type T
@@ -23,7 +25,7 @@ namespace v8pp {
     using object_pointer_type = typename Traits::template object_pointer_type<T>;
 
     template <typename... Args>
-    static object_pointer_type create( v8::Isolate* isolate, Args... args )
+    static object_pointer_type create( Isolate* isolate, Args... args )
     {
       object_pointer_type object = Traits::template create<T>( std::forward<Args>( args )... );
       isolate->AdjustAmountOfExternalAllocatedMemory(
@@ -31,7 +33,7 @@ namespace v8pp {
       return object;
     }
 
-    static void destroy( v8::Isolate* isolate, object_pointer_type const& object )
+    static void destroy( Isolate* isolate, object_pointer_type const& object )
     {
       isolate->AdjustAmountOfExternalAllocatedMemory(
         -static_cast<int64_t>( Traits::object_size( object ) ) );

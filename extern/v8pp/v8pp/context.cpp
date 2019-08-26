@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -33,14 +33,15 @@ static char const path_sep = '/';
 
 namespace v8pp {
 
-  struct context::dynamic_module {
+  struct context::dynamic_module
+  {
     void* handle;
-    v8::Global<v8::Value> exports;
+    Global<Value> exports;
 
     dynamic_module() = default;
     dynamic_module( dynamic_module&& other )
       : handle( other.handle )
-      , exports( std::move( other.exports ) )
+      , exports( move( other.exports ) )
     {
       other.handle = nullptr;
     }
@@ -48,15 +49,15 @@ namespace v8pp {
     dynamic_module( dynamic_module const& ) = delete;
   };
 
-  void context::load_module( v8::FunctionCallbackInfo<v8::Value> const& args )
+  void context::load_module( FunctionCallbackInfo<Value> const& args )
   {
-    v8::Isolate* isolate = args.GetIsolate();
+    Isolate* isolate = args.GetIsolate();
 
-    v8::EscapableHandleScope scope( isolate );
-    v8::Local<v8::Value> result;
+    EscapableHandleScope scope( isolate );
+    Local<Value> result;
     try
     {
-      std::string const name = from_v8<std::string>( isolate, args[0], "" );
+      utf8String const name = from_v8<utf8String>( isolate, args[0], "" );
       if ( name.empty() )
       {
         throw std::runtime_error( "load_module: require module name string argument" );
@@ -68,15 +69,15 @@ namespace v8pp {
       // check if module is already loaded
       if ( it != ctx->modules_.end() )
       {
-        result = v8::Local<v8::Value>::New( isolate, it->second.exports );
+        result = Local<Value>::New( isolate, it->second.exports );
       } else
       {
-        std::string filename = name;
+        utf8String filename = name;
         if ( !ctx->lib_path_.empty() )
         {
           filename = ctx->lib_path_ + path_sep + name;
         }
-        std::string const suffix = V8PP_PLUGIN_SUFFIX;
+        utf8String const suffix = V8PP_PLUGIN_SUFFIX;
         if ( filename.size() >= suffix.size()
           && filename.compare( filename.size() - suffix.size(), suffix.size(), suffix ) != 0 )
         {
@@ -111,11 +112,11 @@ namespace v8pp {
             " not found in " + filename );
         }
 
-        using module_init_proc = v8::Local<v8::Value>( *)( v8::Isolate* );
+        using module_init_proc = Local<Value>( *)( Isolate* );
         module_init_proc init_proc = reinterpret_cast<module_init_proc>( sym );
         result = init_proc( isolate );
         module.exports.Reset( isolate, result );
-        ctx->modules_.emplace( name, std::move( module ) );
+        ctx->modules_.emplace( name, move( module ) );
       }
     } catch ( std::exception const& ex )
     {
@@ -124,15 +125,15 @@ namespace v8pp {
     args.GetReturnValue().Set( scope.Escape( result ) );
   }
 
-  void context::run_file( v8::FunctionCallbackInfo<v8::Value> const& args )
+  void context::run_file( FunctionCallbackInfo<Value> const& args )
   {
-    v8::Isolate* isolate = args.GetIsolate();
+    Isolate* isolate = args.GetIsolate();
 
-    v8::EscapableHandleScope scope( isolate );
-    v8::Local<v8::Value> result;
+    EscapableHandleScope scope( isolate );
+    Local<Value> result;
     try
     {
-      std::string const filename = from_v8<std::string>( isolate, args[0], "" );
+      utf8String const filename = from_v8<utf8String>( isolate, args[0], "" );
       if ( filename.empty() )
       {
         throw std::runtime_error( "run_file: require filename string argument" );
@@ -163,35 +164,34 @@ namespace v8pp {
   };
   static array_buffer_allocator array_buffer_allocator_;
 
-  context::context( v8::Isolate* isolate, v8::ArrayBuffer::Allocator* allocator,
-    bool add_default_global_methods )
+  context::context( Isolate* isolate, v8::ArrayBuffer::Allocator* allocator, bool add_default_global_methods )
   {
     own_isolate_ = ( isolate == nullptr );
     if ( own_isolate_ )
     {
-      v8::Isolate::CreateParams create_params;
+      Isolate::CreateParams create_params;
       create_params.array_buffer_allocator =
         allocator ? allocator : &array_buffer_allocator_;
 
-      isolate = v8::Isolate::New( create_params );
+      isolate = Isolate::New( create_params );
       isolate->Enter();
     }
     isolate_ = isolate;
 
-    v8::HandleScope scope( isolate_ );
+    HandleScope scope( isolate_ );
 
-    v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New( isolate_ );
+    Local<ObjectTemplate> global = ObjectTemplate::New( isolate_ );
 
     if ( add_default_global_methods )
     {
-      v8::Local<v8::Value> data = detail::set_external_data( isolate_, this );
+      Local<Value> data = detail::set_external_data( isolate_, this );
       global->Set( isolate_, "require",
-        v8::FunctionTemplate::New( isolate_, context::load_module, data ) );
+        FunctionTemplate::New( isolate_, context::load_module, data ) );
       global->Set( isolate_, "run",
-        v8::FunctionTemplate::New( isolate_, context::run_file, data ) );
+        FunctionTemplate::New( isolate_, context::run_file, data ) );
     }
 
-    v8::Local<v8::Context> impl = v8::Context::New( isolate_, nullptr, global );
+    Local<Context> impl = Context::New( isolate_, nullptr, global );
     impl->Enter();
     impl_.Reset( isolate_, impl );
   }
@@ -216,7 +216,7 @@ namespace v8pp {
     }
     modules_.clear();
 
-    v8::Local<v8::Context> impl = to_local( isolate_, impl_ );
+    Local<Context> impl = to_local( isolate_, impl_ );
     impl->Exit();
 
     impl_.Reset();
@@ -227,9 +227,9 @@ namespace v8pp {
     }
   }
 
-  context& context::set( char const* name, v8::Local<v8::Value> value )
+  context& context::set( char const* name, Local<Value> value )
   {
-    v8::HandleScope scope( isolate_ );
+    HandleScope scope( isolate_ );
     to_local( isolate_, impl_ )->Global()->Set( isolate_->GetCurrentContext(), to_v8( isolate_, name ), value ).FromJust();
     return *this;
   }
@@ -239,7 +239,7 @@ namespace v8pp {
     return set( name, m.new_instance() );
   }
 
-  v8::Local<v8::Value> context::run_file( std::string const& filename )
+  Local<Value> context::run_file( utf8String const& filename )
   {
     std::ifstream stream( filename.c_str() );
     if ( !stream )
@@ -248,22 +248,21 @@ namespace v8pp {
     }
 
     std::istreambuf_iterator<char> begin( stream ), end;
-    return run_script( std::string( begin, end ), filename );
+    return run_script( utf8String( begin, end ), filename );
   }
 
-  v8::Local<v8::Value> context::run_script( std::string const& source,
-    std::string const& filename )
+  Local<Value> context::run_script( utf8String const& source, utf8String const& filename )
   {
-    v8::EscapableHandleScope scope( isolate_ );
-    v8::Local<v8::Context> context = isolate_->GetCurrentContext();
+    EscapableHandleScope scope( isolate_ );
+    Local<Context> context = isolate_->GetCurrentContext();
 
     v8::ScriptOrigin origin( to_v8( isolate_, filename ) );
-    v8::Local<v8::Script> script;
+    Local<v8::Script> script;
     bool const is_valid = v8::Script::Compile( context,
       to_v8( isolate_, source ), &origin ).ToLocal( &script );
     (void)is_valid;
 
-    v8::Local<v8::Value> result;
+    Local<Value> result;
     if ( !script.IsEmpty() )
     {
       bool const is_successful = script->Run( context ).ToLocal( &result );

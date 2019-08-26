@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "neko_config.h"
 
@@ -49,6 +49,7 @@ namespace neko {
   using std::unordered_map;
   using std::shared_ptr;
   using std::unique_ptr;
+  using std::move;
 
   using utf8String = std::string; //!< Be careful. This is just a normal string but aliased to call to attention that it contains utf-8.
 

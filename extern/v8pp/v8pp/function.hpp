@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -15,6 +15,7 @@
 #include <tuple>
 #include <type_traits>
 
+#include "v8pp/config.hpp"
 #include "v8pp/call_from_v8.hpp"
 #include "v8pp/ptr_traits.hpp"
 #include "v8pp/throw_ex.hpp"
@@ -52,7 +53,7 @@ namespace v8pp {
     template <typename T>
     class external_data {
     public:
-      static v8::Local<v8::External> set( v8::Isolate* isolate, T&& data )
+      static Local<External> set( Isolate* isolate, T&& data )
       {
         external_data* value = new external_data;
         try
@@ -64,18 +65,18 @@ namespace v8pp {
           throw;
         }
 
-        v8::Local<v8::External> ext = v8::External::New( isolate, value );
+        Local<External> ext = External::New( isolate, value );
         value->pext_.Reset( isolate, ext );
         value->pext_.SetWeak(
           value,
-          []( v8::WeakCallbackInfo<external_data> const& data ) {
+          []( WeakCallbackInfo<external_data> const& data ) {
           delete data.GetParameter();
         },
-          v8::WeakCallbackType::kParameter );
+          WeakCallbackType::kParameter );
         return ext;
       }
 
-      static T& get( v8::Local<v8::External> ext )
+      static T& get( Local<External> ext )
       {
         external_data* value = static_cast<external_data*>( ext->Value() );
         return *static_cast<T*>( value->storage() );
@@ -93,55 +94,55 @@ namespace v8pp {
       }
       using data_storage = typename std::aligned_storage<sizeof( T )>::type;
       data_storage storage_;
-      v8::Global<v8::External> pext_;
+      Global<External> pext_;
     };
 
     template <typename T>
-    typename std::enable_if<is_pointer_cast_allowed<T>::value, v8::Local<v8::Value>>::type
-      set_external_data( v8::Isolate* isolate, T value )
+    typename std::enable_if<is_pointer_cast_allowed<T>::value, Local<Value>>::type
+      set_external_data( Isolate* isolate, T value )
     {
-      return v8::External::New( isolate, pointer_cast<T>( value ) );
+      return External::New( isolate, pointer_cast<T>( value ) );
     }
 
     template <typename T>
-    typename std::enable_if<!is_pointer_cast_allowed<T>::value, v8::Local<v8::Value>>::type
-      set_external_data( v8::Isolate* isolate, T&& value )
+    typename std::enable_if<!is_pointer_cast_allowed<T>::value, Local<Value>>::type
+      set_external_data( Isolate* isolate, T&& value )
     {
       return external_data<T>::set( isolate, std::forward<T>( value ) );
     }
 
     template <typename T>
     typename std::enable_if<is_pointer_cast_allowed<T>::value, T>::type
-      get_external_data( v8::Local<v8::Value> value )
+      get_external_data( Local<Value> value )
     {
-      return pointer_cast<T>( value.As<v8::External>()->Value() );
+      return pointer_cast<T>( value.As<External>()->Value() );
     }
 
     template <typename T>
     typename std::enable_if<!is_pointer_cast_allowed<T>::value, T&>::type
-      get_external_data( v8::Local<v8::Value> value )
+      get_external_data( Local<Value> value )
     {
-      return external_data<T>::get( value.As<v8::External>() );
+      return external_data<T>::get( value.As<External>() );
     }
 
     template <typename Traits, typename F>
     typename function_traits<F>::return_type
-      invoke( v8::FunctionCallbackInfo<v8::Value> const& args, std::false_type /*is_member_function_pointer*/ )
+      invoke( FunctionCallbackInfo<Value> const& args, std::false_type /*is_member_function_pointer*/ )
     {
       return call_from_v8<Traits, F>( std::forward<F>( get_external_data<F>( args.Data() ) ), args );
     }
 
     template <typename Traits, typename F>
     typename function_traits<F>::return_type
-      invoke( v8::FunctionCallbackInfo<v8::Value> const& args, std::true_type /*is_member_function_pointer*/ )
+      invoke( FunctionCallbackInfo<Value> const& args, std::true_type /*is_member_function_pointer*/ )
     {
       using arguments = typename function_traits<F>::arguments;
       static_assert( std::tuple_size<arguments>::value > 0, "" );
       using class_type = typename std::decay<
         typename std::tuple_element<0, arguments>::type>::type;
 
-      v8::Isolate* isolate = args.GetIsolate();
-      v8::Local<v8::Object> obj = args.This();
+      Isolate* isolate = args.GetIsolate();
+      Local<Object> obj = args.This();
       auto ptr = class_<class_type, Traits>::unwrap_object( isolate, obj );
       if ( !ptr )
       {
@@ -151,13 +152,13 @@ namespace v8pp {
     }
 
     template <typename Traits, typename F>
-    void forward_ret( v8::FunctionCallbackInfo<v8::Value> const& args, std::true_type /*is_void_return*/ )
+    void forward_ret( FunctionCallbackInfo<Value> const& args, std::true_type /*is_void_return*/ )
     {
       invoke<Traits, F>( args, std::is_member_function_pointer<F>() );
     }
 
     template <typename Traits, typename F>
-    void forward_ret( v8::FunctionCallbackInfo<v8::Value> const& args, std::false_type /*is_void_return*/ )
+    void forward_ret( FunctionCallbackInfo<Value> const& args, std::false_type /*is_void_return*/ )
     {
       using return_type = typename function_traits<F>::return_type;
       using converter = typename call_from_v8_traits<F>::template arg_converter<return_type, Traits>;
@@ -165,12 +166,12 @@ namespace v8pp {
     }
 
     template <typename Traits, typename F>
-    void forward_function( v8::FunctionCallbackInfo<v8::Value> const& args )
+    void forward_function( FunctionCallbackInfo<Value> const& args )
     {
       static_assert( is_callable<F>::value || std::is_member_function_pointer<F>::value, "required callable F" );
 
-      v8::Isolate* isolate = args.GetIsolate();
-      v8::HandleScope scope( isolate );
+      Isolate* isolate = args.GetIsolate();
+      HandleScope scope( isolate );
 
       try
       {
@@ -185,20 +186,20 @@ namespace v8pp {
 
   /// Wrap C++ function into new V8 function template
   template <typename F, typename Traits = raw_ptr_traits>
-  v8::Local<v8::FunctionTemplate> wrap_function_template( v8::Isolate* isolate, F&& func )
+  Local<FunctionTemplate> wrap_function_template( Isolate* isolate, F&& func )
   {
     using F_type = typename std::decay<F>::type;
-    return v8::FunctionTemplate::New( isolate, &detail::forward_function<Traits, F_type>, detail::set_external_data( isolate, std::forward<F_type>( func ) ) );
+    return FunctionTemplate::New( isolate, &detail::forward_function<Traits, F_type>, detail::set_external_data( isolate, std::forward<F_type>( func ) ) );
   }
 
   /// Wrap C++ function into new V8 function
   /// Set nullptr or empty string for name
   /// to make the function anonymous
   template <typename F, typename Traits = raw_ptr_traits>
-  v8::Local<v8::Function> wrap_function( v8::Isolate* isolate, char const* name, F&& func )
+  Local<Function> wrap_function( Isolate* isolate, char const* name, F&& func )
   {
     using F_type = typename std::decay<F>::type;
-    v8::Local<v8::Function> fn = v8::Function::New( isolate->GetCurrentContext(), &detail::forward_function<Traits, F_type>, detail::set_external_data( isolate, std::forward<F_type>( func ) ) ).ToLocalChecked();
+    Local<Function> fn = Function::New( isolate->GetCurrentContext(), &detail::forward_function<Traits, F_type>, detail::set_external_data( isolate, std::forward<F_type>( func ) ) ).ToLocalChecked();
     if ( name && *name )
     {
       fn->SetName( to_v8( isolate, name ) );
