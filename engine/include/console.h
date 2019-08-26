@@ -174,6 +174,9 @@ namespace neko {
     void execute( string commandLine, const bool echo = true );
     //! Executes a file.
     void executeFile( const string& filename );
+    //! Gets a variable or command.
+    ConVar* getVariable( const string_view name );
+    ConCmd* getCommand( const string_view name );
   };
 
 }

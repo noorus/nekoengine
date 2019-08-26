@@ -549,4 +549,30 @@ namespace neko {
 #endif
   }
 
+  ConVar* Console::getVariable( const string_view name )
+  {
+    for ( auto& base : cvars_ )
+    {
+      if ( !base->isRegistered() )
+        continue;
+      if ( boost::iequals( name, base->name() ) )
+        return ( base->isCommand() ? nullptr : (ConVar*)base );
+    }
+
+    return nullptr;
+  }
+
+  ConCmd* Console::getCommand( const string_view name )
+  {
+    for ( auto& base : cvars_ )
+    {
+      if ( !base->isRegistered() )
+        continue;
+      if ( boost::iequals( name, base->name() ) )
+        return ( base->isCommand() ? (ConCmd*)base : nullptr );
+    }
+
+    return nullptr;
+  }
+
 }

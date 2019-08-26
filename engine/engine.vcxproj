@@ -170,6 +170,7 @@
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\framebuffer.cpp" />
     <ClCompile Include="src\gfx.cpp" />
+    <ClCompile Include="src\js_console.cpp" />
     <ClCompile Include="src\loader.cpp" />
     <ClCompile Include="src\locator.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -221,7 +222,9 @@
     <ClInclude Include="include\framebuffer.h" />
     <ClInclude Include="include\gfx.h" />
     <ClInclude Include="include\gfx_types.h" />
+    <ClInclude Include="include\js_console.h" />
     <ClInclude Include="include\js_util.h" />
+    <ClInclude Include="include\js_wrapper.h" />
     <ClInclude Include="include\loader.h" />
     <ClInclude Include="include\locator.h" />
     <ClInclude Include="include\memory.h" />

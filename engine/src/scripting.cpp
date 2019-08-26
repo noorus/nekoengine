@@ -10,6 +10,10 @@
 #include "locator.h"
 #include "memory.h"
 
+#include "js_console.h"
+#include "js_util.h"
+#include "v8pp/module.hpp"
+
 namespace neko {
 
 #ifdef _DEBUG
@@ -64,6 +68,23 @@ namespace neko {
       NEKO_EXCEPT( "V8 default isolation creation failed" );
   }
 
+  void poop( v8::FunctionCallbackInfo<v8::Value> const& args )
+  {
+    HandleScope handleScope( args.GetIsolate() );
+    utf8String msg;
+    for ( int i = 0; i < args.Length(); i++ )
+    {
+      if ( i > 0 )
+        msg.append( " " );
+      v8::String::Utf8Value str( args.GetIsolate(), args[i] );
+      if ( *str )
+        msg.append( *str );
+    }
+    char asd[1024];
+    sprintf_s( asd, 1024, "JS mylib::poop(): %s\r\n", msg.c_str() );
+    OutputDebugStringA( asd );
+  }
+
   void Scripting::initialize()
   {
     Isolate::Scope isolateScope( isolate_ );
@@ -85,6 +106,12 @@ namespace neko {
 
     global_->console_ = engine_->console();
     global_->isolate_ = isolate_;
+
+    // js::Console::initialize( global_->console_, context );
+
+    v8pp::module mylib( isolate_ );
+    mylib.set( "poop", &poop );
+    isolate_->GetCurrentContext()->Global()->Set( js::util::allocString( "mylib", isolate_ ), mylib.new_instance() );
 
     utf8String scriptFile = global_->scriptDirectory_ + "initialization.js";
     Script script( global_, scriptFile );
