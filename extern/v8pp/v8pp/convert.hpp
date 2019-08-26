@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -468,7 +468,8 @@ struct convert
   };
 
   template <typename T>
-  struct convert<T*, typename std::enable_if<is_wrapped_class<T>::value>::type> {
+  struct convert<T*, typename std::enable_if<is_wrapped_class<T>::value>::type>
+  {
     using from_type = T * ;
     using to_type = Local<Object>;
     using class_type = typename std::remove_cv<T>::type;
@@ -484,7 +485,7 @@ struct convert
       {
         return nullptr;
       }
-      return class_<class_type, raw_ptr_traits>::unwrap_object( isolate, value );
+      return class_<class_type, raw_ptr_traits>::unwrap( isolate, value );
     }
 
     static to_type to_v8( Isolate* isolate, T const* value )
@@ -494,7 +495,8 @@ struct convert
   };
 
   template <typename T>
-  struct convert<T, typename std::enable_if<is_wrapped_class<T>::value>::type> {
+  struct convert<T, typename std::enable_if<is_wrapped_class<T>::value>::type>
+  {
     using from_type = T & ;
     using to_type = Local<Object>;
     using class_type = typename std::remove_cv<T>::type;
@@ -510,7 +512,7 @@ struct convert
       {
         throw invalid_argument( isolate, value, "Object" );
       }
-      T* object = class_<class_type, raw_ptr_traits>::unwrap_object( isolate, value );
+      T* object = class_<class_type, raw_ptr_traits>::unwrap( isolate, value );
       if ( object )
       {
         return *object;
@@ -544,7 +546,7 @@ struct convert
       {
         return nullptr;
       }
-      return class_<class_type, shared_ptr_traits>::unwrap_object( isolate, value );
+      return class_<class_type, shared_ptr_traits>::unwrap( isolate, value );
     }
 
     static to_type to_v8( Isolate* isolate, std::shared_ptr<T> const& value )
@@ -570,7 +572,7 @@ struct convert
       {
         throw invalid_argument( isolate, value, "Object" );
       }
-      std::shared_ptr<T> object = class_<class_type, shared_ptr_traits>::unwrap_object( isolate, value );
+      std::shared_ptr<T> object = class_<class_type, shared_ptr_traits>::unwrap( isolate, value );
       if ( object )
       {
         //			assert(object.use_count() > 1);

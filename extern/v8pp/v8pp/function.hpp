@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -143,7 +143,7 @@ namespace v8pp {
 
       Isolate* isolate = args.GetIsolate();
       Local<Object> obj = args.This();
-      auto ptr = class_<class_type, Traits>::unwrap_object( isolate, obj );
+      auto ptr = class_<class_type, Traits>::unwrap( isolate, obj );
       if ( !ptr )
       {
         throw std::runtime_error( "method called on null instance" );

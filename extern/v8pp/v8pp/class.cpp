@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -69,7 +69,7 @@ namespace v8pp {
         ObjectRegistry* this_ = get_external_data<ObjectRegistry*>( args.Data() );
         try
         {
-          return args.GetReturnValue().Set( this_->wrap_object( args ) );
+          return args.GetReturnValue().Set( this_->wrap( args ) );
         } catch ( std::exception const& ex )
         {
           args.GetReturnValue().Set( throw_ex( isolate, ex.what() ) );
@@ -139,7 +139,7 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    void ObjectRegistry<Traits>::remove_object( object_id const& obj )
+    void ObjectRegistry<Traits>::remove_object( TObjectID const& obj )
     {
       auto it = objects_.find( Traits::key( obj ) );
       assert( it != objects_.end() && "no object" );
@@ -164,7 +164,7 @@ namespace v8pp {
 
     template<typename Traits>
     typename ObjectRegistry<Traits>::TPointer
-      ObjectRegistry<Traits>::find_object( object_id id, TypeInfo const& type ) const
+      ObjectRegistry<Traits>::find_object( TObjectID id, TypeInfo const& type ) const
     {
       auto it = objects_.find( Traits::key( id ) );
       if ( it != objects_.end() )
@@ -219,11 +219,11 @@ namespace v8pp {
       Global<Object> pobj( isolate_, obj );
       pobj.SetWeak( this, []( WeakCallbackInfo<ObjectRegistry> const& data )
       {
-        object_id object = data.GetInternalField( 0 );
+        TObjectID object = data.GetInternalField( 0 );
         ObjectRegistry* this_ = static_cast<ObjectRegistry*>( data.GetInternalField( 1 ) );
         this_->remove_object( object );
       }, WeakCallbackType::kInternalFields );
-      objects_.emplace( object, wrapped_object{ move( pobj ), call_dtor } );
+      objects_.emplace( object, WrappedObject{ move( pobj ), call_dtor } );
 
       return scope.Escape( obj );
     }
@@ -250,7 +250,7 @@ namespace v8pp {
         Local<Object> obj = value.As<Object>();
         if ( obj->InternalFieldCount() == 2 )
         {
-          object_id id = obj->GetAlignedPointerFromInternalField( 0 );
+          TObjectID id = obj->GetAlignedPointerFromInternalField( 0 );
           if ( id )
           {
             auto registry = static_cast<ObjectRegistry*>(
@@ -271,7 +271,7 @@ namespace v8pp {
     }
 
     template<typename Traits>
-    void ObjectRegistry<Traits>::reset_object( TPointer const& object, wrapped_object& wrapped )
+    void ObjectRegistry<Traits>::reset_object( TPointer const& object, WrappedObject& wrapped )
     {
       if ( wrapped.call_dtor )
       {
@@ -356,10 +356,10 @@ namespace v8pp {
       instance( operation::remove, isolate );
     }
 
-    Classes::classes_info::iterator Classes::find( TypeInfo const& type )
+    Classes::ClassInfoVector::iterator Classes::find( TypeInfo const& type )
     {
       return std::find_if( classes_.begin(), classes_.end(),
-        [&type]( classes_info::value_type const& info )
+        [&type]( ClassInfoVector::value_type const& info )
       {
         return info->type == type;
       } );

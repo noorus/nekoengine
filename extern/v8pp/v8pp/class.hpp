@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -45,7 +45,7 @@ namespace v8pp {
     public:
       using TPointer = typename Traits::pointer_type;
       using TConstPointer = typename Traits::const_pointer_type;
-      using object_id = typename Traits::object_id;
+      using TObjectID = typename Traits::object_id;
 
       using ctor_function = std::function<TPointer( FunctionCallbackInfo<Value> const& args )>;
       using dtor_function = std::function<void( Isolate*, TPointer const& )>;
@@ -82,10 +82,10 @@ namespace v8pp {
 
       bool cast( TPointer& ptr, TypeInfo const& type ) const;
 
-      void remove_object( object_id const& obj );
+      void remove_object( TObjectID const& obj );
       void remove_objects();
 
-      TPointer find_object( object_id id, TypeInfo const& type ) const;
+      TPointer find_object( TObjectID id, TypeInfo const& type ) const;
       Local<Object> find_v8_object( TPointer const& ptr ) const;
 
       Local<Object> wrap( TPointer const& object, bool call_dtor );
@@ -93,13 +93,13 @@ namespace v8pp {
       TPointer unwrap( Local<Value> value );
 
     private:
-      struct wrapped_object
+      struct WrappedObject
       {
         Global<Object> pobj;
         bool call_dtor;
       };
 
-      void reset_object( TPointer const& object, wrapped_object& wrapped );
+      void reset_object( TPointer const& object, WrappedObject& wrapped );
 
       struct BaseClassInfo
       {
@@ -113,7 +113,7 @@ namespace v8pp {
 
       std::vector<BaseClassInfo> bases_;
       std::vector<ObjectRegistry*> derivatives_;
-      std::unordered_map<TPointer, wrapped_object> objects_;
+      std::unordered_map<TPointer, WrappedObject> objects_;
 
       Isolate* isolate_;
       Global<FunctionTemplate> func_;
@@ -138,10 +138,10 @@ namespace v8pp {
       static void remove_all( Isolate* isolate );
 
     private:
-      using classes_info = std::vector<unique_ptr<ClassInfo>>;
-      classes_info classes_;
+      using ClassInfoVector = vector<unique_ptr<ClassInfo>>;
+      ClassInfoVector classes_;
 
-      classes_info::iterator find( TypeInfo const& type );
+      ClassInfoVector::iterator find( TypeInfo const& type );
 
       enum class operation {
         get,
@@ -161,7 +161,7 @@ namespace v8pp {
     using TRegistry = detail::ObjectRegistry<Traits>;
     TRegistry& class_info_;
 
-    using object_id = typename TRegistry::object_id;
+    using object_id = typename TRegistry::TObjectID;
     using TPointer = typename TRegistry::TPointer;
     using TConstPointer = typename TRegistry::TConstPointer;
 
@@ -331,7 +331,7 @@ namespace v8pp {
     static Local<Object> reference_external( Isolate* isolate, object_pointer_type const& ext )
     {
       using namespace detail;
-      return Classes::find<Traits>( isolate, type_id<T>() ).wrap_object( ext, false );
+      return Classes::find<Traits>( isolate, type_id<T>() ).wrap( ext, false );
     }
 
     /// Remove external reference from JavaScript
@@ -347,15 +347,15 @@ namespace v8pp {
     static Local<Object> import_external( Isolate* isolate, object_pointer_type const& ext )
     {
       using namespace detail;
-      return Classes::find<Traits>( isolate, type_id<T>() ).wrap_object( ext, true );
+      return Classes::find<Traits>( isolate, type_id<T>() ).wrap( ext, true );
     }
 
     /// Get wrapped object from V8 value, may return nullptr on fail.
-    static object_pointer_type unwrap_object( Isolate* isolate, Local<Value> value )
+    static object_pointer_type unwrap( Isolate* isolate, Local<Value> value )
     {
       using namespace detail;
       return Traits::template static_pointer_cast<T>(
-        Classes::find<Traits>( isolate, type_id<T>() ).unwrap_object( value ) );
+        Classes::find<Traits>( isolate, type_id<T>() ).unwrap( value ) );
     }
 
     /// Create a wrapped C++ object and import it into JavaScript
@@ -420,7 +420,7 @@ namespace v8pp {
 
       try
       {
-        auto self = unwrap_object( isolate, info.This() );
+        auto self = unwrap( isolate, info.This() );
         Attribute attr = detail::get_external_data<Attribute>( info.Data() );
         info.GetReturnValue().Set( to_v8( isolate, ( *self ).*attr ) );
       } catch ( std::exception const& ex )
@@ -436,7 +436,7 @@ namespace v8pp {
 
       try
       {
-        auto self = unwrap_object( isolate, info.This() );
+        auto self = unwrap( isolate, info.This() );
         Attribute ptr = detail::get_external_data<Attribute>( info.Data() );
         using attr_type = typename detail::function_traits<Attribute>::return_type;
         ( *self ).*ptr = v8pp::from_v8<attr_type>( isolate, value );

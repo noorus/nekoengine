@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -79,13 +79,14 @@ namespace v8pp {
 
   struct shared_ptr_traits
   {
-    using pointer_type = std::shared_ptr<void>;
-    using const_pointer_type = std::shared_ptr<void const>;
+    using pointer_type = shared_ptr<void>;
+    using const_pointer_type = shared_ptr<void const>;
 
     template <typename T>
-    using object_pointer_type = std::shared_ptr<T>;
+    using object_pointer_type = shared_ptr<T>;
+
     template <typename T>
-    using object_const_pointer_type = std::shared_ptr<T const>;
+    using object_const_pointer_type = shared_ptr<T const>;
 
     using object_id = void*;
 

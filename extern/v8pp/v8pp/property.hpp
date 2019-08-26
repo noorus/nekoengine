@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // NOTE: This is NOT the original v8pp source!
 // Some modifications have been made to fit the nekoengine project.
@@ -101,7 +101,7 @@ namespace v8pp {
       static void get( Local<String> name, PropertyCallbackInfo<Value> const& info )
         try
       {
-        auto obj = v8pp::class_<class_type, Traits>::unwrap_object( info.GetIsolate(), info.This() );
+        auto obj = v8pp::class_<class_type, Traits>::unwrap( info.GetIsolate(), info.This() );
         assert( obj );
 
         property_type const& prop = detail::get_external_data<property_type>( info.Data() );
@@ -199,7 +199,7 @@ namespace v8pp {
       static void set( Local<String> name, Local<Value> value, PropertyCallbackInfo<void> const& info )
         try
       {
-        auto obj = v8pp::class_<class_type, Traits>::unwrap_object( info.GetIsolate(), info.This() );
+        auto obj = v8pp::class_<class_type, Traits>::unwrap( info.GetIsolate(), info.This() );
         assert( obj );
 
         property_type const& prop = detail::get_external_data<property_type>( info.Data() );
