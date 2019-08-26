@@ -7,6 +7,19 @@ namespace neko {
 
   class Renderer;
 
+  struct GLInformation {
+    int32_t versionMajor; //!< Major GL version
+    int32_t versionMinor; //!< Minor GL version
+    int64_t maxTextureSize; //!< Maximum width/height for GL_TEXTURE
+    int64_t maxRenderbufferSize; //!< Maximum width/height for GL_RENDERBUFFER
+    int64_t maxFramebufferWidth; //!< Maximum width for GL_FRAMEBUFFER
+    int64_t maxFramebufferHeight; //!< Maximum height for GL_FRAMEBUFFER
+    GLInformation()
+    {
+      memset( this, 0, sizeof( GLInformation ) );
+    }
+  };
+
   //! \class Surface
   //! \brief A surface.
   class Surface {
@@ -112,15 +125,17 @@ namespace neko {
     Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
     TexturePtr colorBuffer_;
     RenderbufferPtr depthStencilBuffer_;
+    mutable bool available_;
   public:
     Framebuffer() = delete;
     Framebuffer( Renderer* renderer );
     void recreate( size_t width, size_t height );
     void destroy();
-    bool validate();
+    bool validate() const;
     void begin();
     void end();
     inline TexturePtr texture() { return colorBuffer_; }
+    bool available() const;
     ~Framebuffer();
   };
 
@@ -140,6 +155,7 @@ namespace neko {
     GLuint implCreateFramebuffer( size_t width, size_t height );
     void implDeleteFramebuffer( GLuint handle );
   protected:
+    GLInformation info_;
     EnginePtr engine_;
     ShadersPtr shaders_;
     MeshManagerPtr meshes_;
@@ -148,6 +164,7 @@ namespace neko {
     void sceneDraw( CameraPtr camera );
   public:
     Renderer( EnginePtr engine );
+    void initialize();
     void uploadTextures();
     void draw( CameraPtr camera );
     ~Renderer();

@@ -5,15 +5,6 @@
 
 namespace neko {
 
-  struct GfxContextInfo {
-    short glVersionMinor; //!< Major GL version
-    short glVersionMajor; //!< Minor GL version
-    short depthBits; //!< Depth buffer bits per pixel
-    short stencilBits; //!< Stencil buffer bits per pixel
-    inline bool hasDepth() const throw( ) { return ( depthBits > 0 ); }
-    inline bool hasStencil() const throw( ) { return ( stencilBits > 0 ); }
-  };
-
   class Gfx: public Subsystem {
   public:
     struct Info {

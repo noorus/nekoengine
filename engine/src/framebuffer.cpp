@@ -7,7 +7,7 @@ namespace neko {
   using namespace gl;
 
   Framebuffer::Framebuffer( Renderer* renderer ):
-    renderer_( renderer ), width_( 0 ), height_( 0 ), handle_( 0 )
+    renderer_( renderer ), width_( 0 ), height_( 0 ), handle_( 0 ), available_( false )
   {
     assert( renderer_ );
   }
@@ -36,6 +36,7 @@ namespace neko {
 
   void Framebuffer::destroy()
   {
+    available_ = false;
     if ( handle_ )
     {
       renderer_->implDeleteFramebuffer( handle_ );
@@ -45,7 +46,7 @@ namespace neko {
     depthStencilBuffer_.reset();
   }
 
-  bool Framebuffer::validate()
+  bool Framebuffer::validate() const
   {
     glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
     bool ret = ( glCheckFramebufferStatus( GL_FRAMEBUFFER ) == GL_FRAMEBUFFER_COMPLETE );
@@ -53,10 +54,19 @@ namespace neko {
     return ret;
   }
 
+  bool Framebuffer::available() const
+  {
+    if ( !available_ && handle_ )
+    {
+      available_ = validate();
+    }
+    return available_;
+  }
+
   void Framebuffer::begin()
   {
     glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
-    glClearColor( 1.0f, 0.1f, 0.1f, 1.0f );
+    glClearColor( 0.1f, 0.3f, 1.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
   }
 

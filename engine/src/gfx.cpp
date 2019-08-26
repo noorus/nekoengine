@@ -106,6 +106,8 @@ namespace neko {
     glViewport( 0, 0, width, height );
     glClearColor( cClearColor.r, cClearColor.g, cClearColor.b, cClearColor.a );
 
+    renderer_->initialize();
+
     engine_->operationContinueVideo();
   }
 
