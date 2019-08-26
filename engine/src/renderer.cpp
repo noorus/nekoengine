@@ -60,32 +60,65 @@ namespace neko {
 
   void glFetchInformation( GLInformation& info )
   {
-    auto glvGetI32 = []( GLenum e, int32_t& target )
+    auto glbAuxStr = []( GLenum e ) -> utf8String
     {
-      GLint data = 0;
-      glGetIntegerv( e, &data );
-      target = (int32_t)data;
+      return glbinding::aux::Meta::getString( e );
     };
-    auto glvGetI64 = []( GLenum e, int64_t& target )
+    auto glvGetI64 = [glbAuxStr]( GLenum e, int64_t& target, bool doNotThrow = false ) -> bool
     {
       GLint64 data = 0;
       glGetInteger64v( e, &data );
+      auto error = glGetError();
+      if ( error != GL_NO_ERROR )
+      {
+        if ( !doNotThrow )
+          NEKO_OPENGL_EXCEPT( "glGetInteger64v failed for " + glbAuxStr( e ), error );
+        return false;
+      }
       target = (int64_t)data;
+      return true;
     };
 
     // OpenGL version
-    glvGetI32( GL_MAJOR_VERSION, info.versionMajor );
-    glvGetI32( GL_MINOR_VERSION, info.versionMinor );
+    glvGetI64( GL_MAJOR_VERSION, info.versionMajor );
+    glvGetI64( GL_MINOR_VERSION, info.versionMinor );
 
     // Max buffer sizes
     glvGetI64( GL_MAX_TEXTURE_SIZE, info.maxTextureSize );
     glvGetI64( GL_MAX_RENDERBUFFER_SIZE, info.maxRenderbufferSize );
-    glvGetI64( GL_MAX_FRAMEBUFFER_WIDTH, info.maxFramebufferWidth );
-    glvGetI64( GL_MAX_FRAMEBUFFER_HEIGHT, info.maxFramebufferHeight );
+
+    if ( !glvGetI64( GL_MAX_FRAMEBUFFER_WIDTH, info.maxFramebufferWidth, true )
+      || !glvGetI64( GL_MAX_FRAMEBUFFER_HEIGHT, info.maxFramebufferHeight, true ) )
+    {
+      // Some drivers do not support GL_MAX_FRAMEBUFFER_WIDTH/GL_MAX_FRAMEBUFFER_WIDTH
+      // despite supporting framebuffers in themselves just fine, due to them being added
+      // in a later extension than framebuffers. Let's just default to the max texture size.
+      info.maxFramebufferWidth = info.maxTextureSize;
+      info.maxFramebufferHeight = info.maxTextureSize;
+    }
+  }
+
+  void Renderer::clearErrors()
+  {
+    uint32_t errorCount = 0;
+    while ( true )
+    {
+      auto error = glGetError();
+      if ( error == GL_NO_ERROR )
+        break;
+      if ( error == GL_OUT_OF_MEMORY )
+        NEKO_EXCEPT( "Driver generated GL_OUT_OF_MEMORY. Out of memory." );
+      errorCount++;
+    }
+    if ( !errorCount )
+      return;
+    engine_->console()->printf( Console::srcGfx, "Cleared %d GL errors...", errorCount );
   }
 
   Renderer::Renderer( EnginePtr engine ): engine_( move( engine ) )
   {
+    clearErrors();
+
     glFetchInformation( info_ );
 
     if ( info_.versionMajor < 3 || ( info_.versionMajor == 3 && info_.versionMinor < 3 ) )
@@ -122,7 +155,7 @@ namespace neko {
     MaterialVector mats;
     engine_->loader()->getFinishedMaterials( mats );
     if ( !mats.empty() )
-      engine_->console()->printf( Console::srcGfx, "Renderer::uploadTextures got %d new images", mats.size() );
+      engine_->console()->printf( Console::srcGfx, "Renderer::uploadTextures got %d new materials", mats.size() );
     for ( auto& mat : mats )
     {
       if ( !mat->loaded_ )

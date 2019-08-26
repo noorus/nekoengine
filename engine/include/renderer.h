@@ -8,8 +8,8 @@ namespace neko {
   class Renderer;
 
   struct GLInformation {
-    int32_t versionMajor; //!< Major GL version
-    int32_t versionMinor; //!< Minor GL version
+    int64_t versionMajor; //!< Major GL version
+    int64_t versionMinor; //!< Minor GL version
     int64_t maxTextureSize; //!< Maximum width/height for GL_TEXTURE
     int64_t maxRenderbufferSize; //!< Maximum width/height for GL_RENDERBUFFER
     int64_t maxFramebufferWidth; //!< Maximum width for GL_FRAMEBUFFER
@@ -162,6 +162,7 @@ namespace neko {
     platform::RWLock loadLock_;
     MaterialVector materials_;
     void sceneDraw( CameraPtr camera );
+    void clearErrors();
   public:
     Renderer( EnginePtr engine );
     void initialize();

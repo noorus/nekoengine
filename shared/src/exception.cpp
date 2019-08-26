@@ -12,6 +12,12 @@ namespace neko {
   {
   }
 
+  Exception::Exception( const string& description, gl::GLenum gle, const string& source ) :
+    description_( description ), source_( source )
+  {
+    description_.append( " (" + glbinding::aux::Meta::getString( gle ) + ")" );
+  }
+
   const string& Exception::getFullDescription() const
   {
     if ( fullDescription_.empty() )

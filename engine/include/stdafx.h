@@ -110,6 +110,7 @@
 // OpenGL
 #include <glbinding/gl45core/gl.h>
 #include <glbinding/glbinding.h>
+#include <glbinding-aux/Meta.h>
 
 // SFML
 #include <SFML/System.hpp>
