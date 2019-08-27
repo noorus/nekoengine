@@ -10,6 +10,9 @@ namespace neko {
   using gl::GLboolean;
   using gl::GLenum;
   using gl::GLchar;
+  using gl::GLsizei;
+  using gl::GLdouble;
+  using gl::GLint;
 
   //! Some forwards for hinting at usage despite same underlying datatype.
   using GLGraphicsFormat = gl::GLenum;

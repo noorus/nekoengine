@@ -7,7 +7,7 @@ namespace neko {
 
   class EBO;
 
-  enum MeshAttributeIndex: gl::GLuint {
+  enum MeshAttributeIndex: GLuint {
     MeshAttrib_Position = 0,
     MeshAttrib_Texcoord
   };
