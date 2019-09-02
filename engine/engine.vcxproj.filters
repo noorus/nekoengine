@@ -150,6 +150,9 @@
     <ClCompile Include="..\extern\v8pp\v8pp\throw_ex.cpp">
       <Filter>Source Files\extern\v8pp</Filter>
     </ClCompile>
+    <ClCompile Include="src\scriptingcontext.cpp">
+      <Filter>Source Files\scripting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">

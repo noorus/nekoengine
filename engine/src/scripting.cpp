@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #ifndef NEKO_NO_SCRIPTING
 
 #include "neko_types.h"
@@ -11,8 +11,6 @@
 #include "memory.h"
 
 #include "js_console.h"
-#include "js_util.h"
-#include "v8pp/module.hpp"
 
 namespace neko {
 
@@ -22,34 +20,22 @@ namespace neko {
 # define NEKO_CONFIG_SUBDIRNAME "release"
 #endif
 
-  using v8::HandleScope;
-  using v8::ObjectTemplate;
-  using v8::Isolate;
-  using v8::Context;
-  using v8::Local;
-  using v8::Global;
-
   Scripting::Scripting( EnginePtr engine ):
     Subsystem( move( engine ) ),
-    v8::ArrayBuffer::Allocator(),
-    isolate_( nullptr )
+    v8::ArrayBuffer::Allocator()
   {
     engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
 
-    auto rootDirectory = platform::getCurrentDirectory();
-    auto dataDirectory = rootDirectory;
-    dataDirectory.append( "\\data\\v8\\" NEKO_CONFIG_SUBDIRNAME "\\" );
+    rootDirectory_ = platform::getCurrentDirectory();
+    dataDirectory_ = rootDirectory_;
+    dataDirectory_.append( "\\data\\v8\\" NEKO_CONFIG_SUBDIRNAME "\\" );
 
-    global_ = make_shared<ScriptingContext>();
-    global_->scriptDirectory_ = rootDirectory;
-    global_->scriptDirectory_.append( "\\script\\" );
-
-    if ( !v8::V8::InitializeICU( ( dataDirectory + "icudtl.dat" ).c_str() ) )
+    if ( !v8::V8::InitializeICU( ( dataDirectory_ + "icudtl.dat" ).c_str() ) )
       NEKO_EXCEPT( "V8 ICU initialization failed" );
 
     v8::V8::InitializeExternalStartupData(
-      ( dataDirectory + "natives_blob.bin" ).c_str(),
-      ( dataDirectory + "snapshot_blob.bin" ).c_str()
+      ( dataDirectory_ + "natives_blob.bin" ).c_str(),
+      ( dataDirectory_ + "snapshot_blob.bin" ).c_str()
     );
 
     platform_ = move( v8::platform::NewDefaultPlatform(
@@ -60,63 +46,22 @@ namespace neko {
     v8::V8::InitializePlatform( platform_.get() );
 
     v8::V8::Initialize();
-
-    Isolate::CreateParams params;
-    params.array_buffer_allocator = this;
-    isolate_ = Isolate::New( params );
-    if ( !isolate_ )
-      NEKO_EXCEPT( "V8 default isolation creation failed" );
-  }
-
-  void poop( v8::FunctionCallbackInfo<v8::Value> const& args )
-  {
-    HandleScope handleScope( args.GetIsolate() );
-    utf8String msg;
-    for ( int i = 0; i < args.Length(); i++ )
-    {
-      if ( i > 0 )
-        msg.append( " " );
-      v8::String::Utf8Value str( args.GetIsolate(), args[i] );
-      if ( *str )
-        msg.append( *str );
-    }
-    char asd[1024];
-    sprintf_s( asd, 1024, "JS mylib::poop(): %s\r\n", msg.c_str() );
-    OutputDebugStringA( asd );
   }
 
   void Scripting::initialize()
   {
-    Isolate::Scope isolateScope( isolate_ );
-    HandleScope handleScope( isolate_ );
-
-    Local<ObjectTemplate> global = ObjectTemplate::New( isolate_ );
-
-    // init natives here for global template
-
-    Local<Context> context = Context::New( isolate_, nullptr, global );
-    if ( context.IsEmpty() )
-      NEKO_EXCEPT( "V8 default context creation failed" );
-
-    Context::Scope contextScope( context );
-
-    context_.Reset( isolate_, context );
-
-    // init natives here for global context
+    global_ = make_shared<ScriptingContext>( this );
+    global_->scriptDirectory_ = rootDirectory_;
+    global_->scriptDirectory_.append( "\\script\\" );
 
     global_->console_ = engine_->console();
-    global_->isolate_ = isolate_;
 
-    // js::Console::initialize( global_->console_, context );
-
-    v8pp::module mylib( isolate_ );
-    mylib.set( "poop", &poop );
-    isolate_->GetCurrentContext()->Global()->Set( js::util::allocString( "mylib", isolate_ ), mylib.new_instance() );
+    js::Console::initialize( global_->console_, global_->isolate_, global_->isolate_->GetCurrentContext() );
 
     utf8String scriptFile = global_->scriptDirectory_ + "initialization.js";
     Script script( global_, scriptFile );
-    script.compile( context_ );
-    script.execute( context_ );
+    script.compile( global_->ctx_ );
+    script.execute( global_->ctx_ );
   }
 
   void* Scripting::Allocate( size_t length )
@@ -136,8 +81,7 @@ namespace neko {
 
   void Scripting::shutdown()
   {
-    context_.Reset();
-    assert( context_.IsEmpty() );
+    global_.reset();
   }
 
   void Scripting::preUpdate( GameTime time )
@@ -158,16 +102,6 @@ namespace neko {
   Scripting::~Scripting()
   {
     shutdown();
-    if ( isolate_ )
-    {
-      isolate_->ContextDisposedNotification();
-      // None of these matter. It still leaks f*****g memory.
-      /*isolate_->IdleNotificationDeadline( platform_->MonotonicallyIncreasingTime() + 1.0 );
-      isolate_->LowMemoryNotification();
-      Sleep( 2000 );*/
-      isolate_->TerminateExecution();
-      isolate_->Dispose();
-    }
     v8::V8::Dispose();
     v8::V8::ShutdownPlatform();
   }

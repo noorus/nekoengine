@@ -35,16 +35,20 @@ namespace neko {
   public:
     utf8String scriptDirectory_;
     v8::Isolate* isolate_;
+    v8::Global<v8::Context> ctx_;
+    const bool externalIsolate_;
     ConsolePtr console_;
+    ScriptingContext( v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
+    ~ScriptingContext();
     inline v8::Isolate* isolate() const throw() { return isolate_; }
   };
 
   class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {
   protected:
-    v8::Isolate* isolate_;
-    v8::Global<v8::Context> context_;
     unique_ptr<v8::Platform> platform_;
     ScriptingContextPtr global_;
+    utf8String rootDirectory_;
+    utf8String dataDirectory_;
   private:
     //! v8::ArrayBuffer::Allocator implementation
     virtual void* Allocate( size_t length ) override;
@@ -58,8 +62,7 @@ namespace neko {
     virtual void tick( GameTime tick, GameTime time ) override;
     virtual void postUpdate( GameTime delta, GameTime tick ) override;
     virtual ~Scripting();
-    inline v8::Isolate* getIsolate() throw() { return isolate_; }
-    inline v8::Global<v8::Context>& getContext() throw() { return context_; }
+    inline ScriptingContextPtr getContext() throw() { return global_; }
   };
 
 }

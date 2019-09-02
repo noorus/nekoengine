@@ -9,7 +9,15 @@ namespace neko {
 
   namespace js {
 
-    class Console: public Wrapper<Console> {
+    class Console {
+    protected:
+      //! My JavaScript-exported constructor function template.
+      static Global<FunctionTemplate> constructor;
+      //! My JavaScript-exported class name
+      static string className;
+      //! Internal v8 object handle
+      Global<v8::Object> jsHandle_;
+      int jsReferences_;
     protected:
       static Console* instance;
       ConsolePtr mConsole;
@@ -24,7 +32,22 @@ namespace neko {
       static void jsExecute( const FunctionCallbackInfo<v8::Value>& args );
     public:
       inline ConsolePtr getConsole() { return mConsole; }
-      static void initialize( ConsolePtr console, Local<v8::Context> context );
+      void ref();
+      void unref();
+      inline Local<v8::Object> handle()
+      {
+        return handle( Isolate::GetCurrent() );
+      }
+      inline Local<v8::Object> handle( Isolate* isolate )
+      {
+        return Local<v8::Object>::New( isolate, persistent() );
+      }
+      inline Global<v8::Object>& persistent()
+      {
+        return jsHandle_;
+      }
+      void makeWeak();
+      static void initialize( ConsolePtr console, Isolate* isolate, Local<v8::Context> context );
       static void shutdown();
     };
 
