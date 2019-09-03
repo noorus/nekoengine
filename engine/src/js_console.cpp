@@ -13,16 +13,23 @@ namespace neko {
 
     string Console::className( "Console" );
 
-    Console::Console( ConsolePtr console ): mConsole( move( console ) )
+    Console::Console( ConsolePtr console ): console_( move( console ) )
     {
     }
 
-    void Console::registerGlobals( v8::Local<v8::FunctionTemplate>& tpl )
+    JSConsolePtr Console::create( ConsolePtr console, Isolate* isolate, V8Object& global )
     {
-      JS_TEMPLATE_SET( tpl, Console, print );
-      JS_TEMPLATE_SET( tpl, Console, getVariable );
-      JS_TEMPLATE_SET( tpl, Console, setVariable );
-      JS_TEMPLATE_SET( tpl, Console, execute );
+      auto instance = make_unique<Console>( move( console ) );
+      instance->wrapperRegisterObject( isolate, global );
+      return move( instance );
+    }
+
+    void Console::registerGlobals( Isolate* isolate, v8::Local<v8::FunctionTemplate>& tpl )
+    {
+      JS_WRAPPER_SETMEMBER( tpl, Console, print );
+      JS_WRAPPER_SETMEMBER( tpl, Console, getVariable );
+      JS_WRAPPER_SETMEMBER( tpl, Console, setVariable );
+      JS_WRAPPER_SETMEMBER( tpl, Console, execute );
     }
 
     void Console::js_print( Isolate* isolate, const V8CallbackArgs& args )
@@ -39,7 +46,7 @@ namespace neko {
           msg.append( *str );
       }
 
-      mConsole->print( neko::Console::srcScripting, msg );
+      console_->print( neko::Console::srcScripting, msg );
     }
 
     void Console::js_getVariable( Isolate* isolate, const V8CallbackArgs& args )
@@ -55,7 +62,7 @@ namespace neko {
 
       v8::String::Utf8Value variableName( args.GetIsolate(), args[0] );
 
-      ConVar* variable = mConsole->getVariable( (const char*)*variableName );
+      ConVar* variable = console_->getVariable( (const char*)*variableName );
 
       if ( !variable )
       {
@@ -82,7 +89,7 @@ namespace neko {
       v8::String::Utf8Value variableName( isolate, args[0] );
       v8::String::Utf8Value variableValue( isolate, args[1] );
 
-      ConVar* variable = mConsole->getVariable( (const char*)*variableName );
+      ConVar* variable = console_->getVariable( (const char*)*variableName );
 
       if ( !variable )
       {
@@ -108,7 +115,7 @@ namespace neko {
 
       v8::String::Utf8Value commandLine( isolate, args[0] );
 
-      mConsole->execute( (const char*)*commandLine );
+      console_->execute( (const char*)*commandLine );
     }
 
   }

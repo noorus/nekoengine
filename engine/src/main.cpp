@@ -62,7 +62,7 @@ int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCm
 #endif
 
   // CRT memory allocation breakpoints can be set here
-  //_CrtSetBreakAlloc( x );
+  // _CrtSetBreakAlloc( x );
 
   platform::g_instance = hInstance;
 

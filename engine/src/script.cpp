@@ -28,16 +28,18 @@ namespace neko {
 
   bool Script::compile( v8::Global<v8::Context>& context_ )
   {
-    HandleScope handleScope( globalContext_->isolate() );
+    auto isolate = globalContext_->isolate();
+    Isolate::Scope isolateScope( isolate );
+    HandleScope handleScope( isolate );
 
     globalContext_->console_->printf( Console::srcScripting, "Compiling %s", name_.c_str() );
 
     status_ = Status_Unknown;
 
-    auto context = Local<Context>::New( globalContext_->isolate(), context_ );
+    auto context = Local<Context>::New( isolate, context_ );
     Context::Scope contextScope( context );
 
-    TryCatch tryCatch( globalContext_->isolate() );
+    TryCatch tryCatch( isolate );
 
     utf8String source;
     {
@@ -56,7 +58,7 @@ namespace neko {
       return false;
     }
 
-    script_.Reset( globalContext_->isolate(), script.ToLocalChecked() );
+    script_.Reset( isolate, script.ToLocalChecked() );
     status_ = Status_Compiled;
 
     globalContext_->console_->printf( Console::srcScripting, "%s compiled succesfully!", name_.c_str() );
@@ -67,7 +69,7 @@ namespace neko {
   void Script::reportException( const v8::TryCatch& tryCatch )
   {
     auto isolate = globalContext_->isolate();
-
+    Isolate::Scope isolateScope( isolate );
     HandleScope handleScope( isolate );
 
     v8::String::Utf8Value exception( isolate, tryCatch.Exception() );
@@ -94,19 +96,21 @@ namespace neko {
 
   bool Script::execute( v8::Global<v8::Context>& context_ )
   {
-    HandleScope handleScope( globalContext_->isolate() );
+    auto isolate = globalContext_->isolate();
+    Isolate::Scope isolateScope( isolate );
+    HandleScope handleScope( isolate );
 
     if ( script_.IsEmpty() )
       return false;
 
     globalContext_->console_->printf( Console::srcScripting, "Running %s", name_.c_str() );
 
-    auto context = Local<Context>::New( globalContext_->isolate(), context_ );
+    auto context = Local<Context>::New( isolate, context_ );
     Context::Scope contextScope( context );
 
-    TryCatch tryCatch( globalContext_->isolate() );
+    TryCatch tryCatch( isolate );
 
-    auto script = Local<v8::Script>::New( globalContext_->isolate(), script_ );
+    auto script = Local<v8::Script>::New( isolate, script_ );
     auto result = script->Run( context );
 
     if ( result.IsEmpty() )

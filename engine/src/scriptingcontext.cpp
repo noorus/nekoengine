@@ -22,7 +22,7 @@ namespace neko {
   using v8::Local;
   using v8::Global;
 
-  ScriptingContext::ScriptingContext( ScriptingPtr owner,
+  ScriptingContext::ScriptingContext( Scripting* owner,
     v8::ArrayBuffer::Allocator* allocator,
     Isolate* isolate ):
     owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false )
@@ -46,11 +46,12 @@ namespace neko {
 
   void ScriptingContext::initialize()
   {
+    Isolate::Scope isolateScope( isolate_ );
     HandleScope handleScope( isolate_ );
 
     auto globalObjectTemplate = ObjectTemplate::New( isolate_ );
 
-    owner_->registerTemplateGlobals( isolate_, globalObjectTemplate );
+    registerTemplateGlobals( globalObjectTemplate );
 
     auto context = v8::Context::New( isolate_, nullptr, globalObjectTemplate );
     if ( context.IsEmpty() )
@@ -58,15 +59,41 @@ namespace neko {
 
     ctx_.Reset( isolate_, context );
 
+    {
+      Context::Scope contextScope( context );
+      registerContextGlobals( ctx_ );
+    }
+  }
+
+  void ScriptingContext::registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global )
+  {
+    // global->Set( js::util::allocString( "fuckyou" ),  )
+  }
+
+  void ScriptingContext::registerContextGlobals( v8::Global<v8::Context>& globalContext )
+  {
+    v8::HandleScope handleScope( isolate_ );
+
+    auto context = v8::Local<v8::Context>::New( isolate_, globalContext );
+
+    jsConsole_ = js::Console::create( console_, isolate_, context->Global() );
+  }
+
+  void ScriptingContext::tick()
+  {
+    Isolate::Scope isolateScope( isolate_ );
+    v8::HandleScope handleScope( isolate_ );
+
+    auto context = v8::Local<v8::Context>::New( isolate_, ctx_ );
     Context::Scope contextScope( context );
 
-    owner_->registerContextGlobals( isolate_, ctx_ );
+    v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_, v8::platform::MessageLoopBehavior::kDoNotWait );
   }
 
   ScriptingContext::~ScriptingContext()
   {
-    auto context = v8pp::to_local( isolate_, ctx_ );
-    context->Exit();
+    jsConsole_.reset();
+
     ctx_.Reset();
 
     if ( isolate_ && !externalIsolate_ )

@@ -10,6 +10,39 @@ namespace neko {
 
   namespace js {
 
+    using v8::Isolate;
+    using v8::HandleScope;
+    using v8::Local;
+    using v8::Persistent;
+    using v8::Eternal;
+    using v8::Global;
+    using v8::PropertyCallbackInfo;
+    using v8::ObjectTemplate;
+    using v8::FunctionTemplate;
+    using v8::FunctionCallbackInfo;
+    using v8::EscapableHandleScope;
+
+    using V8CallbackArgs = v8::FunctionCallbackInfo<v8::Value>;
+    using V8FunctionTemplate = v8::Local<v8::FunctionTemplate>;
+    using V8Object = v8::Local<v8::Object>;
+
+    namespace dirty {
+
+      template <class T>
+      constexpr inline v8::Local<v8::External> externalWrap( v8::Isolate* isolate, T val )
+      {
+        return v8::External::New( isolate, (void*)val );
+      }
+
+      template <class T>
+      constexpr inline T* externalUnwrap( v8::Local<v8::Value>& val )
+      {
+        auto self = v8::Local<v8::External>::Cast( val );
+        return static_cast<T*>( self->Value() );
+      }
+
+    }
+
     namespace util {
 
 #     define JS_TEMPLATE_ACCESSOR(tpl,x,y,z) tpl->PrototypeTemplate()->SetAccessor( \

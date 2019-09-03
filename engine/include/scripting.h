@@ -4,6 +4,7 @@
 #include "neko_types.h"
 #include "forwards.h"
 #include "subsystem.h"
+#include "js_console.h"
 
 namespace neko {
 
@@ -36,18 +37,24 @@ namespace neko {
     const bool externalIsolate_;
     v8::Isolate* isolate_;
     v8::Global<v8::Context> ctx_;
-    ScriptingPtr owner_;
+    Scripting* owner_;
     void initialize();
+  private:
+    void registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global );
+    void registerContextGlobals( v8::Global<v8::Context>& globalContext );
+  protected:
+    js::JSConsolePtr jsConsole_;
   public:
     ConsolePtr console_;
     utf8String scriptDirectory_;
-    ScriptingContext( ScriptingPtr owner, v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
+    ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
+    void tick();
     ~ScriptingContext();
     inline v8::Isolate* isolate() const throw() { return isolate_; }
     inline v8::Global<v8::Context>& ctx() throw() { return ctx_; }
   };
 
-  class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator, public std::enable_shared_from_this<Scripting> {
+  class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {
     friend class ScriptingContext;
   protected:
     unique_ptr<v8::Platform> platform_;
@@ -59,9 +66,6 @@ namespace neko {
     virtual void* Allocate( size_t length ) override;
     virtual void* AllocateUninitialized( size_t length ) override;
     virtual void Free( void* data, size_t length ) override;
-  protected:
-    void registerTemplateGlobals( v8::Isolate* isolate, v8::Local<v8::ObjectTemplate>& global );
-    void registerContextGlobals( v8::Isolate* isolate, v8::Global<v8::Context>& globalContext );
   public:
     Scripting( EnginePtr engine );
     void initialize();
