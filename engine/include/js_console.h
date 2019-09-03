@@ -4,51 +4,90 @@
 #include "console.h"
 #include "js_wrapper.h"
 #include "forwards.h"
+#include <type_traits>
 
 namespace neko {
 
   namespace js {
 
-    class Console {
+    class Scripting;
+
+    template <class T>
+    constexpr inline v8::Local<v8::External> v8extwrap( v8::Isolate* isolate, T val )
+    {
+      return v8::External::New( isolate, (void*)val );
+    }
+
+    template <class T>
+    constexpr inline T* v8extunwrap( v8::Local<v8::Value>& val )
+    {
+      auto self = v8::Local<v8::External>::Cast( val );
+      return static_cast<T*>( self->Value() );
+    }
+
+    using V8CallbackArgs = v8::FunctionCallbackInfo<v8::Value>;
+
+#   define JS_TEMPLATE_SETNEW(tpl,cls,x) tpl->PrototypeTemplate()->Set( \
+      util::allocStringConserve( #x, Isolate::GetCurrent() ), \
+      FunctionTemplate::New( Isolate::GetCurrent(), []( const V8CallbackArgs& args ) { \
+        auto self = v8extunwrap<cls>( args.Data() ); \
+        self->js_##x( args.GetIsolate(), args ); \
+      }, v8extwrap( Isolate::GetCurrent(), this ) ) )
+
+    template <class T>
+    class WrapThatShit {
+      friend class Scripting;
     protected:
-      //! My JavaScript-exported constructor function template.
-      static Global<FunctionTemplate> constructor;
       //! My JavaScript-exported class name
       static string className;
-      //! Internal v8 object handle
-      Global<v8::Object> jsHandle_;
-      int jsReferences_;
+    public:
+      void wrappedRegisterObject( Isolate* isolate, v8::Local<v8::Object>& global )
+      {
+        global->Set( isolate->GetCurrentContext(),
+          js::util::allocStringConserve( className, isolate ),
+          wrappedImplCreateFunction( isolate )
+        ).FromJust();
+      }
     protected:
-      static Console* instance;
+      inline v8::Local<v8::Object> wrappedImplCreateFunction( Isolate* isolate )
+      {
+        v8::EscapableHandleScope scope( isolate );
+
+        auto tpl = FunctionTemplate::New( isolate );
+        tpl->SetClassName( util::allocString( className, isolate ) );
+        tpl->InstanceTemplate()->SetInternalFieldCount( 1 );
+
+        registerGlobals( tpl );
+
+        auto classFn = tpl->GetFunction( isolate->GetCurrentContext() ).ToLocalChecked();
+        auto classInst = classFn->NewInstance( isolate->GetCurrentContext() ).ToLocalChecked();
+        //auto ext = v8::External::New( isolate, instance );
+        //fninst->SetInternalField( 0, ext );
+
+        return scope.Escape( classInst );
+      }
+    public:
+      virtual void registerGlobals( v8::Local<v8::FunctionTemplate>& tpl ) = 0;
+    };
+
+#   define JS_TEMPLATE_SET(tpl,cls,x) JS_TEMPLATE_SETNEW(tpl,cls,x)
+
+    class Console: public WrapThatShit<Console> {
+      friend class Scripting;
+    public:
       ConsolePtr mConsole;
       explicit Console( ConsolePtr console );
-      //! JavaScript Console.print.
-      static void jsPrint( const FunctionCallbackInfo<v8::Value>& args );
-      //! JavaScript Console.getVariable.
-      static void jsGetVariable( const FunctionCallbackInfo<v8::Value>& args );
-      //! JavaScript Console.setVariable.
-      static void jsSetVariable( const FunctionCallbackInfo<v8::Value>& args );
-      //! JavaScript Console.execute.
-      static void jsExecute( const FunctionCallbackInfo<v8::Value>& args );
     public:
-      inline ConsolePtr getConsole() { return mConsole; }
-      void ref();
-      void unref();
-      inline Local<v8::Object> handle()
-      {
-        return handle( Isolate::GetCurrent() );
-      }
-      inline Local<v8::Object> handle( Isolate* isolate )
-      {
-        return Local<v8::Object>::New( isolate, persistent() );
-      }
-      inline Global<v8::Object>& persistent()
-      {
-        return jsHandle_;
-      }
-      void makeWeak();
-      static void initialize( ConsolePtr console, Isolate* isolate, Local<v8::Context> context );
-      static void shutdown();
+      void registerGlobals( v8::Local<v8::FunctionTemplate>& tpl ) override;
+    public:
+      //! JavaScript Console.print.
+      void js_print( Isolate* isolate, const V8CallbackArgs& args );
+      //! JavaScript Console.getVariable.
+      void js_getVariable( Isolate* isolate, const V8CallbackArgs& args );
+      //! JavaScript Console.setVariable.
+      void js_setVariable( Isolate* isolate, const V8CallbackArgs& args );
+      //! JavaScript Console.execute.
+      void js_execute( Isolate* isolate, const V8CallbackArgs& args );
     };
 
   }

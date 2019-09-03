@@ -32,18 +32,23 @@ namespace neko {
   };
 
   class ScriptingContext {
-  public:
-    utf8String scriptDirectory_;
+  private:
+    const bool externalIsolate_;
     v8::Isolate* isolate_;
     v8::Global<v8::Context> ctx_;
-    const bool externalIsolate_;
+    ScriptingPtr owner_;
+    void initialize();
+  public:
     ConsolePtr console_;
-    ScriptingContext( v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
+    utf8String scriptDirectory_;
+    ScriptingContext( ScriptingPtr owner, v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
     ~ScriptingContext();
     inline v8::Isolate* isolate() const throw() { return isolate_; }
+    inline v8::Global<v8::Context>& ctx() throw() { return ctx_; }
   };
 
-  class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {
+  class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator, public std::enable_shared_from_this<Scripting> {
+    friend class ScriptingContext;
   protected:
     unique_ptr<v8::Platform> platform_;
     ScriptingContextPtr global_;
@@ -54,9 +59,13 @@ namespace neko {
     virtual void* Allocate( size_t length ) override;
     virtual void* AllocateUninitialized( size_t length ) override;
     virtual void Free( void* data, size_t length ) override;
+  protected:
+    void registerTemplateGlobals( v8::Isolate* isolate, v8::Local<v8::ObjectTemplate>& global );
+    void registerContextGlobals( v8::Isolate* isolate, v8::Global<v8::Context>& globalContext );
   public:
     Scripting( EnginePtr engine );
     void initialize();
+    void postInitialize();
     void shutdown();
     virtual void preUpdate( GameTime time ) override;
     virtual void tick( GameTime tick, GameTime time ) override;

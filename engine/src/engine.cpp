@@ -56,6 +56,8 @@ namespace neko {
     scripting_->initialize();
     console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
 #endif
+
+    scripting_->postInitialize();
   }
 
   void Engine::signalStop()

@@ -11,6 +11,7 @@
 #include "memory.h"
 
 #include "js_console.h"
+#include "js_util.h"
 
 namespace neko {
 
@@ -50,18 +51,32 @@ namespace neko {
 
   void Scripting::initialize()
   {
-    global_ = make_shared<ScriptingContext>( this );
+    global_ = make_shared<ScriptingContext>( shared_from_this(), this );
     global_->scriptDirectory_ = rootDirectory_;
     global_->scriptDirectory_.append( "\\script\\" );
+  }
 
-    global_->console_ = engine_->console();
+  void Scripting::registerTemplateGlobals( v8::Isolate* isolate, v8::Local<v8::ObjectTemplate>& global )
+  {
+    // global->Set( js::util::allocString( "fuckyou" ),  )
+  }
 
-    js::Console::initialize( global_->console_, global_->isolate_, global_->isolate_->GetCurrentContext() );
+  void Scripting::registerContextGlobals( v8::Isolate* isolate, v8::Global<v8::Context>& globalContext )
+  {
+    v8::HandleScope handleScope( isolate );
 
+    auto context = v8::Local<v8::Context>::New( isolate, globalContext );
+
+    auto cnsl = new js::Console( engine_->console() );
+    cnsl->wrappedRegisterObject( isolate, context->Global() );
+  }
+
+  void Scripting::postInitialize()
+  {
     utf8String scriptFile = global_->scriptDirectory_ + "initialization.js";
     Script script( global_, scriptFile );
-    script.compile( global_->ctx_ );
-    script.execute( global_->ctx_ );
+    script.compile( global_->ctx() );
+    script.execute( global_->ctx() );
   }
 
   void* Scripting::Allocate( size_t length )

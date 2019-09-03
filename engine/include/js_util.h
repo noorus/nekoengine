@@ -15,16 +15,13 @@ namespace neko {
 #     define JS_TEMPLATE_ACCESSOR(tpl,x,y,z) tpl->PrototypeTemplate()->SetAccessor( \
         util::allocString( x ), y, z )
 
-#     define JS_TEMPLATE_SET(tpl,x,y) tpl->PrototypeTemplate()->Set( \
-        util::allocString( x ), FunctionTemplate::New( Isolate::GetCurrent(), y ) )
-
       //! Create a local JavaScript String instance from given source string.
       inline v8::Local<v8::String> allocString( const utf8String& str, v8::Isolate* isolate = nullptr )
       {
         v8::MaybeLocal<v8::String> ret = v8::String::NewFromUtf8(
           isolate ? isolate : v8::Isolate::GetCurrent(), str.c_str(), v8::NewStringType::kInternalized );
         if ( ret.IsEmpty() )
-          NEKO_EXCEPT( "String memory allocation failed" );
+          NEKO_EXCEPT( "V8 String allocation failed" );
         return ret.ToLocalChecked();
       }
 
@@ -34,7 +31,16 @@ namespace neko {
         v8::MaybeLocal<v8::String> ret = v8::String::NewFromTwoByte(
           isolate ? isolate : v8::Isolate::GetCurrent(), (uint16_t*)str.c_str(), v8::NewStringType::kInternalized );
         if ( ret.IsEmpty() )
-          NEKO_EXCEPT( "String memory allocation failed" );
+          NEKO_EXCEPT( "V8 String allocation failed" );
+        return ret.ToLocalChecked();
+      }
+
+      //! Create a local V8 String that will likely be duplicated (class names etc.)
+      inline v8::Local<v8::String> allocStringConserve( string_view str, v8::Isolate* isolate = nullptr )
+      {
+        auto ret = v8::String::NewFromUtf8( isolate ? isolate : v8::Isolate::GetCurrent(), str.data(), v8::NewStringType::kInternalized );
+        if ( ret.IsEmpty() )
+          NEKO_EXCEPT( "V8 String allocation failed" );
         return ret.ToLocalChecked();
       }
 

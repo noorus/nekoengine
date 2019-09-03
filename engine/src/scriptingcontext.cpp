@@ -16,16 +16,19 @@ namespace neko {
 
   using v8::HandleScope;
   using v8::ObjectTemplate;
+  using v8::FunctionTemplate;
   using v8::Isolate;
   using v8::Context;
   using v8::Local;
   using v8::Global;
 
-  ScriptingContext::ScriptingContext(
+  ScriptingContext::ScriptingContext( ScriptingPtr owner,
     v8::ArrayBuffer::Allocator* allocator,
     Isolate* isolate ):
-    isolate_( isolate ), externalIsolate_( isolate ? true : false )
+    owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false )
   {
+    assert( owner_ );
+
     if ( !isolate_ )
     {
       Isolate::CreateParams params;
@@ -36,16 +39,28 @@ namespace neko {
       isolate_->Enter();
     }
 
-    HandleScope scope( isolate_ );
+    console_ = owner_->engine_->console();
 
-    auto global = ObjectTemplate::New( isolate_ );
+    initialize();
+  }
 
-    auto context = v8::Context::New( isolate_, nullptr, global );
+  void ScriptingContext::initialize()
+  {
+    HandleScope handleScope( isolate_ );
+
+    auto globalObjectTemplate = ObjectTemplate::New( isolate_ );
+
+    owner_->registerTemplateGlobals( isolate_, globalObjectTemplate );
+
+    auto context = v8::Context::New( isolate_, nullptr, globalObjectTemplate );
     if ( context.IsEmpty() )
       NEKO_EXCEPT( "V8 context creation failed" );
 
-    context->Enter();
     ctx_.Reset( isolate_, context );
+
+    Context::Scope contextScope( context );
+
+    owner_->registerContextGlobals( isolate_, ctx_ );
   }
 
   ScriptingContext::~ScriptingContext()
