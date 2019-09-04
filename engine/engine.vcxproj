@@ -59,9 +59,9 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\freetype\include\freetype2\;$(SolutionDir)..\SDK\harfbuzz\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\freetype\include\freetype2\;$(SolutionDir)..\SDK\harfbuzz\include\;$(SolutionDir)..\SDK\zlib\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;LODEPNG_NO_COMPILE_ZLIB;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_TRACE_MAPS;V8_ENABLE_ALLOCATION_TIMEOUT;V8_ENABLE_FORCE_SLOW_PATH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_SNAPSHOT_NATIVE_CODE_COUNTERS;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_CHECK_MICROTASKS_SCOPES_CONSISTENCY;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_ENABLE_CHECKS;V8_TARGET_ARCH_X64;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_HANDLE_ZAPPING;ENABLE_DISASSEMBLER;ENABLE_MINOR_MC;OBJECT_PRINT;VERIFY_HEAP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_TRACE_MAPS;V8_ENABLE_ALLOCATION_TIMEOUT;V8_ENABLE_FORCE_SLOW_PATH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_SNAPSHOT_NATIVE_CODE_COUNTERS;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_CHECK_MICROTASKS_SCOPES_CONSISTENCY;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_ENABLE_CHECKS;V8_TARGET_ARCH_X64;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_HANDLE_ZAPPING;ENABLE_DISASSEMBLER;ENABLE_MINOR_MC;OBJECT_PRINT;VERIFY_HEAP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/bigobj /utf-8</AdditionalOptions>
       <CompileAsManaged>false</CompileAsManaged>
@@ -105,9 +105,9 @@
       <SDLCheck>
       </SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\freetype\include\freetype2\;$(SolutionDir)..\SDK\harfbuzz\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\freetype\include\freetype2\;$(SolutionDir)..\SDK\harfbuzz\include\;$(SolutionDir)..\SDK\zlib\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;WIN64;LODEPNG_NO_COMPILE_ZLIB;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_I18N_SUPPORT;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_TARGET_ARCH_X64;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_MINOR_MC;OBJECT_PRINT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;WIN64;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_I18N_SUPPORT;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_TARGET_ARCH_X64;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_MINOR_MC;OBJECT_PRINT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
@@ -153,16 +153,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\extern\lodepng\lodepng.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4267</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4267</DisableSpecificWarnings>
     </ClCompile>
-    <ClCompile Include="..\extern\v8pp\v8pp\class.cpp" />
-    <ClCompile Include="..\extern\v8pp\v8pp\context.cpp" />
-    <ClCompile Include="..\extern\v8pp\v8pp\convert.cpp" />
-    <ClCompile Include="..\extern\v8pp\v8pp\json.cpp" />
-    <ClCompile Include="..\extern\v8pp\v8pp\throw_ex.cpp" />
     <ClCompile Include="..\shared\src\exception.cpp" />
     <ClCompile Include="..\shared\src\platform_windows.cpp" />
     <ClCompile Include="src\camera.cpp" />
@@ -194,22 +191,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extern\lodepng\lodepng.h" />
-    <ClInclude Include="..\extern\v8pp\v8pp\call_from_v8.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\call_v8.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\class.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\config.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\context.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\convert.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\factory.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\function.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\json.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\module.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\object.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\persistent.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\property.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\ptr_traits.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\throw_ex.hpp" />
-    <ClInclude Include="..\extern\v8pp\v8pp\utility.hpp" />
     <ClInclude Include="..\shared\include\neko_config.h" />
     <ClInclude Include="..\shared\include\neko_exception.h" />
     <ClInclude Include="..\shared\include\neko_platform.h" />

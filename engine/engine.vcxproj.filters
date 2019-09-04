@@ -55,12 +55,6 @@
     <Filter Include="Source Files\engine">
       <UniqueIdentifier>{24988d51-f061-4d37-a58e-e6e816ff2720}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\extern\v8pp">
-      <UniqueIdentifier>{064b6a06-b489-4733-bfc1-ba3dce037b02}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\extern\v8pp">
-      <UniqueIdentifier>{085c4d49-204e-4bd8-880d-914d8cb7acdf}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -134,21 +128,6 @@
     </ClCompile>
     <ClCompile Include="src\js_console.cpp">
       <Filter>Source Files\scripting</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\v8pp\v8pp\class.cpp">
-      <Filter>Source Files\extern\v8pp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\v8pp\v8pp\context.cpp">
-      <Filter>Source Files\extern\v8pp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\v8pp\v8pp\convert.cpp">
-      <Filter>Source Files\extern\v8pp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\v8pp\v8pp\json.cpp">
-      <Filter>Source Files\extern\v8pp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\v8pp\v8pp\throw_ex.cpp">
-      <Filter>Source Files\extern\v8pp</Filter>
     </ClCompile>
     <ClCompile Include="src\scriptingcontext.cpp">
       <Filter>Source Files\scripting</Filter>
@@ -247,54 +226,6 @@
     </ClInclude>
     <ClInclude Include="include\js_console.h">
       <Filter>Header Files\scripting</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\call_from_v8.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\call_v8.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\class.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\config.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\context.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\convert.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\factory.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\function.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\json.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\module.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\object.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\persistent.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\property.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\ptr_traits.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\throw_ex.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\v8pp\v8pp\utility.hpp">
-      <Filter>Header Files\extern\v8pp</Filter>
     </ClInclude>
     <ClInclude Include="include\fontmanager.h">
       <Filter>Header Files\gfx</Filter>
