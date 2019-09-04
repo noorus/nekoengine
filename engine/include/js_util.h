@@ -26,16 +26,6 @@ namespace neko {
     using V8FunctionTemplate = v8::Local<v8::FunctionTemplate>;
     using V8Object = v8::Local<v8::Object>;
 
-    namespace dirty {
-
-      template <class T>
-      constexpr inline v8::Local<v8::External> externalWrap( v8::Isolate* isolate, T val )
-      {
-        return v8::External::New( isolate, (void*)val );
-      }
-
-    }
-
     namespace util {
 
 #     define JS_TEMPLATE_ACCESSOR(tpl,x,y,z) tpl->PrototypeTemplate()->SetAccessor( \

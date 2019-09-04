@@ -13,7 +13,7 @@ namespace neko {
       FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
         auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
         self->js_##x( args.GetIsolate(), args ); \
-      }, dirty::externalWrap( isolate, this ) ) )
+      }, v8::External::New( isolate, (void*)this ) ) )
 
     template <class T>
     class StaticObjectWrapper {
