@@ -34,13 +34,6 @@ namespace neko {
         return v8::External::New( isolate, (void*)val );
       }
 
-      template <class T>
-      constexpr inline T* externalUnwrap( v8::Local<v8::Value>& val )
-      {
-        auto self = v8::Local<v8::External>::Cast( val );
-        return static_cast<T*>( self->Value() );
-      }
-
     }
 
     namespace util {

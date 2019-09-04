@@ -27,7 +27,7 @@ namespace neko {
       //! JavaScript Console.execute.
       void js_execute( Isolate* isolate, const V8CallbackArgs& args );
     public:
-      static JSConsolePtr create( ConsolePtr console, Isolate* isolate, V8Object& global );
+      static JSConsolePtr create( ConsolePtr console, Isolate* isolate, V8Object global );
     };
 
   }

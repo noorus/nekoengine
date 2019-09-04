@@ -10,8 +10,6 @@
 #include "locator.h"
 #include "memory.h"
 
-#include "v8pp/convert.hpp"
-
 namespace neko {
 
   using v8::HandleScope;

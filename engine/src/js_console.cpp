@@ -2,10 +2,6 @@
 #include "js_console.h"
 #include "js_util.h"
 #include "console.h"
-#include "v8pp/convert.hpp"
-#include "v8pp/class.hpp"
-#include "v8pp/function.hpp"
-#include "v8pp/object.hpp"
 
 namespace neko {
 
@@ -17,7 +13,7 @@ namespace neko {
     {
     }
 
-    JSConsolePtr Console::create( ConsolePtr console, Isolate* isolate, V8Object& global )
+    JSConsolePtr Console::create( ConsolePtr console, Isolate* isolate, V8Object global )
     {
       auto instance = make_unique<Console>( move( console ) );
       instance->wrapperRegisterObject( isolate, global );

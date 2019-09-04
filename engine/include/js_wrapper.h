@@ -11,7 +11,7 @@ namespace neko {
 #   define JS_WRAPPER_SETMEMBER(tpl,cls,x) tpl->PrototypeTemplate()->Set( \
       util::allocStringConserve( #x, isolate ), \
       FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
-        auto self = dirty::externalUnwrap<cls>( args.Data() ); \
+        auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
         self->js_##x( args.GetIsolate(), args ); \
       }, dirty::externalWrap( isolate, this ) ) )
 
@@ -22,7 +22,7 @@ namespace neko {
       //! My JavaScript-exported class name
       static string className;
     protected:
-      void wrapperRegisterObject( Isolate* isolate, V8Object& global )
+      void wrapperRegisterObject( Isolate* isolate, V8Object global )
       {
         global->Set( isolate->GetCurrentContext(),
           js::util::allocStringConserve( className, isolate ),
