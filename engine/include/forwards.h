@@ -36,4 +36,7 @@ namespace neko {
   class ThreadedLoader;
   using ThreadedLoaderPtr = shared_ptr<ThreadedLoader>;
 
+  class FontManager;
+  using FontManagerPtr = shared_ptr<FontManager>;
+
 }

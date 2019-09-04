@@ -1,17 +1,23 @@
 #pragma once
 #include "utilities.h"
 #include "renderer.h"
+#include "fontmanager.h"
 
 namespace neko {
 
   struct LoadTask {
     enum LoadType {
-      Load_Texture
+      Load_Texture,
+      Load_Fontface
     } type_;
     struct TextureLoad {
       MaterialPtr material_;
       string path_;
     } textureLoad;
+    struct FontfaceLoad {
+      FontPtr font_;
+      utf8String path_;
+    } fontfaceLoad;
     LoadTask( MaterialPtr material, const string& path ): type_( Load_Texture )
     {
       textureLoad.material_ = move( material );

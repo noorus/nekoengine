@@ -153,6 +153,9 @@
     <ClCompile Include="src\scriptingcontext.cpp">
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
+    <ClCompile Include="src\fontmanager.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -292,6 +295,9 @@
     </ClInclude>
     <ClInclude Include="..\extern\v8pp\v8pp\utility.hpp">
       <Filter>Header Files\extern\v8pp</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fontmanager.h">
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

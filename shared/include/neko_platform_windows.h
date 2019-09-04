@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "neko_types.h"
 #include "neko_exception.h"
 //#include "consolelistener.h"
@@ -260,7 +260,14 @@ namespace neko {
         DWORD read = 0;
         if ( ReadFile( file_, (LPVOID)ret.data(), length, &read, nullptr ) != TRUE || read != length )
           NEKO_EXCEPT( "File read failed or length mismatch" );
-        return ret;
+        return move( ret );
+      }
+      void readFullVector( vector<uint8_t>& out )
+      {
+        out.resize( size_ );
+        DWORD read = 0;
+        if ( ReadFile( file_, (LPVOID)out.data(), size_, &read, nullptr ) != TRUE || read != size_ )
+          NEKO_EXCEPT( "File read failed or length mismatch" );
       }
     };
 

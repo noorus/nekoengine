@@ -87,11 +87,11 @@ namespace neko {
         char asd[256];
         sprintf_s( asd, 256, "ThreadedLoader::handleNewTasks processing texture from %s\r\n", task.textureLoad.path_.c_str() );
         OutputDebugStringA( asd );
-        vector<uint8_t> out;
+        vector<uint8_t> input;
         unsigned int width, height;
-        if ( lodepng::decode( out, width, height, task.textureLoad.path_, LCT_RGBA, 8 ) == 0 )
+        platform::FileReader( task.textureLoad.path_ ).readFullVector( input );
+        if ( lodepng::decode( task.textureLoad.material_->image_.data_, width, height, input.data(), input.size(), LCT_RGBA, 8 ) == 0 )
         {
-          task.textureLoad.material_->image_.data_.swap( out );
           task.textureLoad.material_->image_.width_ = width;
           task.textureLoad.material_->image_.height_ = height;
           task.textureLoad.material_->image_.format_ = Surface::PixFmtColorRGBA8;
@@ -104,6 +104,10 @@ namespace neko {
         {
           //task.textureLoad.material_->
         }
+      }
+      else if ( task.type_ == LoadTask::Load_Fontface )
+      {
+        //
       }
     }
 

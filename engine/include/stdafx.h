@@ -146,6 +146,27 @@
 
 #pragma warning( pop )
 
+// FreeType2
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_MODULE_H
+#include FT_MODULE_ERRORS_H
+#include FT_SIZES_H
+#include FT_OUTLINE_H
+#include FT_RENDER_H
+#include FT_DRIVER_H
+#include FT_STROKER_H
+#include FT_GLYPH_H
+#include FT_BBOX_H
+#include FT_CACHE_H
+#include FT_TRUETYPE_IDS_H
+#include FT_TRUETYPE_TABLES_H
+#include FT_TRUETYPE_TAGS_H
+
+// Harfbuzz
+#include <harfbuzz/hb.h>
+#include <harfbuzz/hb-ft.h>
+
 // Local types
 #include "neko_types.h"
 #include "nekomath.h"

@@ -28,8 +28,10 @@ namespace neko {
     ConsolePtr console_;
     GfxPtr gfx_;
     ScriptingPtr scripting_;
-    platform::PerformanceClock clock_;
     ThreadedLoaderPtr loader_;
+    FontManagerPtr fonts_;
+  protected:
+    platform::PerformanceClock clock_;
     GameTime time_;
     volatile Signal signal_;
   public:
@@ -38,6 +40,7 @@ namespace neko {
     inline ScriptingPtr scripting() throw() { return scripting_; }
     inline GameTime time() const throw() { return time_; }
     inline ThreadedLoaderPtr loader() throw() { return loader_; }
+    inline FontManagerPtr fonts() throw() { return fonts_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console );
