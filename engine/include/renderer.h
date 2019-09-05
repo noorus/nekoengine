@@ -27,6 +27,7 @@ namespace neko {
     enum PixelFormat {
       PixFmtColorRGB8,
       PixFmtColorRGBA8,
+      PixFmtColorRGBA8_A8Input,
       PixFmtDepthStencil24_8
     };
   protected:
@@ -166,6 +167,7 @@ namespace neko {
   public:
     Renderer( EnginePtr engine );
     void initialize();
+    MaterialPtr createTextureWithData( size_t width, size_t height, Surface::PixelFormat format, const void* data );
     void uploadTextures();
     void draw( CameraPtr camera );
     ~Renderer();

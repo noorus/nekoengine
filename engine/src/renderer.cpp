@@ -245,6 +245,17 @@ namespace neko {
     glDeleteFramebuffers( 1, &handle );
   }
 
+  MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, Surface::PixelFormat format, const void* data )
+  {
+    MaterialPtr mat = make_shared<Material>();
+    mat->image_.format_ = format;
+    mat->image_.width_ = width;
+    mat->image_.height_ = height;
+    mat->texture_ = make_shared<Texture>( this, mat->image_.width_, mat->image_.height_, mat->image_.format_, data );
+    mat->loaded_ = true;
+    return move( mat );
+  }
+
   void Renderer::sceneDraw( CameraPtr camera )
   {
     glDisable( GL_DEPTH_TEST );

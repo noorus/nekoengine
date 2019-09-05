@@ -26,10 +26,23 @@ namespace neko {
   struct Vertex2D {
     float x, y; //!< Vertex coordinates
     float s, t; //!< Texture coordinates
+    Vertex2D(): x( 0.0f ), y( 0.0f ), s( 0.0f ), t( 0.0f ) {}
+    Vertex2D( float x_, float y_, float s_, float t_ ): x( x_ ), y( y_ ), s( s_ ), t( t_ ) {}
   };
   struct PixelRGBA {
     uint8_t r, g, b, a;
   };
 #pragma pack( pop )
+
+  struct Mesh {
+    unsigned short* indices;
+    unsigned char* textureData;
+    unsigned int textureId;
+    Vertex2D* vertices;
+    unsigned int nbIndices;
+    unsigned int nbVertices;
+    GLuint vertexBuffer;
+    GLuint indexBuffer;
+  };
 
 }

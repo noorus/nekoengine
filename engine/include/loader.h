@@ -12,11 +12,13 @@ namespace neko {
     } type_;
     struct TextureLoad {
       MaterialPtr material_;
-      string path_;
+      utf8String path_;
     } textureLoad;
     struct FontfaceLoad {
       FontPtr font_;
+      FontManagerPtr manager_;
       utf8String path_;
+      float size_;
     } fontfaceLoad;
     LoadTask( MaterialPtr material, const string& path ): type_( Load_Texture )
     {

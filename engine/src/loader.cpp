@@ -107,7 +107,9 @@ namespace neko {
       }
       else if ( task.type_ == LoadTask::Load_Fontface )
       {
-        //
+        vector<uint8_t> input;
+        platform::FileReader( task.fontfaceLoad.path_ ).readFullVector( input );
+        task.fontfaceLoad.font_ = move( task.fontfaceLoad.manager_->loadFace( input.data(), input.size(), task.fontfaceLoad.size_ * 64, 72, 72 ) );
       }
     }
 
