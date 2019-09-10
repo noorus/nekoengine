@@ -34,6 +34,7 @@ namespace neko {
   };
 #pragma pack( pop )
 
+  // temp shit for freetype/hb testing
   struct Mesh {
     unsigned short* indices;
     unsigned char* textureData;

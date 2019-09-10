@@ -7,7 +7,7 @@ namespace neko {
 
   using namespace gl;
 
-  // MeshManager
+  // MeshManager: VBOs
 
   size_t MeshManager::pushVBO( vector<Vertex3D> vertices )
   {
@@ -51,13 +51,27 @@ namespace neko {
     vboUploadHelper( vbos2d_ );
   }
 
-  size_t MeshManager::pushVAO( VAO::VBOType type, size_t verticesVBO )
+  // MeshManager: VAOs
+
+  size_t MeshManager::pushVAO( VBOType type, size_t verticesVBO )
   {
-    if ( type == VAO::VBO_3D && ( verticesVBO >= vbos3d_.size() || !vbos3d_[verticesVBO].uploaded ) )
+    if ( type == VBO_3D && ( verticesVBO >= vbos3d_.size() || !vbos3d_[verticesVBO].uploaded ) )
       NEKO_EXCEPT( "VBO3D index out of bounds or VBO not uploaded while defining VAO" );
-    if ( type == VAO::VBO_2D && ( verticesVBO >= vbos2d_.size() || !vbos2d_[verticesVBO].uploaded ) )
+    if ( type == VBO_2D && ( verticesVBO >= vbos2d_.size() || !vbos2d_[verticesVBO].uploaded ) )
       NEKO_EXCEPT( "VBO2D index out of bounds or VBO not uploaded while defining VAO" );
     vaos_.emplace_back( type, verticesVBO );
+    return ( vaos_.size() - 1 );
+  }
+
+  size_t MeshManager::pushVAO( VBOType type, size_t verticesVBO, size_t indicesEBO )
+  {
+    if ( type == VBO_3D && ( verticesVBO >= vbos3d_.size() || !vbos3d_[verticesVBO].uploaded ) )
+      NEKO_EXCEPT( "VBO3D index out of bounds or VBO not uploaded while defining VAO" );
+    if ( type == VBO_2D && ( verticesVBO >= vbos2d_.size() || !vbos2d_[verticesVBO].uploaded ) )
+      NEKO_EXCEPT( "VBO2D index out of bounds or VBO not uploaded while defining VAO" );
+    if ( indicesEBO >= ebos_.size() || !ebos_[indicesEBO].uploaded_ )
+      NEKO_EXCEPT( "EBO index out of bounds or EBO not uploaded while defining VAO" );
+    vaos_.emplace_back( type, verticesVBO, indicesEBO );
     return ( vaos_.size() - 1 );
   }
 
@@ -72,7 +86,14 @@ namespace neko {
     glGenVertexArrays( (GLsizei)dirties.size(), ids.data() );
     for ( size_t i = 0; i < dirties.size(); ++i )
     {
-      if ( dirties[i]->vboType_ == VAO::VBO_3D )
+      EBO* ebo = nullptr;
+      if ( dirties[i]->useEBO_ )
+      {
+        ebo = &( ebos_[dirties[i]->ebo_] );
+        if ( !ebo->uploaded_ )
+          NEKO_EXCEPT( "EBO used for VAO has not been uploaded" );
+      }
+      if ( dirties[i]->vboType_ == VBO_3D )
       {
         auto vbo = &( vbos3d_[dirties[i]->vbo_] );
         if ( !vbo->uploaded )
@@ -80,19 +101,27 @@ namespace neko {
         dirties[i]->size_ = vbo->storage_.size();
         glBindVertexArray( ids[i] );
         glBindBuffer( GL_ARRAY_BUFFER, vbo->id );
+        if ( ebo )
+        {
+          glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo->id_ );
+        }
         glEnableVertexAttribArray( MeshAttrib_Position );
         glVertexAttribPointer( MeshAttrib_Position, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex3D ), nullptr ); // x, y, z
         glEnableVertexAttribArray( MeshAttrib_Texcoord );
         glVertexAttribPointer( MeshAttrib_Texcoord, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex3D ), (void*)( 3 * sizeof( float ) ) ); // s, t
         dirties[i]->size_ = vbo->storage_.size();
       }
-      else if ( dirties[i]->vboType_ == VAO::VBO_2D )
+      else if ( dirties[i]->vboType_ == VBO_2D )
       {
         auto vbo = &( vbos2d_[dirties[i]->vbo_] );
         if ( !vbo->uploaded )
           NEKO_EXCEPT( "VBO2D used for VAO has not been uploaded" );
         glBindVertexArray( ids[i] );
         glBindBuffer( GL_ARRAY_BUFFER, vbo->id );
+        if ( ebo )
+        {
+          glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo->id_ );
+        }
         glEnableVertexAttribArray( MeshAttrib_Position );
         glVertexAttribPointer( MeshAttrib_Position, 2, GL_FLOAT, GL_FALSE, sizeof( Vertex2D ), nullptr ); // x, y
         glEnableVertexAttribArray( MeshAttrib_Texcoord );
@@ -104,12 +133,28 @@ namespace neko {
       dirties[i]->id = ids[i];
       dirties[i]->uploaded_ = true;
 
+      glBindVertexArray( 0 );
+
       glDisableVertexAttribArray( MeshAttrib_Texcoord );
       glDisableVertexAttribArray( MeshAttrib_Position );
+      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
       glBindBuffer( GL_ARRAY_BUFFER, 0 );
-      glBindVertexArray( 0 );
     }
   }
+
+  void VAO::draw( GLenum mode )
+  {
+    glBindVertexArray( id );
+    //glEnableVertexAttribArray( MeshAttrib_Position );
+    //glEnableVertexAttribArray( MeshAttrib_Texcoord );
+    if ( useEBO_ )
+      glDrawElements( mode, (GLsizei)size_, GL_UNSIGNED_INT, 0 );
+    else
+      glDrawArrays( mode, 0, (GLsizei)size_ );
+    glBindVertexArray( 0 );
+  }
+
+  // MeshManager: EBOs
 
   size_t MeshManager::pushEBO( vector<GLuint> indexes )
   {
@@ -131,25 +176,11 @@ namespace neko {
     for ( size_t i = 0; i < dirties.size(); ++i )
     {
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ids[i] );
-      glBufferData( GL_ELEMENT_ARRAY_BUFFER, dirties[i]->storage_.size(), dirties[i]->storage_.data(), GL_STATIC_DRAW );
+      glBufferData( GL_ELEMENT_ARRAY_BUFFER, dirties[i]->storage_.size() * sizeof( GLuint ), dirties[i]->storage_.data(), GL_STATIC_DRAW );
       dirties[i]->id_ = ids[i];
       dirties[i]->uploaded_ = true;
     }
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-  }
-
-  void MeshManager::useEBO( size_t index )
-  {
-    assert( index >= 0 && index < ebos_.size() );
-  }
-
-  void VAO::draw( GLenum mode )
-  {
-    glBindVertexArray( id );
-    glEnableVertexAttribArray( MeshAttrib_Position );
-    glEnableVertexAttribArray( MeshAttrib_Texcoord );
-    glDrawArrays( mode, 0, (GLsizei)size_ );
-    glBindVertexArray( 0 );
   }
 
   void MeshManager::teardown()

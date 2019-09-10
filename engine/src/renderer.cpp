@@ -15,24 +15,24 @@ namespace neko {
 
     const vector<PixelRGBA> image4x4 =
     {
-      { 255, 0, 0, 255 },
-      { 0, 255, 0, 255 },
-      { 0, 0, 255, 255 },
-      { 255, 0, 255, 255 }
+      { 255, 0,   0,   255 },
+      { 0,   255, 0,   255 },
+      { 0,   0,   255, 255 },
+      { 255, 0,   255, 255 }
     };
 
-    /*const vector<GLuint> quadIndexes =
+    const vector<GLuint> quadIndices =
     {
-      0, 1, 2, 2, 3, 0
-    };*/
+      0, 1, 2, 3
+    };
 
     const vector<Vertex2D> quad2D =
     { // x      y     s     t
-    { -0.5f,  0.5f, 0.0f, 0.0f }, // 0
-    {  0.5f,  0.5f, 1.0f, 0.0f }, // 1
-    {  0.5f, -0.5f, 1.0f, 1.0f }, // 3
-    { -0.5f, -0.5f, 0.0f, 1.0f }, // 4
-    { -0.5f,  0.5f, 0.0f, 0.0f }  // 5
+      { -0.5f,  0.5f, 0.0f, 0.0f }, // 0
+      {  0.5f,  0.5f, 1.0f, 0.0f }, // 1
+      {  0.5f, -0.5f, 1.0f, 1.0f }, // 3
+      { -0.5f, -0.5f, 0.0f, 1.0f }, // 4
+      { -0.5f,  0.5f, 0.0f, 0.0f }  // 5
     };
 
     const vector<Vertex2D> quadStrip2D =
@@ -131,11 +131,11 @@ namespace neko {
     auto quadVBO = meshes_->pushVBO( static_geometry::quadStrip2D );
     auto screenVBO = meshes_->pushVBO( static_geometry::screenQuad );
     meshes_->uploadVBOs();
-    auto triangleVao = meshes_->pushVAO( VAO::VBO_2D, quadVBO );
-    auto screenVAO = meshes_->pushVAO( VAO::VBO_2D, screenVBO );
+    auto quadEBO = meshes_->pushEBO( static_geometry::quadIndices );
+    meshes_->uploadEBOs();
+    auto quadVAO = meshes_->pushVAO( VBO_2D, quadVBO, quadEBO );
+    auto screenVAO = meshes_->pushVAO( VBO_2D, screenVBO );
     meshes_->uploadVAOs();
-    /*auto quadEBO = meshes_->pushEBO( static_geometry::quadIndexes );
-    meshes_->uploadEBOs();*/
 
     g_texture = make_shared<Texture>( this, 2, 2, Surface::PixFmtColorRGBA8, (const void*)static_geometry::image4x4.data() );
   }
@@ -249,8 +249,8 @@ namespace neko {
   {
     MaterialPtr mat = make_shared<Material>();
     mat->image_.format_ = format;
-    mat->image_.width_ = width;
-    mat->image_.height_ = height;
+    mat->image_.width_ = (unsigned int)width;
+    mat->image_.height_ = (unsigned int)height;
     mat->texture_ = make_shared<Texture>( this, mat->image_.width_, mat->image_.height_, mat->image_.format_, data );
     mat->loaded_ = true;
     return move( mat );
