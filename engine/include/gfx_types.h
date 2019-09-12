@@ -34,6 +34,20 @@ namespace neko {
   };
 #pragma pack( pop )
 
+  enum PixelFormat {
+    PixFmtColorRGB8,
+    PixFmtColorRGBA8,
+    PixFmtColorRGBA8_A8Input,
+    PixFmtDepthStencil24_8
+  };
+
+  struct ImageData {
+    unsigned int width_;
+    unsigned int height_;
+    vector<uint8_t> data_;
+    PixelFormat format_;
+  };
+
   // temp shit for freetype/hb testing
   struct Mesh {
     unsigned short* indices;

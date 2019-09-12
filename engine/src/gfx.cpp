@@ -5,6 +5,7 @@
 #include "shaders.h"
 #include "renderer.h"
 #include "camera.h"
+#include "fontmanager.h"
 
 namespace neko {
 
@@ -14,6 +15,16 @@ namespace neko {
 
   const char cWindowTitle[] = "nekoengine-render";
   const vec4 cClearColor = vec4( 0.175f, 0.175f, 0.5f, 1.0f );
+
+  HBShaper* latinShaper = nullptr;
+  vector<Mesh*> meshes;
+
+  HBText hbt1 = {
+    "ficellé fffffi. VAV.",
+    "fr",
+    HB_SCRIPT_LATIN,
+    HB_DIRECTION_LTR
+  };
 
   Gfx::Gfx( EnginePtr engine ): Subsystem( move( engine ) )
   {
@@ -87,8 +98,8 @@ namespace neko {
 
     glEnable( GL_DEBUG_OUTPUT );
     glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
-    glDebugMessageCallback( Gfx::openglDebugCallbackFunction, this );
-    glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true );
+    //glDebugMessageCallback( Gfx::openglDebugCallbackFunction, this );
+    //glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true );
   }
 
   void Gfx::postInitialize()
@@ -108,12 +119,22 @@ namespace neko {
 
     renderer_->initialize();
 
+    latinShaper = new HBShaper( "DejaVuSerif.ttf", engine_->fonts() );
+    latinShaper->init();
+
     engine_->operationContinueVideo();
+
+    latinShaper->addFeature( HBFeature::KerningOn );
+
+    for ( auto mesh : latinShaper->drawText( renderer_, hbt1, 20, 320 ) )
+    {
+      meshes.push_back( mesh );
+    }
   }
 
   void Gfx::preUpdate( GameTime time )
   {
-    renderer_->uploadTextures();
+    renderer_->preUpdate( time );
   }
 
   void Gfx::tick( GameTime tick, GameTime time )
@@ -144,6 +165,9 @@ namespace neko {
     engine_->operationSuspendVideo();
 
     camera_.reset();
+
+    if ( latinShaper )
+      delete latinShaper;
 
     window_->close();
     window_.reset();

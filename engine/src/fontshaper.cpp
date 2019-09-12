@@ -46,6 +46,9 @@ namespace neko {
       int twidth = pow( 2, ceil( log( glyph.width ) / log( 2 ) ) );
       int theight = pow( 2, ceil( log( glyph.height ) / log( 2 ) ) );
 
+      if ( !twidth || !theight )
+        continue;
+
       auto tdata = new unsigned char[twidth * theight]();
 
       for ( int iy = 0; iy < glyph.height; ++iy )
@@ -82,7 +85,7 @@ namespace neko {
       m->indices = indices;
       m->textureData = tdata;
 
-      auto mat = renderer->createTextureWithData( twidth, theight, Surface::PixelFormat::PixFmtColorRGBA8_A8Input, tdata );
+      auto mat = renderer->createTextureWithData( twidth, theight, PixelFormat::PixFmtColorRGBA8_A8Input, tdata );
 
       // don't do this!! use atlas texture instead
       m->textureId = mat->texture_->handle();

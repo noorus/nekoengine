@@ -175,6 +175,12 @@ namespace neko {
       return utf8String( &conversion[0] );
     }
 
+    //! Show a modal error dialog.
+    inline void errorBox( string_view content, string_view title )
+    {
+      MessageBoxA( 0, content.data(), title.data(), MB_ICONERROR | MB_OK | MB_TASKMODAL );
+    }
+
     //! \class FileReader
     //! Native generic file reader implementation.
     class FileReader {

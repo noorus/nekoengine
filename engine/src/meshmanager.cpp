@@ -55,22 +55,22 @@ namespace neko {
 
   size_t MeshManager::pushVAO( VBOType type, size_t verticesVBO )
   {
-    if ( type == VBO_3D && ( verticesVBO >= vbos3d_.size() || !vbos3d_[verticesVBO].uploaded ) )
-      NEKO_EXCEPT( "VBO3D index out of bounds or VBO not uploaded while defining VAO" );
-    if ( type == VBO_2D && ( verticesVBO >= vbos2d_.size() || !vbos2d_[verticesVBO].uploaded ) )
-      NEKO_EXCEPT( "VBO2D index out of bounds or VBO not uploaded while defining VAO" );
+    if ( type == VBO_3D && verticesVBO >= vbos3d_.size() )
+      NEKO_EXCEPT( "VBO3D index out of bounds while defining VAO" );
+    if ( type == VBO_2D && verticesVBO >= vbos2d_.size() )
+      NEKO_EXCEPT( "VBO2D index out of bounds while defining VAO" );
     vaos_.emplace_back( type, verticesVBO );
     return ( vaos_.size() - 1 );
   }
 
   size_t MeshManager::pushVAO( VBOType type, size_t verticesVBO, size_t indicesEBO )
   {
-    if ( type == VBO_3D && ( verticesVBO >= vbos3d_.size() || !vbos3d_[verticesVBO].uploaded ) )
-      NEKO_EXCEPT( "VBO3D index out of bounds or VBO not uploaded while defining VAO" );
-    if ( type == VBO_2D && ( verticesVBO >= vbos2d_.size() || !vbos2d_[verticesVBO].uploaded ) )
-      NEKO_EXCEPT( "VBO2D index out of bounds or VBO not uploaded while defining VAO" );
-    if ( indicesEBO >= ebos_.size() || !ebos_[indicesEBO].uploaded_ )
-      NEKO_EXCEPT( "EBO index out of bounds or EBO not uploaded while defining VAO" );
+    if ( type == VBO_3D && verticesVBO >= vbos3d_.size() )
+      NEKO_EXCEPT( "VBO3D index out of bounds while defining VAO" );
+    if ( type == VBO_2D && verticesVBO >= vbos2d_.size() )
+      NEKO_EXCEPT( "VBO2D index out of bounds while defining VAO" );
+    if ( indicesEBO >= ebos_.size() )
+      NEKO_EXCEPT( "EBO index out of bounds while defining VAO" );
     vaos_.emplace_back( type, verticesVBO, indicesEBO );
     return ( vaos_.size() - 1 );
   }

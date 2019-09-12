@@ -18,6 +18,8 @@ inline int runMain()
 
   ConsolePtr console = make_shared<Console>();
 
+  Locator::provideConsole( console );
+
   platform::Thread consoleWindowThread( c_consoleThreadName,
     []( platform::Event& running, platform::Event& wantStop, void* argument ) -> bool
   {
@@ -41,6 +43,7 @@ inline int runMain()
   engine->shutdown();
   engine.reset();
 
+  Locator::provideConsole( ConsolePtr() );
   console.reset();
 
   platform::shutdown();
@@ -72,6 +75,15 @@ int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCm
 
   int retval = EXIT_SUCCESS;
 
+  auto exceptionReporter = []( string_view description )
+  {
+    if ( Locator::hasConsole() )
+    {
+      Locator::console().printf( Console::srcEngine, "Fatal: %s", description.data() );
+    }
+    platform::errorBox( description, "Exception" );
+  };
+
 #ifndef _DEBUG
   try
 #endif
@@ -81,12 +93,12 @@ int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCm
 #ifndef _DEBUG
   catch ( neko::Exception& e )
   {
-    MessageBoxA( 0, e.getFullDescription().c_str(), "Exception", MB_ICONERROR | MB_OK | MB_TASKMODAL );
+    exceptionReporter( e.getFullDescription() );
     return EXIT_FAILURE;
   }
   catch ( ... )
   {
-    MessageBoxA( 0, "Unknown exception!", "Exception", MB_ICONERROR | MB_OK | MB_TASKMODAL );
+    exceptionReporter( "Unknown exception!" );
     return EXIT_FAILURE;
   }
 #endif

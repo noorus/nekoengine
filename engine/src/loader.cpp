@@ -94,7 +94,7 @@ namespace neko {
         {
           task.textureLoad.material_->image_.width_ = width;
           task.textureLoad.material_->image_.height_ = height;
-          task.textureLoad.material_->image_.format_ = Surface::PixFmtColorRGBA8;
+          task.textureLoad.material_->image_.format_ = PixFmtColorRGBA8;
           task.textureLoad.material_->loaded_ = true;
           finishedTasksLock_.lock();
           finishedMaterials_.push_back( task.textureLoad.material_ );

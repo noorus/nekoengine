@@ -131,7 +131,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-main.lib;sfml-system.lib;sfml-window.lib;glbinding.lib;glbinding-aux.lib;opengl32.lib;icui18n.dll.lib;icuuc.dll.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;libz-static.lib;libbz2.lib;libpng16.lib;freetype.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;sfml-main.lib;sfml-system.lib;sfml-window.lib;glbinding.lib;glbinding-aux.lib;opengl32.lib;icui18n.dll.lib;icuuc.dll.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;libz-static.lib;libbz2.lib;libpng16.lib;freetype.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <SubSystem>Windows</SubSystem>
@@ -213,6 +213,7 @@
     <ClInclude Include="include\js_wrapper.h" />
     <ClInclude Include="include\loader.h" />
     <ClInclude Include="include\locator.h" />
+    <ClInclude Include="include\materials.h" />
     <ClInclude Include="include\memory.h" />
     <ClInclude Include="include\meshmanager.h" />
     <ClInclude Include="include\nekomath.h" />
@@ -221,6 +222,7 @@
     <ClInclude Include="include\shaders.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\subsystem.h" />
+    <ClInclude Include="include\textures.h" />
     <ClInclude Include="include\utilities.h" />
   </ItemGroup>
   <ItemGroup>

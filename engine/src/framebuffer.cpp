@@ -25,8 +25,8 @@ namespace neko {
 
     // currently using a static framebuffer format:
     // 8-bit RGB color, 24-bit depth, 8-bit stencil
-    colorBuffer_ = make_shared<Texture>( renderer_, width_, height_, Surface::PixFmtColorRGB8, nullptr );
-    depthStencilBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, Surface::PixFmtDepthStencil24_8 );
+    colorBuffer_ = make_shared<Texture>( renderer_, width_, height_, PixFmtColorRGB8, nullptr );
+    depthStencilBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepthStencil24_8 );
 
     glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
     glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer_->handle(), 0 );

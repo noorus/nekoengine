@@ -55,14 +55,22 @@ namespace neko {
 
   }
 
+  const int64_t c_glVersion[2] = { 4, 5 };
+
   static TexturePtr g_texture;
   static FramebufferPtr g_framebuf;
 
-  void glFetchInformation( GLInformation& info )
+  void glStartupFetchAndCheck( GLInformation& info )
   {
     auto glbAuxStr = []( GLenum e ) -> utf8String
     {
       return glbinding::aux::Meta::getString( e );
+    };
+    auto glvGetI32NoThrow = []( GLenum e  ) -> int32_t
+    {
+      GLint data = 0;
+      glGetIntegerv( e, &data );
+      return data;
     };
     auto glvGetI64 = [glbAuxStr]( GLenum e, int64_t& target, bool doNotThrow = false ) -> bool
     {
@@ -80,8 +88,24 @@ namespace neko {
     };
 
     // OpenGL version
-    glvGetI64( GL_MAJOR_VERSION, info.versionMajor );
-    glvGetI64( GL_MINOR_VERSION, info.versionMinor );
+    info.versionMajor = glvGetI32NoThrow( GL_MAJOR_VERSION );
+    info.versionMinor = glvGetI32NoThrow( GL_MINOR_VERSION );
+
+    // Bail out if the version isn't up to task.
+    // The following (newer) calls might otherwise fail in a less controlled way.
+    // For example, glGetInteger64v already requires OpenGL 3.2
+    if ( info.versionMajor < c_glVersion[0] || ( info.versionMajor == c_glVersion[0] && info.versionMinor < c_glVersion[1] ) )
+    {
+      // Be all pretty and informative about it.
+      std::stringstream description;
+      description << "Insufficient OpenGL version - Got ";
+      if ( info.versionMajor == 0 )
+        description << "ancient";
+      else
+        description << info.versionMajor << "." << info.versionMinor;
+      description << "; Expected at least " << c_glVersion[0] << "." << c_glVersion[1];
+      NEKO_EXCEPT( description.str() );
+    }
 
     // Max buffer sizes
     glvGetI64( GL_MAX_TEXTURE_SIZE, info.maxTextureSize );
@@ -119,10 +143,7 @@ namespace neko {
   {
     clearErrors();
 
-    glFetchInformation( info_ );
-
-    if ( info_.versionMajor < 3 || ( info_.versionMajor == 3 && info_.versionMinor < 3 ) )
-      NEKO_EXCEPT( "Insufficient OpenGL version" );
+    glStartupFetchAndCheck( info_ );
 
     shaders_ = make_shared<Shaders>( engine_ );
     shaders_->initialize();
@@ -130,14 +151,11 @@ namespace neko {
     meshes_ = make_shared<MeshManager>();
     auto quadVBO = meshes_->pushVBO( static_geometry::quadStrip2D );
     auto screenVBO = meshes_->pushVBO( static_geometry::screenQuad );
-    meshes_->uploadVBOs();
     auto quadEBO = meshes_->pushEBO( static_geometry::quadIndices );
-    meshes_->uploadEBOs();
     auto quadVAO = meshes_->pushVAO( VBO_2D, quadVBO, quadEBO );
     auto screenVAO = meshes_->pushVAO( VBO_2D, screenVBO );
-    meshes_->uploadVAOs();
 
-    g_texture = make_shared<Texture>( this, 2, 2, Surface::PixFmtColorRGBA8, (const void*)static_geometry::image4x4.data() );
+    g_texture = make_shared<Texture>( this, 2, 2, PixFmtColorRGBA8, (const void*)static_geometry::image4x4.data() );
   }
 
   void Renderer::initialize()
@@ -162,6 +180,16 @@ namespace neko {
         continue;
       mat->texture_ = make_shared<Texture>( this, mat->image_.width_, mat->image_.height_, mat->image_.format_, mat->image_.data_.data() );
     }
+  }
+
+  void Renderer::preUpdate( GameTime time )
+  {
+    uploadTextures();
+    // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point when we try to create the VAO.
+    // Thus uploading the VAOs should always come last.
+    meshes_->uploadVBOs();
+    meshes_->uploadEBOs();
+    meshes_->uploadVAOs();
   }
 
   //! Called by Texture::Texture()
@@ -245,7 +273,7 @@ namespace neko {
     glDeleteFramebuffers( 1, &handle );
   }
 
-  MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, Surface::PixelFormat format, const void* data )
+  MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data )
   {
     MaterialPtr mat = make_shared<Material>();
     mat->image_.format_ = format;
