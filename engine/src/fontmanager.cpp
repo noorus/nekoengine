@@ -31,7 +31,7 @@ namespace neko {
       NEKO_EXCEPT( "FreeType library creation failed" );
 
     FT_Add_Default_Modules( freeType_ );
-    // FT_Set_Default_Properties( freeType_ ); // TODO this uses an env variable? wtf, replace
+    FT_Set_Default_Properties( freeType_ ); // TODO this uses an env variable? wtf, replace
   }
 
   FontPtr FontManager::loadFace( uint8_t* buffer, size_t length, int32_t pointSize, uint32_t hDPI, uint32_t vDPI )

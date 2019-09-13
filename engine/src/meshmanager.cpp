@@ -133,6 +133,7 @@ namespace neko {
       dirties[i]->id = ids[i];
       dirties[i]->uploaded_ = true;
 
+      // Unbind the VAO !BEFORE! unbinding any attributes, VBOs or EBOs that are now bound to the VAO!
       glBindVertexArray( 0 );
 
       glDisableVertexAttribArray( MeshAttrib_Texcoord );
@@ -145,8 +146,6 @@ namespace neko {
   void VAO::draw( GLenum mode )
   {
     glBindVertexArray( id );
-    //glEnableVertexAttribArray( MeshAttrib_Position );
-    //glEnableVertexAttribArray( MeshAttrib_Texcoord );
     if ( useEBO_ )
       glDrawElements( mode, (GLsizei)size_, GL_UNSIGNED_INT, 0 );
     else

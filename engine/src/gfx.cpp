@@ -6,6 +6,7 @@
 #include "renderer.h"
 #include "camera.h"
 #include "fontmanager.h"
+#include "console.h"
 
 namespace neko {
 
@@ -15,6 +16,13 @@ namespace neko {
 
   const char cWindowTitle[] = "nekoengine-render";
   const vec4 cClearColor = vec4( 0.175f, 0.175f, 0.5f, 1.0f );
+
+  NEKO_DECLARE_CONVAR( vid_screenwidth,
+    "Screen width. Changes are applied when the renderer is restarted.", 1280 );
+  NEKO_DECLARE_CONVAR( vid_screenheight,
+    "Screen height. Changes are applied when the renderer is restarted.", 720 );
+  NEKO_DECLARE_CONVAR( gl_debuglog,
+    "Whether to print OpenGL debug log output.", true );
 
   HBShaper* latinShaper = nullptr;
   vector<Mesh*> meshes;
@@ -47,12 +55,27 @@ namespace neko {
     gfx->engine_->console()->printf( Console::srcGfx, "OpenGL Debug: %s", message );
   }
 
+  void Gfx::setOpenGLDebugLogging( const bool enable )
+  {
+    if ( enable )
+    {
+      glEnable( GL_DEBUG_OUTPUT );
+      glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
+      glDebugMessageCallback( Gfx::openglDebugCallbackFunction, this );
+      glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true );
+    } else
+    {
+      glDisable( GL_DEBUG_OUTPUT );
+      glDisable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
+    }
+  }
+
   void Gfx::preInitialize()
   {
     info_.clear();
 
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-    sf::VideoMode videoMode( 1280, 720, desktop.bitsPerPixel );
+    sf::VideoMode videoMode( g_CVar_vid_screenwidth.as_i(), g_CVar_vid_screenheight.as_i(), desktop.bitsPerPixel );
 
     sf::ContextSettings settings;
     settings.depthBits = 24;
@@ -84,22 +107,7 @@ namespace neko {
 
     printInfo();
 
-    glDisable( GL_DEPTH_TEST );
-    glDisable( GL_CULL_FACE );
-
-    glEnable( GL_MULTISAMPLE );
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-    // Smoothing can generate sub-fragments and cause visible ridges between triangles.
-    // Use a framebuffer for AA instead.
-    glDisable( GL_LINE_SMOOTH );
-    glDisable( GL_POLYGON_SMOOTH );
-
-    glEnable( GL_DEBUG_OUTPUT );
-    glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
-    //glDebugMessageCallback( Gfx::openglDebugCallbackFunction, this );
-    //glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true );
+    setOpenGLDebugLogging( g_CVar_gl_debuglog.as_b() );
   }
 
   void Gfx::postInitialize()
@@ -134,7 +142,7 @@ namespace neko {
 
   void Gfx::preUpdate( GameTime time )
   {
-    renderer_->preUpdate( time );
+    renderer_->prepare( time );
   }
 
   void Gfx::tick( GameTime tick, GameTime time )

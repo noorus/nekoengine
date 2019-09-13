@@ -5,6 +5,10 @@
 
 namespace neko {
 
+  NEKO_EXTERN_CONVAR( vid_screenwidth );
+  NEKO_EXTERN_CONVAR( vid_screenheight );
+  NEKO_EXTERN_CONVAR( gl_debuglog );
+
   class Gfx: public Subsystem {
   public:
     struct Info {
@@ -29,6 +33,7 @@ namespace neko {
   private:
     static void openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity,
       GLsizei length, const GLchar* message, const void* userParam );
+    void setOpenGLDebugLogging( const bool enable );
   public:
     void postInitialize();
     Gfx( EnginePtr engine );

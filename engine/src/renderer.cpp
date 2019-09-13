@@ -182,9 +182,11 @@ namespace neko {
     }
   }
 
-  void Renderer::preUpdate( GameTime time )
+  void Renderer::prepare( GameTime time )
   {
+    // Upload any new textures. Could this be parallellized?
     uploadTextures();
+
     // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point when we try to create the VAO.
     // Thus uploading the VAOs should always come last.
     meshes_->uploadVBOs();
@@ -203,16 +205,16 @@ namespace neko {
 
     glBindTexture( GL_TEXTURE_2D, handle );
 
-    // assumptions for now
+    // Assumptions for now
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
-    // assumptions for now
+    // Assumptions for now
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     // 1 byte alignment - i.e. unaligned.
-    // could boost performance to use aligned memory in the future.
+    // Could boost performance to use aligned memory in the future.
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
     glTexImage2D( GL_TEXTURE_2D, 0, format, (GLsizei)width, (GLsizei)height, 0, internalFormat, internalType, data );
@@ -310,11 +312,24 @@ namespace neko {
     if ( !g_framebuf->available() )
       return;
 
+    glDisable( GL_DEPTH_TEST );
+    glDisable( GL_CULL_FACE );
+
+    glEnable( GL_MULTISAMPLE );
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    // Smoothing can generate sub-fragments and cause visible ridges between triangles.
+    // Use a framebuffer for AA instead.
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_POLYGON_SMOOTH );
+
+    // Draw the scene inside the framebuffer.
     g_framebuf->begin();
     sceneDraw( camera );
     g_framebuf->end();
 
-    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    // Framebuffer has been unbound, now draw to the default context, the window.
     glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT );
 
