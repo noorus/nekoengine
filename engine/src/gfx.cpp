@@ -24,16 +24,6 @@ namespace neko {
   NEKO_DECLARE_CONVAR( gl_debuglog,
     "Whether to print OpenGL debug log output.", true );
 
-  HBShaper* latinShaper = nullptr;
-  vector<Mesh*> meshes;
-
-  HBText hbt1 = {
-    "ficellé fffffi. VAV.",
-    "fr",
-    HB_SCRIPT_LATIN,
-    HB_DIRECTION_LTR
-  };
-
   Gfx::Gfx( EnginePtr engine ): Subsystem( move( engine ) )
   {
     preInitialize();
@@ -127,17 +117,7 @@ namespace neko {
 
     renderer_->initialize();
 
-    latinShaper = new HBShaper( "DejaVuSerif.ttf", engine_->fonts() );
-    latinShaper->init();
-
     engine_->operationContinueVideo();
-
-    latinShaper->addFeature( HBFeature::KerningOn );
-
-    for ( auto mesh : latinShaper->drawText( renderer_, hbt1, 20, 320 ) )
-    {
-      meshes.push_back( mesh );
-    }
   }
 
   void Gfx::preUpdate( GameTime time )
@@ -173,9 +153,6 @@ namespace neko {
     engine_->operationSuspendVideo();
 
     camera_.reset();
-
-    if ( latinShaper )
-      delete latinShaper;
 
     window_->close();
     window_.reset();
