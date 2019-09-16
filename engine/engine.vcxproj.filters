@@ -81,9 +81,6 @@
     <ClCompile Include="src\locator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\extern\lodepng\lodepng.cpp">
       <Filter>Source Files\extern</Filter>
     </ClCompile>
@@ -136,6 +133,9 @@
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="src\fontshaper.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\camera.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
   </ItemGroup>

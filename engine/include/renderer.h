@@ -44,11 +44,12 @@ namespace neko {
     void clearErrors();
   public:
     Renderer( EnginePtr engine );
-    void initialize();
+    void initialize( size_t width, size_t height );
     MaterialPtr createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data );
     void prepare( GameTime time );
     void uploadTextures();
     void draw( CameraPtr camera );
+    void reset( size_t width, size_t height );
     ~Renderer();
   };
 

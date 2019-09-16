@@ -14,7 +14,7 @@ namespace neko {
 
   // Gfx
 
-  const char cWindowTitle[] = "nekoengine-render";
+  const char cWindowTitle[] = "nekoengine//render";
   const vec4 cClearColor = vec4( 0.175f, 0.175f, 0.5f, 1.0f );
 
   NEKO_DECLARE_CONVAR( vid_screenwidth,
@@ -53,7 +53,8 @@ namespace neko {
       glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
       glDebugMessageCallback( Gfx::openglDebugCallbackFunction, this );
       glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true );
-    } else
+    }
+    else
     {
       glDisable( GL_DEBUG_OUTPUT );
       glDisable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
@@ -102,20 +103,14 @@ namespace neko {
 
   void Gfx::postInitialize()
   {
-    int width, height;
-    width = window_->getSize().x;
-    height = window_->getSize().y;
-
     renderer_ = make_shared<Renderer>( engine_ );
 
-    auto realResolution = vec2( (Real)width, (Real)height );
+    auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
     camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, 0.0f ) );
 
-    engine_->console()->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
-    glViewport( 0, 0, width, height );
-    glClearColor( cClearColor.r, cClearColor.g, cClearColor.b, cClearColor.a );
+    resize( window_->getSize().x, window_->getSize().y );
 
-    renderer_->initialize();
+    renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
 
     engine_->operationContinueVideo();
   }
@@ -123,6 +118,19 @@ namespace neko {
   void Gfx::preUpdate( GameTime time )
   {
     renderer_->prepare( time );
+  }
+
+  void Gfx::resize( size_t width, size_t height )
+  {
+    viewport_.size_ = vec2i( width, height );
+
+    engine_->console()->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
+
+    auto realResolution = vec2( (Real)width, (Real)height );
+    camera_->setViewport( realResolution );
+
+    glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
+    glClearColor( cClearColor.r, cClearColor.g, cClearColor.b, cClearColor.a );
   }
 
   void Gfx::tick( GameTime tick, GameTime time )
@@ -133,6 +141,11 @@ namespace neko {
     {
       if ( evt.type == sf::Event::Closed )
         engine_->signalStop();
+      else if ( evt.type == sf::Event::Resized )
+      {
+        resize( evt.size.width, evt.size.height );
+        flags_.resized = true;
+      }
     }
 
     camera_->update( tick, time );
@@ -140,8 +153,15 @@ namespace neko {
 
   void Gfx::postUpdate( GameTime delta, GameTime time )
   {
-    // activate as current context, just to be sure
+    // activate as current context
     window_->setActive( true );
+
+    if ( flags_.resized )
+    {
+      renderer_->reset( viewport_.size_.x, viewport_.size_.y );
+      flags_.resized = false;
+      window_->setActive( true );
+    }
 
     renderer_->draw( camera_ );
 

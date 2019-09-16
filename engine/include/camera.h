@@ -11,7 +11,8 @@ namespace neko {
     mat4 view_;
     mat4 projection_;
   public:
-    Camera( vec2 resolution, vec3 position );
+    Camera( vec2 viewport, vec3 position );
+    void setViewport( vec2 resolution );
     void update( GameTime delta, GameTime time );
     inline const mat4& view() const throw() { return view_; }
     inline const mat4& projection() const throw() { return projection_; }

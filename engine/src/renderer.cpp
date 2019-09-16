@@ -158,14 +158,21 @@ namespace neko {
     g_texture = make_shared<Texture>( this, 2, 2, PixFmtColorRGBA8, (const void*)static_geometry::image4x4.data() );
   }
 
-  void Renderer::initialize()
+  void Renderer::initialize( size_t width, size_t height )
   {
     MaterialPtr myMat = make_shared<Material>();
     materials_.push_back( myMat );
     engine_->loader()->addLoadTask( { LoadTask( myMat, R"(data\textures\test.png)" ) } );
 
     g_framebuf = make_shared<Framebuffer>( this );
-    g_framebuf->recreate( 1280, 720 );
+
+    reset( width, height );
+  }
+
+  void Renderer::reset( size_t width, size_t height )
+  {
+    assert( g_framebuf );
+    g_framebuf->recreate( width, height );
   }
 
   void Renderer::uploadTextures()
