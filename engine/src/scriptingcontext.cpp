@@ -9,6 +9,7 @@
 #include "console.h"
 #include "locator.h"
 #include "memory.h"
+#include "js_math.h"
 
 namespace neko {
 
@@ -65,7 +66,7 @@ namespace neko {
 
   void ScriptingContext::registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global )
   {
-    // global->Set( js::util::allocString( "fuckyou" ),  )
+    jsVector2_.initialize( isolate_, global );
   }
 
   void ScriptingContext::registerContextGlobals( v8::Global<v8::Context>& globalContext )

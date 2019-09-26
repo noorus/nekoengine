@@ -5,6 +5,7 @@
 #include "forwards.h"
 #include "subsystem.h"
 #include "js_console.h"
+#include "js_math.h"
 
 namespace neko {
 
@@ -44,6 +45,7 @@ namespace neko {
     void registerContextGlobals( v8::Global<v8::Context>& globalContext );
   protected:
     js::JSConsolePtr jsConsole_;
+    js::DynamicObjectConstructor<js::Vector2> jsVector2_;
   public:
     ConsolePtr console_;
     utf8String scriptDirectory_;

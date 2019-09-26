@@ -8,6 +8,7 @@ namespace neko {
   namespace js {
 
     string Console::className( "Console" );
+    WrappedType Console::internalType = Wrapped_Console;
 
     Console::Console( ConsolePtr console ): console_( move( console ) )
     {

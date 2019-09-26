@@ -72,6 +72,16 @@ namespace neko {
         isolate->ThrowException( allocString( buffer, isolate ) );
       }
 
+      inline Real extractNumberComponent( v8::Isolate* isolate, v8::MaybeLocal<v8::Object>& obj, string_view name, Real defval )
+      {
+        if ( obj.IsEmpty() )
+          return defval;
+        auto val = obj.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
+        if ( val.IsEmpty() || !val->IsNumber() )
+          return defval;
+        return static_cast<Real>( val->NumberValue( isolate->GetCurrentContext() ).FromMaybe( static_cast<double>( defval ) ) );
+      }
+
     }
 
   }
