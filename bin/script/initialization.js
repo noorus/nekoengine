@@ -1,3 +1,11 @@
 let poop = 1337;
 let asd = ( poop * 3 );
 Console.print(["aint that some shit?!!", asd, poop].join(" "));
+Console.print("let's test the vector thingy");
+let x = new vec2(1,1);
+let y = new vec2(3,3);
+Console.print(x);
+Console.print(y);
+Console.print(x.midPoint(y));
+Console.print(x.constructor);
+Console.print(x.midPoint);

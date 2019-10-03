@@ -25,6 +25,7 @@ namespace neko {
     using V8CallbackArgs = v8::FunctionCallbackInfo<v8::Value>;
     using V8FunctionTemplate = v8::Local<v8::FunctionTemplate>;
     using V8Object = v8::Local<v8::Object>;
+    using V8Context = v8::Local<v8::Context>;
 
     namespace util {
 

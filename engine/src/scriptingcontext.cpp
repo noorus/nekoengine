@@ -38,6 +38,8 @@ namespace neko {
       isolate_->Enter();
     }
 
+    isolate_->SetData( js::IsolateData_ScriptingContext, this );
+
     console_ = owner_->engine_->console();
 
     initialize();
@@ -66,7 +68,7 @@ namespace neko {
 
   void ScriptingContext::registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global )
   {
-    jsVector2_.initialize( isolate_, global );
+    vec2Registry_.initialize( isolate_, global );
   }
 
   void ScriptingContext::registerContextGlobals( v8::Global<v8::Context>& globalContext )
@@ -80,17 +82,12 @@ namespace neko {
 
   void ScriptingContext::tick()
   {
-    Isolate::Scope isolateScope( isolate_ );
-    v8::HandleScope handleScope( isolate_ );
-
-    auto context = v8::Local<v8::Context>::New( isolate_, ctx_ );
-    Context::Scope contextScope( context );
-
     v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_, v8::platform::MessageLoopBehavior::kDoNotWait );
   }
 
   ScriptingContext::~ScriptingContext()
   {
+    vec2Registry_.clear();
     jsConsole_.reset();
 
     ctx_.Reset();
@@ -100,9 +97,8 @@ namespace neko {
       isolate_->Exit();
       isolate_->ContextDisposedNotification();
       // None of these matter. It still leaks f*****g memory.
-      /*isolate_->IdleNotificationDeadline( platform_->MonotonicallyIncreasingTime() + 1.0 );
+      isolate_->IdleNotificationDeadline( owner_->platform_->MonotonicallyIncreasingTime() + 1.0 );
       isolate_->LowMemoryNotification();
-      Sleep( 2000 );*/
       isolate_->TerminateExecution();
       isolate_->Dispose();
     }

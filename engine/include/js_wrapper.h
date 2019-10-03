@@ -8,46 +8,111 @@ namespace neko {
 
   namespace js {
 
-#   define JS_WRAPPER_SETMEMBER(tpl,cls,x) tpl->PrototypeTemplate()->Set( \
-      util::allocStringConserve( #x, isolate ), \
-      FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
-        auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
-        self->js_##x( args.GetIsolate(), args ); \
-      }, v8::External::New( isolate, (void*)this ) ) )
-
-#   define JS_WRAPPER_SETACCESSOR(obj,cls,x,valInternal) obj->PrototypeTemplate()->SetAccessor( \
-      util::allocStringConserve( #x, isolate ), []( Local<v8::String> prop, const PropertyCallbackInfo<v8::Value>& info ) { \
-        auto self = info.This(); \
-        assert( self->InternalFieldCount() >= Max_WrapField ); \
-        assert( self->GetInternalField( WrapField_Type )->Uint32Value( info.GetIsolate()->GetCurrentContext() ).FromMaybe( 9999 ) == internalType ); \
-        auto obj = static_cast<cls*>( self->GetAlignedPointerFromInternalField( WrapField_Pointer ) ); \
-        obj->js_get##valInternal( prop, info ); \
-      }, []( Local<v8::String> prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info ) { \
-        auto self = info.This(); \
-        assert( self->InternalFieldCount() >= Max_WrapField ); \
-        assert( self->GetInternalField( WrapField_Type )->Uint32Value( info.GetIsolate()->GetCurrentContext() ).FromMaybe( 9999 ) == internalType ); \
-        auto obj = static_cast<cls*>( self->GetAlignedPointerFromInternalField( WrapField_Pointer ) ); \
-        obj->js_set##valInternal( prop, value, info ); \
-      } )
-
-#   define JS_WRAPPER_SETINTMEMBER(obj,cls,x) obj->PrototypeTemplate()->Set( \
-      util::allocStringConserve( #x, isolate ), FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
-        auto self = args.This(); \
-        assert( self->InternalFieldCount() >= Max_WrapField ); \
-        assert( self->GetInternalField( WrapField_Type )->Uint32Value( args.GetIsolate()->GetCurrentContext() ).FromMaybe( 9999 ) == internalType ); \
-        auto obj = static_cast<cls*>( self->GetAlignedPointerFromInternalField( WrapField_Pointer ) ); \
-        obj->js_##x( args ); \
-    } ) )
-
     enum WrappedType {
-      Wrapped_Console,
-      Wrapped_Vector2
+      Wrapped_Console, //!< Static: JSConsole
+      Wrapped_Math, //!< Static: JSMath
+      Wrapped_Vector2 //!< Dynamic: Vector2
     };
 
     enum WrappedFieldIndex {
       WrapField_Type,
       WrapField_Pointer,
       Max_WrapField
+    };
+
+    namespace util {
+
+      inline bool isWrappedType( V8Context& ctx, V8Object& object, WrappedType type )
+      {
+        if ( object->InternalFieldCount() != Max_WrapField )
+          return false;
+        auto val = object->GetInternalField( WrapField_Type );
+        if ( val.IsEmpty() || !val->IsUint32() )
+          return false;
+        return ( val->Uint32Value( ctx ).FromMaybe( Max_WrapField ) == type );
+      }
+
+    }
+
+    //! Use this to create member functions for static-wrapped objects (instances).
+#   define JS_WRAPPER_SETOBJMEMBER(tpl,cls,x) tpl->PrototypeTemplate()->Set( \
+      util::allocStringConserve( #x, isolate ), \
+      FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
+        auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
+        self->js_##x( args.GetIsolate(), args ); \
+      }, v8::External::New( isolate, (void*)this ) ) )
+
+    //! Use this to create accessors for variables in dynamic-wrapped objects' templates.
+#   define JS_WRAPPER_SETACCESSOR(obj,cls,x,valInternal) obj->PrototypeTemplate()->SetAccessor( \
+      util::allocStringConserve( #x, isolate ), []( Local<v8::String> prop, const PropertyCallbackInfo<v8::Value>& info ) { \
+        auto self = info.This(); \
+        if ( !util::isWrappedType( info.GetIsolate()->GetCurrentContext(), self, internalType ) ) \
+          return; \
+        auto obj = static_cast<cls*>( self->GetAlignedPointerFromInternalField( WrapField_Pointer ) ); \
+        obj->js_get##valInternal( prop, info ); \
+      }, []( Local<v8::String> prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info ) { \
+        auto self = info.This(); \
+        if ( !util::isWrappedType( info.GetIsolate()->GetCurrentContext(), self, internalType ) ) \
+          return; \
+        auto obj = static_cast<cls*>( self->GetAlignedPointerFromInternalField( WrapField_Pointer ) ); \
+        obj->js_set##valInternal( prop, value, info ); \
+      } )
+
+    //! Use this to create member functions for variables in dynamic-wrapped objects' templates.
+#   define JS_WRAPPER_SETMEMBER(obj,cls,x) obj->PrototypeTemplate()->Set( \
+      util::allocStringConserve( #x, isolate ), \
+      FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
+        auto self = args.This(); \
+        if ( !util::isWrappedType( args.GetIsolate()->GetCurrentContext(), self, internalType ) ) \
+          return; \
+        auto obj = static_cast<cls*>( self->GetAlignedPointerFromInternalField( WrapField_Pointer ) ); \
+        obj->js_##x( args ); \
+    } ) )
+
+    template <class T, class Y>
+    class DynamicObjectsRegistry {
+    public:
+      using PtrType = shared_ptr<T>;
+    protected:
+      vector<PtrType> pool_;
+      //! My JS constructor store
+      v8::Eternal<v8::FunctionTemplate> constructor;
+    public:
+      template <class... Args>
+      inline PtrType createFromJS( v8::Handle<v8::Object>& handle, Args... args )
+      {
+        auto ptr = make_shared<T>( args... );
+        ptr->wrapperWrap( handle );
+        pool_.push_back( ptr );
+        return ptr;
+      }
+      inline PtrType createFrom( const Y& source )
+      {
+        auto isolate = Isolate::GetCurrent();
+        auto context = isolate->GetCurrentContext();
+        auto constFunc = constructor.Get( isolate )->GetFunction( context ).ToLocalChecked();
+        assert( !constFunc.IsEmpty() );
+        auto inst = constFunc->NewInstance( context );
+        assert( !inst.IsEmpty() );
+        V8Object object;
+        inst.ToLocal( &object );
+        auto unwr = T::unwrap( object );
+        assert( unwr );
+        auto ptr = unwr->shared_from_this();
+        assert( ptr );
+        ptr->setFrom( source );
+        return ptr;
+      }
+      void initialize( Isolate* isolate, v8::Local<v8::ObjectTemplate>& exports )
+      {
+        auto tpl = T::wrapperImplConstructor( isolate );
+        exports->Set( util::allocStringConserve( T::className, isolate ), tpl );
+        constructor.Set( isolate, tpl );
+      }
+      inline void clear()
+      {
+        pool_.clear();
+      }
     };
 
     template <class T>
@@ -87,11 +152,12 @@ namespace neko {
       virtual void registerGlobals( Isolate* isolate, v8::Local<v8::FunctionTemplate>& tpl ) = 0;
     };
 
-    template <class T>
-    class DynamicObjectWrapper {
+    template <class T, class Y>
+    class DynamicObjectWrapper: public std::enable_shared_from_this<T> {
       friend class neko::Scripting;
       template <class T>
       friend class DynamicObjectConstructor;
+      friend class DynamicObjectsRegistry<T, Y>;
     protected:
       //! My JavaScript-exported class name
       static string className;
@@ -150,54 +216,41 @@ namespace neko {
 
         return scope.Escape( tpl );
       }
-    protected:
-      template <class T>
-      static inline T* Unwrap( v8::Local<v8::Object> handle )
-      {
-        assert( !handle.IsEmpty() );
-        assert( handle->InternalFieldCount() > 0 );
-        // Cast to ObjectWrap before casting to T.  A direct cast from void
-        // to T won't work right when T has more than one base class.
-        void* ptr = handle->GetAlignedPointerFromInternalField( 0 );
-        ObjectWrap* wrap = static_cast<ObjectWrap*>( ptr );
-        return static_cast<T*>( wrap );
-      }
     public:
       DynamicObjectWrapper(): refs_( 0 )
       {
       }
-      virtual ~DynamicObjectWrapper()
+      void reset()
       {
         if ( persistent().IsEmpty() )
           return;
         persistent().ClearWeak();
         persistent().Reset();
       }
-      inline v8::Local<v8::Object> handle()
+      virtual ~DynamicObjectWrapper()
+      {
+        reset();
+      }
+      inline V8Object handle()
       {
         return handle( v8::Isolate::GetCurrent() );
       }
-      inline v8::Local<v8::Object> handle( v8::Isolate* isolate )
+      inline V8Object handle( v8::Isolate* isolate )
       {
-        return v8::Local<v8::Object>::New( isolate, persistent() );
+        return V8Object::New( isolate, persistent() );
       }
       inline v8::Persistent<v8::Object>& persistent()
       {
         return handle_;
       }
-    };
-
-    template <class T>
-    class DynamicObjectConstructor {
-    protected:
-      //! My JS constructor store
-      v8::Eternal<v8::FunctionTemplate> constructor;
-    public:
-      void initialize( Isolate* isolate, v8::Local<v8::ObjectTemplate>& exports )
+      //! Unwraps the given handle.
+      static inline T* unwrap( V8Object handle )
       {
-        auto tpl = T::wrapperImplConstructor( isolate );
-        exports->Set( util::allocStringConserve( T::className, isolate ), tpl );
-        constructor.Set( isolate, tpl );
+        assert( !handle.IsEmpty() );
+        assert( handle->InternalFieldCount() >= Max_WrapField );
+        auto ptr = handle->GetAlignedPointerFromInternalField( WrapField_Pointer );
+        auto wrapper = static_cast<DynamicObjectWrapper*>( ptr );
+        return static_cast<T*>( wrapper );
       }
     };
 

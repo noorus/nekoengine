@@ -12,6 +12,19 @@ namespace neko {
   class ScriptingContext;
   using ScriptingContextPtr = shared_ptr<ScriptingContext>;
 
+  namespace js {
+
+    enum IsolateDataSlot {
+      IsolateData_ScriptingContext = 0
+    };
+
+    inline ScriptingContext* getScriptContext( Isolate* isolate )
+    {
+      return static_cast<ScriptingContext*>( isolate->GetData( IsolateData_ScriptingContext ) );
+    }
+
+  }
+
   class Script {
   public:
     enum Status {
@@ -45,7 +58,7 @@ namespace neko {
     void registerContextGlobals( v8::Global<v8::Context>& globalContext );
   protected:
     js::JSConsolePtr jsConsole_;
-    js::DynamicObjectConstructor<js::Vector2> jsVector2_;
+    js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
   public:
     ConsolePtr console_;
     utf8String scriptDirectory_;
@@ -54,6 +67,7 @@ namespace neko {
     ~ScriptingContext();
     inline v8::Isolate* isolate() const throw() { return isolate_; }
     inline v8::Global<v8::Context>& ctx() throw() { return ctx_; }
+    inline js::DynamicObjectsRegistry<js::Vector2, vec2>& vec2reg() { return vec2Registry_; }
   };
 
   class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {

@@ -21,12 +21,12 @@ namespace neko {
       return move( instance );
     }
 
-    void Console::registerGlobals( Isolate* isolate, v8::Local<v8::FunctionTemplate>& tpl )
+    void Console::registerGlobals( Isolate* isolate, V8FunctionTemplate& tpl )
     {
-      JS_WRAPPER_SETMEMBER( tpl, Console, print );
-      JS_WRAPPER_SETMEMBER( tpl, Console, getVariable );
-      JS_WRAPPER_SETMEMBER( tpl, Console, setVariable );
-      JS_WRAPPER_SETMEMBER( tpl, Console, execute );
+      JS_WRAPPER_SETOBJMEMBER( tpl, Console, print );
+      JS_WRAPPER_SETOBJMEMBER( tpl, Console, getVariable );
+      JS_WRAPPER_SETOBJMEMBER( tpl, Console, setVariable );
+      JS_WRAPPER_SETOBJMEMBER( tpl, Console, execute );
     }
 
     void Console::js_print( Isolate* isolate, const V8CallbackArgs& args )

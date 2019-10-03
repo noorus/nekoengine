@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "neko_types.h"
 #include <algorithm>
 #include <boost/math/constants/constants.hpp>
@@ -10,6 +10,10 @@
 # define NEKO_MATH_FUNC_CEIL ::ceil
 # define NEKO_MATH_FUNC_SIN ::sin
 # define NEKO_MATH_FUNC_COS ::cos
+# define NEKO_MATH_FUNC_TAN ::tan
+# define NEKO_MATH_FUNC_ASIN ::asin
+# define NEKO_MATH_FUNC_ACOS ::acos
+# define NEKO_MATH_FUNC_ATAN ::atan
 # define NEKO_MATH_FUNC_ABS ::abs
 #else
 # define NEKO_MATH_FUNC_ROUND ::roundf
@@ -18,6 +22,10 @@
 # define NEKO_MATH_FUNC_CEIL ::ceilf
 # define NEKO_MATH_FUNC_SIN ::sinf
 # define NEKO_MATH_FUNC_COS ::cosf
+# define NEKO_MATH_FUNC_TAN ::tanf
+# define NEKO_MATH_FUNC_ASIN ::asinf
+# define NEKO_MATH_FUNC_ACOS ::acosf
+# define NEKO_MATH_FUNC_ATAN ::atanf
 # define NEKO_MATH_FUNC_ABS ::abs
 #endif
 
@@ -87,6 +95,42 @@ namespace neko {
     inline Real cos( Real value )
     {
       return NEKO_MATH_FUNC_COS( value );
+    }
+
+    //! \fn inline Real tan( Real value )
+    //! \brief Tangent.
+    //! \param value Value.
+    //! \return Tangent of value.
+    inline Real tan( Real value )
+    {
+      return NEKO_MATH_FUNC_TAN( value );
+    }
+
+    //! \fn inline Real asin( Real value )
+    //! \brief Arcsine.
+    //! \param value Value.
+    //! \return Arcsine of value.
+    inline Real asin( Real value )
+    {
+      return NEKO_MATH_FUNC_ASIN( value );
+    }
+
+    //! \fn inline Real cos( Real value )
+    //! \brief Arccosine.
+    //! \param value Value.
+    //! \return Arccosine of value.
+    inline Real acos( Real value )
+    {
+      return NEKO_MATH_FUNC_ACOS( value );
+    }
+
+    //! \fn inline Real tan( Real value )
+    //! \brief Arctangent.
+    //! \param value Value.
+    //! \return Arctangent of value.
+    inline Real atan( Real value )
+    {
+      return NEKO_MATH_FUNC_ATAN( value );
     }
 
     //! \fn abs
