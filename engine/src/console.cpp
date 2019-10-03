@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "console.h"
 #include "utilities.h"
 #include "neko_exception.h"
@@ -144,6 +144,7 @@ namespace neko {
   Console::Console()
   {
     // Register default sources
+    registerSource( "error", rgbToVec3( 222, 37, 56 ) );
     registerSource( "engine", rgbToVec3( 60, 64, 76 ) );
     registerSource( "gfx", rgbToVec3( 79, 115, 44 ) );
     registerSource( "sound", rgbToVec3( 181, 80, 10 ) );
@@ -373,6 +374,35 @@ namespace neko {
     va_end( va_alist );
 
     print( source, buffer );
+  }
+
+  void Console::errorPrintf( const char* str, ... )
+  {
+    va_list va_alist;
+    char buffer[c_sprintfBufferSize];
+    va_start( va_alist, str );
+    _vsnprintf_s( buffer, c_sprintfBufferSize, str, va_alist );
+    va_end( va_alist );
+
+    utf8String fullStr = "Fatal: ";
+    fullStr.append( buffer );
+    utf8String tmp;
+    tmp.reserve( 1024 );
+    for ( size_t i = 0; i <= fullStr.size(); ++i )
+    {
+      if ( i == fullStr.size() || fullStr[i] == LF )
+      {
+        if ( !tmp.empty() )
+          print( srcError, tmp );
+        if ( i == fullStr.size() )
+          break;
+        tmp.clear();
+      }
+      else if ( fullStr[i] != CR )
+      {
+        tmp.push_back( fullStr[i] );
+      }
+    }
   }
 
   StringVector Console::tokenize( const string& str )

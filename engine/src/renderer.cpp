@@ -98,7 +98,7 @@ namespace neko {
     {
       // Be all pretty and informative about it.
       std::stringstream description;
-      description << "Insufficient OpenGL version - Got ";
+      description << "Insufficient OpenGL version!\r\nGot: ";
       if ( info.versionMajor == 0 )
         description << "ancient";
       else
@@ -142,8 +142,12 @@ namespace neko {
   Renderer::Renderer( EnginePtr engine ): engine_( move( engine ) )
   {
     clearErrors();
-
     glStartupFetchAndCheck( info_ );
+  }
+
+  void Renderer::preInitialize()
+  {
+    clearErrors();
 
     shaders_ = make_shared<Shaders>( engine_ );
     shaders_->initialize();

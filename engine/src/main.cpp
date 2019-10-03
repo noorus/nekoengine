@@ -9,10 +9,22 @@
 using namespace neko;
 
 const string c_consoleThreadName = "nekoConsole";
-const string c_consoleTitle = "nekoengine//console";
+const string c_consoleTitle      = "nekoengine//console";
+const int    c_consoleDims[4]    = { 220, 220, 640, 320 };
+
+auto g_exceptionReporter = []( string_view description )
+{
+  if ( Locator::hasConsole() )
+  {
+    Locator::console().errorPrintf( description.data() );
+  }
+  platform::errorBox( description, "Exception" );
+};
 
 inline int runMain()
 {
+  bool failure = false;
+
   platform::initialize();
   platform::prepareProcess();
 
@@ -24,7 +36,11 @@ inline int runMain()
     []( platform::Event& running, platform::Event& wantStop, void* argument ) -> bool
   {
     auto console = ( (Console*)argument )->shared_from_this();
-    platform::ConsoleWindowPtr window = make_shared<platform::ConsoleWindow>( console, c_consoleTitle, 220, 220, 640, 320 );
+    platform::ConsoleWindowPtr window = make_shared<platform::ConsoleWindow>(
+      console, c_consoleTitle,
+      c_consoleDims[0], c_consoleDims[1], // x, y
+      c_consoleDims[2], c_consoleDims[3]  // w, h
+    );
     running.set();
     window->messageLoop( wantStop );
     return true;
@@ -33,22 +49,40 @@ inline int runMain()
   consoleWindowThread.start();
 
   EnginePtr engine = make_shared<Engine>( console );
-  engine->initialize( Engine::Options() );
-  engine->run();
+
+#ifndef _DEBUG
+  try
+#endif
+  {
+    engine->initialize( Engine::Options() );
+    engine->run();
+  }
+#ifndef _DEBUG
+  catch ( neko::Exception& e )
+  {
+    g_exceptionReporter( e.getFullDescription() );
+    if ( Locator::hasConsole() )
+      Locator::console().print( Console::srcEngine, "Shutting down gracefully..." );
+    failure = true;
+  }
+#endif
 
   if ( consoleWindowThread.check() )
     consoleWindowThread.stop();
   consoleWindowThread.waitFor();
 
-  engine->shutdown();
-  engine.reset();
+  if ( engine )
+  {
+    engine->shutdown();
+    engine.reset();
+  }
 
   Locator::provideConsole( ConsolePtr() );
   console.reset();
 
   platform::shutdown();
 
-  return 0;
+  return ( failure ? EXIT_FAILURE : EXIT_SUCCESS );
 }
 
 #ifdef NEKO_PLATFORM_WINDOWS
@@ -75,15 +109,6 @@ int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCm
 
   int retval = EXIT_SUCCESS;
 
-  auto exceptionReporter = []( string_view description )
-  {
-    if ( Locator::hasConsole() )
-    {
-      Locator::console().printf( Console::srcEngine, "Fatal: %s", description.data() );
-    }
-    platform::errorBox( description, "Exception" );
-  };
-
 #ifndef _DEBUG
   try
 #endif
@@ -93,12 +118,12 @@ int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCm
 #ifndef _DEBUG
   catch ( neko::Exception& e )
   {
-    exceptionReporter( e.getFullDescription() );
+    g_exceptionReporter( e.getFullDescription() );
     return EXIT_FAILURE;
   }
   catch ( ... )
   {
-    exceptionReporter( "Unknown exception!" );
+    g_exceptionReporter( "Unknown exception!" );
     return EXIT_FAILURE;
   }
 #endif

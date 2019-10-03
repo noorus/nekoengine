@@ -178,7 +178,7 @@ namespace neko {
     //! Show a modal error dialog.
     inline void errorBox( string_view content, string_view title )
     {
-      MessageBoxA( 0, content.data(), title.data(), MB_ICONERROR | MB_OK | MB_TASKMODAL );
+      MessageBoxA( 0, content.data(), title.data(), MB_ICONERROR | MB_OK | MB_SYSTEMMODAL );
     }
 
     //! \class FileReader

@@ -97,13 +97,14 @@ namespace neko {
     glstrGetClean( GL_VENDOR, info_.vendor_ );
 
     printInfo();
-
-    setOpenGLDebugLogging( g_CVar_gl_debuglog.as_b() );
   }
 
   void Gfx::postInitialize()
   {
     renderer_ = make_shared<Renderer>( engine_ );
+    renderer_->preInitialize();
+
+    setOpenGLDebugLogging( g_CVar_gl_debuglog.as_b() );
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
     camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, 0.0f ) );

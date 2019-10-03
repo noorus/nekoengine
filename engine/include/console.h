@@ -110,7 +110,8 @@ namespace neko {
   public:
     //! Message source types.
     enum Source: unsigned long {
-      srcEngine = 0,  //!< Message from the engine
+      srcError = 0,   //!< Error message
+      srcEngine,      //!< Message from the engine
       srcGfx,         //!< Message from the graphics subsystem
       srcSound,       //!< Message from the sound subsystem
       srcPhysics,     //!< Message from the physics subsystem
@@ -167,9 +168,11 @@ namespace neko {
     //! Prints a message.
     void print( Source source, const char* str );
     //! Prints a message.
-    inline void print( Source source, const string& str ) { print( source, str.c_str() ); }
-    //! Prints a message.
+    inline void print( Source source, const utf8String& str ) { print( source, str.c_str() ); }
+    //! Prints a C-style formatted message.
     void printf( Source source, const char* str, ... );
+    //! Prints an error message.
+    void errorPrintf( const char* str, ... );
     //! Executes a command line.
     void execute( string commandLine, const bool echo = true );
     //! Executes a file.

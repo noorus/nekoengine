@@ -100,7 +100,7 @@ namespace neko {
 
   using GameTime = double;
 
-  using StringVector = vector<string>;
+  using StringVector = vector<utf8String>;
 
   using vec2i = glm::i64vec2;
   using vec3i = glm::i64vec3;

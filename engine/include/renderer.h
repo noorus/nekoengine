@@ -44,6 +44,7 @@ namespace neko {
     void clearErrors();
   public:
     Renderer( EnginePtr engine );
+    void preInitialize();
     void initialize( size_t width, size_t height );
     MaterialPtr createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data );
     void prepare( GameTime time );
