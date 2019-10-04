@@ -11,7 +11,8 @@ namespace neko {
     enum WrappedType {
       Wrapped_Console, //!< Static: JSConsole
       Wrapped_Math, //!< Static: JSMath
-      Wrapped_Vector2 //!< Dynamic: Vector2
+      Wrapped_Vector2, //!< Dynamic: Vector2
+      Max_WrappedType
     };
 
     enum WrappedFieldIndex {
@@ -29,7 +30,24 @@ namespace neko {
         auto val = object->GetInternalField( WrapField_Type );
         if ( val.IsEmpty() || !val->IsUint32() )
           return false;
-        return ( val->Uint32Value( ctx ).FromMaybe( Max_WrapField ) == type );
+        return ( val->Uint32Value( ctx ).FromMaybe( Max_WrappedType ) == type );
+      }
+
+      inline bool getWrappedType( V8Context& ctx, V8Value& value, WrappedType& type_out )
+      {
+        if ( value.IsEmpty() || !value->IsObject() )
+          return false;
+        auto object = value->ToObject( ctx ).ToLocalChecked();
+        if ( object->InternalFieldCount() != Max_WrapField )
+          return false;
+        auto val = object->GetInternalField( WrapField_Type );
+        if ( val.IsEmpty() || !val->IsUint32() )
+          return false;
+        auto retval = static_cast<WrappedType>( val->Uint32Value( ctx ).FromMaybe( Max_WrappedType ) );
+        if ( retval >= Max_WrappedType )
+          return false;
+        type_out = retval;
+        return true;
       }
 
     }
@@ -37,6 +55,14 @@ namespace neko {
     //! Use this to create member functions for static-wrapped objects (instances).
 #   define JS_WRAPPER_SETOBJMEMBER(tpl,cls,x) tpl->PrototypeTemplate()->Set( \
       util::allocStringConserve( #x, isolate ), \
+      FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
+        auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
+        self->js_##x( args.GetIsolate(), args ); \
+      }, v8::External::New( isolate, (void*)this ) ) )
+
+    //! Use this to create member functions for static-wrapped objects (instances).
+#   define JS_WRAPPER_SETOBJMEMBERNAMED(tpl,cls,x,y) tpl->PrototypeTemplate()->Set( \
+      util::allocStringConserve( #y, isolate ), \
       FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
         auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
         self->js_##x( args.GetIsolate(), args ); \

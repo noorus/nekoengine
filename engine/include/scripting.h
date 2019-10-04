@@ -58,6 +58,7 @@ namespace neko {
     void registerContextGlobals( v8::Global<v8::Context>& globalContext );
   protected:
     js::JSConsolePtr jsConsole_;
+    js::JSMathPtr jsMath_;
     js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
   public:
     ConsolePtr console_;

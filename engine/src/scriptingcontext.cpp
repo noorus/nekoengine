@@ -78,6 +78,7 @@ namespace neko {
     auto context = v8::Local<v8::Context>::New( isolate_, globalContext );
 
     jsConsole_ = js::Console::create( console_, isolate_, context->Global() );
+    jsMath_ = js::Math::create( isolate_, context->Global() );
   }
 
   void ScriptingContext::tick()
@@ -89,6 +90,7 @@ namespace neko {
   {
     vec2Registry_.clear();
     jsConsole_.reset();
+    jsMath_.reset();
 
     ctx_.Reset();
 

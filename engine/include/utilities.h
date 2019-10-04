@@ -11,6 +11,15 @@ namespace neko {
       return ( ( offset + alignment - 1 ) / alignment ) * alignment;
     }
 
+    inline wstring asciiToWideNaive( string_view str )
+    {
+      wstring out;
+      out.reserve( str.length() );
+      for ( size_t i = 0; i < str.length(); ++i )
+        out[i] = (wchar_t)str[i];
+      return move( out );
+    }
+
   }
 
   //! \class ScopedRWLock

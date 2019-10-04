@@ -8,6 +8,25 @@ namespace neko {
 
   namespace js {
 
+    class Math;
+    using JSMathPtr = unique_ptr<Math>;
+
+    class Math: public StaticObjectWrapper<Math> {
+    private:
+      void registerGlobals( Isolate* isolate, V8FunctionTemplate& tpl ) final;
+    public:
+      explicit Math();
+    public:
+      //! JavaScript Math.equals
+      void js_equals( Isolate* isolate, const V8CallbackArgs& args );
+      //! JavaScript Math.greater
+      void js_greater( Isolate* isolate, const V8CallbackArgs& args );
+      //! JavaScript Math.lesser
+      void js_lesser( Isolate* isolate, const V8CallbackArgs& args );
+    public:
+      static JSMathPtr create( Isolate* isolate, V8Object global );
+    };
+
     class Vector2: public DynamicObjectWrapper<Vector2, vec2> {
     private:
       vec2 v_; //!< Internal vec2.
@@ -34,7 +53,7 @@ namespace neko {
       void js_makeCeil( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const v8::FunctionCallbackInfo<v8::Value>& info );
-      static void registerExport( Isolate* isolate, v8::Local<v8::FunctionTemplate>& obj );
+      static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
     public:
       Vector2( const vec2& source ): v_( source ) {}
       Vector2(): v_( 0.0f, 0.0f ) {}
@@ -51,6 +70,13 @@ namespace neko {
     //! Expect and extract a Vector2 object as args[arg],
     //! throw JS exception and return null on failure.
     Vector2Ptr extractVector2( int arg, const V8CallbackArgs& args );
+
+    template <class T>
+    inline shared_ptr<T> extractWrappedDynamic( V8Context& context, V8Value& value )
+    {
+      auto object = value->ToObject( context ).ToLocalChecked();
+      return T::unwrap( object )->shared_from_this();
+    }
 
   }
 

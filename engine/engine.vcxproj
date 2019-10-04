@@ -171,6 +171,7 @@
     <ClCompile Include="src\framebuffer.cpp" />
     <ClCompile Include="src\gfx.cpp" />
     <ClCompile Include="src\js_console.cpp" />
+    <ClCompile Include="src\js_math.cpp" />
     <ClCompile Include="src\js_mathutil.cpp" />
     <ClCompile Include="src\js_vector2.cpp" />
     <ClCompile Include="src\loader.cpp" />

@@ -25,6 +25,7 @@ namespace neko {
     using V8CallbackArgs = v8::FunctionCallbackInfo<v8::Value>;
     using V8FunctionTemplate = v8::Local<v8::FunctionTemplate>;
     using V8Object = v8::Local<v8::Object>;
+    using V8Value = v8::Local<v8::Value>;
     using V8Context = v8::Local<v8::Context>;
 
     namespace util {
@@ -59,6 +60,11 @@ namespace neko {
         if ( ret.IsEmpty() )
           NEKO_EXCEPT( "V8 String allocation failed" );
         return ret.ToLocalChecked();
+      }
+
+      inline void throwException( v8::Isolate* isolate, const char* message )
+      {
+        isolate->ThrowException( allocStringConserve( message, isolate ) );
       }
 
       inline void throwException( v8::Isolate* isolate, const wchar_t* message, ... )
