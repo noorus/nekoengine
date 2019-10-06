@@ -23,7 +23,7 @@ namespace neko {
 
     namespace util {
 
-      inline bool isWrappedType( V8Context& ctx, V8Object& object, WrappedType type )
+      inline bool isWrappedType( V8Context& ctx, const V8Object& object, WrappedType type )
       {
         if ( object->InternalFieldCount() != Max_WrapField )
           return false;
@@ -33,7 +33,7 @@ namespace neko {
         return ( val->Uint32Value( ctx ).FromMaybe( Max_WrappedType ) == type );
       }
 
-      inline bool getWrappedType( V8Context& ctx, V8Value& value, WrappedType& type_out )
+      inline bool getWrappedType( V8Context& ctx, const V8Value& value, WrappedType& type_out )
       {
         if ( value.IsEmpty() || !value->IsObject() )
           return false;
@@ -184,6 +184,7 @@ namespace neko {
       template <class T>
       friend class DynamicObjectConstructor;
       friend class DynamicObjectsRegistry<T, Y>;
+      using RegistryPtrType = shared_ptr<DynamicObjectsRegistry<T, Y>>;
     protected:
       //! My JavaScript-exported class name
       static string className;

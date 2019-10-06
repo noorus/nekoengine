@@ -32,6 +32,7 @@ namespace neko {
     {
       Isolate::CreateParams params;
       params.array_buffer_allocator = allocator;
+      params.allow_atomics_wait = true;
       isolate_ = Isolate::New( params );
       if ( !isolate_ )
         NEKO_EXCEPT( "V8 isolate creation failed" );
@@ -39,6 +40,7 @@ namespace neko {
     }
 
     isolate_->SetData( js::IsolateData_ScriptingContext, this );
+    isolate_->SetMicrotasksPolicy( v8::MicrotasksPolicy::kExplicit );
 
     console_ = owner_->engine_->console();
 
@@ -83,6 +85,7 @@ namespace neko {
 
   void ScriptingContext::tick()
   {
+    isolate_->RunMicrotasks();
     v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_, v8::platform::MessageLoopBehavior::kDoNotWait );
   }
 

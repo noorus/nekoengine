@@ -213,6 +213,7 @@
     <ClInclude Include="include\gfx_types.h" />
     <ClInclude Include="include\js_console.h" />
     <ClInclude Include="include\js_math.h" />
+    <ClInclude Include="include\js_mathutil.h" />
     <ClInclude Include="include\js_util.h" />
     <ClInclude Include="include\js_wrapper.h" />
     <ClInclude Include="include\loader.h" />

@@ -63,6 +63,7 @@ namespace neko {
         v_.y = other.y;
       }
       inline vec2& v() { return v_; } //!< Get the internal vec2.
+      inline operator vec2() const { return v_; }
     };
 
     using Vector2Ptr = shared_ptr<Vector2>;
@@ -72,7 +73,7 @@ namespace neko {
     Vector2Ptr extractVector2( int arg, const V8CallbackArgs& args );
 
     template <class T>
-    inline shared_ptr<T> extractWrappedDynamic( V8Context& context, V8Value& value )
+    inline shared_ptr<T> extractWrappedDynamic( V8Context& context, const V8Value& value )
     {
       auto object = value->ToObject( context ).ToLocalChecked();
       return T::unwrap( object )->shared_from_this();

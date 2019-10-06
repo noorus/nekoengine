@@ -27,6 +27,7 @@ namespace neko {
     using V8Object = v8::Local<v8::Object>;
     using V8Value = v8::Local<v8::Value>;
     using V8Context = v8::Local<v8::Context>;
+    using V8Function = v8::Local<v8::Function>;
 
     namespace util {
 

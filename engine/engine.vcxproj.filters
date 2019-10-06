@@ -251,6 +251,9 @@
     <ClInclude Include="include\js_math.h">
       <Filter>Header Files\scripting</Filter>
     </ClInclude>
+    <ClInclude Include="include\js_mathutil.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="manifest\neko.manifest">

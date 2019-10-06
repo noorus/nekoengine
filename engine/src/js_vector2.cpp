@@ -47,12 +47,6 @@ namespace neko {
       auto isolate = args.GetIsolate();
       HandleScope handleScope( isolate );
 
-      if ( !args.IsConstructCall() )
-      {
-        args.GetIsolate()->ThrowException( util::allocString( "Function called as non-constructor" ) );
-        return;
-      }
-
       auto context = args.GetIsolate()->GetCurrentContext();
 
       vec2 vec( 0.0f, 0.0f );
@@ -101,9 +95,17 @@ namespace neko {
       }
 
       auto ctx = getScriptContext( args.GetIsolate() );
-      auto thisObj = args.This();
-      auto ptr = ctx->vec2reg().createFromJS( thisObj, vec );
-      args.GetReturnValue().Set( ptr->handle( isolate ) );
+      if ( args.IsConstructCall() )
+      {
+        auto thisObj = args.This();
+        auto ptr = ctx->vec2reg().createFromJS( thisObj, vec );
+        args.GetReturnValue().Set( ptr->handle( isolate ) );
+      }
+      else
+      {
+        auto ptr = ctx->vec2reg().createFrom( vec );
+        args.GetReturnValue().Set( ptr->handle( isolate ) );
+      }
     }
 
     //! \verbatim

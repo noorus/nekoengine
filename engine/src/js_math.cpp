@@ -2,31 +2,31 @@
 #include "js_console.h"
 #include "js_util.h"
 #include "js_math.h"
+#include "js_mathutil.h"
 
 namespace neko {
 
   namespace js {
 
-    const char* c_className = "NekoMath";
+    namespace mathShared {
 
-    string Math::className( c_className );
-    WrappedType Math::internalType = Wrapped_Math;
-
-    struct Messages {
-      utf8String syntaxErrorText;
-      utf8String nonobjErrorText;
-      utf8String nonmatchErrorText;
-      Messages( const utf8String& caller )
+      Messages::Messages( const utf8String& caller )
       {
         syntaxErrorText = "Syntax error: " + caller + "( lhs, rhs )";
         nonobjErrorText = "Usage error: " + caller + "( lhs, rhs ) - unknown object type passed in";
         nonmatchErrorText = "Usage error: " + caller + "( lhs, rhs ) - object types do not match";
       }
-    };
 
-    static const Messages c_equalsMessages( c_className + utf8String( ".equals" ) );
-    static const Messages c_greaterMessages( c_className + utf8String( ".greaterThan" ) );
-    static const Messages c_lesserMessages( c_className + utf8String( ".lessThan" ) );
+    }
+
+    const char* c_className = "NekoMath";
+
+    static const mathShared::Messages c_equalsMessages( c_className + utf8String( ".equals" ) );
+    static const mathShared::Messages c_greaterMessages( c_className + utf8String( ".greaterThan" ) );
+    static const mathShared::Messages c_lesserMessages( c_className + utf8String( ".lessThan" ) );
+
+    string Math::className( c_className );
+    WrappedType Math::internalType = Wrapped_Math;
 
     Math::Math()
     {
@@ -51,34 +51,6 @@ namespace neko {
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, lesser, lt );
     }
 
-    bool extractLhsRhsArgObjects( Isolate* isolate, const Messages& msgs, const V8CallbackArgs& args, WrappedType& lhsType, WrappedType& rhsType )
-    {
-      HandleScope handleScope( isolate );
-
-      if ( args.Length() != 2 )
-      {
-        util::throwException( isolate, msgs.syntaxErrorText.c_str() );
-        return false;
-      }
-
-      auto context = args.GetIsolate()->GetCurrentContext();
-
-      if ( !util::getWrappedType( context, args[0], lhsType )
-        || !util::getWrappedType( context, args[1], rhsType ) )
-      {
-        util::throwException( isolate, msgs.nonobjErrorText.c_str() );
-        return false;
-      }
-
-      if ( lhsType != rhsType )
-      {
-        util::throwException( isolate, msgs.nonmatchErrorText.c_str() );
-        return false;
-      }
-
-      return true;
-    }
-
     //! \verbatim
     //! bool Math.equals( lhs, rhs )
     //! \endverbatim
@@ -87,17 +59,10 @@ namespace neko {
       HandleScope handleScope( isolate );
 
       WrappedType lhsType, rhsType;
-      if ( !extractLhsRhsArgObjects( isolate, c_equalsMessages, args, lhsType, rhsType ) )
+      if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_equalsMessages, args, lhsType, rhsType ) )
         return;
 
-      bool retval = false;
-      auto context = isolate->GetCurrentContext();
-      if ( lhsType == Wrapped_Vector2 )
-      {
-        auto lhs = extractWrappedDynamic<Vector2>( context, args[0] );
-        auto rhs = extractWrappedDynamic<Vector2>( context, args[1] );
-        retval = glm::all( glm::equal( lhs->v(), rhs->v() ) );
-      }
+      bool retval = mathShared::jsmath_equals( isolate, args[0], args[1], lhsType );
 
       args.GetReturnValue().Set( retval );
     }
@@ -110,17 +75,10 @@ namespace neko {
       HandleScope handleScope( isolate );
 
       WrappedType lhsType, rhsType;
-      if ( !extractLhsRhsArgObjects( isolate, c_greaterMessages, args, lhsType, rhsType ) )
+      if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_greaterMessages, args, lhsType, rhsType ) )
         return;
 
-      bool retval = false;
-      auto context = isolate->GetCurrentContext();
-      if ( lhsType == Wrapped_Vector2 )
-      {
-        auto lhs = extractWrappedDynamic<Vector2>( context, args[0] );
-        auto rhs = extractWrappedDynamic<Vector2>( context, args[1] );
-        retval = glm::all( glm::greaterThan( lhs->v(), rhs->v() ) );
-      }
+      bool retval = mathShared::jsmath_greater( isolate, args[0], args[1], lhsType );
 
       args.GetReturnValue().Set( retval );
     }
@@ -133,17 +91,10 @@ namespace neko {
       HandleScope handleScope( isolate );
 
       WrappedType lhsType, rhsType;
-      if ( !extractLhsRhsArgObjects( isolate, c_lesserMessages, args, lhsType, rhsType ) )
+      if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_lesserMessages, args, lhsType, rhsType ) )
         return;
 
-      bool retval = false;
-      auto context = isolate->GetCurrentContext();
-      if ( lhsType == Wrapped_Vector2 )
-      {
-        auto lhs = extractWrappedDynamic<Vector2>( context, args[0] );
-        auto rhs = extractWrappedDynamic<Vector2>( context, args[1] );
-        retval = glm::all( glm::lessThan( lhs->v(), rhs->v() ) );
-      }
+      bool retval = mathShared::jsmath_lesser( isolate, args[0], args[1], lhsType );
 
       args.GetReturnValue().Set( retval );
     }
