@@ -28,47 +28,62 @@ namespace neko {
     using V8Value = v8::Local<v8::Value>;
     using V8Context = v8::Local<v8::Context>;
     using V8Function = v8::Local<v8::Function>;
+    using V8String = v8::Local<v8::String>;
 
     namespace util {
 
 #     define JS_TEMPLATE_ACCESSOR(tpl,x,y,z) tpl->PrototypeTemplate()->SetAccessor( \
         util::allocString( x ), y, z )
 
+      inline V8String staticStr( Isolate* isolate, const char* data )
+      {
+        return v8::String::NewFromOneByte( isolate,
+          reinterpret_cast<const uint8_t*>( data ),
+          v8::NewStringType::kInternalized, -1 ).ToLocalChecked();
+      }
+
+      inline V8String staticStr( Isolate* isolate, const char* data, int length )
+      {
+        return v8::String::NewFromOneByte( isolate,
+          reinterpret_cast<const uint8_t*>( data ),
+          v8::NewStringType::kInternalized, length ).ToLocalChecked();
+      }
+
       //! Create a local JavaScript String instance from given source string.
-      inline v8::Local<v8::String> allocString( const utf8String& str, v8::Isolate* isolate = nullptr )
+      inline V8String allocString( const utf8String& str, Isolate* isolate = nullptr )
       {
         v8::MaybeLocal<v8::String> ret = v8::String::NewFromUtf8(
-          isolate ? isolate : v8::Isolate::GetCurrent(), str.c_str(), v8::NewStringType::kInternalized );
+          isolate ? isolate : v8::Isolate::GetCurrent(), str.c_str(), v8::NewStringType::kNormal );
         if ( ret.IsEmpty() )
           NEKO_EXCEPT( "V8 String allocation failed" );
         return ret.ToLocalChecked();
       }
 
       //! Create a local JavaScript String instance from given source string.
-      inline v8::Local<v8::String> allocString( const wstring& str, v8::Isolate* isolate = nullptr )
+      inline V8String allocString( const wstring& str, Isolate* isolate = nullptr )
       {
         v8::MaybeLocal<v8::String> ret = v8::String::NewFromTwoByte(
-          isolate ? isolate : v8::Isolate::GetCurrent(), (uint16_t*)str.c_str(), v8::NewStringType::kInternalized );
+          isolate ? isolate : v8::Isolate::GetCurrent(), (uint16_t*)str.c_str(), v8::NewStringType::kNormal );
         if ( ret.IsEmpty() )
           NEKO_EXCEPT( "V8 String allocation failed" );
         return ret.ToLocalChecked();
       }
 
       //! Create a local V8 String that will likely be duplicated (class names etc.)
-      inline v8::Local<v8::String> allocStringConserve( string_view str, v8::Isolate* isolate = nullptr )
+      inline V8String allocStringConserve( string_view str, Isolate* isolate = nullptr )
       {
-        auto ret = v8::String::NewFromUtf8( isolate ? isolate : v8::Isolate::GetCurrent(), str.data(), v8::NewStringType::kInternalized );
+        auto ret = v8::String::NewFromUtf8( isolate ? isolate : Isolate::GetCurrent(), str.data(), v8::NewStringType::kInternalized );
         if ( ret.IsEmpty() )
           NEKO_EXCEPT( "V8 String allocation failed" );
         return ret.ToLocalChecked();
       }
 
-      inline void throwException( v8::Isolate* isolate, const char* message )
+      inline void throwException( Isolate* isolate, const char* message )
       {
-        isolate->ThrowException( allocStringConserve( message, isolate ) );
+        isolate->ThrowException( staticStr( isolate, message ) );
       }
 
-      inline void throwException( v8::Isolate* isolate, const wchar_t* message, ... )
+      inline void throwException( Isolate* isolate, const wchar_t* message, ... )
       {
         wchar_t buffer[1024];
 
@@ -80,7 +95,7 @@ namespace neko {
         isolate->ThrowException( allocString( buffer, isolate ) );
       }
 
-      inline Real extractNumberComponent( v8::Isolate* isolate, v8::MaybeLocal<v8::Object>& obj, string_view name, Real defval )
+      inline Real extractNumberComponent( Isolate* isolate, v8::MaybeLocal<v8::Object>& obj, string_view name, Real defval )
       {
         if ( obj.IsEmpty() )
           return defval;

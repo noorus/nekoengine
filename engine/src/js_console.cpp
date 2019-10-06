@@ -52,8 +52,7 @@ namespace neko {
 
       if ( args.Length() != 1 || !args[0]->IsString() )
       {
-        util::throwException( isolate,
-          L"Syntax error: String Console.getVariable( String variable )" );
+        util::throwException( isolate, "Syntax error: String Console.getVariable( String variable )" );
         return;
       }
 
@@ -78,8 +77,7 @@ namespace neko {
 
       if ( args.Length() != 2 || !args[0]->IsString() )
       {
-        util::throwException( isolate,
-          L"Syntax error: Console.setVariable( String variable, String value )" );
+        util::throwException( isolate, "Syntax error: Console.setVariable( String variable, String value )" );
         return;
       }
 
@@ -105,8 +103,7 @@ namespace neko {
 
       if ( args.Length() != 1 || !args[0]->IsString() )
       {
-        util::throwException( isolate,
-          L"Syntax error: Console.execute( String commandLine )" );
+        util::throwException( isolate, "Syntax error: Console.execute( String commandLine )" );
         return;
       }
 

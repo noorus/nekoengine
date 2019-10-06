@@ -19,9 +19,7 @@ namespace neko {
           return Vector2::unwrap( object )->shared_from_this();
         }
       }
-      char error[64];
-      sprintf_s<64>( error, "Expected object vec2 as argument %d", arg );
-      args.GetIsolate()->ThrowException( util::allocString( error, args.GetIsolate() ) );
+      util::throwException( args.GetIsolate(), L"Expected object vec2 as argument %d", arg );
       return Vector2Ptr();
     }
 

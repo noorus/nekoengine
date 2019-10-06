@@ -90,11 +90,11 @@ namespace neko {
 
       if ( !valueParsed )
       {
-        args.GetIsolate()->ThrowException( util::allocString( "Invalid constructor call to vec2" ) );
+        isolate->ThrowException( util::staticStr( isolate, "Invalid constructor call to vec2" ) );
         return;
       }
 
-      auto ctx = getScriptContext( args.GetIsolate() );
+      auto ctx = getScriptContext( isolate );
       if ( args.IsConstructCall() )
       {
         auto thisObj = args.This();
@@ -111,7 +111,7 @@ namespace neko {
     //! \verbatim
     //! Real vec2.x
     //! \endverbatim
-    void Vector2::js_getX( Local<v8::String> prop, const PropertyCallbackInfo<v8::Value>& info )
+    void Vector2::js_getX( V8String prop, const PropertyCallbackInfo<v8::Value>& info )
     {
       info.GetReturnValue().Set( static_cast<double>( v_.x ) );
     }
@@ -119,7 +119,7 @@ namespace neko {
     //! \verbatim
     //! Real vec2.x
     //! \endverbatim
-    void Vector2::js_setX( Local<v8::String> prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info )
+    void Vector2::js_setX( V8String prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info )
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )

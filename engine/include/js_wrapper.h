@@ -70,13 +70,13 @@ namespace neko {
 
     //! Use this to create accessors for variables in dynamic-wrapped objects' templates.
 #   define JS_WRAPPER_SETACCESSOR(obj,cls,x,valInternal) obj->PrototypeTemplate()->SetAccessor( \
-      util::allocStringConserve( #x, isolate ), []( Local<v8::String> prop, const PropertyCallbackInfo<v8::Value>& info ) { \
+      util::allocStringConserve( #x, isolate ), []( V8String prop, const PropertyCallbackInfo<v8::Value>& info ) { \
         auto self = info.This(); \
         if ( !util::isWrappedType( info.GetIsolate()->GetCurrentContext(), self, internalType ) ) \
           return; \
         auto obj = static_cast<cls*>( self->GetAlignedPointerFromInternalField( WrapField_Pointer ) ); \
         obj->js_get##valInternal( prop, info ); \
-      }, []( Local<v8::String> prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info ) { \
+      }, []( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info ) { \
         auto self = info.This(); \
         if ( !util::isWrappedType( info.GetIsolate()->GetCurrentContext(), self, internalType ) ) \
           return; \
