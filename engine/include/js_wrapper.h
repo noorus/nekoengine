@@ -54,7 +54,7 @@ namespace neko {
 
     //! Use this to create member functions for static-wrapped objects (instances).
 #   define JS_WRAPPER_SETOBJMEMBER(tpl,cls,x) tpl->PrototypeTemplate()->Set( \
-      util::allocStringConserve( #x, isolate ), \
+      util::staticStr( isolate, #x ), \
       FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
         auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
         self->js_##x( args.GetIsolate(), args ); \
@@ -62,7 +62,7 @@ namespace neko {
 
     //! Use this to create member functions for static-wrapped objects (instances).
 #   define JS_WRAPPER_SETOBJMEMBERNAMED(tpl,cls,x,y) tpl->PrototypeTemplate()->Set( \
-      util::allocStringConserve( #y, isolate ), \
+      util::staticStr( isolate, #y ), \
       FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
         auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
         self->js_##x( args.GetIsolate(), args ); \
@@ -70,7 +70,7 @@ namespace neko {
 
     //! Use this to create accessors for variables in dynamic-wrapped objects' templates.
 #   define JS_WRAPPER_SETACCESSOR(obj,cls,x,valInternal) obj->PrototypeTemplate()->SetAccessor( \
-      util::allocStringConserve( #x, isolate ), []( V8String prop, const PropertyCallbackInfo<v8::Value>& info ) { \
+      util::staticStr( isolate, #x ), []( V8String prop, const PropertyCallbackInfo<v8::Value>& info ) { \
         auto self = info.This(); \
         if ( !util::isWrappedType( info.GetIsolate()->GetCurrentContext(), self, internalType ) ) \
           return; \
@@ -86,7 +86,18 @@ namespace neko {
 
     //! Use this to create member functions for variables in dynamic-wrapped objects' templates.
 #   define JS_WRAPPER_SETMEMBER(obj,cls,x) obj->PrototypeTemplate()->Set( \
-      util::allocStringConserve( #x, isolate ), \
+      util::staticStr( isolate, #x ), \
+      FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
+        auto self = args.This(); \
+        if ( !util::isWrappedType( args.GetIsolate()->GetCurrentContext(), self, internalType ) ) \
+          return; \
+        auto obj = static_cast<cls*>( self->GetAlignedPointerFromInternalField( WrapField_Pointer ) ); \
+        obj->js_##x( args ); \
+    } ) )
+
+    //! Use this to create member functions for variables in dynamic-wrapped objects' templates.
+#   define JS_WRAPPER_SETMEMBERNAMED(obj,cls,x,y) obj->PrototypeTemplate()->Set( \
+      util::staticStr( isolate, #y ), \
       FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
         auto self = args.This(); \
         if ( !util::isWrappedType( args.GetIsolate()->GetCurrentContext(), self, internalType ) ) \

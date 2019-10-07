@@ -21,21 +21,33 @@ namespace neko {
       void js_equals( Isolate* isolate, const V8CallbackArgs& args );
       //! JavaScript Math.greater
       void js_greater( Isolate* isolate, const V8CallbackArgs& args );
+      //! JavaScript Math.greaterOrEqual
+      void js_greaterOrEqual( Isolate* isolate, const V8CallbackArgs& args );
       //! JavaScript Math.lesser
       void js_lesser( Isolate* isolate, const V8CallbackArgs& args );
+      //! JavaScript Math.lesserOrEqual
+      void js_lesserOrEqual( Isolate* isolate, const V8CallbackArgs& args );
     public:
       static JSMathPtr create( Isolate* isolate, V8Object global );
     };
 
+    //! \class Vector2
+    //! \brief Implementation of JavaScript vec2().
     class Vector2: public DynamicObjectWrapper<Vector2, vec2> {
     private:
       vec2 v_; //!< Internal vec2.
     protected:
       //! Properties
-      void js_getX( Local<v8::String> prop, const PropertyCallbackInfo<v8::Value>& info );
-      void js_setX( Local<v8::String> prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info );
-      void js_getY( Local<v8::String> prop, const PropertyCallbackInfo<v8::Value>& info );
-      void js_setY( Local<v8::String> prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info );
+      void js_getX( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setX( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getY( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setY( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      //! Comparisons
+      void js_equals( const V8CallbackArgs& args );
+      void js_greater( const V8CallbackArgs& args );
+      void js_greaterOrEqual( const V8CallbackArgs& args );
+      void js_lesser( const V8CallbackArgs& args );
+      void js_lesserOrEqual( const V8CallbackArgs& args );
       //! Functions
       void js_toString( const V8CallbackArgs& args );
       void js_length( const V8CallbackArgs& args );
@@ -52,7 +64,7 @@ namespace neko {
       void js_makeFloor( const V8CallbackArgs& args );
       void js_makeCeil( const V8CallbackArgs& args );
     public:
-      static void jsConstructor( const v8::FunctionCallbackInfo<v8::Value>& info );
+      static void jsConstructor( const V8CallbackArgs& info );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
     public:
       Vector2( const vec2& source ): v_( source ) {}

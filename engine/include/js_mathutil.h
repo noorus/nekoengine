@@ -15,7 +15,7 @@ namespace neko {
         utf8String syntaxErrorText;
         utf8String nonobjErrorText;
         utf8String nonmatchErrorText;
-        Messages( const utf8String& caller );
+        Messages( const utf8String& caller, bool twoArgs );
       };
 
       inline bool extractLhsRhsTypes( Isolate* isolate, const Messages& msgs, const V8Value& lhs, const V8Value& rhs, WrappedType& lhsType, WrappedType& rhsType )
@@ -72,7 +72,7 @@ namespace neko {
         return retval;
       }
 
-      inline bool jsmath_greater( Isolate* isolate, const V8Value& lhs, const V8Value& rhs, const WrappedType type )
+      inline bool jsmath_greater( Isolate* isolate, const V8Value& lhs, const V8Value& rhs, const WrappedType type, bool orEqual = false )
       {
         HandleScope handleScope( isolate );
 
@@ -82,13 +82,13 @@ namespace neko {
         {
           auto lobj = extractWrappedDynamic<Vector2>( context, lhs );
           auto robj = extractWrappedDynamic<Vector2>( context, rhs );
-          retval = glm::all( glm::greaterThan( lobj->v(), robj->v() ) );
+          retval = glm::all( orEqual ? glm::greaterThanEqual( lobj->v(), robj->v() ) : glm::greaterThan( lobj->v(), robj->v() ) );
         }
 
         return retval;
       }
 
-      inline bool jsmath_lesser( Isolate* isolate, const V8Value& lhs, const V8Value& rhs, const WrappedType type )
+      inline bool jsmath_lesser( Isolate* isolate, const V8Value& lhs, const V8Value& rhs, const WrappedType type, bool orEqual = false )
       {
         HandleScope handleScope( isolate );
 
@@ -98,7 +98,7 @@ namespace neko {
         {
           auto lobj = extractWrappedDynamic<Vector2>( context, lhs );
           auto robj = extractWrappedDynamic<Vector2>( context, rhs );
-          retval = glm::all( glm::lessThan( lobj->v(), robj->v() ) );
+          retval = glm::all( orEqual ? glm::lessThanEqual( lobj->v(), robj->v() ) : glm::lessThan( lobj->v(), robj->v() ) );
         }
 
         return retval;

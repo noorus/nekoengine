@@ -4,12 +4,21 @@
 #include "console.h"
 #include "scripting.h"
 #include "nekomath.h"
+#include "js_mathutil.h"
 
 namespace neko {
 
   namespace js {
 
-    string Vector2::className( "vec2" );
+    static const char* c_className = "vec2";
+
+    static const mathShared::Messages c_equalsMessages( c_className + utf8String( ".equals" ), false );
+    static const mathShared::Messages c_greaterMessages( c_className + utf8String( ".greaterThan" ), false );
+    static const mathShared::Messages c_greaterOrEqualMessages( c_className + utf8String( ".greaterThanOrEqual" ), false );
+    static const mathShared::Messages c_lesserMessages( c_className + utf8String( ".lessThan" ), false );
+    static const mathShared::Messages c_lesserOrEqualMessages( c_className + utf8String( ".lessThanOrEqual" ), false );
+
+    string Vector2::className( c_className );
     WrappedType Vector2::internalType = Wrapped_Vector2;
 
     void Vector2::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
@@ -33,6 +42,22 @@ namespace neko {
       JS_WRAPPER_SETMEMBER( tpl, Vector2, reflect );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, makeFloor );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, makeCeil );
+
+      // Comparisons
+      JS_WRAPPER_SETMEMBER( tpl, Vector2, equals );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, equals, eq );
+      JS_WRAPPER_SETMEMBER( tpl, Vector2, greater );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, greater, greaterThan );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, greater, gt );
+      JS_WRAPPER_SETMEMBER( tpl, Vector2, greaterOrEqual );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, greater, greaterThanOrEqual );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, greater, gte );
+      JS_WRAPPER_SETMEMBER( tpl, Vector2, lesser );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, lesser, lessThan );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, lesser, lt );
+      JS_WRAPPER_SETMEMBER( tpl, Vector2, lesserOrEqual );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, lesser, lessThanOrEqual );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, lesser, lte );
     }
 
     //! \verbatim
@@ -159,6 +184,116 @@ namespace neko {
     }
 
     //! \verbatim
+    //! bool vec2.equals( vec2 )
+    //! \endverbatim
+    void Vector2::js_equals( const V8CallbackArgs& args )
+    {
+      auto isolate = args.GetIsolate();
+      HandleScope handleScope( isolate );
+
+      if ( args.Length() != 1 )
+      {
+        util::throwException( isolate, c_equalsMessages.syntaxErrorText.c_str() );
+        return;
+      }
+
+      WrappedType lhsType, rhsType;
+      if ( !mathShared::extractLhsRhsTypes( isolate, c_equalsMessages, args.This(), args[0], lhsType, rhsType ) )
+        return;
+
+      bool retval = mathShared::jsmath_equals( isolate, args.This(), args[0], lhsType );
+      args.GetReturnValue().Set( retval );
+    }
+
+    //! \verbatim
+    //! bool vec2.greaterThan( vec2 )
+    //! \endverbatim
+    void Vector2::js_greater( const V8CallbackArgs& args )
+    {
+      auto isolate = args.GetIsolate();
+      HandleScope handleScope( isolate );
+
+      if ( args.Length() != 1 )
+      {
+        util::throwException( isolate, c_greaterMessages.syntaxErrorText.c_str() );
+        return;
+      }
+
+      WrappedType lhsType, rhsType;
+      if ( !mathShared::extractLhsRhsTypes( isolate, c_greaterMessages, args.This(), args[0], lhsType, rhsType ) )
+        return;
+
+      bool retval = mathShared::jsmath_greater( isolate, args.This(), args[0], lhsType, false );
+      args.GetReturnValue().Set( retval );
+    }
+
+    //! \verbatim
+    //! bool vec2.greaterThanOrEqual( vec2 )
+    //! \endverbatim
+    void Vector2::js_greaterOrEqual( const V8CallbackArgs& args )
+    {
+      auto isolate = args.GetIsolate();
+      HandleScope handleScope( isolate );
+
+      if ( args.Length() != 1 )
+      {
+        util::throwException( isolate, c_greaterOrEqualMessages.syntaxErrorText.c_str() );
+        return;
+      }
+
+      WrappedType lhsType, rhsType;
+      if ( !mathShared::extractLhsRhsTypes( isolate, c_greaterOrEqualMessages, args.This(), args[0], lhsType, rhsType ) )
+        return;
+
+      bool retval = mathShared::jsmath_greater( isolate, args.This(), args[0], lhsType, true );
+      args.GetReturnValue().Set( retval );
+    }
+
+    //! \verbatim
+    //! bool vec2.lessThan( vec2 )
+    //! \endverbatim
+    void Vector2::js_lesser( const V8CallbackArgs& args )
+    {
+      auto isolate = args.GetIsolate();
+      HandleScope handleScope( isolate );
+
+      if ( args.Length() != 1 )
+      {
+        util::throwException( isolate, c_lesserMessages.syntaxErrorText.c_str() );
+        return;
+      }
+
+      WrappedType lhsType, rhsType;
+      if ( !mathShared::extractLhsRhsTypes( isolate, c_lesserMessages, args.This(), args[0], lhsType, rhsType ) )
+        return;
+
+      bool retval = mathShared::jsmath_lesser( isolate, args.This(), args[0], lhsType, false );
+      args.GetReturnValue().Set( retval );
+    }
+
+    //! \verbatim
+    //! bool vec2.lessThanOrEqual( vec2 )
+    //! \endverbatim
+    void Vector2::js_lesserOrEqual( const V8CallbackArgs& args )
+    {
+      auto isolate = args.GetIsolate();
+      HandleScope handleScope( isolate );
+
+      if ( args.Length() != 1 )
+      {
+        util::throwException( isolate, c_lesserOrEqualMessages.syntaxErrorText.c_str() );
+        return;
+      }
+
+      WrappedType lhsType, rhsType;
+      if ( !mathShared::extractLhsRhsTypes( isolate, c_lesserOrEqualMessages, args.This(), args[0], lhsType, rhsType ) )
+        return;
+
+      bool retval = mathShared::jsmath_lesser( isolate, args.This(), args[0], lhsType, true );
+      args.GetReturnValue().Set( retval );
+    }
+
+    //! \verbatim
     //! Real vec2.length()
     //! \endverbatim
     void Vector2::js_length( const V8CallbackArgs& args )
@@ -243,15 +378,6 @@ namespace neko {
       }
     }
 
-    inline Real angleBetween( vec2& v1, vec2& v2 )
-    {
-      auto lenProd = glm::length( v1 ) * glm::length( v2 );
-      if ( lenProd < 1e-6f )
-        lenProd = 1e-6f;
-      auto f = ( glm::dot( v1, v2 ) / lenProd );
-      return math::acos( math::clamp( f, -(glm::one<Real>()), glm::one<Real>() ) );
-    }
-
     //! \verbatim
     //! Radian vec2.angleBetween( vec2 )
     //! \endverbatim
@@ -260,7 +386,7 @@ namespace neko {
       auto other = extractVector2( 0, args );
       if ( other )
       {
-        auto angle = angleBetween( v_, other->v() );
+        auto angle = math::angleBetween( v_, other->v() );
         args.GetReturnValue().Set( static_cast<double>( angle ) );
       }
     }
@@ -273,7 +399,7 @@ namespace neko {
       auto other = extractVector2( 0, args );
       if ( other )
       {
-        auto angle = angleBetween( v_, other->v() );
+        auto angle = math::angleBetween( v_, other->v() );
         if ( glm::cross( v_, other->v() ) < glm::zero<Real>() )
           angle = ( glm::two_pi<Real>() - angle );
         args.GetReturnValue().Set( static_cast<double>( angle ) );

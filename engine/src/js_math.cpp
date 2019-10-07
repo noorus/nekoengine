@@ -10,20 +10,23 @@ namespace neko {
 
     namespace mathShared {
 
-      Messages::Messages( const utf8String& caller )
+      Messages::Messages( const utf8String& caller, bool twoArgs )
       {
-        syntaxErrorText = "Syntax error: " + caller + "( lhs, rhs )";
-        nonobjErrorText = "Usage error: " + caller + "( lhs, rhs ) - unknown object type passed in";
-        nonmatchErrorText = "Usage error: " + caller + "( lhs, rhs ) - object types do not match";
+        auto argsStr = utf8String( twoArgs ? "( lhs, rhs )" : "( other )" );
+        syntaxErrorText = "Syntax error: " + caller + argsStr;
+        nonobjErrorText = "Usage error: " + caller + argsStr + " - unknown object type passed in";
+        nonmatchErrorText = "Usage error: " + caller + argsStr + " - object types do not match";
       }
 
     }
 
-    const char* c_className = "NekoMath";
+    static const char* c_className = "NekoMath";
 
-    static const mathShared::Messages c_equalsMessages( c_className + utf8String( ".equals" ) );
-    static const mathShared::Messages c_greaterMessages( c_className + utf8String( ".greaterThan" ) );
-    static const mathShared::Messages c_lesserMessages( c_className + utf8String( ".lessThan" ) );
+    static const mathShared::Messages c_equalsMessages( c_className + utf8String( ".equals" ), true );
+    static const mathShared::Messages c_greaterMessages( c_className + utf8String( ".greaterThan" ), true );
+    static const mathShared::Messages c_greaterOrEqualMessages( c_className + utf8String( ".greaterThanOrEqual" ), true );
+    static const mathShared::Messages c_lesserMessages( c_className + utf8String( ".lessThan" ), true );
+    static const mathShared::Messages c_lesserOrEqualMessages( c_className + utf8String( ".lessThanOrEqual" ), true );
 
     string Math::className( c_className );
     WrappedType Math::internalType = Wrapped_Math;
@@ -41,14 +44,25 @@ namespace neko {
 
     void Math::registerGlobals( Isolate* isolate, V8FunctionTemplate& tpl )
     {
+      // Comparisons - equality
       JS_WRAPPER_SETOBJMEMBER( tpl, Math, equals );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, equals, eq );
+      // Comparisons - greater than
       JS_WRAPPER_SETOBJMEMBER( tpl, Math, greater );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, greater, greaterThan );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, greater, gt );
+      // Comparisons - greater than or equal
+      JS_WRAPPER_SETOBJMEMBER( tpl, Math, greaterOrEqual );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, greaterOrEqual, greaterThanOrEqual );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, greaterOrEqual, gte );
+      // Comparisons - less than
       JS_WRAPPER_SETOBJMEMBER( tpl, Math, lesser );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, lesser, lessThan );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, lesser, lt );
+      // Comparisons - less than or equal
+      JS_WRAPPER_SETOBJMEMBER( tpl, Math, lesserOrEqual );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, lesserOrEqual, lessThanOrEqual );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, lesserOrEqual, lte );
     }
 
     //! \verbatim
@@ -78,7 +92,23 @@ namespace neko {
       if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_greaterMessages, args, lhsType, rhsType ) )
         return;
 
-      bool retval = mathShared::jsmath_greater( isolate, args[0], args[1], lhsType );
+      bool retval = mathShared::jsmath_greater( isolate, args[0], args[1], lhsType, false );
+
+      args.GetReturnValue().Set( retval );
+    }
+
+    //! \verbatim
+    //! bool Math.greaterOrEqual( lhs, rhs )
+    //! \endverbatim
+    void Math::js_greaterOrEqual( Isolate* isolate, const V8CallbackArgs& args )
+    {
+      HandleScope handleScope( isolate );
+
+      WrappedType lhsType, rhsType;
+      if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_greaterOrEqualMessages, args, lhsType, rhsType ) )
+        return;
+
+      bool retval = mathShared::jsmath_greater( isolate, args[0], args[1], lhsType, true );
 
       args.GetReturnValue().Set( retval );
     }
@@ -94,7 +124,23 @@ namespace neko {
       if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_lesserMessages, args, lhsType, rhsType ) )
         return;
 
-      bool retval = mathShared::jsmath_lesser( isolate, args[0], args[1], lhsType );
+      bool retval = mathShared::jsmath_lesser( isolate, args[0], args[1], lhsType, false );
+
+      args.GetReturnValue().Set( retval );
+    }
+
+    //! \verbatim
+    //! bool Math.lesserOrEqual( lhs, rhs )
+    //! \endverbatim
+    void Math::js_lesserOrEqual( Isolate* isolate, const V8CallbackArgs& args )
+    {
+      HandleScope handleScope( isolate );
+
+      WrappedType lhsType, rhsType;
+      if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_lesserOrEqualMessages, args, lhsType, rhsType ) )
+        return;
+
+      bool retval = mathShared::jsmath_lesser( isolate, args[0], args[1], lhsType, true );
 
       args.GetReturnValue().Set( retval );
     }

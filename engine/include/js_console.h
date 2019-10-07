@@ -14,7 +14,7 @@ namespace neko {
     class Console: public StaticObjectWrapper<Console> {
     private:
       ConsolePtr console_;
-      void registerGlobals( Isolate* isolate, v8::Local<v8::FunctionTemplate>& tpl ) final;
+      void registerGlobals( Isolate* isolate, V8FunctionTemplate& tpl ) final;
     public:
       explicit Console( ConsolePtr console );
     public:

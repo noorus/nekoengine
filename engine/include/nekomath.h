@@ -205,6 +205,20 @@ namespace neko {
       return t * t * v1 + 2 * t * interp * control + interp * interp * v2;
     }
 
+    //! \fn inline Real angleBetween( vec2& v1, vec2& v2 )
+    //! \brief Angle between two 2D vectors.
+    //! \param [in] v1 The first vector.
+    //! \param [in] v2 The second vector.
+    //! \returns The angle between the vectors in radians.
+    inline Real angleBetween( vec2& v1, vec2& v2 )
+    {
+      auto lenProd = glm::length( v1 ) * glm::length( v2 );
+      if ( lenProd < 1e-6f )
+        lenProd = 1e-6f;
+      auto f = ( glm::dot( v1, v2 ) / lenProd );
+      return math::acos( math::clamp( f, -( glm::one<Real>() ), glm::one<Real>() ) );
+    }
+
   }
 
 }
