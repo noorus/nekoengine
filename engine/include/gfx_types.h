@@ -48,16 +48,4 @@ namespace neko {
     PixelFormat format_;
   };
 
-  // temp shit for freetype/hb testing
-  struct Mesh {
-    unsigned short* indices;
-    unsigned char* textureData;
-    unsigned int textureId;
-    Vertex2D* vertices;
-    unsigned int nbIndices;
-    unsigned int nbVertices;
-    GLuint vertexBuffer;
-    GLuint indexBuffer;
-  };
-
 }

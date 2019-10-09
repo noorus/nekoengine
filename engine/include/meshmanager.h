@@ -17,6 +17,12 @@ namespace neko {
     MeshAttrib_Texcoord
   };
 
+  enum MeshDataModifyHint {
+    ModifyHint_Ephemeral,
+    ModifyHint_Never,
+    ModifyHint_Often
+  };
+
   //! \class VBO
   //! \brief Vertex Buffer Object
   //! A buffer of raw vertex data (of only one type), referenceable by an ID.
@@ -26,7 +32,9 @@ namespace neko {
     vector<T> storage_;
     GLuint id;
     bool uploaded;
-    VBO(): id( 0 ), uploaded( false ) {}
+    bool dirty_; //!< Whether to just sub-update data
+    MeshDataModifyHint hint_; //!< What usage hint to use
+    VBO(): id( 0 ), uploaded( false ), dirty_( false ), hint_( ModifyHint_Often ) {}
   };
 
   template <class T>
@@ -63,7 +71,9 @@ namespace neko {
     vector<GLuint> storage_; //!< Contents of this ebo
     GLuint id_; //!< GL "name" for this ebo
     bool uploaded_; //!< Has this been uploaded yet?
-    EBO(): id_( 0 ), uploaded_( false ) {}
+    bool dirty_; //!< Whether to just sub-update data
+    MeshDataModifyHint hint_; //!< What usage hint to use
+    EBO(): id_( 0 ), uploaded_( false ), dirty_( false ), hint_( ModifyHint_Often ) {}
   };
 
   using EBOVector = vector<EBO>;

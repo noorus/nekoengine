@@ -7,6 +7,14 @@ namespace neko {
 
   using namespace gl;
 
+  // Should correspond to order in MeshDataModifyHint
+  static const GLenum c_hintMapping[3] = { GL_STREAM_DRAW, GL_STATIC_DRAW, GL_DYNAMIC_DRAW };
+
+  inline GLenum convertHint( MeshDataModifyHint hint )
+  {
+    return c_hintMapping[hint];
+  }
+
   // MeshManager: VBOs
 
   size_t MeshManager::pushVBO( vector<Vertex3D> vertices )
@@ -29,19 +37,37 @@ namespace neko {
   void vboUploadHelper( VBOVector<T>& vbos )
   {
     vector<VBO<T>*> dirties;
+    vector<VBO<T>*> subUpdates;
     for ( auto& buf : vbos )
       if ( !buf.uploaded )
         dirties.push_back( &buf );
+      else if ( buf.dirty_ )
+        subUpdates.push_back( &buf );
+
+    // Generate & upload entirely new ones
     vector<GLuint> ids;
     ids.resize( dirties.size() );
     glGenBuffers( (GLsizei)dirties.size(), ids.data() );
     for ( size_t i = 0; i < dirties.size(); ++i )
     {
       glBindBuffer( GL_ARRAY_BUFFER, ids[i] );
-      glBufferData( GL_ARRAY_BUFFER, dirties[i]->storage_.size() * sizeof( T ), dirties[i]->storage_.data(), GL_STATIC_DRAW );
+      glBufferData( GL_ARRAY_BUFFER,
+        dirties[i]->storage_.size() * sizeof( T ),
+        dirties[i]->storage_.data(),
+        convertHint( dirties[i]->hint_ ) );
       dirties[i]->id = ids[i];
       dirties[i]->uploaded = true;
     }
+
+    // Update sub-data on existing ones
+    for ( size_t i = 0; i < subUpdates.size(); ++i )
+    {
+      glNamedBufferSubData( subUpdates[i]->id, 0,
+        subUpdates[i]->storage_.size() * sizeof( T ),
+        subUpdates[i]->storage_.data() );
+      subUpdates[i]->dirty_ = false;
+    }
+
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
   }
 
@@ -166,19 +192,37 @@ namespace neko {
   void MeshManager::uploadEBOs()
   {
     vector<EBO*> dirties;
+    vector<EBO*> subUpdates;
     for ( auto& ebo : ebos_ )
       if ( !ebo.uploaded_ )
         dirties.push_back( &ebo );
+      else if ( ebo.dirty_ )
+        subUpdates.push_back( &ebo );
+
+    // Generate & upload entirely new ones
     vector<GLuint> ids;
     ids.resize( dirties.size() );
     glGenBuffers( (GLsizei)dirties.size(), ids.data() );
     for ( size_t i = 0; i < dirties.size(); ++i )
     {
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ids[i] );
-      glBufferData( GL_ELEMENT_ARRAY_BUFFER, dirties[i]->storage_.size() * sizeof( GLuint ), dirties[i]->storage_.data(), GL_STATIC_DRAW );
+      glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+        dirties[i]->storage_.size() * sizeof( GLuint ),
+        dirties[i]->storage_.data(),
+        convertHint( dirties[i]->hint_ ) );
       dirties[i]->id_ = ids[i];
       dirties[i]->uploaded_ = true;
     }
+
+    // Update sub-data on existing ones
+    for ( size_t i = 0; i < subUpdates.size(); ++i )
+    {
+      glNamedBufferSubData( subUpdates[i]->id_, 0,
+        subUpdates[i]->storage_.size() * sizeof( GLuint ),
+        subUpdates[i]->storage_.data() );
+      subUpdates[i]->dirty_ = false;
+    }
+
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
   }
 
