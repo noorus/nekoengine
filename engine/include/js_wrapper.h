@@ -23,7 +23,7 @@ namespace neko {
 
     namespace util {
 
-      inline bool isWrappedType( V8Context& ctx, const V8Object& object, WrappedType type )
+      inline bool isWrappedType( const V8Context& ctx, const V8Object& object, WrappedType type )
       {
         if ( object->InternalFieldCount() != Max_WrapField )
           return false;
@@ -33,7 +33,7 @@ namespace neko {
         return ( val->Uint32Value( ctx ).FromMaybe( Max_WrappedType ) == type );
       }
 
-      inline bool getWrappedType( V8Context& ctx, const V8Value& value, WrappedType& type_out )
+      inline bool getWrappedType( const V8Context& ctx, const V8Value& value, WrappedType& type_out )
       {
         if ( value.IsEmpty() || !value->IsObject() )
           return false;
