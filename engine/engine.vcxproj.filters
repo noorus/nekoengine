@@ -55,6 +55,9 @@
     <Filter Include="Source Files\engine">
       <UniqueIdentifier>{24988d51-f061-4d37-a58e-e6e816ff2720}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gfx\fonts">
+      <UniqueIdentifier>{5ea6f9e9-59c3-4d06-9e96-ed4aaff962d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -129,9 +132,6 @@
     <ClCompile Include="src\scriptingcontext.cpp">
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
-    <ClCompile Include="src\fontmanager.cpp">
-      <Filter>Source Files\gfx</Filter>
-    </ClCompile>
     <ClCompile Include="src\fontshaper.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
@@ -147,11 +147,17 @@
     <ClCompile Include="src\js_math.cpp">
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
-    <ClCompile Include="src\font_textured.cpp">
-      <Filter>Source Files\gfx</Filter>
-    </ClCompile>
     <ClCompile Include="src\font_textbuffer.cpp">
-      <Filter>Source Files\gfx</Filter>
+      <Filter>Source Files\gfx\fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\font_textureatlas.cpp">
+      <Filter>Source Files\gfx\fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\font_textured.cpp">
+      <Filter>Source Files\gfx\fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fontmanager.cpp">
+      <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

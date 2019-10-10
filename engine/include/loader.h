@@ -15,7 +15,7 @@ namespace neko {
       utf8String path_;
     } textureLoad;
     struct FontfaceLoad {
-      FontPtr font_;
+      fonts::FontPtr font_;
       FontManagerPtr manager_;
       utf8String path_;
       float size_;

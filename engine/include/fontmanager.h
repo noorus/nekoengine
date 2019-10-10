@@ -11,7 +11,9 @@ namespace neko {
     Real kerning;
   };
 
-  namespace ftgl {
+  class FontManager;
+
+  namespace fonts {
 
     struct TextureAtlas {
       vector<vec3i> nodes_;
@@ -55,8 +57,49 @@ namespace neko {
       Real outline_thickness;
       TextureGlyph(): codepoint( -1 ), width( 0 ), height( 0 ),
         rendermode( RENDER_NORMAL ), outline_thickness( 0.0f ),
-        offset( 0, 0 ), advance( 0.0f, 0.0f ) {}
+        offset( 0, 0 ), advance( 0.0f, 0.0f )
+      {
+      }
     };
+
+    class Font {
+    private:
+      void postInit();
+      void initEmptyGlyph();
+      void generateKerning();
+      void forceUCS2Charmap();
+    public:
+      FT_Face face_;
+      vector<TextureGlyph> glyphs_;
+      TextureAtlasPtr atlas_;
+      FontManagerPtr manager_;
+      Real size_;
+      Real ascender_;
+      Real descender_;
+      RenderMode rendermode_;
+      uint8_t lcd_weights[5];
+      bool hinting_;
+      bool filtering_;
+      bool kerning_;
+      Real outline_thickness_;
+      Real linegap_;
+      Real underline_position;
+      Real underline_thickness;
+      int padding_;
+      unique_ptr<utils::DumbBuffer> data_;
+    public:
+      Font( FontManagerPtr manager, size_t width, size_t height, size_t depth );
+      ~Font();
+      void loadGlyph( uint32_t codepoint );
+      void loadFace( vector<uint8_t>& source, Real pointSize );
+    };
+
+    using FontPtr = shared_ptr<Font>;
+    using FontVector = vector<FontPtr>;
+
+  }
+
+  namespace ftgl {
 
     struct Markup {
       char* family;
@@ -116,57 +159,19 @@ namespace neko {
 
   }
 
-  class Font {
-  private:
-    void generateKerning();
-  public:
-    FT_Face face_;
-    vector<ftgl::TextureGlyph> glyphs_;
-    ftgl::TextureAtlasPtr atlas_;
-    FT_Library ftlib_;
-    Real size_;
-    Real ascender_;
-    Real descender_;
-    ftgl::RenderMode rendermode_;
-    uint8_t lcd_weights[5];
-    bool hinting_;
-    bool filtering_;
-    bool kerning_;
-    Real outline_thickness_;
-    Real linegap_;
-    Real underline_position;
-    Real underline_thickness;
-    int padding_;
-    struct Data {
-      uint8_t* buffer_;
-      size_t length_;
-      Data(): buffer_( nullptr ), length_( 0 ) {}
-    } data_;
-    Font( bool hinting, bool filtering, bool kerning );
-    void initEmptyGlyph();
-    void loadGlyph( uint32_t codepoint );
-  };
-
-  using FontPtr = shared_ptr<Font>;
-  using FontVector = vector<FontPtr>;
-
-  class FontManager {
+  class FontManager: public std::enable_shared_from_this<FontManager> {
   protected:
-    FontVector fonts_;
+    fonts::FontVector fonts_;
     FT_MemoryRec_ ftMemAllocator_;
     FT_Library freeType_;
     platform::RWLock faceLock_;
-    ftgl::TextureAtlasPtr atlas_;
-    void forceUCS2Charmap( FT_Face face );
-    void textureFontPostInit( FontPtr font );
   public:
     FontManager();
     ~FontManager();
-    FontPtr loadFace( uint8_t* buffer, size_t length, Real pointSize, ftgl::TextureAtlasPtr atlas );
-    void initialize( size_t width, size_t height, size_t depth );
+    void initialize();
     void shutdown();
-    void freeFace( FontPtr face );
-    inline FontVector& fonts() { return fonts_; }
+    inline fonts::FontVector& fonts() { return fonts_; }
+    inline FT_Library lib() { return freeType_; }
   };
 
 }

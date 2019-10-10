@@ -47,7 +47,7 @@ namespace neko {
 
     timer.start();
     fonts_ = make_shared<FontManager>();
-    fonts_->initialize( 8192, 8192, 1 );
+    fonts_->initialize();
     console_->printf( Console::srcEngine, "Font manager init took %dms", (int)timer.stop() );
 
     timer.start();

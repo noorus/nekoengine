@@ -6,155 +6,311 @@
 
 namespace neko {
 
-  namespace ftgl {
+  namespace fonts {
 
-    // TextureAtlas
+#define HRES  64
+#define HRESf 64.f
+#define DPI   72
 
-    TextureAtlas::TextureAtlas( const size_t width, const size_t height, const size_t depth )
+    const Real c_resolutionMultiplier = 100.0f;
+
+    Font::Font( FontManagerPtr manager, size_t width, size_t height, size_t depth ):
+      manager_( move( manager ) ),
+      hinting_( true ), filtering_( true ), kerning_( true ),
+      ascender_( 0.0f ), descender_( 0.0f ), size_( 0.0f ),
+      outline_thickness_( 0.0f ), padding_( 0 ),
+      rendermode_( RENDER_NORMAL )
     {
-      assert( depth == 1 || depth == 3 || depth == 4 );
+      // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
+      // FT_LCD_FILTER_DEFAULT is (0x10, 0x40, 0x70, 0x40, 0x10)
+      lcd_weights[0] = 0x10;
+      lcd_weights[1] = 0x40;
+      lcd_weights[2] = 0x70;
+      lcd_weights[3] = 0x40;
+      lcd_weights[4] = 0x10;
 
-      nodes_.emplace_back( 1, 1, width - 2 );
-
-      used_ = 0;
-      width_ = width;
-      height_ = height;
-      depth_ = depth;
-      id_ = 0;
-
-      data_.resize( width * height * depth );
+      atlas_ = make_shared<TextureAtlas>( width, height, depth );
     }
 
-    void TextureAtlas::setRegion( const size_t x, const size_t y, const size_t width, const size_t height, const uint8_t* data, const size_t stride )
+    void Font::loadFace( vector<uint8_t>& source, Real pointSize )
     {
-      assert( x > 0 && y > 0 && ( x < ( width_ - 1 ) ) && ( y < ( height_ - 1 ) ) );
-      assert( ( x + width ) <= ( width_ - 1 ) && ( y + height ) <= ( height_ - 1 ) );
+      assert( !data_.get() );
+      assert( size_ < 1.0f );
 
-      assert( height == 0 || ( data && width > 0 ) );
+      data_ = make_unique<utils::DumbBuffer>( Memory::Graphics, source );
+      size_ = pointSize;
 
-      auto depth = depth_;
-      size_t charsize = sizeof( uint8_t );
-      for ( size_t i = 0; i < height; ++i )
+      auto ftlib = manager_->lib();
+
+      FT_Open_Args args = { 0 };
+      args.flags = FT_OPEN_MEMORY;
+      args.memory_base = data_->data();
+      args.memory_size = (FT_Long)data_->length();
+
+      auto err = FT_Open_Face( ftlib, &args, 0, &face_ );
+      if ( err || !face_ )
       {
-        memcpy(
-          data_.data() + ( ( y + i ) * width_ + x ) * charsize * depth,
-          data + ( i * stride ) * charsize, width * charsize * depth );
+        NEKO_FREETYPE_EXCEPT( "FreeType font face load failed", err );
+      }
+
+      /*Locator::console().printf( Console::srcEngine,
+        "Font: %s, face %d/%d, glyphs: %d, charmaps: %d, scalable? %s",
+        font->face_->family_name,
+        0, font->face_->num_faces,
+        font->face_->num_glyphs,
+        font->face_->num_charmaps,
+        ( font->face_->face_flags & FT_FACE_FLAG_SCALABLE ) ? "yes" : "no" );*/
+
+      //forceUCS2Charmap( font->face_ );
+      err = FT_Select_Charmap( face_, FT_ENCODING_UNICODE );
+      if ( err )
+        NEKO_FREETYPE_EXCEPT( "FreeType font charmap seelection failed", err );
+
+      auto calcWidth = (signed long)( size_ * c_resolutionMultiplier * HRESf );
+      const unsigned int horizRes = ( DPI * HRES );
+      const unsigned int vertRes = ( DPI );
+      err = FT_Set_Char_Size( face_, calcWidth, 0, horizRes, vertRes );
+      if ( err )
+        NEKO_FREETYPE_EXCEPT( "FreeType font character point size setting failed", err );
+
+      // I have absolutely no idea what this is but seems important.
+      FT_Matrix matrix = {
+        (int)( ( 1.0 / HRES ) * 0x10000L ),
+        (int)( ( 0.0 ) * 0x10000L ),
+        (int)( ( 0.0 ) * 0x10000L ),
+        (int)( ( 1.0 ) * 0x10000L ) };
+
+      FT_Set_Transform( face_, &matrix, nullptr );
+
+      postInit();
+      initEmptyGlyph();
+    }
+
+    Font::~Font()
+    {
+      if ( face_ )
+        FT_Done_Face( face_ );
+    }
+
+    void Font::forceUCS2Charmap()
+    {
+      assert( face_ );
+
+      for ( auto i = 0; i < face_->num_charmaps; ++i )
+      {
+        auto charmap = face_->charmaps[i];
+        if ( ( charmap->platform_id == 0 && charmap->encoding_id == 3 )
+          || ( charmap->platform_id == 3 && charmap->encoding_id == 1 ) )
+          if ( FT_Set_Charmap( face_, charmap ) == 0 )
+            return;
       }
     }
 
-    int TextureAtlas::fit( const size_t index, const size_t width, const size_t height )
+    void Font::postInit()
     {
-      auto node = &nodes_[index];
-      auto x = node->x;
-      auto y = node->y;
-      auto width_left = (int64_t)width;
-      auto i = index;
+      underline_position = math::round( face_->underline_position / (Real)( HRESf * HRESf ) * size_ );
+      if ( underline_position > -2.0f )
+        underline_position = -2.0f;
 
-      if ( ( x + width ) > ( width_ - 1 ) )
-        return -1;
+      underline_thickness = math::round( face_->underline_thickness / (Real)( HRESf * HRESf ) * size_ );
+      if ( underline_thickness < 1.0f )
+        underline_thickness = 1.0f;
 
-      while ( width_left > 0 )
-      {
-        node = &nodes_[i];
-        if ( node->y > y )
-          y = node->y;
-        if ( ( y + height ) > ( height_ - 1 ) )
-          return -1;
-        width_left -= node->z;
-        ++i;
-      }
-
-      return y;
+      auto metrics = face_->size->metrics;
+      ascender_ = ( metrics.ascender >> 6 ) / c_resolutionMultiplier;
+      descender_ = ( metrics.descender >> 6 ) / c_resolutionMultiplier;
+      size_ = ( metrics.height >> 6 ) / c_resolutionMultiplier;
+      linegap_ = ( size_ - ascender_ + descender_ );
     }
 
-    void TextureAtlas::merge()
+    void Font::initEmptyGlyph()
     {
-      size_t i = 0;
-      for ( i = 0; i < nodes_.size() - 1; ++i )
+      auto region = atlas_->getRegion( 5, 5 );
+      if ( region.x < 0 )
+        NEKO_EXCEPT( "Font face texture atlas is full" );
+
+#pragma warning(push)
+#pragma warning(disable:4838)
+      static unsigned char data[4 * 4 * 3] = {
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+#pragma warning(pop)
+
+      atlas_->setRegion( region.x, region.y, 4, 4, data, 0 );
+
+      TextureGlyph glyph;
+      glyph.codepoint = -1;
+      glyph.coords[0].s = ( region.x + 2 ) / (Real)atlas_->width_;
+      glyph.coords[0].t = ( region.y + 2 ) / (Real)atlas_->height_;
+      glyph.coords[1].s = ( region.x + 3 ) / (Real)atlas_->width_;
+      glyph.coords[1].t = ( region.y + 3 ) / (Real)atlas_->height_;
+
+      glyphs_.push_back( move( glyph ) );
+    }
+
+    void Font::loadGlyph( uint32_t codepoint )
+    {
+      auto ftlib = manager_->lib();
+      auto glyphIndex = FT_Get_Char_Index( face_, (FT_ULong)codepoint );
+
+      FT_Int32 flags = 0;
+      flags |= (
+        ( rendermode_ != RENDER_NORMAL && rendermode_ != RENDER_SIGNED_DISTANCE_FIELD )
+        ? FT_LOAD_NO_BITMAP : FT_LOAD_RENDER );
+      flags |= ( hinting_ ? FT_LOAD_FORCE_AUTOHINT : ( FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT ) );
+
+      if ( atlas_->depth_ == 3 )
       {
-        auto node = &nodes_[i];
-        auto next = &nodes_[i + 1];
-        if ( node->y == next->y )
+        FT_Library_SetLcdFilter( ftlib, FT_LCD_FILTER_LIGHT );
+        flags |= FT_LOAD_TARGET_LCD;
+        if ( filtering_ )
+          FT_Library_SetLcdFilterWeights( ftlib, lcd_weights );
+      }
+
+      auto err = FT_Load_Glyph( face_, glyphIndex, flags );
+      if ( err )
+        NEKO_FREETYPE_EXCEPT( "FreeType glyph loading error", err );
+
+      FT_Glyph ftglyph = nullptr;
+      FT_GlyphSlot slot = nullptr;
+      FT_Bitmap bitmap;
+      vec2i glyphCoords;
+      if ( rendermode_ == RENDER_NORMAL || rendermode_ == RENDER_SIGNED_DISTANCE_FIELD )
+      {
+        slot = face_->glyph;
+        bitmap = slot->bitmap;
+        glyphCoords.x = slot->bitmap_left;
+        glyphCoords.y = slot->bitmap_top;
+      }
+      else
+      {
+        FT_Stroker stroker;
+        err = FT_Stroker_New( ftlib, &stroker );
+        if ( err )
+          NEKO_FREETYPE_EXCEPT( "FreeType stroker creation failed", err );
+
+        FT_Stroker_Set( stroker, (int)( outline_thickness_ * HRES ), FT_STROKER_LINECAP_ROUND, FT_STROKER_LINEJOIN_ROUND, 0 );
+
+        err = FT_Get_Glyph( face_->glyph, &ftglyph );
+        if ( err )
+          NEKO_FREETYPE_EXCEPT( "FreeType get glyph failed", err );
+
+        if ( rendermode_ == RENDER_OUTLINE_EDGE )
+          err = FT_Glyph_Stroke( &ftglyph, stroker, 1 );
+        else if ( rendermode_ == RENDER_OUTLINE_POSITIVE )
+          err = FT_Glyph_StrokeBorder( &ftglyph, stroker, 0, 1 );
+        else if ( rendermode_ == RENDER_OUTLINE_NEGATIVE )
+          err = FT_Glyph_StrokeBorder( &ftglyph, stroker, 1, 1 );
+
+        if ( err )
+          NEKO_FREETYPE_EXCEPT( "FreeType glyph stroke failed", err );
+
+        if ( atlas_->depth_ == 1 )
+          err = FT_Glyph_To_Bitmap( &ftglyph, FT_RENDER_MODE_NORMAL, 0, 1 );
+        else
+          err = FT_Glyph_To_Bitmap( &ftglyph, FT_RENDER_MODE_LCD, 0, 1 );
+
+        if ( err )
+          NEKO_FREETYPE_EXCEPT( "FreeType glyph to bitmap failed", err );
+
+        auto bitmapGlyph = (FT_BitmapGlyph)ftglyph;
+        bitmap = bitmapGlyph->bitmap;
+        glyphCoords.x = bitmapGlyph->left;
+        glyphCoords.y = bitmapGlyph->top;
+
+        FT_Stroker_Done( stroker );
+      }
+
+      vec4i padding( 0, 0, 1, 1 );
+      if ( rendermode_ == RENDER_SIGNED_DISTANCE_FIELD )
+      {
+        padding.x = 1;
+        padding.y = 1;
+      }
+
+      if ( padding_ != 0 )
+        padding += padding_;
+
+      size_t src_w = bitmap.width / atlas_->depth_;
+      size_t src_h = bitmap.rows;
+      size_t tgt_w = src_w + padding.x + padding.z;
+      size_t tgt_h = src_h + padding.y + padding.w;
+
+      auto region = atlas_->getRegion( tgt_w, tgt_h );
+      if ( region.x < 0 )
+        NEKO_EXCEPT( "Font face texture atlas is full" );
+
+      auto x = region.x;
+      auto y = region.y;
+
+      auto buffer = (uint8_t*)Locator::memory().alloc( Memory::Graphics, tgt_w * tgt_h * atlas_->depth_ );
+      auto dst_ptr = buffer + ( padding.y * tgt_w + padding.x ) * atlas_->depth_;
+      auto src_ptr = bitmap.buffer;
+      for ( int i = 0; i < src_h; ++i )
+      {
+        memcpy( dst_ptr, src_ptr, bitmap.width );
+        dst_ptr += tgt_w * atlas_->depth_;
+        src_ptr += bitmap.pitch;
+      }
+
+      if ( rendermode_ == RENDER_SIGNED_DISTANCE_FIELD )
+      {
+        // TODO make_distance_mapb
+      }
+
+      atlas_->setRegion( x, y, tgt_w, tgt_h, buffer, tgt_w * atlas_->depth_ );
+      Locator::memory().free( Memory::Graphics, buffer );
+
+      TextureGlyph glyph;
+      glyph.codepoint = codepoint;
+      glyph.width = tgt_w;
+      glyph.height = tgt_h;
+      glyph.rendermode = rendermode_;
+      glyph.offset = glyphCoords;
+      glyph.coords[0].s = x / (Real)atlas_->width_;
+      glyph.coords[0].t = y / (Real)atlas_->height_;
+      glyph.coords[1].s = ( x + glyph.width ) / (Real)atlas_->width_;
+      glyph.coords[1].t = ( y + glyph.height ) / (Real)atlas_->height_;
+
+      FT_Load_Glyph( face_, glyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_HINTING );
+      slot = face_->glyph;
+      glyph.advance.x = (Real)slot->advance.x / HRESf;
+      glyph.advance.y = (Real)slot->advance.y / HRESf;
+
+      glyphs_.push_back( move( glyph ) );
+
+      if ( ftglyph )
+        FT_Done_Glyph( ftglyph );
+
+      generateKerning();
+    }
+
+    void Font::generateKerning()
+    {
+      assert( glyphs_.size() > 0 );
+
+      for ( size_t i = 1; i < glyphs_.size(); ++i )
+      {
+        auto glyph = &glyphs_[i];
+        auto index = FT_Get_Char_Index( face_, glyph->codepoint );
+        glyph->kerning.clear();
+
+        for ( size_t j = 1; j < glyphs_.size(); ++j )
         {
-          node->z += next->z;
-          nodes_.erase( nodes_.begin() + ( i + 1 ) );
-          --i;
-        }
-      }
-    }
+          auto prev_glyph = &glyphs_[j];
+          auto prev_index = FT_Get_Char_Index( face_, prev_glyph->codepoint );
 
-    vec4i TextureAtlas::getRegion( const size_t width, const size_t height )
-    {
-      int best_index = -1;
-      size_t best_height = std::numeric_limits<size_t>::max();
-      size_t best_width = std::numeric_limits<size_t>::max();
-
-      vec4i region;
-
-      for ( size_t i = 0; i < nodes_.size(); ++i )
-      {
-        auto y = fit( i, width, height );
-        if ( y >= 0 )
-        {
-          auto node = &nodes_[i];
-          if ( ( ( y + height ) < best_height )
-            || ( ( ( y + height ) == best_height )
-            && ( node->z > 0 && (size_t)node->z < best_width ) ) )
+          FT_Vector kerning;
+          FT_Get_Kerning( face_, prev_index, index, FT_KERNING_UNFITTED, &kerning );
+          if ( kerning.x )
           {
-            best_height = ( y + height );
-            best_index = (int)i;
-            best_width = node->z;
-            region.x = node->x;
-            region.y = y;
+            Kerning k = { prev_glyph->codepoint, kerning.x / (Real)( HRESf * HRESf ) };
+            glyph->kerning.push_back( move( k ) );
           }
         }
       }
-
-      if ( best_index == -1 )
-      {
-        region.x = -1;
-        region.y = -1;
-        region.z = 0;
-        region.w = 0;
-        return move( region );
-      }
-
-      vec3i node( region.x, region.y + height, width );
-      nodes_.insert( nodes_.begin() + best_index, node );
-
-      size_t i;
-      for ( i = best_index + 1; i < nodes_.size(); ++i )
-      {
-        auto node = &nodes_[i];
-        auto prev = &nodes_[i - 1];
-        if ( node->x < ( prev->x + prev->z ) )
-        {
-          int shrink = prev->x + prev->z - node->x;
-          node->x += shrink;
-          node->z -= shrink;
-          if ( node->z <= 0 )
-          {
-            nodes_.erase( nodes_.begin() + i );
-            --i;
-          } else
-            break;
-        } else
-          break;
-      }
-
-      merge();
-      used_ += ( width * height );
-      return move( region );
-    }
-
-    void TextureAtlas::clear()
-    {
-      vec3i node( 1, 1, 1 );
-      nodes_.clear();
-      used_ = 0;
-      node.z = width_ - 2;
-      nodes_.push_back( move( node ) );
-      memset( data_.data(), 0, width_ * height_ * depth_ );
     }
 
   }

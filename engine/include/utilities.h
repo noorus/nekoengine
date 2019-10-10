@@ -1,6 +1,7 @@
 #pragma once
 #include "neko_types.h"
 #include "neko_platform.h"
+#include "locator.h"
 
 namespace neko {
 
@@ -92,6 +93,29 @@ namespace neko {
 
       return result;
     }
+
+    class DumbBuffer {
+    private:
+      Memory::Sector sector_;
+      uint8_t* buffer_;
+      size_t length_;
+    public:
+      DumbBuffer( Memory::Sector sector, const vector<uint8_t>& source ):
+        sector_( sector ), buffer_( nullptr ), length_( 0 )
+      {
+        length_ = source.size();
+        buffer_ = static_cast<uint8_t*>( Locator::memory().alloc( sector_, length_ ) );
+        memcpy( buffer_, source.data(), length_ );
+      }
+      ~DumbBuffer()
+      {
+        if ( buffer_ )
+          Locator::memory().free( sector_, buffer_ );
+      }
+      inline const Memory::Sector sector() const { return sector_; }
+      inline const size_t length() const { return length_; }
+      inline uint8_t* data() { return buffer_; }
+    };
 
   }
 
