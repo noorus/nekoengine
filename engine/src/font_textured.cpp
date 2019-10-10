@@ -14,7 +14,7 @@ namespace neko {
 
     const Real c_resolutionMultiplier = 100.0f;
 
-    Font::Font( FontManagerPtr manager, size_t width, size_t height, size_t depth ):
+    GraphicalFont::GraphicalFont( FontManagerPtr manager, size_t width, size_t height, size_t depth ):
       manager_( move( manager ) ),
       hinting_( true ), filtering_( true ), kerning_( true ),
       ascender_( 0.0f ), descender_( 0.0f ), size_( 0.0f ),
@@ -32,7 +32,7 @@ namespace neko {
       atlas_ = make_shared<TextureAtlas>( width, height, depth );
     }
 
-    void Font::loadFace( vector<uint8_t>& source, Real pointSize )
+    void GraphicalFont::loadFace( vector<uint8_t>& source, Real pointSize )
     {
       assert( !data_.get() );
       assert( size_ < 1.0f );
@@ -86,13 +86,13 @@ namespace neko {
       initEmptyGlyph();
     }
 
-    Font::~Font()
+    GraphicalFont::~GraphicalFont()
     {
       if ( face_ )
         FT_Done_Face( face_ );
     }
 
-    void Font::forceUCS2Charmap()
+    void GraphicalFont::forceUCS2Charmap()
     {
       assert( face_ );
 
@@ -106,7 +106,7 @@ namespace neko {
       }
     }
 
-    void Font::postInit()
+    void GraphicalFont::postInit()
     {
       underline_position = math::round( face_->underline_position / (Real)( HRESf * HRESf ) * size_ );
       if ( underline_position > -2.0f )
@@ -123,7 +123,7 @@ namespace neko {
       linegap_ = ( size_ - ascender_ + descender_ );
     }
 
-    void Font::initEmptyGlyph()
+    void GraphicalFont::initEmptyGlyph()
     {
       auto region = atlas_->getRegion( 5, 5 );
       if ( region.x < 0 )
@@ -150,7 +150,7 @@ namespace neko {
       glyphs_.push_back( move( glyph ) );
     }
 
-    void Font::loadGlyph( uint32_t codepoint )
+    void GraphicalFont::loadGlyph( uint32_t codepoint )
     {
       auto ftlib = manager_->lib();
       auto glyphIndex = FT_Get_Char_Index( face_, (FT_ULong)codepoint );
@@ -208,9 +208,9 @@ namespace neko {
           NEKO_FREETYPE_EXCEPT( "FreeType glyph stroke failed", err );
 
         if ( atlas_->depth_ == 1 )
-          err = FT_Glyph_To_Bitmap( &ftglyph, FT_RENDER_MODE_NORMAL, 0, 1 );
+          err = FT_Glyph_To_Bitmap( &ftglyph, FT_RENDER_MODE_NORMAL, nullptr, 1 );
         else
-          err = FT_Glyph_To_Bitmap( &ftglyph, FT_RENDER_MODE_LCD, 0, 1 );
+          err = FT_Glyph_To_Bitmap( &ftglyph, FT_RENDER_MODE_LCD, nullptr, 1 );
 
         if ( err )
           NEKO_FREETYPE_EXCEPT( "FreeType glyph to bitmap failed", err );
@@ -287,7 +287,7 @@ namespace neko {
       generateKerning();
     }
 
-    void Font::generateKerning()
+    void GraphicalFont::generateKerning()
     {
       assert( glyphs_.size() > 0 );
 

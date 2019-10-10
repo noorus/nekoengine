@@ -6,13 +6,6 @@
 
 namespace neko {
 
-  struct Kerning {
-    uint32_t codepoint;
-    Real kerning;
-  };
-
-  class FontManager;
-
   namespace fonts {
 
     struct TextureAtlas {
@@ -32,6 +25,11 @@ namespace neko {
     };
 
     using TextureAtlasPtr = shared_ptr<TextureAtlas>;
+
+    struct Kerning {
+      uint32_t codepoint;
+      Real kerning;
+    };
 
     enum RenderMode {
       RENDER_NORMAL,
@@ -57,12 +55,12 @@ namespace neko {
       Real outline_thickness;
       TextureGlyph(): codepoint( -1 ), width( 0 ), height( 0 ),
         rendermode( RENDER_NORMAL ), outline_thickness( 0.0f ),
-        offset( 0, 0 ), advance( 0.0f, 0.0f )
-      {
-      }
+        offset( 0, 0 ), advance( 0.0f, 0.0f ) {}
     };
 
-    class Font {
+    using TextureGlyphVector = vector<TextureGlyph>;
+
+    class GraphicalFont {
     private:
       void postInit();
       void initEmptyGlyph();
@@ -70,7 +68,7 @@ namespace neko {
       void forceUCS2Charmap();
     public:
       FT_Face face_;
-      vector<TextureGlyph> glyphs_;
+      TextureGlyphVector glyphs_;
       TextureAtlasPtr atlas_;
       FontManagerPtr manager_;
       Real size_;
@@ -88,14 +86,14 @@ namespace neko {
       int padding_;
       unique_ptr<utils::DumbBuffer> data_;
     public:
-      Font( FontManagerPtr manager, size_t width, size_t height, size_t depth );
-      ~Font();
+      GraphicalFont( FontManagerPtr manager, size_t width, size_t height, size_t depth );
+      ~GraphicalFont();
       void loadGlyph( uint32_t codepoint );
       void loadFace( vector<uint8_t>& source, Real pointSize );
     };
 
-    using FontPtr = shared_ptr<Font>;
-    using FontVector = vector<FontPtr>;
+    using GraphicalFontPtr = shared_ptr<GraphicalFont>;
+    using GraphicalFontVector = vector<GraphicalFontPtr>;
 
   }
 
@@ -159,18 +157,37 @@ namespace neko {
 
   }
 
-  class FontManager: public std::enable_shared_from_this<FontManager> {
+  struct Font {
+    struct Specs {
+      vec2i atlasSize_;
+      Real pointSize_;
+    };
+    bool loaded_;
+    fonts::GraphicalFontPtr impl_;
+    FontManager* manager_;
+    Font( FontManager* manager ): loaded_( false ), manager_( manager ) {}
+  };
+
+  using FontPtr = shared_ptr<Font>;
+  using FontVector = vector<FontPtr>;
+
+  class FontManager: public enable_shared_from_this<FontManager> {
   protected:
-    fonts::FontVector fonts_;
+    FontVector fonts_;
     FT_MemoryRec_ ftMemAllocator_;
     FT_Library freeType_;
     platform::RWLock faceLock_;
+    EnginePtr engine_;
+    void uploadFonts();
   public:
-    FontManager();
+    FontManager( EnginePtr engine );
     ~FontManager();
     void initialize();
+    FontPtr createFont();
+    void loadFont( FontPtr font, const Font::Specs& specs, vector<uint8_t>& buffer );
     void shutdown();
-    inline fonts::FontVector& fonts() { return fonts_; }
+    void prepare( GameTime time );
+    inline FontVector& fonts() { return fonts_; }
     inline FT_Library lib() { return freeType_; }
   };
 

@@ -46,14 +46,14 @@ namespace neko {
     loader_->start();
 
     timer.start();
-    fonts_ = make_shared<FontManager>();
-    fonts_->initialize();
-    console_->printf( Console::srcEngine, "Font manager init took %dms", (int)timer.stop() );
-
-    timer.start();
     gfx_ = make_shared<Gfx>( shared_from_this() );
     gfx_->postInitialize();
     console_->printf( Console::srcGfx, "Gfx init took %dms", (int)timer.stop() );
+
+    timer.start();
+    fonts_ = make_shared<FontManager>( shared_from_this() );
+    fonts_->initialize();
+    console_->printf( Console::srcEngine, "Font manager init took %dms", (int)timer.stop() );
 
 #ifndef NEKO_NO_SCRIPTING
     timer.start();
@@ -87,6 +87,7 @@ namespace neko {
     {
       console_->executeBuffered();
       scripting_->preUpdate( time_ );
+      fonts_->prepare( time_ );
       gfx_->preUpdate( time_ );
 
       delta = clock_.update();

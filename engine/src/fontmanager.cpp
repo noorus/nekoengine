@@ -3,6 +3,8 @@
 #include "fontmanager.h"
 #include "neko_exception.h"
 #include "console.h"
+#include "engine.h"
+#include "loader.h"
 
 namespace neko {
 
@@ -21,54 +23,93 @@ namespace neko {
     Locator::memory().free( Memory::Graphics, block );
   }
 
-  FontManager::FontManager(): freeType_( nullptr )
+  FontManager::FontManager( EnginePtr engine ): engine_( move( engine ) ), freeType_( nullptr )
   {
     ftMemAllocator_.user = nullptr;
     ftMemAllocator_.alloc = ftMemoryAllocate;
     ftMemAllocator_.realloc = ftMemoryReallocate;
     ftMemAllocator_.free = ftMemoryFree;
+  }
+
+  void FontManager::initialize()
+  {
+    assert( !freeType_ );
 
     if ( FT_New_Library( &ftMemAllocator_, &freeType_ ) != 0 )
       NEKO_EXCEPT( "FreeType library creation failed" );
 
     FT_Add_Default_Modules( freeType_ );
     // FT_Set_Default_Properties( freeType_ ); // TODO this uses an env variable? wtf, replace
+
+    auto font = createFont();
+    engine_->loader()->addLoadTask( { LoadTask( font, R"(data\fonts\DejaVuSerif.ttf)", 15.0f ) } );
   }
 
-  fonts::FontPtr g_testFont;
-
-  void FontManager::initialize()
+  void FontManager::uploadFonts()
   {
-    platform::FileReader reader( "DejaVuSerif.ttf" );
-    vector<uint8_t> buffer;
-    reader.readFullVector( buffer );
+    FontVector fonts;
+    engine_->loader()->getFinishedFonts( fonts );
+    if ( !fonts.empty() )
+      engine_->console()->printf( Console::srcGfx, "FontManager::uploadFonts got %d new fonts", fonts.size() );
+    for ( auto& font : fonts )
+    {
+      if ( !font->loaded_ )
+        continue;
+      // guess we're done?
+      font->impl_->loadGlyph( utils::utf8_to_utf32( "a" ) );
+      font->impl_->loadGlyph( utils::utf8_to_utf32( "b" ) );
+      font->impl_->loadGlyph( utils::utf8_to_utf32( "c" ) );
+      font->impl_->loadGlyph( utils::utf8_to_utf32( "d" ) );
+      font->impl_->loadGlyph( utils::utf8_to_utf32( "e" ) );
+      font->impl_->loadGlyph( utils::utf8_to_utf32( "f" ) );
+      font->impl_->loadGlyph( utils::utf8_to_utf32( "g" ) );
+    }
+  }
 
-    g_testFont = make_shared<fonts::Font>( shared_from_this(), 8192, 8192, 1 );
-    g_testFont->loadFace( buffer, 15.0f );
+  void FontManager::prepare( GameTime time )
+  {
+    uploadFonts();
+  }
 
-    g_testFont->loadGlyph( utils::utf8_to_utf32( "a" ) );
-    g_testFont->loadGlyph( utils::utf8_to_utf32( "b" ) );
-    g_testFont->loadGlyph( utils::utf8_to_utf32( "c" ) );
-    g_testFont->loadGlyph( utils::utf8_to_utf32( "d" ) );
-    g_testFont->loadGlyph( utils::utf8_to_utf32( "e" ) );
-    g_testFont->loadGlyph( utils::utf8_to_utf32( "f" ) );
-    g_testFont->loadGlyph( utils::utf8_to_utf32( "g" ) );
+  FontPtr FontManager::createFont()
+  {
+    ScopedRWLock lock( &faceLock_ );
 
-    fonts_.push_back( g_testFont );
+    auto font = make_shared<Font>( this );
+    fonts_.push_back( font );
+
+    return move( font );
+  }
+
+  void FontManager::loadFont( FontPtr font, const Font::Specs& specs, vector<uint8_t>& buffer )
+  {
+    ScopedRWLock lock( &faceLock_ );
+
+    const int atlasDepth = 1; // We'll just stick to this since we know what it means. (normal glyphs)
+
+    assert( !font->loaded_ );
+
+    font->impl_ = make_shared<fonts::GraphicalFont>( shared_from_this(),
+      specs.atlasSize_.x, specs.atlasSize_.y, atlasDepth );
+    font->impl_->loadFace( buffer, specs.pointSize_ );
+    font->loaded_ = true;
   }
 
   void FontManager::shutdown()
   {
-    g_testFont.reset();
-  }
+    ScopedRWLock lock( &faceLock_ );
 
-  FontManager::~FontManager()
-  {
+    fonts_.clear();
     if ( freeType_ )
     {
       FT_Done_Library( freeType_ );
       freeType_ = nullptr;
     }
+  }
+
+  FontManager::~FontManager()
+  {
+    shutdown();
   }
 
 }

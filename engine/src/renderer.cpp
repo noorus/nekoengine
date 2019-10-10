@@ -160,8 +160,8 @@ namespace neko {
     auto quadVAO = meshes_->pushVAO( VBO_2D, quadVBO, quadEBO );
     auto screenVAO = meshes_->pushVAO( VBO_2D, screenVBO );
 
-    //g_texture = make_shared<Texture>( this, 2, 2, PixFmtColorRGBA8, (const void*)static_geometry::image4x4.data() );
-    g_texture = make_shared<Texture>( this, 8192, 8192, PixFmtColorR8, engine_->fonts()->fonts()[0]->atlas_->data_.data() );
+    g_texture = make_shared<Texture>( this, 2, 2, PixFmtColorRGBA8, (const void*)static_geometry::image4x4.data() );
+    //g_texture = make_shared<Texture>( this, 8192, 8192, PixFmtColorR8, engine_->fonts()->fonts()[0]->atlas_->data_.data() );
   }
 
   void Renderer::initialize( size_t width, size_t height )
@@ -312,9 +312,9 @@ namespace neko {
     shaders_->use( 0 );
 
     glActiveTexture( GL_TEXTURE0 );
-    //if ( materials_[0]->texture_ )
-    //  glBindTexture( GL_TEXTURE_2D, materials_[0]->texture_->handle() );
-    //else
+    if ( materials_[0]->texture_ )
+      glBindTexture( GL_TEXTURE_2D, materials_[0]->texture_->handle() );
+    else
       glBindTexture( GL_TEXTURE_2D, g_texture->handle() );
 
     meshes_->getVAO( 0 ).draw( GL_TRIANGLE_STRIP );

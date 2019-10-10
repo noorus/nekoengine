@@ -26,7 +26,6 @@ namespace neko {
       if ( waitRet == 0 ) // new tasks
       {
         loader->handleNewTasks();
-        OutputDebugStringA( "ThreadedLoader::threadProc() new tasks!\r\n" );
       }
       else if ( waitRet == timeoutValue )
       {
@@ -52,6 +51,7 @@ namespace neko {
   void ThreadedLoader::addLoadTask( const LoadTaskVector& resources )
   {
     ScopedRWLock lock( &addTaskLock_ );
+
     newTasks_.reserve( newTasks_.size() + resources.size() );
     newTasks_.insert( newTasks_.end(), resources.begin(), resources.end() );
     newTasksEvent_.set();
@@ -68,6 +68,12 @@ namespace neko {
 
     finishedMaterials_.clear();
     finishedTasksEvent_.reset();
+  }
+
+  void ThreadedLoader::getFinishedFonts( FontVector& fonts )
+  {
+    if ( !finishedTasksEvent_.check() )
+      return;
   }
 
   // Context: Worker thread
@@ -107,13 +113,19 @@ namespace neko {
       }
       else if ( task.type_ == LoadTask::Load_Fontface )
       {
-        //vector<uint8_t> input;
-        //platform::FileReader( task.fontfaceLoad.path_ ).readFullVector( input );
-        //task.fontfaceLoad.font_ = move( task.fontfaceLoad.manager_->loadFace( input.data(), input.size(), task.fontfaceLoad.size_ ) );
+        char asd[256];
+        sprintf_s( asd, 256, "ThreadedLoader::handleNewTasks processing fontface from %s\r\n", task.fontfaceLoad.path_.c_str() );
+        OutputDebugStringA( asd );
+        vector<uint8_t> input;
+        platform::FileReader( task.fontfaceLoad.path_ ).readFullVector( input );
+        task.fontfaceLoad.font_->manager_->loadFont( task.fontfaceLoad.font_, task.fontfaceLoad.specs_, input );
+        finishedTasksLock_.lock();
+        finishedFonts_.push_back( task.fontfaceLoad.font_ );
+        finishedTasksLock_.unlock();
       }
     }
 
-    if ( !finishedMaterials_.empty() )
+    if ( !finishedMaterials_.empty() || !finishedFonts_.empty() )
       finishedTasksEvent_.set();
   }
 
