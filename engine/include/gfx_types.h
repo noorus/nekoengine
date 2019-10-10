@@ -38,7 +38,8 @@ namespace neko {
     PixFmtColorRGB8,
     PixFmtColorRGBA8,
     PixFmtColorRGBA8_A8Input,
-    PixFmtDepthStencil24_8
+    PixFmtDepthStencil24_8,
+    PixFmtColorR8
   };
 
   struct ImageData {

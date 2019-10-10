@@ -165,6 +165,7 @@
 #include FT_GLYPH_H
 #include FT_BBOX_H
 #include FT_CACHE_H
+#include FT_LCD_FILTER_H
 #include FT_TRUETYPE_IDS_H
 #include FT_TRUETYPE_TABLES_H
 #include FT_TRUETYPE_TAGS_H

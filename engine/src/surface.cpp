@@ -35,6 +35,12 @@ namespace neko {
       internalFormat_ = GL_DEPTH_STENCIL;
       internalType_ = GL_UNSIGNED_INT_24_8;
     }
+    else if ( format_ == PixFmtColorR8 )
+    {
+      glFormat_ = GL_RED;
+      internalFormat_ = GL_RED;
+      internalType_ = GL_UNSIGNED_BYTE;
+    }
     else
     {
       NEKO_EXCEPT( "Unsupported or unknown surface format" );

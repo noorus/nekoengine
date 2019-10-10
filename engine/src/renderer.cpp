@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "loader.h"
 #include "engine.h"
+#include "fontmanager.h"
 
 namespace neko {
 

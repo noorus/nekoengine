@@ -168,6 +168,8 @@
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\fontmanager.cpp" />
     <ClCompile Include="src\fontshaper.cpp" />
+    <ClCompile Include="src\font_textbuffer.cpp" />
+    <ClCompile Include="src\font_textured.cpp" />
     <ClCompile Include="src\framebuffer.cpp" />
     <ClCompile Include="src\gfx.cpp" />
     <ClCompile Include="src\js_console.cpp" />
