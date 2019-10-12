@@ -64,6 +64,8 @@ namespace neko {
   using std::move;
   using std::string_view;
 
+  using std::numeric_limits;
+
   using boost::noncopyable;
 
 #ifdef NEKO_MATH_DOUBLE
@@ -105,6 +107,12 @@ namespace neko {
   using vec2i = glm::i64vec2;
   using vec3i = glm::i64vec3;
   using vec4i = glm::i64vec4;
+
+  // These are for when you need 32 bits no matter what our Real is.
+  // Mainly used for shaders.
+  using vec2f = glm::fvec2;
+  using vec3f = glm::fvec3;
+  using vec4f = glm::fvec4;
 
   enum CharacterConstants {
     TAB = 9,

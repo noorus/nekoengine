@@ -9,7 +9,7 @@
 
 namespace neko {
 
-  GameTime cLogicStep = 1.0 / 60.0; //!< 60 fps
+  GameTime cLogicStep = ( 1.0 / 60.0 ); //!< 60 fps
 
   Engine::Engine( ConsolePtr console ): console_( move( console ) ), time_( 0.0 )
   {

@@ -10,6 +10,7 @@ namespace neko {
     renderer_( renderer ), width_( 0 ), height_( 0 ), handle_( 0 ), available_( false )
   {
     assert( renderer_ );
+    clearColor_ = vec4( 30.0f / 255.0f, 30.0f / 255.0f, 35.0f / 255.0f, 1.0f );
   }
 
   void Framebuffer::recreate( size_t width, size_t height )
@@ -66,7 +67,7 @@ namespace neko {
   void Framebuffer::begin()
   {
     glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
-    glClearColor( 0.1f, 0.3f, 1.0f, 1.0f );
+    glClearColor( clearColor_.r, clearColor_.g, clearColor_.b, clearColor_.a );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
   }
 

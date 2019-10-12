@@ -86,6 +86,7 @@ namespace neko {
     Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
     TexturePtr colorBuffer_;
     RenderbufferPtr depthStencilBuffer_;
+    vec4 clearColor_;
     mutable bool available_;
   public:
     Framebuffer() = delete;

@@ -29,6 +29,11 @@ namespace neko {
     Vertex2D(): x( 0.0f ), y( 0.0f ), s( 0.0f ), t( 0.0f ) {}
     Vertex2D( float x_, float y_, float s_, float t_ ): x( x_ ), y( y_ ), s( s_ ), t( t_ ) {}
   };
+  struct VertexText3D {
+    vec3 position;
+    vec2 texcoord;
+    vec4 color;
+  };
   struct PixelRGBA {
     uint8_t r, g, b, a;
   };

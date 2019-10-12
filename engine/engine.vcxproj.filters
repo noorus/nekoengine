@@ -159,6 +159,9 @@
     <ClCompile Include="src\fontmanager.cpp">
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
+    <ClCompile Include="src\dynamicmesh.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -265,6 +268,9 @@
     </ClInclude>
     <ClInclude Include="include\js_mathutil.h">
       <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\include\neko_pooledtypes.h">
+      <Filter>Header Files\shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

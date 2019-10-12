@@ -88,9 +88,9 @@ namespace neko {
       auto lineNumber = message->GetLineNumber( context ).FromJust();
 
       globalContext_->console_->printf( Console::srcScripting, "V8 Script exception!" );
-      globalContext_->console_->printf( Console::srcScripting, "●   %s", *exception );
+      globalContext_->console_->printf( Console::srcScripting, "● %s", *exception );
       globalContext_->console_->printf( Console::srcScripting, "In %s line %d:", *scriptName, lineNumber );
-      globalContext_->console_->printf( Console::srcScripting, "→   %s", *sourceLine );
+      globalContext_->console_->printf( Console::srcScripting, "→ %s", *sourceLine );
     }
   }
 

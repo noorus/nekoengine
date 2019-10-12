@@ -56,6 +56,15 @@ namespace neko {
       TextureGlyph(): codepoint( -1 ), width( 0 ), height( 0 ),
         rendermode( RENDER_NORMAL ), outline_thickness( 0.0f ),
         offset( 0, 0 ), advance( 0.0f, 0.0f ) {}
+      inline Real getKerning( uint32_t codepoint )
+      {
+        for ( size_t i = 0; i < kerning.size(); ++i )
+        {
+          if ( kerning[i].codepoint == codepoint )
+            return kerning[i].kerning;
+        }
+        return 0.0f;
+      }
     };
 
     using TextureGlyphVector = vector<TextureGlyph>;

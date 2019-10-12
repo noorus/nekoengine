@@ -22,20 +22,6 @@ namespace neko {
       { 255, 0,   255, 255 }
     };
 
-    const vector<GLuint> quadIndices =
-    {
-      0, 1, 2, 3
-    };
-
-    const vector<Vertex2D> quad2D =
-    { // x      y     s     t
-      { -0.5f,  0.5f, 0.0f, 0.0f }, // 0
-      {  0.5f,  0.5f, 1.0f, 0.0f }, // 1
-      {  0.5f, -0.5f, 1.0f, 1.0f }, // 3
-      { -0.5f, -0.5f, 0.0f, 1.0f }, // 4
-      { -0.5f,  0.5f, 0.0f, 0.0f }  // 5
-    };
-
     const vector<Vertex2D> quadStrip2D =
     {   // x      y     s     t
       { -0.5f, -0.5f, 0.0f, 1.0f },
@@ -52,6 +38,11 @@ namespace neko {
       { -1.0f,  1.0f, 0.0f, 1.0f },
       {  1.0f, -1.0f, 1.0f, 0.0f },
       {  1.0f,  1.0f, 1.0f, 1.0f },
+    };
+
+    const vector<GLuint> quadIndices =
+    {
+      0, 1, 2, 3
     };
 
   }
@@ -146,6 +137,8 @@ namespace neko {
     glStartupFetchAndCheck( info_ );
   }
 
+  DynamicMeshPtr g_testMesh;
+
   void Renderer::preInitialize()
   {
     clearErrors();
@@ -154,10 +147,10 @@ namespace neko {
     shaders_->initialize();
 
     meshes_ = make_shared<MeshManager>();
-    auto quadVBO = meshes_->pushVBO( static_geometry::quadStrip2D );
+    //auto quadVBO = meshes_->pushVBO( static_geometry::quadStrip2D );
     auto screenVBO = meshes_->pushVBO( static_geometry::screenQuad );
-    auto quadEBO = meshes_->pushEBO( static_geometry::quadIndices );
-    auto quadVAO = meshes_->pushVAO( VBO_2D, quadVBO, quadEBO );
+    //auto quadEBO = meshes_->pushEBO( static_geometry::quadIndices );
+    //auto quadVAO = meshes_->pushVAO( VBO_2D, quadVBO, quadEBO );
     auto screenVAO = meshes_->pushVAO( VBO_2D, screenVBO );
 
     g_texture = make_shared<Texture>( this, 2, 2, PixFmtColorRGBA8, (const void*)static_geometry::image4x4.data() );
@@ -205,6 +198,13 @@ namespace neko {
     meshes_->uploadVBOs();
     meshes_->uploadEBOs();
     meshes_->uploadVAOs();
+
+    if ( !g_testMesh && !materials_.empty() && materials_[0]->loaded_ )
+    {
+      g_testMesh = make_shared<DynamicMesh>( meshes_->shared_from_this() );
+      g_testMesh->pushVertices( static_geometry::quadStrip2D );
+      g_testMesh->pushIndices( static_geometry::quadIndices );
+    }
   }
 
   //! Called by Texture::Texture()
@@ -309,15 +309,18 @@ namespace neko {
     model = glm::translate( model, vec3( 1.0f, 1.0f, 0.0f ) );
     shaders_->setMatrices( model, camera->view(), camera->projection() );
 
-    shaders_->use( 0 );
+    if ( g_testMesh )
+    {
+      shaders_->use( 0 );
 
-    glActiveTexture( GL_TEXTURE0 );
-    if ( materials_[0]->texture_ )
-      glBindTexture( GL_TEXTURE_2D, materials_[0]->texture_->handle() );
-    else
-      glBindTexture( GL_TEXTURE_2D, g_texture->handle() );
+      glActiveTexture( GL_TEXTURE0 );
+      if ( !materials_.empty() && materials_[0]->texture_ )
+        glBindTexture( GL_TEXTURE_2D, materials_[0]->texture_->handle() );
+      else
+        glBindTexture( GL_TEXTURE_2D, g_texture->handle() );
 
-    meshes_->getVAO( 0 ).draw( GL_TRIANGLE_STRIP );
+      g_testMesh->draw( GL_TRIANGLE_STRIP );
+    }
   }
 
   void Renderer::draw( CameraPtr camera )
@@ -329,8 +332,6 @@ namespace neko {
     glDisable( GL_CULL_FACE );
 
     glEnable( GL_MULTISAMPLE );
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     // Smoothing can generate sub-fragments and cause visible ridges between triangles.
     // Use a framebuffer for AA instead.
@@ -343,19 +344,21 @@ namespace neko {
     g_framebuf->end();
 
     // Framebuffer has been unbound, now draw to the default context, the window.
-    glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-    glClear( GL_COLOR_BUFFER_BIT );
+    glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
     shaders_->use( 1 );
 
     glDisable( GL_DEPTH_TEST );
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, g_framebuf->texture()->handle() );
-    meshes_->getVAO( 1 ).draw( GL_TRIANGLES );
+    meshes_->getVAO( 0 ).draw( GL_TRIANGLES );
   }
 
   Renderer::~Renderer()
   {
+    g_testMesh.reset();
+
     g_texture.reset();
     g_framebuf.reset();
 

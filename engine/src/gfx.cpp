@@ -15,7 +15,6 @@ namespace neko {
   // Gfx
 
   const char cWindowTitle[] = "nekoengine//render";
-  const vec4 cClearColor = vec4( 0.175f, 0.175f, 0.5f, 1.0f );
 
   NEKO_DECLARE_CONVAR( vid_screenwidth,
     "Screen width. Changes are applied when the renderer is restarted.", 1280 );
@@ -131,7 +130,6 @@ namespace neko {
     camera_->setViewport( realResolution );
 
     glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
-    glClearColor( cClearColor.r, cClearColor.g, cClearColor.b, cClearColor.a );
   }
 
   void Gfx::tick( GameTime tick, GameTime time )

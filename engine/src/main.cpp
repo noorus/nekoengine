@@ -11,7 +11,7 @@ using namespace neko;
 const string c_consoleThreadName = "nekoConsole";
 const string c_consoleTitle      = "nekoengine//console";
 const string c_errorTitle        = "nekoengine//exception";
-const int    c_consoleDims[4]    = { 220, 220, 640, 320 };
+const vec4i  c_consoleDims       = { 220, 220, 640, 320 };
 
 auto g_exceptionReporter = []( string_view description )
 {

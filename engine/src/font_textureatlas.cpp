@@ -86,8 +86,8 @@ namespace neko {
     vec4i TextureAtlas::getRegion( const size_t width, const size_t height )
     {
       int best_index = -1;
-      size_t best_height = std::numeric_limits<size_t>::max();
-      size_t best_width = std::numeric_limits<size_t>::max();
+      size_t best_height = numeric_limits<size_t>::max();
+      size_t best_width = numeric_limits<size_t>::max();
 
       vec4i region;
 
