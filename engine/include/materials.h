@@ -11,10 +11,10 @@ namespace neko {
     ImageData image_;
     TexturePtr texture_;
     Material(): loaded_( false ) {}
+    inline const bool hasHostCopy() const { return !image_.data_.empty(); }
   };
 
   using MaterialPtr = shared_ptr<Material>;
-
   using MaterialVector = vector<MaterialPtr>;
 
   class MaterialManager {

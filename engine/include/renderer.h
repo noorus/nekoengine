@@ -4,6 +4,7 @@
 #include "neko_platform.h"
 #include "textures.h"
 #include "materials.h"
+#include "meshmanager.h"
 
 namespace neko {
 
@@ -25,6 +26,10 @@ namespace neko {
     friend class Renderbuffer;
     friend class Framebuffer;
   private:
+    struct StaticData {
+      MaterialPtr placeholderTexture_;
+      StaticMeshPtr screenQuad_;
+    } builtin_;
     GLuint implCreateTexture( size_t width, size_t height,
       GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
       const void* data );

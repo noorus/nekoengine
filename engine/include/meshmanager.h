@@ -134,6 +134,20 @@ namespace neko {
   using DynamicMeshPtr = shared_ptr<DynamicMesh>;
   using DynamicMeshVector = vector<DynamicMeshPtr>;
 
+  class StaticMesh {
+  private:
+    MeshManagerPtr manager_;
+    size_t vbo_;
+    size_t ebo_;
+    size_t vao_;
+  public:
+    StaticMesh( MeshManagerPtr manager, vector<Vertex2D> verts );
+    void draw( GLenum mode );
+    ~StaticMesh();
+  };
+
+  using StaticMeshPtr = shared_ptr<StaticMesh>;
+
   class MeshManager: public enable_shared_from_this<MeshManager> {
   private:
     VBOVector<Vertex2D> vbos2d_;
@@ -152,7 +166,7 @@ namespace neko {
     size_t pushVAO( VBOType type, size_t verticesVBO, size_t indicesEBO );
     void uploadVAOs();
     inline VAO& getVAO( size_t index ) { return vaos_[index]; }
-    size_t pushEBO( vector<GLuint> indexes );
+    size_t pushEBO( vector<GLuint> indices );
     void uploadEBOs();
     inline EBO& getEBO( size_t index ) { return ebos_[index]; }
     size_t createVBO( VBOType type );

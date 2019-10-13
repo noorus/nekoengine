@@ -12,9 +12,9 @@ namespace neko {
 
   using namespace gl;
 
-  namespace static_geometry {
+  namespace BuiltinData {
 
-    const vector<PixelRGBA> image4x4 =
+    const vector<PixelRGBA> placeholderImage2x2 =
     {
       { 255, 0,   0,   255 },
       { 0,   255, 0,   255 },
@@ -147,13 +147,11 @@ namespace neko {
     shaders_->initialize();
 
     meshes_ = make_shared<MeshManager>();
-    //auto quadVBO = meshes_->pushVBO( static_geometry::quadStrip2D );
-    auto screenVBO = meshes_->pushVBO( static_geometry::screenQuad );
-    //auto quadEBO = meshes_->pushEBO( static_geometry::quadIndices );
-    //auto quadVAO = meshes_->pushVAO( VBO_2D, quadVBO, quadEBO );
-    auto screenVAO = meshes_->pushVAO( VBO_2D, screenVBO );
 
-    g_texture = make_shared<Texture>( this, 2, 2, PixFmtColorRGBA8, (const void*)static_geometry::image4x4.data() );
+    builtin_.placeholderTexture_ = createTextureWithData(
+      2, 2, PixFmtColorRGBA8, (const void*)BuiltinData::placeholderImage2x2.data() );
+    builtin_.screenQuad_ = make_shared<StaticMesh>( meshes_->shared_from_this(), BuiltinData::screenQuad );
+
     //g_texture = make_shared<Texture>( this, 8192, 8192, PixFmtColorR8, engine_->fonts()->fonts()[0]->atlas_->data_.data() );
   }
 
@@ -202,8 +200,8 @@ namespace neko {
     if ( !g_testMesh && !materials_.empty() && materials_[0]->loaded_ )
     {
       g_testMesh = make_shared<DynamicMesh>( meshes_->shared_from_this() );
-      g_testMesh->pushVertices( static_geometry::quadStrip2D );
-      g_testMesh->pushIndices( static_geometry::quadIndices );
+      g_testMesh->pushVertices( BuiltinData::quadStrip2D );
+      g_testMesh->pushIndices( BuiltinData::quadIndices );
     }
   }
 
@@ -352,7 +350,7 @@ namespace neko {
     glDisable( GL_DEPTH_TEST );
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, g_framebuf->texture()->handle() );
-    meshes_->getVAO( 0 ).draw( GL_TRIANGLES );
+    builtin_.screenQuad_->draw( GL_TRIANGLES );
   }
 
   Renderer::~Renderer()
