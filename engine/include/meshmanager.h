@@ -123,11 +123,12 @@ namespace neko {
     size_t vbo_;
     size_t ebo_;
     size_t vao_;
+    GLenum drawMode_;
   public:
-    DynamicMesh( MeshManagerPtr manager );
+    DynamicMesh( MeshManagerPtr manager, GLenum drawMode );
     void pushVertices( vector<Vertex2D> verts );
     void pushIndices( vector<GLuint> indices );
-    void draw( GLenum mode );
+    void draw();
     ~DynamicMesh();
   };
 
@@ -140,13 +141,15 @@ namespace neko {
     size_t vbo_;
     size_t ebo_;
     size_t vao_;
+    GLenum drawMode_;
   public:
-    StaticMesh( MeshManagerPtr manager, vector<Vertex2D> verts );
-    void draw( GLenum mode );
+    StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts );
+    void draw();
     ~StaticMesh();
   };
 
   using StaticMeshPtr = shared_ptr<StaticMesh>;
+  using StaticMeshVector = vector<StaticMeshPtr>;
 
   class MeshManager: public enable_shared_from_this<MeshManager> {
   private:
@@ -155,6 +158,8 @@ namespace neko {
     VBOVector<VertexText3D> vbosText3d_;
     VAOVector vaos_;
     EBOVector ebos_;
+    DynamicMeshVector dynamics_;
+    StaticMeshVector statics_;
   public:
     size_t pushVBO( vector<Vertex3D> vertices );
     size_t pushVBO( vector<Vertex2D> vertices );
@@ -175,6 +180,8 @@ namespace neko {
     void freeEBO( size_t id );
     size_t createVAO();
     void freeVAO( size_t id );
+    DynamicMeshPtr createDynamic( GLenum drawMode );
+    StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts );
     void teardown();
   };
 

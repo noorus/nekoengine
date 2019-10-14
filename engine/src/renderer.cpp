@@ -148,9 +148,9 @@ namespace neko {
 
     meshes_ = make_shared<MeshManager>();
 
-    builtin_.placeholderTexture_ = createTextureWithData(
-      2, 2, PixFmtColorRGBA8, (const void*)BuiltinData::placeholderImage2x2.data() );
-    builtin_.screenQuad_ = make_shared<StaticMesh>( meshes_->shared_from_this(), BuiltinData::screenQuad );
+    builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
+      (const void*)BuiltinData::placeholderImage2x2.data() );
+    builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad );
 
     //g_texture = make_shared<Texture>( this, 8192, 8192, PixFmtColorR8, engine_->fonts()->fonts()[0]->atlas_->data_.data() );
   }
@@ -199,7 +199,7 @@ namespace neko {
 
     if ( !g_testMesh && !materials_.empty() && materials_[0]->loaded_ )
     {
-      g_testMesh = make_shared<DynamicMesh>( meshes_->shared_from_this() );
+      g_testMesh = meshes_->createDynamic( GL_TRIANGLE_STRIP );
       g_testMesh->pushVertices( BuiltinData::quadStrip2D );
       g_testMesh->pushIndices( BuiltinData::quadIndices );
     }
@@ -317,7 +317,7 @@ namespace neko {
       else
         glBindTexture( GL_TEXTURE_2D, g_texture->handle() );
 
-      g_testMesh->draw( GL_TRIANGLE_STRIP );
+      g_testMesh->draw();
     }
   }
 
@@ -350,13 +350,11 @@ namespace neko {
     glDisable( GL_DEPTH_TEST );
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, g_framebuf->texture()->handle() );
-    builtin_.screenQuad_->draw( GL_TRIANGLES );
+    builtin_.screenQuad_->draw();
   }
 
   Renderer::~Renderer()
   {
-    g_testMesh.reset();
-
     g_texture.reset();
     g_framebuf.reset();
 

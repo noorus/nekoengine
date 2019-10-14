@@ -205,6 +205,20 @@ namespace neko {
     }
   };
 
+  DynamicMeshPtr MeshManager::createDynamic( GLenum drawMode )
+  {
+    auto mesh = make_shared<DynamicMesh>( shared_from_this(), drawMode );
+    dynamics_.push_back( mesh );
+    return move( mesh );
+  }
+
+  StaticMeshPtr MeshManager::createStatic( GLenum drawMode, vector<Vertex2D> verts )
+  {
+    auto mesh = make_shared<StaticMesh>( shared_from_this(), drawMode, move( verts ) );
+    statics_.push_back( mesh );
+    return move( mesh );
+  }
+
   void MeshManager::uploadVAOs()
   {
     vector<VAO*> dirties;
@@ -369,7 +383,8 @@ namespace neko {
 
   void MeshManager::teardown()
   {
-    //
+    dynamics_.clear();
+    statics_.clear();
   }
 
 }

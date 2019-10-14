@@ -58,6 +58,9 @@
     <Filter Include="Source Files\gfx\fonts">
       <UniqueIdentifier>{5ea6f9e9-59c3-4d06-9e96-ed4aaff962d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gfx\meshes">
+      <UniqueIdentifier>{388c7dea-8882-455e-be66-fa8d18c040f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -91,9 +94,6 @@
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="src\gfx.cpp">
-      <Filter>Source Files\gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="src\meshmanager.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
     <ClCompile Include="src\renderbuffer.cpp">
@@ -132,9 +132,6 @@
     <ClCompile Include="src\scriptingcontext.cpp">
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
-    <ClCompile Include="src\fontshaper.cpp">
-      <Filter>Source Files\gfx</Filter>
-    </ClCompile>
     <ClCompile Include="src\camera.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
@@ -159,8 +156,14 @@
     <ClCompile Include="src\fontmanager.cpp">
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
+    <ClCompile Include="src\staticmesh.cpp">
+      <Filter>Source Files\gfx\meshes</Filter>
+    </ClCompile>
     <ClCompile Include="src\dynamicmesh.cpp">
-      <Filter>Source Files\gfx</Filter>
+      <Filter>Source Files\gfx\meshes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\meshmanager.cpp">
+      <Filter>Source Files\gfx\meshes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

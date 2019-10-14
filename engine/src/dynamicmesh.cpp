@@ -7,7 +7,8 @@ namespace neko {
 
   using namespace gl;
 
-  DynamicMesh::DynamicMesh( MeshManagerPtr manager ): manager_( move( manager ) ),
+  DynamicMesh::DynamicMesh( MeshManagerPtr manager, GLenum drawMode ):
+    manager_( move( manager ) ), drawMode_( drawMode ),
     vbo_( cInvalidIndexValue ), ebo_( cInvalidIndexValue ), vao_( cInvalidIndexValue )
   {
     vbo_ = manager_->createVBO( VBO_2D );
@@ -29,39 +30,14 @@ namespace neko {
     ebo->dirty_ = true;
   }
 
-  void DynamicMesh::draw( GLenum mode )
+  void DynamicMesh::draw()
   {
     auto vao = &manager_->getVAO( vao_ );
     if ( vao->used_ && vao->uploaded_ )
-      vao->draw( mode );
+      vao->draw( drawMode_ );
   }
 
   DynamicMesh::~DynamicMesh()
-  {
-    if ( vao_ != cInvalidIndexValue )
-      manager_->freeVAO( vao_ );
-    if ( ebo_ != cInvalidIndexValue )
-      manager_->freeEBO( ebo_ );
-    if ( vbo_ != cInvalidIndexValue )
-      manager_->freeVBO( VBO_2D, vbo_ );
-  }
-
-  StaticMesh::StaticMesh( MeshManagerPtr manager, vector<Vertex2D> verts ):
-    manager_( move( manager ) ),
-    vbo_( cInvalidIndexValue ), ebo_( cInvalidIndexValue ), vao_( cInvalidIndexValue )
-  {
-    vbo_ = manager_->pushVBO( move( verts ) );
-    vao_ = manager_->pushVAO( VBO_2D, vbo_ );
-  }
-
-  void StaticMesh::draw( GLenum mode )
-  {
-    auto vao = &manager_->getVAO( vao_ );
-    if ( vao->used_ && vao->uploaded_ )
-      vao->draw( mode );
-  }
-
-  StaticMesh::~StaticMesh()
   {
     if ( vao_ != cInvalidIndexValue )
       manager_->freeVAO( vao_ );

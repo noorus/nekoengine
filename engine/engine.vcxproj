@@ -168,7 +168,6 @@
     <ClCompile Include="src\dynamicmesh.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\fontmanager.cpp" />
-    <ClCompile Include="src\fontshaper.cpp" />
     <ClCompile Include="src\font_textbuffer.cpp" />
     <ClCompile Include="src\font_textureatlas.cpp" />
     <ClCompile Include="src\font_textured.cpp" />
@@ -189,6 +188,7 @@
     <ClCompile Include="src\scripting.cpp" />
     <ClCompile Include="src\scriptingcontext.cpp" />
     <ClCompile Include="src\shaders.cpp" />
+    <ClCompile Include="src\staticmesh.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
