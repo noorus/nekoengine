@@ -118,16 +118,22 @@ namespace neko {
   using EBOVector = PooledVector<EBO>;
 
   class DynamicMesh {
-  private:
+  public:
+    VBOType vertexType_;
     MeshManagerPtr manager_;
     size_t vbo_;
     size_t ebo_;
     size_t vao_;
     GLenum drawMode_;
   public:
-    DynamicMesh( MeshManagerPtr manager, GLenum drawMode );
+    DynamicMesh( MeshManagerPtr manager, VBOType vertexType, GLenum drawMode );
     void pushVertices( vector<Vertex2D> verts );
+    void pushVertices( vector<Vertex3D> verts );
+    void pushVertices( vector<VertexText3D> verts );
     void pushIndices( vector<GLuint> indices );
+    const size_t vertsCount() const;
+    const size_t indicesCount() const;
+    void dump( const utf8String& name );
     void draw();
     ~DynamicMesh();
   };
@@ -180,7 +186,7 @@ namespace neko {
     void freeEBO( size_t id );
     size_t createVAO();
     void freeVAO( size_t id );
-    DynamicMeshPtr createDynamic( GLenum drawMode );
+    DynamicMeshPtr createDynamic( GLenum drawMode, VBOType vertexType );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts );
     void teardown();
   };

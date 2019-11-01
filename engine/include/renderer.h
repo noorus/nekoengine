@@ -30,9 +30,9 @@ namespace neko {
       MaterialPtr placeholderTexture_;
       StaticMeshPtr screenQuad_;
     } builtin_;
-    GLuint implCreateTexture( size_t width, size_t height,
+    GLuint implCreateTexture2D( size_t width, size_t height,
       GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
-      const void* data );
+      const void* data, GLWrapMode wrap = GLenum::GL_CLAMP_TO_EDGE, Texture::Filtering filtering = Texture::Linear );
     void implDeleteTexture( GLuint handle );
     GLuint implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format );
     void implDeleteRenderbuffer( GLuint handle );
@@ -51,7 +51,7 @@ namespace neko {
     Renderer( EnginePtr engine );
     void preInitialize();
     void initialize( size_t width, size_t height );
-    MaterialPtr createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data );
+    MaterialPtr createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
     void prepare( GameTime time );
     void uploadTextures();
     void draw( CameraPtr camera );

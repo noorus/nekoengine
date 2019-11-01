@@ -27,7 +27,7 @@ namespace neko {
     LoadTask( FontPtr font, const utf8String& path, Real pointSize ): type_( Load_Fontface )
     {
       fontfaceLoad.font_ = move( font );
-      fontfaceLoad.specs_.atlasSize_ = vec2i( 8192, 8192 );
+      fontfaceLoad.specs_.atlasSize_ = vec2i( 1024, 1024 );
       fontfaceLoad.specs_.pointSize_ = pointSize;
       fontfaceLoad.path_ = path;
     }
@@ -40,7 +40,8 @@ namespace neko {
     platform::Thread thread_;
     platform::Event newTasksEvent_;
     platform::RWLock addTaskLock_;
-    platform::Event finishedTasksEvent_;
+    platform::Event finishedMaterialsEvent_;
+    platform::Event finishedFontsEvent_;
     platform::RWLock finishedTasksLock_;
     LoadTaskVector newTasks_;
     MaterialVector finishedMaterials_;

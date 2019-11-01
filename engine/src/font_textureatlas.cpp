@@ -23,6 +23,7 @@ namespace neko {
       id_ = 0;
 
       data_.resize( width * height * depth );
+      memset( data_.data(), 0, data_.size() );
     }
 
     void TextureAtlas::setRegion( const size_t x, const size_t y, const size_t width, const size_t height, const uint8_t* data, const size_t stride )

@@ -6,11 +6,16 @@ namespace neko {
 
   using namespace gl;
 
-  // for now, hardcoded 2D
-  Texture::Texture( Renderer* renderer, size_t width, size_t height, PixelFormat format, const void* data ):
+  Texture::Texture( Renderer* renderer, size_t width, size_t height, PixelFormat format, const void* data, const Wrapping wrapping, const Filtering filtering ):
     Surface( renderer, width, height, format ), type_( Tex2D  )
   {
-    handle_ = renderer_->implCreateTexture( width_, height_, glFormat_, internalFormat_, internalType_, data );
+    GLenum wrap = (
+      wrapping == ClampEdge ? GL_CLAMP_TO_EDGE
+      : wrapping == ClampBorder ? GL_CLAMP_TO_BORDER
+      : wrapping == MirroredRepeat ? GL_MIRRORED_REPEAT
+      : wrapping == Repeat ? GL_REPEAT
+      : GL_MIRROR_CLAMP_TO_EDGE );
+    handle_ = renderer_->implCreateTexture2D( width_, height_, glFormat_, internalFormat_, internalType_, data, wrap, filtering );
     assert( handle_ );
   }
 

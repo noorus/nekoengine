@@ -205,9 +205,9 @@ namespace neko {
     }
   };
 
-  DynamicMeshPtr MeshManager::createDynamic( GLenum drawMode )
+  DynamicMeshPtr MeshManager::createDynamic( GLenum drawMode, VBOType vertexType )
   {
-    auto mesh = make_shared<DynamicMesh>( shared_from_this(), drawMode );
+    auto mesh = make_shared<DynamicMesh>( shared_from_this(), vertexType, drawMode );
     dynamics_.push_back( mesh );
     return move( mesh );
   }

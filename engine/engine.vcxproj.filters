@@ -294,5 +294,11 @@
     <None Include="..\bin\data\shaders\mainframebuf_vp.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\bin\data\shaders\text_fp.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\text_vp.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

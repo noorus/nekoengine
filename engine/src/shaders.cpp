@@ -92,11 +92,15 @@ namespace neko {
     shaders_.emplace_back( Shader::Vertex, rootDirectory + "mainframebuf_vp.glsl" );
     shaders_.emplace_back( Shader::Fragment, rootDirectory + "mainframebuf_fp.glsl" );
 
+    shaders_.emplace_back( Shader::Vertex, rootDirectory + "text_vp.glsl" );
+    shaders_.emplace_back( Shader::Fragment, rootDirectory + "text_fp.glsl" );
+
     for ( auto& shader : shaders_ )
       compileShader( shader );
 
     programs_.emplace_back( "default", 0, 1 );
     programs_.emplace_back( "mainframebuf", 2, 3 );
+    programs_.emplace_back( "text", 4, 5 );
 
     for ( auto& program : programs_ )
     {

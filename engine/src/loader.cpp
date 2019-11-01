@@ -59,7 +59,7 @@ namespace neko {
 
   void ThreadedLoader::getFinishedMaterials( MaterialVector& materials )
   {
-    if ( !finishedTasksEvent_.check() )
+    if ( !finishedMaterialsEvent_.check() )
       return;
 
     finishedTasksLock_.lock();
@@ -67,13 +67,20 @@ namespace neko {
     finishedTasksLock_.unlock();
 
     finishedMaterials_.clear();
-    finishedTasksEvent_.reset();
+    finishedMaterialsEvent_.reset();
   }
 
   void ThreadedLoader::getFinishedFonts( FontVector& fonts )
   {
-    if ( !finishedTasksEvent_.check() )
+    if ( !finishedFontsEvent_.check() )
       return;
+
+    finishedTasksLock_.lock();
+    fonts.swap( finishedFonts_ );
+    finishedTasksLock_.unlock();
+
+    finishedFonts_.clear();
+    finishedFontsEvent_.reset();
   }
 
   // Context: Worker thread
@@ -125,8 +132,11 @@ namespace neko {
       }
     }
 
-    if ( !finishedMaterials_.empty() || !finishedFonts_.empty() )
-      finishedTasksEvent_.set();
+    if ( !finishedMaterials_.empty() )
+      finishedMaterialsEvent_.set();
+
+    if ( !finishedFonts_.empty() )
+      finishedFontsEvent_.set();
   }
 
   ThreadedLoader::~ThreadedLoader()

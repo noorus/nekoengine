@@ -15,7 +15,7 @@
 namespace neko {
 
   const char* c_fileLogFormat = "[%0#*.2f][%s] %s\r\n";
-  const int c_sprintfBufferSize = 1024;
+  const int c_sprintfBufferSize = 8192;
 
   CVarList Console::precreated_;
 

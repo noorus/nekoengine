@@ -98,6 +98,13 @@ namespace neko {
       GraphicalFont( FontManagerPtr manager, size_t width, size_t height, size_t depth );
       ~GraphicalFont();
       void loadGlyph( uint32_t codepoint );
+      TextureGlyph* getGlyph( uint32_t codepoint )
+      {
+        for ( auto& glyph : glyphs_ )
+          if ( glyph.codepoint == codepoint )
+            return &glyph;
+        return nullptr;
+      }
       void loadFace( vector<uint8_t>& source, Real pointSize );
     };
 

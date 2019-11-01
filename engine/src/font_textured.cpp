@@ -12,10 +12,10 @@ namespace neko {
 #define HRESf 64.f
 #define DPI   72
 
-    const Real c_resolutionMultiplier = 100.0f;
+    const Real c_resolutionMultiplier = 4.0f;
 
     GraphicalFont::GraphicalFont( FontManagerPtr manager, size_t width, size_t height, size_t depth ):
-      manager_( move( manager ) ),
+      manager_( move( manager ) ), face_( nullptr ),
       hinting_( true ), filtering_( true ), kerning_( true ),
       ascender_( 0.0f ), descender_( 0.0f ), size_( 0.0f ),
       outline_thickness_( 0.0f ), padding_( 0 ),
@@ -53,13 +53,13 @@ namespace neko {
         NEKO_FREETYPE_EXCEPT( "FreeType font face load failed", err );
       }
 
-      /*Locator::console().printf( Console::srcEngine,
+      Locator::console().printf( Console::srcEngine,
         "Font: %s, face %d/%d, glyphs: %d, charmaps: %d, scalable? %s",
-        font->face_->family_name,
-        0, font->face_->num_faces,
-        font->face_->num_glyphs,
-        font->face_->num_charmaps,
-        ( font->face_->face_flags & FT_FACE_FLAG_SCALABLE ) ? "yes" : "no" );*/
+        face_->family_name,
+        0, face_->num_faces,
+        face_->num_glyphs,
+        face_->num_charmaps,
+        ( face_->face_flags & FT_FACE_FLAG_SCALABLE ) ? "yes" : "no" );
 
       //forceUCS2Charmap( font->face_ );
       err = FT_Select_Charmap( face_, FT_ENCODING_UNICODE );
@@ -223,7 +223,7 @@ namespace neko {
         FT_Stroker_Done( stroker );
       }
 
-      vec4i padding( 0, 0, 1, 1 );
+      vec4i padding( 0, 0, 0, 0 );
       if ( rendermode_ == RENDER_SIGNED_DISTANCE_FIELD )
       {
         padding.x = 1;
@@ -238,7 +238,7 @@ namespace neko {
       size_t tgt_w = src_w + padding.x + padding.z;
       size_t tgt_h = src_h + padding.y + padding.w;
 
-      auto region = atlas_->getRegion( tgt_w, tgt_h );
+      auto region = atlas_->getRegion( tgt_w + 4, tgt_h + 4 );
       if ( region.x < 0 )
         NEKO_EXCEPT( "Font face texture atlas is full" );
 

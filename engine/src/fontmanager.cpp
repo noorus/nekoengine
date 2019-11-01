@@ -40,9 +40,6 @@ namespace neko {
 
     FT_Add_Default_Modules( freeType_ );
     // FT_Set_Default_Properties( freeType_ ); // TODO this uses an env variable? wtf, replace
-
-    auto font = createFont();
-    engine_->loader()->addLoadTask( { LoadTask( font, R"(data\fonts\DejaVuSerif.ttf)", 15.0f ) } );
   }
 
   void FontManager::uploadFonts()
@@ -56,13 +53,13 @@ namespace neko {
       if ( !font->loaded_ )
         continue;
       // guess we're done?
-      font->impl_->loadGlyph( utils::utf8_to_utf32( "a" ) );
+      /*font->impl_->loadGlyph( utils::utf8_to_utf32( "a" ) );
       font->impl_->loadGlyph( utils::utf8_to_utf32( "b" ) );
       font->impl_->loadGlyph( utils::utf8_to_utf32( "c" ) );
       font->impl_->loadGlyph( utils::utf8_to_utf32( "d" ) );
       font->impl_->loadGlyph( utils::utf8_to_utf32( "e" ) );
       font->impl_->loadGlyph( utils::utf8_to_utf32( "f" ) );
-      font->impl_->loadGlyph( utils::utf8_to_utf32( "g" ) );
+      font->impl_->loadGlyph( utils::utf8_to_utf32( "g" ) );*/
     }
   }
 

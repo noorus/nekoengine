@@ -243,6 +243,8 @@
     <None Include="..\bin\data\shaders\default_vp.glsl" />
     <None Include="..\bin\data\shaders\mainframebuf_fp.glsl" />
     <None Include="..\bin\data\shaders\mainframebuf_vp.glsl" />
+    <None Include="..\bin\data\shaders\text_fp.glsl" />
+    <None Include="..\bin\data\shaders\text_vp.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
