@@ -35,13 +35,25 @@ namespace neko {
     engine_->console()->print( Console::srcGfx, "GL Renderer: " + info_.renderer_ );
   }
 
+  // 131185: Buffer detailed info...
+  // 131218: Program/shader state performance warning...
+  const std::array<GLuint, 1> c_ignoredGlDebugMessages = { 131218 };
+
   void Gfx::openglDebugCallbackFunction(
     GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam )
   {
     if ( !userParam )
       return;
+
+    for ( GLuint ignoredId : c_ignoredGlDebugMessages )
+      if ( id == ignoredId )
+        return;
+
+    if ( id == 1281 || id == 1285 )
+      DebugBreak();
+
     auto gfx = (Gfx*)userParam;
-    gfx->engine_->console()->printf( Console::srcGfx, "OpenGL Debug: %s", message );
+    gfx->engine_->console()->printf( Console::srcGfx, "OpenGL Debug: %s (%d)", message, id );
   }
 
   void Gfx::setOpenGLDebugLogging( const bool enable )
@@ -51,7 +63,7 @@ namespace neko {
       glEnable( GL_DEBUG_OUTPUT );
       glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
       glDebugMessageCallback( Gfx::openglDebugCallbackFunction, this );
-      glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true );
+      glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true );
     }
     else
     {
