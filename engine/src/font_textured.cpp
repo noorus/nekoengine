@@ -129,14 +129,14 @@ namespace neko {
       if ( region.x < 0 )
         NEKO_EXCEPT( "Font face texture atlas is full" );
 
-#pragma warning(push)
-#pragma warning(disable:4838)
+#pragma warning( push )
+#pragma warning( disable: 4838 )
       static unsigned char data[4 * 4 * 3] = {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
-#pragma warning(pop)
+#pragma warning( pop )
 
       atlas_->setRegion( region.x, region.y, 4, 4, data, 0 );
 

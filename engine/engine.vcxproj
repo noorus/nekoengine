@@ -73,13 +73,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <BrowseInformation>true</BrowseInformation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>
+      </MinimalRebuild>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\debug\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\debug\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glbindingd.lib;glbinding-auxd.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;v8_d.dll.lib;v8_libbase_d.dll.lib;v8_libplatform_d.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;libz-staticd.lib;libbz2d.lib;libpng16d.lib;freetyped.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
-      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
       <AssemblyDebug>true</AssemblyDebug>
@@ -87,8 +89,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <AdditionalOptions>/ignore:4099 /time %(AdditionalOptions)</AdditionalOptions>
-      <OptimizeReferences>
-      </OptimizeReferences>
+      <OptimizeReferences>false</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(ProjectDir)manifest\neko.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>

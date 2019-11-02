@@ -108,7 +108,7 @@ namespace neko {
       void loadFace( vector<uint8_t>& source, Real pointSize );
     };
 
-    using GraphicalFontPtr = shared_ptr<GraphicalFont>;
+    using GraphicalFontPtr = unique_ptr<GraphicalFont>;
     using GraphicalFontVector = vector<GraphicalFontPtr>;
 
   }
@@ -201,6 +201,7 @@ namespace neko {
     void initialize();
     FontPtr createFont();
     void loadFont( FontPtr font, const Font::Specs& specs, vector<uint8_t>& buffer );
+    void unloadFont( Font* font );
     void shutdown();
     void prepare( GameTime time );
     inline FontVector& fonts() { return fonts_; }

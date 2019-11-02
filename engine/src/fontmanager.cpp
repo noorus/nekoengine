@@ -53,13 +53,7 @@ namespace neko {
       if ( !font->loaded_ )
         continue;
       // guess we're done?
-      /*font->impl_->loadGlyph( utils::utf8_to_utf32( "a" ) );
-      font->impl_->loadGlyph( utils::utf8_to_utf32( "b" ) );
-      font->impl_->loadGlyph( utils::utf8_to_utf32( "c" ) );
-      font->impl_->loadGlyph( utils::utf8_to_utf32( "d" ) );
-      font->impl_->loadGlyph( utils::utf8_to_utf32( "e" ) );
-      font->impl_->loadGlyph( utils::utf8_to_utf32( "f" ) );
-      font->impl_->loadGlyph( utils::utf8_to_utf32( "g" ) );*/
+      // could preload glyphs here, if we knew which ones.
     }
   }
 
@@ -86,17 +80,32 @@ namespace neko {
 
     assert( !font->loaded_ );
 
-    font->impl_ = make_shared<fonts::GraphicalFont>( shared_from_this(),
+    font->impl_ = make_unique<fonts::GraphicalFont>( shared_from_this(),
       specs.atlasSize_.x, specs.atlasSize_.y, atlasDepth );
     font->impl_->loadFace( buffer, specs.pointSize_ );
     font->loaded_ = true;
+  }
+
+  void FontManager::unloadFont( Font* font )
+  {
+    if ( font && font->impl_ )
+    {
+      font->impl_.reset();
+      font->loaded_ = false;
+    }
   }
 
   void FontManager::shutdown()
   {
     ScopedRWLock lock( &faceLock_ );
 
+    for ( auto& font : fonts_ )
+    {
+      unloadFont( font.get() );
+    }
+
     fonts_.clear();
+
     if ( freeType_ )
     {
       FT_Done_Library( freeType_ );
