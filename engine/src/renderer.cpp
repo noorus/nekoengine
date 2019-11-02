@@ -70,7 +70,7 @@ namespace neko {
     {
       font_ = fontmgr->createFont();
       engine->loader()->addLoadTask( { LoadTask( font_, R"(data\fonts\LuckiestGuy.ttf)", 32.0f ) } );
-      mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_2D );
+      mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_Text );
       engine->console()->printf( Console::srcGfx, "DynamicText: VBO %d, EBO %d, VAO %d", mesh_->vbo_, mesh_->ebo_, mesh_->vao_ );
     }
     inline bool fontLoaded()
@@ -103,17 +103,15 @@ namespace neko {
           (int)( p0.y - glyph->height )
         );
         auto index = (GLuint)mesh_->vertsCount();
-        auto color = vec4( 0.9f, 0.11f, 0.42f, 1.0f );
-        vector<Vertex2D> vertices = {
-        { p0.x, p1.y, glyph->coords[0].s, glyph->coords[1].t },
-        { p0.x, p0.y, glyph->coords[0].s, glyph->coords[0].t },
-        { p1.x, p0.y, glyph->coords[1].s, glyph->coords[0].t },
-        { p0.x, p1.y, glyph->coords[0].s, glyph->coords[1].t },
-        { p1.x, p0.y, glyph->coords[1].s, glyph->coords[0].t },
-        { p1.x, p1.y, glyph->coords[1].s, glyph->coords[1].t }
+        auto color = vec4( 0.0f, 1.0f, 0.0f, 1.0f );
+        vector<VertexText3D> vertices = {
+          { vec3( p0.x, p1.y, 0.0f ), vec2( glyph->coords[0].s, glyph->coords[1].t ), color },
+          { vec3( p0.x, p0.y, 0.0f ), vec2( glyph->coords[0].s, glyph->coords[0].t ), color },
+          { vec3( p1.x, p0.y, 0.0f ), vec2( glyph->coords[1].s, glyph->coords[0].t ), color },
+          { vec3( p1.x, p1.y, 0.0f ), vec2( glyph->coords[1].s, glyph->coords[1].t ), color }
         };
         vector<GLuint> indices = {
-          index, index + 1, index + 2, index + 3, index + 4, index + 5
+          index + 0, index + 1, index + 2, index + 0, index + 2, index + 3
         };
         mesh_->pushIndices( move( indices ) );
         mesh_->pushVertices( move( vertices ) );
@@ -309,18 +307,13 @@ namespace neko {
 
     if ( !g_testText )
     {
-      Locator::console().printf( Console::srcGfx, "pt1: Creating g_testText" );
       g_testText = make_shared<DynamicText>( engine_->shared_from_this(), meshes_, engine_->fonts() );
-      Locator::console().printf( Console::srcGfx, "pt2: Created g_testText, awaiting font load" );
     }
 
     if ( g_testText && g_testText->fontLoaded() && !g_textAdded )
     {
-      Locator::console().printf( Console::srcGfx, "pt3: Adding text to g_testText" );
       g_textAdded = true;
       g_testText->addText( "nekoengine", vec2( 256.0f, 720.0f - 256.0f + 32.0f ) );
-      Locator::console().printf( Console::srcGfx, "pt4: Added text to g_testText" );
-      Locator::console().printf( Console::srcGfx, "pt5: Updating texture for g_testText" );
       g_testText->updateTexture( this );
     }
 
