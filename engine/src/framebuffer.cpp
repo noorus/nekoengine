@@ -25,14 +25,12 @@ namespace neko {
     assert( handle_ );
 
     // currently using a static framebuffer format:
-    // 8-bit RGB color, 24-bit depth, 8-bit stencil
+    // 8-bit RGB color, 32-bit float depth
     colorBuffer_ = make_shared<Texture>( renderer_, width_, height_, PixFmtColorRGB8, nullptr, Texture::ClampEdge, Texture::Nearest );
-    depthStencilBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepthStencil24_8 );
+    depthBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepth32f );
 
-    glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
-    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer_->handle(), 0 );
-    glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthStencilBuffer_->handle() );
-    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    glNamedFramebufferTexture( handle_, GL_COLOR_ATTACHMENT0, colorBuffer_->handle(), 0 );
+    glNamedFramebufferRenderbuffer( handle_, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_->handle() );
   }
 
   void Framebuffer::destroy()
@@ -44,15 +42,12 @@ namespace neko {
       handle_ = 0;
     }
     colorBuffer_.reset();
-    depthStencilBuffer_.reset();
+    depthBuffer_.reset();
   }
 
   bool Framebuffer::validate() const
   {
-    glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
-    bool ret = ( glCheckFramebufferStatus( GL_FRAMEBUFFER ) == GL_FRAMEBUFFER_COMPLETE );
-    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-    return ret;
+    return ( glCheckNamedFramebufferStatus( handle_, GL_FRAMEBUFFER ) == GL_FRAMEBUFFER_COMPLETE );
   }
 
   bool Framebuffer::available() const
@@ -66,9 +61,10 @@ namespace neko {
 
   void Framebuffer::begin()
   {
+    const GLfloat clearDepth = 0.0f;
     glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
-    glClearColor( clearColor_.r, clearColor_.g, clearColor_.b, clearColor_.a );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+    glClearNamedFramebufferfv( handle_, GL_COLOR, 0, glm::value_ptr( clearColor_ ) );
+    glClearNamedFramebufferfv( handle_, GL_DEPTH, 0, &clearDepth );
   }
 
   void Framebuffer::end()

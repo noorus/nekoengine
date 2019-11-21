@@ -14,13 +14,17 @@ namespace neko {
     vbo_( cInvalidIndexValue ), ebo_( cInvalidIndexValue ), vao_( cInvalidIndexValue )
   {
     vbo_ = manager_->createVBO( vertexType_ );
+    assert( vbo_ != cInvalidIndexValue );
     ebo_ = manager_->createEBO();
+    assert( ebo_ != cInvalidIndexValue );
     vao_ = manager_->pushVAO( vertexType_, vbo_, ebo_ );
+    assert( vao_ != cInvalidIndexValue );
   }
 
   void DynamicMesh::pushVertices( vector<Vertex2D> verts )
   {
     assert( vertexType_ == VBO_2D );
+    assert( vbo_ != cInvalidIndexValue );
     auto vbo = &manager_->getVBO2D( vbo_ );
     vbo->storage_.insert( vbo->storage_.end(), verts.begin(), verts.end() );
     vbo->dirty_ = true;
@@ -29,6 +33,7 @@ namespace neko {
   void DynamicMesh::pushVertices( vector<Vertex3D> verts )
   {
     assert( vertexType_ == VBO_3D );
+    assert( vbo_ != cInvalidIndexValue );
     auto vbo = &manager_->getVBO3D( vbo_ );
     vbo->storage_.insert( vbo->storage_.end(), verts.begin(), verts.end() );
     vbo->dirty_ = true;
@@ -37,6 +42,7 @@ namespace neko {
   void DynamicMesh::pushVertices( vector<VertexText3D> verts )
   {
     assert( vertexType_ == VBO_Text );
+    assert( vbo_ != cInvalidIndexValue );
     auto vbo = &manager_->getVBOText( vbo_ );
     vbo->storage_.insert( vbo->storage_.end(), verts.begin(), verts.end() );
     vbo->dirty_ = true;
@@ -44,6 +50,7 @@ namespace neko {
 
   void DynamicMesh::pushIndices( vector<GLuint> indices )
   {
+    assert( ebo_ != cInvalidIndexValue );
     auto ebo = &manager_->getEBO( ebo_ );
     ebo->storage_.insert( ebo->storage_.end(), indices.begin(), indices.end() );
     ebo->dirty_ = true;
@@ -51,14 +58,15 @@ namespace neko {
 
   void DynamicMesh::draw()
   {
+    assert( vao_ != cInvalidIndexValue );
     auto vao = &manager_->getVAO( vao_ );
-    if ( vao->used_ && vao->uploaded_ )
-      vao->draw( drawMode_ );
+    if ( vao->used_ && vao->uploaded_ && vao->useEBO_ )
+      vao->draw( drawMode_, (GLsizei)indicesCount() );
   }
 
   void DynamicMesh::dump( const utf8String& name )
   {
-    auto ebo = &manager_->getEBO( ebo_ );
+    /*auto ebo = &manager_->getEBO( ebo_ );
     Locator::console().printf( Console::srcGfx, "DynamicMesh %s:", name.c_str() );
     string verts;
     size_t vertCount = 0;
@@ -80,7 +88,7 @@ namespace neko {
       for ( auto& vert : vbo->storage_ )
       {
         char asd[128];
-        sprintf_s( asd, 128, "[%.4f,%.4f,%.4f,%.4f] ",
+        sprintf_s( asd, 128, "[%.2f,%.2f,%.2f,%.2f] ",
           vert.position.x, vert.position.y, vert.texcoord.s, vert.texcoord.t );
         verts.append( asd );
       }
@@ -95,17 +103,29 @@ namespace neko {
       sprintf_s( asd, 128, "[%d] ", index );
       indices.append( asd );
     }
-    Locator::console().print( Console::srcGfx, indices );
+    Locator::console().print( Console::srcGfx, indices );*/
   }
 
   const size_t DynamicMesh::vertsCount() const
   {
-    auto vbo = &manager_->getVBO2D( vbo_ );
-    return vbo->storage_.size();
+    if ( vertexType_ == VBO_2D )
+    {
+      return manager_->getVBO2D( vbo_ ).storage_.size();
+    }
+    else if ( vertexType_ == VBO_3D )
+    {
+      return manager_->getVBO3D( vbo_ ).storage_.size();
+    }
+    else if ( vertexType_ == VBO_Text )
+    {
+      return manager_->getVBOText( vbo_ ).storage_.size();
+    } else
+      NEKO_EXCEPT( "Unknown vertex type" );
   }
 
   const size_t DynamicMesh::indicesCount() const
   {
+    assert( ebo_ != cInvalidIndexValue );
     auto ebo = &manager_->getEBO( ebo_ );
     return ebo->storage_.size();
   }

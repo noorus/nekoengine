@@ -13,32 +13,26 @@ namespace neko {
     assert( renderer && width > 0 && height > 0 );
     if ( format_ == PixFmtColorRGB8 )
     {
-      glFormat_ = GL_RGB8;
-      internalFormat_ = GL_RGB;
+      glFormat_ = GL_RGB;
+      internalFormat_ = GL_RGB8;
       internalType_ = GL_UNSIGNED_BYTE;
     }
     else if ( format_ == PixFmtColorRGBA8 )
     {
-      glFormat_ = GL_RGBA8;
-      internalFormat_ = GL_RGBA;
-      internalType_ = GL_UNSIGNED_BYTE;
-    }
-    else if ( format_ == PixFmtColorRGBA8_A8Input )
-    {
       glFormat_ = GL_RGBA;
-      internalFormat_ = GL_ALPHA;
+      internalFormat_ = GL_RGBA8;
       internalType_ = GL_UNSIGNED_BYTE;
     }
-    else if ( format_ == PixFmtDepthStencil24_8 )
+    else if ( format_ == PixFmtDepth32f )
     {
-      glFormat_ = GL_DEPTH24_STENCIL8;
-      internalFormat_ = GL_DEPTH_STENCIL;
-      internalType_ = GL_UNSIGNED_INT_24_8;
+      glFormat_ = GL_DEPTH_COMPONENT;
+      internalFormat_ = GL_DEPTH_COMPONENT32F;
+      internalType_ = GL_FLOAT;
     }
     else if ( format_ == PixFmtColorR8 )
     {
       glFormat_ = GL_RED;
-      internalFormat_ = GL_RED;
+      internalFormat_ = GL_R8;
       internalType_ = GL_UNSIGNED_BYTE;
     }
     else

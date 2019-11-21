@@ -66,18 +66,17 @@ namespace neko {
     GLuint id_;
     bool uploaded_;
     bool useEBO_;
-    size_t size_;
-    void draw( GLenum mode );
+    void draw( GLenum mode, GLsizei size );
     // Construct empty (basically, unused (for PooledVector)
     VAO(): vboType_( VBO_3D ), vbo_( cInvalidIndexValue ), ebo_( cInvalidIndexValue ), id_( 0 ),
-      uploaded_( false ), useEBO_( false ), size_( 0 ) {}
+      uploaded_( false ), useEBO_( false ) {}
     // Construct with VBO, not using EBO
     VAO( VBOType type, size_t vbo ): vboType_( type ),
-      vbo_( vbo ), ebo_( cInvalidIndexValue ), id_( 0 ), size_( 0 ),
+      vbo_( vbo ), ebo_( cInvalidIndexValue ), id_( 0 ),
       uploaded_( false ), useEBO_( false ) {}
     // Construct with VBO & EBO
     VAO( VBOType type, size_t vbo, size_t ebo ): vboType_( type ),
-      vbo_( vbo ), ebo_( ebo ), id_( 0 ), size_( 0 ),
+      vbo_( vbo ), ebo_( ebo ), id_( 0 ),
       uploaded_( false ), useEBO_( true ) {}
     void release() override
     {
@@ -87,7 +86,6 @@ namespace neko {
       id_ = 0;
       uploaded_ = false;
       useEBO_ = false;
-      size_ = 0;
     }
   };
 
@@ -148,6 +146,7 @@ namespace neko {
     size_t ebo_;
     size_t vao_;
     GLenum drawMode_;
+    GLsizei size_;
   public:
     StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts );
     void draw();

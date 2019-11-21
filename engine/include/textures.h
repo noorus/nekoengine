@@ -97,7 +97,7 @@ namespace neko {
     GLuint handle_; //!< Internal GL handle.
     Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
     TexturePtr colorBuffer_;
-    RenderbufferPtr depthStencilBuffer_;
+    RenderbufferPtr depthBuffer_;
     vec4 clearColor_;
     mutable bool available_;
   public:

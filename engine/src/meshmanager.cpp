@@ -7,15 +7,7 @@ namespace neko {
 
   using namespace gl;
 
-  // Should correspond to order in MeshDataModifyHint
-  static const GLenum c_hintMapping[3] = { GL_STREAM_DRAW, GL_STATIC_DRAW, GL_DYNAMIC_DRAW };
-
-  inline GLenum convertHint( MeshDataModifyHint hint )
-  {
-    return c_hintMapping[hint];
-  }
-
-  // MeshManager: Generals
+  // MeshManager: Generics
 
   size_t MeshManager::createVBO( VBOType type )
   {
@@ -82,50 +74,33 @@ namespace neko {
   void vboUploadHelper( VBOVector<T>& vbos )
   {
     vector<VBO<T>*> dirties;
-    vector<VBO<T>*> subUpdates;
     for ( auto& buf : vbos )
       if ( !buf.used_ )
         continue;
-      else if ( !buf.uploaded_ )
+      else if ( !buf.uploaded_ || buf.dirty_ )
         dirties.push_back( &buf );
-      else if ( buf.dirty_ )
-        subUpdates.push_back( &buf );
 
-    // Just to be sure.
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-
-    // Generate & upload entirely new ones
     if ( !dirties.empty() )
     {
       vector<GLuint> ids;
       ids.resize( dirties.size() );
-      glGenBuffers( (GLsizei)dirties.size(), ids.data() );
+      glCreateBuffers( (GLsizei)dirties.size(), ids.data() );
       for ( size_t i = 0; i < dirties.size(); ++i )
       {
+        if ( dirties[i]->uploaded_ && dirties[i]->dirty_ )
+          glDeleteBuffers( 1, &dirties[i]->id_ );
+        dirties[i]->id_ = ids[i];
         if ( !dirties[i]->storage_.empty() )
         {
-          glBindBuffer( GL_ARRAY_BUFFER, ids[i] );
-          glBufferData( GL_ARRAY_BUFFER,
+          glNamedBufferStorage( dirties[i]->id_,
             dirties[i]->storage_.size() * sizeof( T ),
             dirties[i]->storage_.data(),
-            convertHint( dirties[i]->hint_ ) );
+            GL_DYNAMIC_STORAGE_BIT );
         }
-        dirties[i]->id_ = ids[i];
         dirties[i]->uploaded_ = true;
         dirties[i]->dirty_ = false;
       }
     }
-
-    // Update sub-data on existing ones
-    for ( size_t i = 0; i < subUpdates.size(); ++i )
-    {
-      glNamedBufferSubData( subUpdates[i]->id_, 0,
-        subUpdates[i]->storage_.size() * sizeof( T ),
-        subUpdates[i]->storage_.data() );
-      subUpdates[i]->dirty_ = false;
-    }
-
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
   }
 
   void MeshManager::uploadVBOs()
@@ -182,6 +157,7 @@ namespace neko {
     GLsizei stride_;
   public:
     AttribWriter(): stride_( 0 ) {}
+    inline GLsizei stride() const { return stride_; }
     void add( GLenum type, GLsizei count )
     {
       GLsizei size = 0;
@@ -193,13 +169,14 @@ namespace neko {
       recs_.emplace_back( type, count, size );
       stride_ += size;
     }
-    void write()
+    void write( GLuint handle )
     {
-      size_t ptr = 0;
+      GLuint ptr = 0;
       for ( GLuint i = 0; i < recs_.size(); ++i )
       {
-        glEnableVertexAttribArray( i );
-        glVertexAttribPointer( i, recs_[i].count_, recs_[i].type_, GL_FALSE, stride_, (void*)ptr );
+        glEnableVertexArrayAttrib( handle, i );
+        glVertexArrayAttribBinding( handle, i, 0 );
+        glVertexArrayAttribFormat( handle, i, recs_[i].count_, recs_[i].type_, GL_FALSE, ptr );
         ptr += recs_[i].size_;
       }
     }
@@ -228,16 +205,12 @@ namespace neko {
       else if ( !vao.uploaded_ )
         dirties.push_back( &vao );
 
-    // Just to be sure.
-    glBindVertexArray( 0 );
-
-    // Early out if nothing to create; if VAOs can become "dirty" in the future, this needs to change.
     if ( dirties.empty() )
       return;
 
     vector<GLuint> ids;
     ids.resize( dirties.size() );
-    glGenVertexArrays( (GLsizei)dirties.size(), ids.data() );
+    glCreateVertexArrays( (GLsizei)dirties.size(), ids.data() );
     for ( size_t i = 0; i < dirties.size(); ++i )
     {
       EBO* ebo = nullptr;
@@ -252,78 +225,64 @@ namespace neko {
         auto vbo = &( vbos3d_[dirties[i]->vbo_] );
         if ( !vbo->uploaded_ )
           NEKO_EXCEPT( "VBO3D used for VAO has not been uploaded" );
-        dirties[i]->size_ = vbo->storage_.size();
-        glBindVertexArray( ids[i] );
-        glBindBuffer( GL_ARRAY_BUFFER, vbo->id_ );
         if ( ebo )
         {
-          glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo->id_ );
+          glVertexArrayElementBuffer( ids[i], ebo->id_ );
         }
         AttribWriter attribs;
         attribs.add( GL_FLOAT, 3 ); // vec3 position
         attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
-        attribs.write();
-        dirties[i]->size_ = vbo->storage_.size();
+        attribs.write( ids[i] );
+        glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
       }
       else if ( dirties[i]->vboType_ == VBO_2D )
       {
         auto vbo = &( vbos2d_[dirties[i]->vbo_] );
         if ( !vbo->uploaded_ )
           NEKO_EXCEPT( "VBO2D used for VAO has not been uploaded" );
-        glBindVertexArray( ids[i] );
-        glBindBuffer( GL_ARRAY_BUFFER, vbo->id_ );
         if ( ebo )
         {
-          glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo->id_ );
+          glVertexArrayElementBuffer( ids[i], ebo->id_ );
         }
         AttribWriter attribs;
         attribs.add( GL_FLOAT, 2 ); // vec2 position
         attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
-        attribs.write();
-        dirties[i]->size_ = vbo->storage_.size();
+        attribs.write( ids[i] );
+        glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
       }
       else if ( dirties[i]->vboType_ == VBO_Text )
       {
         auto vbo = &( vbosText3d_[dirties[i]->vbo_] );
         if ( !vbo->uploaded_ )
           NEKO_EXCEPT( "VBOText used for VAO has not been uploaded" );
-        glBindVertexArray( ids[i] );
-        glBindBuffer( GL_ARRAY_BUFFER, vbo->id_ );
         if ( ebo )
         {
-          glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ebo->id_ );
+          glVertexArrayElementBuffer( ids[i], ebo->id_ );
         }
         AttribWriter attribs;
         attribs.add( GL_FLOAT, 3 ); // vec3 position
         attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
         attribs.add( GL_FLOAT, 4 ); // vec4 color
-        attribs.write();
-        dirties[i]->size_ = vbo->storage_.size();
-      } else
+        attribs.write( ids[i] );
+        glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
+      }
+      else
         NEKO_EXCEPT( "Unknown VBO format" );
 
       dirties[i]->id_ = ids[i];
       dirties[i]->uploaded_ = true;
-
-      // Unbind the VAO !BEFORE! unbinding any attributes, VBOs or EBOs that are now bound to the VAO!
-      glBindVertexArray( 0 );
-
-      glDisableVertexAttribArray( MeshAttrib_Color );
-      glDisableVertexAttribArray( MeshAttrib_Texcoord );
-      glDisableVertexAttribArray( MeshAttrib_Position );
-      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-      glBindBuffer( GL_ARRAY_BUFFER, 0 );
     }
   }
 
-  void VAO::draw( GLenum mode )
+  void VAO::draw( GLenum mode, GLsizei size )
   {
     glBindVertexArray( id_ );
     if ( useEBO_ )
-      glDrawElements( mode, (GLsizei)size_, GL_UNSIGNED_INT, nullptr );
+    {
+      glDrawElements( mode, size, GL_UNSIGNED_INT, nullptr );
+    }
     else
-      glDrawArrays( mode, 0, (GLsizei)size_ );
-    glBindVertexArray( 0 );
+      glDrawArrays( mode, 0, size );
   }
 
   // MeshManager: EBOs
@@ -338,47 +297,33 @@ namespace neko {
   void MeshManager::uploadEBOs()
   {
     vector<EBO*> dirties;
-    vector<EBO*> subUpdates;
     for ( auto& ebo : ebos_ )
       if ( !ebo.used_ )
         continue;
-      else if ( !ebo.uploaded_ )
+      else if ( !ebo.uploaded_ || ebo.dirty_ )
         dirties.push_back( &ebo );
-      else if ( ebo.dirty_ )
-        subUpdates.push_back( &ebo );
-
-    // Just to be sure.
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 
     if ( !dirties.empty() )
     {
-      // Generate & upload entirely new ones
       vector<GLuint> ids;
       ids.resize( dirties.size() );
-      glGenBuffers( (GLsizei)dirties.size(), ids.data() );
+      glCreateBuffers( (GLsizei)dirties.size(), ids.data() );
       for ( size_t i = 0; i < dirties.size(); ++i )
       {
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ids[i] );
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-          dirties[i]->storage_.size() * sizeof( GLuint ),
-          dirties[i]->storage_.data(),
-          convertHint( dirties[i]->hint_ ) );
+        if ( dirties[i]->uploaded_ && dirties[i]->dirty_ )
+          glDeleteBuffers( 1, &dirties[i]->id_ );
         dirties[i]->id_ = ids[i];
+        if ( !dirties[i]->storage_.empty() )
+        {
+          glNamedBufferStorage( dirties[i]->id_,
+            dirties[i]->storage_.size() * sizeof( GLuint ),
+            dirties[i]->storage_.data(),
+            GL_DYNAMIC_STORAGE_BIT );
+        }
         dirties[i]->uploaded_ = true;
         dirties[i]->dirty_ = false;
       }
     }
-
-    // Update sub-data on existing ones
-    for ( size_t i = 0; i < subUpdates.size(); ++i )
-    {
-      glNamedBufferSubData( subUpdates[i]->id_, 0,
-        subUpdates[i]->storage_.size() * sizeof( GLuint ),
-        subUpdates[i]->storage_.data() );
-      subUpdates[i]->dirty_ = false;
-    }
-
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
   }
 
   void MeshManager::teardown()

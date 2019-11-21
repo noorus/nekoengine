@@ -109,10 +109,12 @@ namespace neko {
       if ( wait == WAIT_OBJECT_0 )
       {
         return true;
-      } else if ( wait == WAIT_OBJECT_0 + 1 )
+      }
+      else if ( wait == WAIT_OBJECT_0 + 1 )
       {
         return false;
-      } else
+      }
+      else
         NEKO_EXCEPT( "Thread wait failed" );
 
       return false;

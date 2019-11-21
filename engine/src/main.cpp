@@ -11,7 +11,14 @@ using namespace neko;
 const string c_consoleThreadName = "nekoConsole";
 const string c_consoleTitle      = "nekoengine//console";
 const string c_errorTitle        = "nekoengine//exception";
-const vec4i  c_consoleDims       = { 220, 220, 640, 320 };
+const vec2i  c_consolePos        = { 220, 220 };
+const vec2i  c_consoleDims       = { 640, 320 };
+
+// Tell both NVIDIA and AMD to use the most powerful GPU when running on systems with multiple choice (laptops).
+extern "C" {
+  __declspec( dllexport ) DWORD NvOptimusEnablement = 1;
+  __declspec( dllexport ) int AmdPowerXpressRequestHighPerformance = 1;
+}
 
 auto g_exceptionReporter = []( string_view description )
 {
@@ -39,8 +46,8 @@ inline int runMain()
     auto console = ( (Console*)argument )->shared_from_this();
     platform::ConsoleWindowPtr window = make_shared<platform::ConsoleWindow>(
       console, c_consoleTitle,
-      c_consoleDims[0], c_consoleDims[1], // x, y
-      c_consoleDims[2], c_consoleDims[3]  // w, h
+      c_consolePos[0], c_consolePos[1], // x, y
+      c_consoleDims[0], c_consoleDims[1]  // w, h
     );
     running.set();
     window->messageLoop( wantStop );

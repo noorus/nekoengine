@@ -60,6 +60,8 @@ namespace neko {
 
   const int64_t c_glVersion[2] = { 4, 5 };
 
+  static FramebufferPtr g_framebuf;
+
   class DynamicText {
   public:
     DynamicMeshPtr mesh_;
@@ -71,7 +73,6 @@ namespace neko {
       font_ = fontmgr->createFont();
       engine->loader()->addLoadTask( { LoadTask( font_, R"(data\fonts\LuckiestGuy.ttf)", 32.0f ) } );
       mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_Text );
-      engine->console()->printf( Console::srcGfx, "DynamicText: VBO %d, EBO %d, VAO %d", mesh_->vbo_, mesh_->ebo_, mesh_->vao_ );
     }
     inline bool fontLoaded()
     {
@@ -130,8 +131,7 @@ namespace neko {
     }
     void draw()
     {
-      glActiveTexture( GL_TEXTURE0 );
-      glBindTexture( GL_TEXTURE_2D, material_->texture_->handle() );
+      glBindTextureUnit( 0, material_->texture_->handle() );
       mesh_->draw();
     }
     ~DynamicText()
@@ -141,9 +141,6 @@ namespace neko {
   };
 
   using DynamicTextPtr = shared_ptr<DynamicText>;
-
-  static TexturePtr g_texture;
-  static FramebufferPtr g_framebuf;
 
   static DynamicMeshPtr g_testMesh;
   static DynamicTextPtr g_testText;
@@ -336,42 +333,41 @@ namespace neko {
     assert( width <= (size_t)info_.maxTextureSize && height <= (size_t)info_.maxTextureSize );
 
     GLuint handle = 0;
-    glGenTextures( 1, &handle );
+    glCreateTextures( GL_TEXTURE_2D, 1, &handle );
     assert( handle != 0 );
 
-    glBindTexture( GL_TEXTURE_2D, handle );
-
     // Wrapping (repeat, edge, border)
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap );
+    glTextureParameteri( handle, GL_TEXTURE_WRAP_S, wrap );
+    glTextureParameteri( handle, GL_TEXTURE_WRAP_T, wrap );
 
     // Filtering
     if ( filtering == Texture::Nearest )
     {
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+      glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     }
     else if ( filtering == Texture::Linear )
     {
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+      glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     }
     else
     {
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+      glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     }
 
     // 1 byte alignment - i.e. unaligned.
     // Could boost performance to use aligned memory in the future.
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
-    glTexImage2D( GL_TEXTURE_2D, 0, format, (GLsizei)width, (GLsizei)height, 0, internalFormat, internalType, data );
+    glTextureStorage2D( handle, 1, internalFormat, (GLsizei)width, (GLsizei)height );
+
+    if ( data )
+      glTextureSubImage2D( handle, 0, 0, 0, (GLsizei)width, (GLsizei)height, format, internalType, data );
 
     if ( filtering == Texture::Mipmapped )
-      glGenerateMipmap( GL_TEXTURE_2D );
-
-    glBindTexture( GL_TEXTURE_2D, 0 );
+      glGenerateTextureMipmap( handle );
 
     return handle;
   }
@@ -389,12 +385,10 @@ namespace neko {
     assert( width <= (size_t)info_.maxRenderbufferSize && height <= (size_t)info_.maxRenderbufferSize );
 
     GLuint handle = 0;
-    glGenRenderbuffers( 1, &handle );
+    glCreateRenderbuffers( 1, &handle );
     assert( handle != 0 );
 
-    glBindRenderbuffer( GL_RENDERBUFFER, handle );
-    glRenderbufferStorage( GL_RENDERBUFFER, format, (GLsizei)width, (GLsizei)height );
-    glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+    glNamedRenderbufferStorage( handle, format, (GLsizei)width, (GLsizei)height );
 
     return handle;
   }
@@ -412,7 +406,7 @@ namespace neko {
     assert( width <= (size_t)info_.maxFramebufferWidth && height <= (size_t)info_.maxFramebufferHeight );
 
     GLuint handle = 0;
-    glGenFramebuffers( 1, &handle );
+    glCreateFramebuffers( 1, &handle );
     assert( handle != 0 );
 
     return handle;
@@ -453,11 +447,10 @@ namespace neko {
     {
       shaders_->use( 0 );
 
-      glActiveTexture( GL_TEXTURE0 );
       if ( !materials_.empty() && materials_[0]->texture_ )
-        glBindTexture( GL_TEXTURE_2D, materials_[0]->texture_->handle() );
+        glBindTextureUnit( 0, materials_[0]->texture_->handle() );
       else
-        glBindTexture( GL_TEXTURE_2D, g_texture->handle() );
+        glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
 
       g_testMesh->draw();
     }
@@ -496,8 +489,7 @@ namespace neko {
     shaders_->use( 1 );
 
     glDisable( GL_DEPTH_TEST );
-    glActiveTexture( GL_TEXTURE0 );
-    glBindTexture( GL_TEXTURE_2D, g_framebuf->texture()->handle() );
+    glBindTextureUnit( 0, g_framebuf->texture()->handle() );
     builtin_.screenQuad_->draw();
   }
 
@@ -505,7 +497,6 @@ namespace neko {
   {
     g_testText.reset();
 
-    g_texture.reset();
     g_framebuf.reset();
 
     meshes_->teardown();

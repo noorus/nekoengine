@@ -49,7 +49,7 @@ namespace neko {
       if ( id == ignoredId )
         return;
 
-    if ( id == 1281 || id == 1285 )
+    if ( id == 1281 || id == 1285 || id == 0 )
       DebugBreak();
 
     auto gfx = (Gfx*)userParam;
@@ -63,7 +63,7 @@ namespace neko {
       glEnable( GL_DEBUG_OUTPUT );
       glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
       glDebugMessageCallback( Gfx::openglDebugCallbackFunction, this );
-      glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, true );
+      glDebugMessageControl( GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE );
     }
     else
     {

@@ -9,8 +9,9 @@ namespace neko {
 
   StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts ):
     manager_( move( manager ) ), drawMode_( drawMode ),
-    vbo_( cInvalidIndexValue ), ebo_( cInvalidIndexValue ), vao_( cInvalidIndexValue )
+    vbo_( cInvalidIndexValue ), ebo_( cInvalidIndexValue ), vao_( cInvalidIndexValue ), size_( 0 )
   {
+    size_ = (GLsizei)verts.size();
     vbo_ = manager_->pushVBO( move( verts ) );
     vao_ = manager_->pushVAO( VBO_2D, vbo_ );
   }
@@ -19,7 +20,7 @@ namespace neko {
   {
     auto vao = &manager_->getVAO( vao_ );
     if ( vao->used_ && vao->uploaded_ )
-      vao->draw( drawMode_ );
+      vao->draw( drawMode_, size_ );
   }
 
   StaticMesh::~StaticMesh()
