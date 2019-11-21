@@ -21,16 +21,19 @@ namespace neko {
   //! Packed structs we use with OpenGL
 #pragma pack( push, 1 )
   struct Vertex3D {
+    static const size_t element_count = 5;
     float x, y, z; //!< Vertex coordinates
     float s, t; //!< Texture coordinates
   };
   struct Vertex2D {
+    static const size_t element_count = 4;
     float x, y; //!< Vertex coordinates
     float s, t; //!< Texture coordinates
     Vertex2D(): x( 0.0f ), y( 0.0f ), s( 0.0f ), t( 0.0f ) {}
     Vertex2D( float x_, float y_, float s_, float t_ ): x( x_ ), y( y_ ), s( s_ ), t( t_ ) {}
   };
   struct VertexText3D {
+    static const size_t element_count = 9;
     vec3 position;
     vec2 texcoord;
     vec4 color;

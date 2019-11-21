@@ -7,14 +7,11 @@
 
 namespace neko {
 
-  class EBO;
-
-  const size_t cInvalidIndexValue = numeric_limits<size_t>::max();
-
   enum VBOType {
     VBO_3D, //!< 0: pos[3], 1: texcoord[2]
     VBO_2D, //!< 0: pos[2], 1: texcoord[2]
-    VBO_Text //!< 0: pos[3], 1: texcoord[2], 2: color[4]
+    VBO_Text, //!< 0: pos[3], 1: texcoord[2], 2: color[4]
+    Max_VBOType
   };
 
   enum MeshAttributeIndex: GLuint {
@@ -32,108 +29,100 @@ namespace neko {
   //! \class VBO
   //! \brief Vertex Buffer Object
   //! A buffer of raw vertex data (of only one type), referenceable by an ID.
-  template <class T>
-  class VBO: public PooledVectorObject {
+  class VBO {
   public:
-    vector<T> storage_;
-    GLuint id_;
-    bool uploaded_;
+    VBOType type_;
+    GLuint id_; //!< GL name for this vbo
+    bool uploaded_; //!< Has this been uploaded yet?
     bool dirty_; //!< Whether to just sub-update data
     MeshDataModifyHint hint_; //!< What usage hint to use
-    VBO(): id_( 0 ), uploaded_( false ), dirty_( false ), hint_( ModifyHint_Often ) {}
+    vector<float> storage_; //!< Storage buffer
+    VBO( const VBOType type ): type_( type ), id_( 0 ), uploaded_( false ), dirty_( false ), hint_( ModifyHint_Often ) {}
     inline const bool empty() const { return storage_.empty(); }
-    void release() override
+
+    template <typename T>
+    inline void pushVertices( const vector<T>& vertices )
     {
-      storage_.clear();
-      id_ = 0;
-      uploaded_ = false;
-      dirty_ = false;
-      hint_ = ModifyHint_Often;
+      auto oldSize = storage_.size();
+      size_t size = ( vertices.size() * T::element_count );
+      storage_.resize( oldSize + size );
+      memcpy( (float*)storage_.data() + oldSize, vertices.data(), size * sizeof( float ) );
+      dirty_ = true;
+    }
+
+    inline const size_t vertexCount() const
+    {
+      const size_t elements = ( type_ == VBO_2D ? Vertex2D::element_count : type_ == VBO_3D ? Vertex3D::element_count : VertexText3D::element_count );
+      return ( storage_.size() / elements );
     }
   };
 
-  template <class T>
-  class VBOVector: public PooledVector<VBO<T>> {};
-
-  //! \class VAO
-  //! \brief Vertex Array Object
-  //! An object that describes structure of variables in a VBO, referenceable by an ID.
-  class VAO: public PooledVectorObject {
-  public:
-    VBOType vboType_; //!< Type of the associated VBO
-    size_t vbo_; //!< Index of the associated VBO
-    size_t ebo_;
-    GLuint id_;
-    bool uploaded_;
-    bool useEBO_;
-    void draw( GLenum mode, GLsizei size );
-    // Construct empty (basically, unused (for PooledVector)
-    VAO(): vboType_( VBO_3D ), vbo_( cInvalidIndexValue ), ebo_( cInvalidIndexValue ), id_( 0 ),
-      uploaded_( false ), useEBO_( false ) {}
-    // Construct with VBO, not using EBO
-    VAO( VBOType type, size_t vbo ): vboType_( type ),
-      vbo_( vbo ), ebo_( cInvalidIndexValue ), id_( 0 ),
-      uploaded_( false ), useEBO_( false ) {}
-    // Construct with VBO & EBO
-    VAO( VBOType type, size_t vbo, size_t ebo ): vboType_( type ),
-      vbo_( vbo ), ebo_( ebo ), id_( 0 ),
-      uploaded_( false ), useEBO_( true ) {}
-    void release() override
-    {
-      vboType_ = VBO_3D;
-      vbo_ = cInvalidIndexValue;
-      ebo_ = cInvalidIndexValue;
-      id_ = 0;
-      uploaded_ = false;
-      useEBO_ = false;
-    }
-  };
-
-  using VAOVector = PooledVector<VAO>;
+  using VBOPtr = shared_ptr<VBO>;
 
   //! \class EBO
   //! \brief Element Buffer Object
   //! An array of indices into a VBO.
-  class EBO: public PooledVectorObject {
+  class EBO {
   public:
     vector<GLuint> storage_; //!< Contents of this ebo
-    GLuint id_; //!< GL "name" for this ebo
+    GLuint id_; //!< GL"name for this ebo
     bool uploaded_; //!< Has this been uploaded yet?
     bool dirty_; //!< Whether to just sub-update data
     MeshDataModifyHint hint_; //!< What usage hint to use
     EBO(): id_( 0 ), uploaded_( false ), dirty_( false ), hint_( ModifyHint_Often ) {}
     inline const bool empty() const { return storage_.empty(); }
-    void release() override
-    {
-      storage_.clear();
-      id_ = 0;
-      uploaded_ = false;
-      dirty_ = false;
-      hint_ = ModifyHint_Often;
-    }
   };
 
-  using EBOVector = PooledVector<EBO>;
+  using EBOPtr = shared_ptr<EBO>;
+
+  //! \class VAO
+  //! \brief Vertex Array Object
+  //! An object that describes structure of variables in a VBO, referenceable by an ID.
+  class VAO {
+  public:
+    VBOPtr vbo_; //!< Associated vbo
+    EBOPtr ebo_; //!< Associated ebo, optional
+    GLuint id_; //< GL name for this vao
+    bool uploaded_; //!< Has this been uploaded yet?
+    void draw( GLenum mode, GLsizei size );
+    VAO(): id_( 0 ), uploaded_( false ) {}
+  };
+
+  using VAOPtr = shared_ptr<VAO>;
 
   class DynamicMesh {
   public:
-    VBOType vertexType_;
     MeshManagerPtr manager_;
-    size_t vbo_;
-    size_t ebo_;
-    size_t vao_;
+    VBOPtr vbo_;
+    EBOPtr ebo_;
+    VAOPtr vao_;
     GLenum drawMode_;
   public:
     DynamicMesh( MeshManagerPtr manager, VBOType vertexType, GLenum drawMode );
-    void pushVertices( vector<Vertex2D> verts );
-    void pushVertices( vector<Vertex3D> verts );
-    void pushVertices( vector<VertexText3D> verts );
-    void pushIndices( vector<GLuint> indices );
-    const size_t vertsCount() const;
-    const size_t indicesCount() const;
-    void dump( const utf8String& name );
-    void draw();
     ~DynamicMesh();
+    void pushVertices( const vector<Vertex2D>& vertices );
+    void pushVertices( const vector<Vertex3D>& vertices );
+    void pushVertices( const vector<VertexText3D>& vertices );
+    void pushIndices( const vector<GLuint>& indices );
+    inline const size_t vertsCount() const
+    {
+      assert( vbo_ );
+      return vbo_->vertexCount();
+    }
+    inline const size_t indicesCount() const
+    {
+      assert( ebo_ );
+      return ebo_->storage_.size();
+    }
+    void draw();
+    template <typename T>
+    inline void append( const vector<T>& vertices, vector<GLuint> indices )
+    {
+      auto base = (GLuint)vertsCount();
+      pushVertices( vertices );
+      std::for_each( indices.begin(), indices.end(), [base]( GLuint& n ) { n += base; } );
+      pushIndices( indices );
+    }
   };
 
   using DynamicMeshPtr = shared_ptr<DynamicMesh>;
@@ -142,15 +131,16 @@ namespace neko {
   class StaticMesh {
   private:
     MeshManagerPtr manager_;
-    size_t vbo_;
-    size_t ebo_;
-    size_t vao_;
+    VBOPtr vbo_;
+    EBOPtr ebo_;
+    VAOPtr vao_;
     GLenum drawMode_;
     GLsizei size_;
   public:
     StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts );
-    void draw();
+    StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices );
     ~StaticMesh();
+    void draw();
   };
 
   using StaticMeshPtr = shared_ptr<StaticMesh>;
@@ -158,35 +148,32 @@ namespace neko {
 
   class MeshManager: public enable_shared_from_this<MeshManager> {
   private:
-    VBOVector<Vertex2D> vbos2d_;
-    VBOVector<Vertex3D> vbos3d_;
-    VBOVector<VertexText3D> vbosText3d_;
-    VAOVector vaos_;
-    EBOVector ebos_;
+    ConsolePtr console_;
+    vector<VBOPtr> vbos_[Max_VBOType];
+    vector<EBOPtr> ebos_;
+    vector<VAOPtr> vaos_;
     DynamicMeshVector dynamics_;
     StaticMeshVector statics_;
   public:
-    size_t pushVBO( vector<Vertex3D> vertices );
-    size_t pushVBO( vector<Vertex2D> vertices );
+    MeshManager( ConsolePtr console ): console_( move( console ) ) {}
+    VBOPtr pushVBO( const vector<Vertex3D>& vertices );
+    VBOPtr pushVBO( const vector<Vertex2D>& vertices );
+    VBOPtr pushVBO( const vector<VertexText3D>& vertices );
     void uploadVBOs();
-    inline VBO<Vertex2D>& getVBO2D( size_t index ) { return vbos2d_[index]; }
-    inline VBO<Vertex3D>& getVBO3D( size_t index ) { return vbos3d_[index]; }
-    inline VBO<VertexText3D>& getVBOText( size_t index ) { return vbosText3d_[index]; }
-    size_t pushVAO( VBOType type, size_t verticesVBO );
-    size_t pushVAO( VBOType type, size_t verticesVBO, size_t indicesEBO );
+    VAOPtr pushVAO( VBOPtr verticesVBO );
+    VAOPtr pushVAO( VBOPtr verticesVBO, EBOPtr indicesEBO );
     void uploadVAOs();
-    inline VAO& getVAO( size_t index ) { return vaos_[index]; }
-    size_t pushEBO( vector<GLuint> indices );
+    EBOPtr pushEBO( const vector<GLuint>& indices );
     void uploadEBOs();
-    inline EBO& getEBO( size_t index ) { return ebos_[index]; }
-    size_t createVBO( VBOType type );
-    void freeVBO( VBOType type, size_t id );
-    size_t createEBO();
-    void freeEBO( size_t id );
-    size_t createVAO();
-    void freeVAO( size_t id );
+    VBOPtr createVBO( VBOType type );
+    void freeVBO( VBOPtr vbo );
+    EBOPtr createEBO();
+    void freeEBO( EBOPtr ebo );
+    VAOPtr createVAO();
+    void freeVAO( VAOPtr vao );
     DynamicMeshPtr createDynamic( GLenum drawMode, VBOType vertexType );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts );
+    StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices );
     void teardown();
   };
 

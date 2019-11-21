@@ -23,37 +23,25 @@ namespace neko {
       { 255, 0,   255, 255 }
     };
 
-    const vector<Vertex2D> quadStrip2D =
+    const vector<Vertex2D> centeredQuad2D =
     {   // x      y     s     t
+      { -0.5f,  0.5f, 0.0f, 0.0f },
       { -0.5f, -0.5f, 0.0f, 1.0f },
-      { 0.5f, -0.5f, 1.0f, 1.0f },
-      { -0.5f, 0.5f, 0.0f, 0.0f },
-      {  0.5f,  0.5f, 1.0f, 0.0f },
+      {  0.5f, -0.5f, 1.0f, 1.0f },
+      {  0.5f,  0.5f, 1.0f, 0.0f }
     };
 
-    const vector<Vertex2D> testQuadStrip2D =
-    {  // x      y     s     t
-    { -50.0f,  50.0f, 0.0f, 0.0f }, // 0
-    { -50.0f, -50.0f, 0.0f, 1.0f }, // 1
-    {  50.0f, -50.0f, 1.0f, 1.0f }, // 2
-    { -50.0f,  50.0f, 0.0f, 0.0f }, // 3
-    {  50.0f, -50.0f, 1.0f, 1.0f }, // 4
-    {  50.0f,  50.0f, 1.0f, 0.0f }, // 5
-    };
-
-    const vector<Vertex2D> screenQuad =
+    const vector<Vertex2D> screenQuad2D =
     {   // x      y     s     t
       { -1.0f,  1.0f, 0.0f, 1.0f },
       { -1.0f, -1.0f, 0.0f, 0.0f },
       {  1.0f, -1.0f, 1.0f, 0.0f },
-      { -1.0f,  1.0f, 0.0f, 1.0f },
-      {  1.0f, -1.0f, 1.0f, 0.0f },
-      {  1.0f,  1.0f, 1.0f, 1.0f },
+      {  1.0f,  1.0f, 1.0f, 1.0f }
     };
 
     const vector<GLuint> quadIndices =
     {
-      0, 1, 2, 3
+      0, 1, 2, 0, 2, 3
     };
 
   }
@@ -121,13 +109,12 @@ namespace neko {
     }
     void updateTexture( Renderer* rndr )
     {
-      mesh_->dump( "testText" );
       material_ = rndr->createTextureWithData( font_->impl_->atlas_->width_, font_->impl_->atlas_->height_,
         PixFmtColorR8, (const void*)font_->impl_->atlas_->data_.data(), Texture::ClampBorder, Texture::Mipmapped );
-      /*platform::FileWriter writer("debug.png");
+      /* platform::FileWriter writer("debug.png");
       vector<uint8_t> buffer;
       lodepng::encode( buffer, font_->impl_->atlas_->data_, font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, LCT_GREY, 8 );
-      writer.writeBlob( buffer.data(), buffer.size() );*/
+      writer.writeBlob( buffer.data(), buffer.size() ); */
     }
     void draw()
     {
@@ -237,11 +224,11 @@ namespace neko {
     shaders_ = make_shared<Shaders>( engine_ );
     shaders_->initialize();
 
-    meshes_ = make_shared<MeshManager>();
+    meshes_ = make_shared<MeshManager>( engine_->console() );
 
     builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
       (const void*)BuiltinData::placeholderImage2x2.data() );
-    builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad );
+    builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
   }
 
   void Renderer::initialize( size_t width, size_t height )
@@ -275,20 +262,6 @@ namespace neko {
     }
   }
 
-  void asdasd( DynamicMeshPtr asd, vector<Vertex2D> verts, vec2 pos )
-  {
-    for ( auto& v : verts )
-    {
-      v.x += pos.x;
-      v.y += pos.y;
-    }
-    asd->pushVertices( verts );
-    auto index = (GLuint)asd->indicesCount();
-    vector<GLuint> indices = { index, index + 1, index + 2, index + 3, index + 4, index + 5 };
-    assert( verts.size() == indices.size() );
-    asd->pushIndices( indices );
-  }
-
   static bool g_textAdded = false;
 
   void Renderer::prepare( GameTime time )
@@ -318,10 +291,14 @@ namespace neko {
     {
       const Real offset = 128.0f;
       g_testMesh = meshes_->createDynamic( GL_TRIANGLES, VBO_2D );
-      asdasd( g_testMesh, BuiltinData::testQuadStrip2D, vec2( offset, offset ) );
-      asdasd( g_testMesh, BuiltinData::testQuadStrip2D, vec2( 1280.0f - offset, offset ) );
-      asdasd( g_testMesh, BuiltinData::testQuadStrip2D, vec2( offset, 720.0f - offset ) );
-      asdasd( g_testMesh, BuiltinData::testQuadStrip2D, vec2( 1280.0f - offset, 720.0f - offset ) );
+      auto positions = { vec2( offset, offset ), vec2( 1280.0f - offset, offset ), vec2( offset, 720.0f - offset ), vec2( 1280.0f - offset, 720.0f - offset ) };
+      for ( auto& pos : positions )
+      {
+        auto verts = functional::map( BuiltinData::centeredQuad2D, [pos]( const Vertex2D& v ) -> Vertex2D {
+          return Vertex2D( pos.x + v.x * 128.0f, pos.y + v.y * 128.0f, v.s, v.t );
+        });
+        g_testMesh->append( verts, BuiltinData::quadIndices );
+      }
     }
   }
 

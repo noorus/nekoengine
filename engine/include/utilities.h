@@ -5,6 +5,19 @@
 
 namespace neko {
 
+  namespace functional {
+
+    template <typename Container, typename Fn>
+    Container map( const Container& in, Fn func )
+    {
+      Container out;
+      out.reserve( in.size() );
+      std::transform( in.begin(), in.end(), std::back_inserter( out ), func );
+      return move( out );
+    }
+
+  }
+
   namespace utils {
 
     constexpr size_t alignToNextMultiple( size_t offset, size_t alignment )

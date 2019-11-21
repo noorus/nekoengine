@@ -49,7 +49,10 @@ namespace neko {
   using std::unordered_map;
   using std::shared_ptr;
   using std::unique_ptr;
+
   using std::move;
+  using std::initializer_list;
+  using std::array;
 
   using utf8String = std::string; //!< Be careful. This is just a normal string but aliased to call to attention that it contains utf-8.
 

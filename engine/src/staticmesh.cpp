@@ -5,32 +5,35 @@
 
 namespace neko {
 
-  using namespace gl;
-
   StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts ):
-    manager_( move( manager ) ), drawMode_( drawMode ),
-    vbo_( cInvalidIndexValue ), ebo_( cInvalidIndexValue ), vao_( cInvalidIndexValue ), size_( 0 )
+    manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)verts.size() )
   {
-    size_ = (GLsizei)verts.size();
-    vbo_ = manager_->pushVBO( move( verts ) );
-    vao_ = manager_->pushVAO( VBO_2D, vbo_ );
+    vbo_ = move( manager_->pushVBO( move( verts ) ) );
+    vao_ = manager_->pushVAO( vbo_ );
+  }
+
+  StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices ):
+    manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)indices.size() )
+  {
+    vbo_ = move( manager_->pushVBO( move( verts ) ) );
+    ebo_ = move( manager_->pushEBO( move( indices ) ) );
+    vao_ = manager_->pushVAO( vbo_, ebo_ );
   }
 
   void StaticMesh::draw()
   {
-    auto vao = &manager_->getVAO( vao_ );
-    if ( vao->used_ && vao->uploaded_ )
-      vao->draw( drawMode_, size_ );
+    if ( vao_->uploaded_ )
+      vao_->draw( drawMode_, size_ );
   }
 
   StaticMesh::~StaticMesh()
   {
-    if ( vao_ != cInvalidIndexValue )
+    if ( vao_ )
       manager_->freeVAO( vao_ );
-    if ( ebo_ != cInvalidIndexValue )
+    if ( ebo_ )
       manager_->freeEBO( ebo_ );
-    if ( vbo_ != cInvalidIndexValue )
-      manager_->freeVBO( VBO_2D, vbo_ );
+    if ( vbo_ )
+      manager_->freeVBO( vbo_ );
   }
 
 }
