@@ -21,6 +21,9 @@
 #include <unordered_map>
 #include <utility>
 #include <set>
+#include <variant>
+#include <any>
+#include <optional>
 #include <boost/math/constants/constants.hpp>
 #include <glm/glm.hpp>
 
@@ -40,19 +43,26 @@ namespace neko {
   using std::wstring;
   using std::stringstream;
   using std::wstringstream;
+  using std::array;
   using std::vector;
   using std::list;
   using std::set;
   using std::map;
-  using std::pair;
   using std::priority_queue;
   using std::unordered_map;
+  using std::make_shared;
   using std::shared_ptr;
+  using std::make_unique;
   using std::unique_ptr;
 
   using std::move;
+  using std::pair;
+  using std::make_pair;
+  using std::tuple;
+  using std::make_tuple;
+  using std::optional;
+  using std::make_optional;
   using std::initializer_list;
-  using std::array;
 
   using utf8String = std::string; //!< Be careful. This is just a normal string but aliased to call to attention that it contains utf-8.
 

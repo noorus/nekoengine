@@ -97,13 +97,32 @@ namespace neko {
         if ( dirties[i]->uploaded_ )
           glDeleteBuffers( 1, &dirties[i]->id_ );
         dirties[i]->id_ = ids[i];
-        const size_t elementSize = ( dirties[i]->type_ == VBO_2D ? sizeof( Vertex2D ) : dirties[i]->type_ == VBO_3D ? sizeof( Vertex3D ) : sizeof( VertexText3D ) );
-        if ( !dirties[i]->storage_.empty() )
+        switch ( dirties[i]->type_ )
         {
-          glNamedBufferStorage( dirties[i]->id_,
-            dirties[i]->storage_.size() * elementSize,
-            dirties[i]->storage_.data(),
-            GL_DYNAMIC_STORAGE_BIT );
+          case VBO_2D:
+          {
+            auto& store = dirties[i]->v2d();
+            glNamedBufferStorage( dirties[i]->id_,
+              store.size() * sizeof( Vertex2D ),
+              store.data(),
+              GL_DYNAMIC_STORAGE_BIT );
+          } break;
+          case VBO_3D:
+          {
+            auto& store = dirties[i]->v3d();
+            glNamedBufferStorage( dirties[i]->id_,
+              store.size() * sizeof( Vertex3D ),
+              store.data(),
+              GL_DYNAMIC_STORAGE_BIT );
+          } break;
+          case VBO_Text:
+          {
+            auto& store = dirties[i]->vt3d();
+            glNamedBufferStorage( dirties[i]->id_,
+              store.size() * sizeof( VertexText3D ),
+              store.data(),
+              GL_DYNAMIC_STORAGE_BIT );
+          } break;
         }
         dirties[i]->uploaded_ = true;
         dirties[i]->dirty_ = false;
@@ -255,9 +274,7 @@ namespace neko {
   {
     glBindVertexArray( id_ );
     if ( ebo_ )
-    {
       glDrawElements( mode, size, GL_UNSIGNED_INT, nullptr );
-    }
     else
       glDrawArrays( mode, 0, size );
   }

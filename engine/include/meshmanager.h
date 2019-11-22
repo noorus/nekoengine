@@ -30,30 +30,78 @@ namespace neko {
   //! \brief Vertex Buffer Object
   //! A buffer of raw vertex data (of only one type), referenceable by an ID.
   class VBO {
+  private:
+    std::variant<vector<Vertex2D>,vector<Vertex3D>,vector<VertexText3D>> store_;
   public:
-    VBOType type_;
+    const VBOType type_; //!< Vertex format
     GLuint id_; //!< GL name for this vbo
     bool uploaded_; //!< Has this been uploaded yet?
     bool dirty_; //!< Whether to just sub-update data
     MeshDataModifyHint hint_; //!< What usage hint to use
-    vector<float> storage_; //!< Storage buffer
-    VBO( const VBOType type ): type_( type ), id_( 0 ), uploaded_( false ), dirty_( false ), hint_( ModifyHint_Often ) {}
-    inline const bool empty() const { return storage_.empty(); }
 
-    template <typename T>
-    inline void pushVertices( const vector<T>& vertices )
+    explicit VBO( const VBOType type ): type_( type ), id_( 0 ), uploaded_( false ), dirty_( false ), hint_( ModifyHint_Often )
     {
-      auto oldSize = storage_.size();
-      size_t size = ( vertices.size() * T::element_count );
-      storage_.resize( oldSize + size );
-      memcpy( (float*)storage_.data() + oldSize, vertices.data(), size * sizeof( float ) );
+      switch ( type_ )
+      {
+        case VBO_2D: store_ = vector<Vertex2D>(); break;
+        case VBO_3D: store_ = vector<Vertex3D>(); break;
+        case VBO_Text: store_ = vector<VertexText3D>(); break;
+        default: NEKO_EXCEPT( "Bad VBO type" ); break;
+      }
+    }
+
+    inline vector<Vertex2D>& v2d()
+    {
+      assert( type_ == VBO_2D );
+      return std::get<vector<Vertex2D>>( store_ );
+    }
+    inline vector<Vertex3D>& v3d()
+    {
+      assert( type_ == VBO_3D );
+      return std::get<vector<Vertex3D>>( store_ );
+    }
+    inline vector<VertexText3D>& vt3d()
+    {
+      assert( type_ == VBO_Text );
+      return std::get<vector<VertexText3D>>( store_ );
+    }
+
+    inline const bool empty() const
+    {
+      return ( type_ == VBO_2D ? std::get<vector<Vertex2D>>( store_ ).empty()
+        : type_ == VBO_3D ? std::get<vector<Vertex3D>>( store_ ).empty()
+        : std::get<vector<VertexText3D>>( store_ ).empty() );
+    }
+
+    inline void pushVertices( const vector<Vertex2D>& vertices )
+    {
+      assert( type_ == VBO_2D );
+      auto& store = std::get<vector<Vertex2D>>( store_ );
+      store.insert( store.end(), vertices.begin(), vertices.end() );
+      dirty_ = true;
+    }
+
+    inline void pushVertices( const vector<Vertex3D>& vertices )
+    {
+      assert( type_ == VBO_3D );
+      auto& store = std::get<vector<Vertex3D>>( store_ );
+      store.insert( store.end(), vertices.begin(), vertices.end() );
+      dirty_ = true;
+    }
+
+    inline void pushVertices( const vector<VertexText3D>& vertices )
+    {
+      assert( type_ == VBO_Text );
+      auto& store = std::get<vector<VertexText3D>>( store_ );
+      store.insert( store.end(), vertices.begin(), vertices.end() );
       dirty_ = true;
     }
 
     inline const size_t vertexCount() const
     {
-      const size_t elements = ( type_ == VBO_2D ? Vertex2D::element_count : type_ == VBO_3D ? Vertex3D::element_count : VertexText3D::element_count );
-      return ( storage_.size() / elements );
+      return ( type_ == VBO_2D ? std::get<vector<Vertex2D>>( store_ ).size()
+        : type_ == VBO_3D ? std::get<vector<Vertex3D>>( store_ ).size()
+        : std::get<vector<VertexText3D>>( store_ ).size() );
     }
   };
 

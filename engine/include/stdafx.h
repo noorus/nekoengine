@@ -78,6 +78,9 @@
 #include <queue>
 #include <unordered_map>
 #include <utility>
+#include <variant>
+#include <any>
+#include <optional>
 
 // Boost
 #include <boost/utility.hpp>
