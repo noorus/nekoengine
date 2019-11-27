@@ -13,8 +13,8 @@ out vec4 color;
 
 void main()
 {
-    mat4 modelViewProjection = projection * view * model;
-    gl_Position = modelViewProjection * vec4(position, 1.0);
-    texcoord = vboTexcoord;
-    color = vboColor;
+  mat4 modelViewProjection = projection * view * model;
+  gl_Position = modelViewProjection * vec4(position, 1.0);
+  texcoord = vboTexcoord;
+  color = vboColor;
 }

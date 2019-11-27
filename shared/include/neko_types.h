@@ -43,6 +43,8 @@ namespace neko {
   using std::wstring;
   using std::stringstream;
   using std::wstringstream;
+  using std::string_view;
+
   using std::array;
   using std::vector;
   using std::list;
@@ -120,6 +122,10 @@ namespace neko {
   using vec2i = glm::i64vec2;
   using vec3i = glm::i64vec3;
   using vec4i = glm::i64vec4;
+
+  using vec2u = glm::u64vec2;
+  using vec3u = glm::u64vec3;
+  using vec4u = glm::u64vec4;
 
   // These are for when you need 32 bits no matter what our Real is.
   // Mainly used for shaders.

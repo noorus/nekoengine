@@ -234,9 +234,8 @@ namespace neko {
       if ( !vbo->uploaded_ )
         NEKO_EXCEPT( "VBO used for VAO has not been uploaded" );
       if ( dirties[i]->ebo_ )
-      {
         glVertexArrayElementBuffer( ids[i], dirties[i]->ebo_->id_ );
-      }
+
       if ( vbo->type_ == VBO_3D )
       {
         AttribWriter attribs;

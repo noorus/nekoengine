@@ -41,9 +41,9 @@ namespace neko {
         {
           auto rval = pool_recentLeads_[i]; // sorry, double usage
           pool_recentLeads_[i] = PoolNone;
-          if ( !at( rval ).used_ )
+          if ( !(*this)[rval].used_ )
           {
-            at( rval ).used_ = true;
+            (*this)[rval].used_ = true;
             return rval;
           }
         }
@@ -55,8 +55,8 @@ namespace neko {
     }
     inline void pool_release( size_t index )
     {
-      at( index ).release();
-      at( index ).used_ = false;
+      (*this)[index].release();
+      (*this)[index].used_ = false;
       for ( size_t i = 0; i < pool_leadsCount; ++i )
         if ( pool_recentLeads_[i] == PoolNone )
         {

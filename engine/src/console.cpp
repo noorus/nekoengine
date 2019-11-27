@@ -167,7 +167,7 @@ namespace neko {
 
     cvars_.sort( []( ConBase* a, ConBase* b ) -> bool {
       return ( _stricmp( a->name().c_str(), b->name().c_str() ) <= 0 );
-    } );
+    });
   }
 
   Console::Source Console::registerSource( const string& name, vec3 color )
@@ -355,9 +355,7 @@ namespace neko {
 
     listenerLock_.lockShared();
     for ( auto listener : listeners_ )
-    {
       listener->onConsolePrint( this, src.color, fullbuf );
-    }
     listenerLock_.unlockShared();
 
 #ifdef _DEBUG
@@ -399,9 +397,7 @@ namespace neko {
         tmp.clear();
       }
       else if ( fullStr[i] != CR )
-      {
         tmp.push_back( fullStr[i] );
-      }
     }
   }
 
@@ -422,7 +418,8 @@ namespace neko {
         if ( escaped )
           buffer.append( 1, chr );
         escaped = !escaped;
-      } else if ( chr == SPACE )
+      }
+      else if ( chr == SPACE )
       {
         if ( !quoted )
         {
@@ -434,13 +431,15 @@ namespace neko {
         } else
           buffer.append( 1, chr );
         escaped = false;
-      } else if ( chr == QUOTE )
+      }
+      else if ( chr == QUOTE )
       {
         if ( escaped )
         {
           buffer.append( 1, chr );
           escaped = false;
-        } else
+        }
+        else
         {
           if ( quoted )
           {
@@ -452,7 +451,8 @@ namespace neko {
           }
           quoted = !quoted;
         }
-      } else
+      }
+      else
       {
         buffer.append( 1, chr );
         escaped = false;
@@ -492,7 +492,8 @@ namespace neko {
           auto cmd = static_cast<ConCmd*>( base );
           lock.unlock();
           cmd->call( this, arguments );
-        } else
+        }
+        else
         {
           auto var = static_cast<ConVar*>( base );
           if ( arguments.size() > 1 )
@@ -564,12 +565,14 @@ namespace neko {
       if ( content[i] != 0 && content[i] != LF && content[i] != CR )
       {
         line.append( 1, content[i] );
-      } else if ( content[i] == LF )
+      }
+      else if ( content[i] == LF )
       {
         if ( !line.empty() )
           execute( line, true );
         line.clear();
-      } else if ( content[i] == 0 )
+      }
+      else if ( content[i] == 0 )
         break;
     }
 

@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 
 #ifdef NEKO_PLATFORM_WINDOWS
 
@@ -95,7 +95,8 @@ namespace neko {
         if ( wait == WAIT_OBJECT_0 )
         {
           DestroyWindow( handle_ );
-        } else if ( wait == WAIT_OBJECT_0 + 1 )
+        }
+        else if ( wait == WAIT_OBJECT_0 + 1 )
         {
           MSG msg;
           while ( PeekMessageW( &msg, nullptr, 0, 0, PM_REMOVE ) )
@@ -187,15 +188,16 @@ namespace neko {
     {
       SendMessageW( ctrl, EM_LIMITTEXT, lineinput ? 128 : -1, 0 );
 
-      if ( !lineinput )
+      if ( lineinput )
+      {
+        SendMessageW( ctrl, EM_SETEVENTMASK, NULL, ENM_CHANGE );
+      }
+      else
       {
         SendMessageW( ctrl, EM_AUTOURLDETECT, TRUE, 0 );
         SendMessageW( ctrl, EM_SETEVENTMASK, NULL, ENM_SELCHANGE | ENM_SCROLL );
         SendMessageW( ctrl, EM_SETOPTIONS, ECOOP_OR,
           ECO_AUTOVSCROLL | ECO_NOHIDESEL | ECO_SAVESEL | ECO_SELECTIONBAR );
-      } else if ( lineinput )
-      {
-        SendMessageW( ctrl, EM_SETEVENTMASK, NULL, ENM_CHANGE );
       }
 
       CHARFORMAT2W format;
@@ -280,7 +282,7 @@ namespace neko {
 
       HDC memdc = CreateCompatibleDC( hdc );
       BITMAPINFOHEADER bmpInfoHdr = { sizeof( BITMAPINFOHEADER ), width, -height, 1, 32 };
-      HBITMAP hbitmap = CreateDIBSection( memdc, (BITMAPINFO*)( &bmpInfoHdr ), DIB_RGB_COLORS, 0, 0, 0 );
+      HBITMAP hbitmap = CreateDIBSection( memdc, (BITMAPINFO*)( &bmpInfoHdr ), DIB_RGB_COLORS, nullptr, nullptr, 0 );
       HGDIOBJ oldbitmap = SelectObject( memdc, hbitmap );
 
       // ---
@@ -415,7 +417,8 @@ namespace neko {
           window->setCmdline( window->autocomplete_.suggestion->name() + " " );
           SendMessageW( window->cmdline_, EM_EXSETSEL, 0, (LPARAM)&range );
           return 0;
-        } else if ( wparam == VK_UP && !window->history_.stack.empty() )
+        }
+        else if ( wparam == VK_UP && !window->history_.stack.empty() )
         {
           if ( window->history_.browsing )
           {
@@ -429,7 +432,8 @@ namespace neko {
             auto backline = window->history_.stack[window->history_.position];
             window->setCmdline( backline.c_str() );
             SendMessageW( window->cmdline_, EM_EXSETSEL, 0, (LPARAM)&range );
-          } else
+          }
+          else
           {
             window->history_.browsing = true;
             window->history_.position = window->history_.stack.size() - 1;
@@ -440,7 +444,8 @@ namespace neko {
             SendMessageW( window->cmdline_, EM_EXSETSEL, 0, (LPARAM)&range );
           }
           return 0;
-        } else if ( wparam == VK_DOWN && ( !window->history_.stack.empty() || window->history_.browsing ) )
+        }
+        else if ( wparam == VK_DOWN && ( !window->history_.stack.empty() || window->history_.browsing ) )
         {
           window->history_.position++;
           if ( window->history_.position >= window->history_.stack.size() )
@@ -460,7 +465,8 @@ namespace neko {
             window->history_.browsing = false;
           }
           return 0;
-        } else if ( wparam == VK_RETURN )
+        }
+        else if ( wparam == VK_RETURN )
         {
           if ( window->history_.browsing )
           {
@@ -515,13 +521,8 @@ namespace neko {
       POINTL lastlinept;
       SendMessageW( log_, EM_POSFROMCHAR, (WPARAM)&lastlinept, lastlinechar );
 
-      if ( logState_.selection )
-      {
+      if ( logState_.selection || lastlinept.y > logFit_.bottom )
         shouldPause = true;
-      } else if ( lastlinept.y > logFit_.bottom )
-      {
-        shouldPause = true;
-      }
 
       if ( shouldPause && !logState_.paused )
         logPause();
@@ -632,11 +633,13 @@ namespace neko {
         FillRect( hdc, &clientRect, (HBRUSH)GetStockObject( WHITE_BRUSH ) );*/
 
         return 1;
-      } else if ( msg == WM_ACTIVATE )
+      }
+      else if ( msg == WM_ACTIVATE )
       {
         InvalidateRect( wnd, nullptr, true );
         return 0;
-      } else if ( msg == WM_COMMAND )
+      }
+      else if ( msg == WM_COMMAND )
       {
         if ( HIWORD( wparam ) == EN_CHANGE && (HANDLE)lparam == self->cmdline_ )
         {
@@ -649,7 +652,8 @@ namespace neko {
         {
           self->logUnpause();
         }
-      } else if ( msg == WM_NOTIFY )
+      }
+      else if ( msg == WM_NOTIFY )
       {
         auto selchange = (SELCHANGE*)lparam;
         if ( selchange->nmhdr.code == EN_SELCHANGE && selchange->nmhdr.hwndFrom == self->log_ )
@@ -669,7 +673,8 @@ namespace neko {
             return CDRF_DODEFAULT;
           }
         }
-      } else if ( msg == WM_PAINT )
+      }
+      else if ( msg == WM_PAINT )
       {
         PAINTSTRUCT ps;
         auto dc = BeginPaint( wnd, &ps );
@@ -682,16 +687,19 @@ namespace neko {
         EndPaint( wnd, &ps );
 
         return 0;
-      } else if ( msg == WM_GETMINMAXINFO )
+      }
+      else if ( msg == WM_GETMINMAXINFO )
       {
         auto minmax = (LPMINMAXINFO)lparam;
         minmax->ptMinTrackSize.x = minWidth;
         minmax->ptMinTrackSize.y = minHeight;
-      } else if ( msg == WM_EXITSIZEMOVE )
+      }
+      else if ( msg == WM_EXITSIZEMOVE )
       {
         InvalidateRect( wnd, nullptr, FALSE );
         return 0;
-      } else if ( msg == WM_SIZE )
+      }
+      else if ( msg == WM_SIZE )
       {
         self->logFit_ = fitLogControl( LOWORD( lparam ), HIWORD( lparam ) );
         MoveWindow( self->log_, self->logFit_.left, self->logFit_.top, self->logFit_.right, self->logFit_.bottom, TRUE );
@@ -700,15 +708,18 @@ namespace neko {
         fit = fitUnpauseButton( LOWORD( lparam ), HIWORD( lparam ) );
         MoveWindow( self->unpauseButton_, fit.left, fit.top, fit.right, fit.bottom, TRUE );
         return 0;
-      } else if ( msg == WM_SETFOCUS )
+      }
+      else if ( msg == WM_SETFOCUS )
       {
         SetFocus( self->cmdline_ );
         return 0;
-      } else if ( msg == WM_DESTROY )
+      }
+      else if ( msg == WM_DESTROY )
       {
         PostQuitMessage( EXIT_SUCCESS );
         return 0;
-      } else if ( msg == WM_HIVE_CONSOLEFLUSHBUFFER )
+      }
+      else if ( msg == WM_HIVE_CONSOLEFLUSHBUFFER )
       {
         if ( !self->logState_.paused )
         {

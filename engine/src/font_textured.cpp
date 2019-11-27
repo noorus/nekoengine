@@ -135,7 +135,8 @@ namespace neko {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+      };
 #pragma warning( pop )
 
       atlas_->setRegion( region.x, region.y, 4, 4, data, 0 );
@@ -289,7 +290,7 @@ namespace neko {
 
     void GraphicalFont::generateKerning()
     {
-      assert( glyphs_.size() > 0 );
+      assert( !glyphs_.empty() );
 
       for ( size_t i = 1; i < glyphs_.size(); ++i )
       {

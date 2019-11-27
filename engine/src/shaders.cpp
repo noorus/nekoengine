@@ -24,46 +24,6 @@ namespace neko {
 
   // Program
 
-  void ShaderProgram::setUniform2f( const char *uniform, const float &f0, const float &f1 )
-  {
-    glUniform2f( uniforms[uniform], f0, f1 );
-  }
-
-  void ShaderProgram::setUniform4f( const char *uniform, const float &f0, const float &f1, const float &f2, const float &f3 )
-  {
-    glUniform4f( uniforms[uniform], f0, f1, f2, f3 );
-  }
-
-  void ShaderProgram::setUniform4fv( const char *uniform, const GLsizei &count, const float *v )
-  {
-    glUniform4fv( uniforms[uniform], count, v );
-  }
-
-  void ShaderProgram::setUniform1i( const char *uniform, const GLint &i )
-  {
-    glUniform1i( uniforms[uniform], i );
-  }
-
-  void ShaderProgram::setUniform1ui( const char *uniform, const GLuint &i )
-  {
-    glUniform1ui( uniforms[uniform], i );
-  }
-
-  void ShaderProgram::setUniform1f( const char* uniform, const GLfloat& f )
-  {
-    glUniform1f( uniforms[uniform], f );
-  }
-
-  void ShaderProgram::setUniform1d( const char* uniform, const GLdouble& d )
-  {
-    glUniform1d( uniforms[uniform], d );
-  }
-
-  void ShaderProgram::setUniformMatrix4fv( const char *uniform, const GLsizei &count, const GLboolean &transpose, const GLfloat *v )
-  {
-    glUniformMatrix4fv( uniforms[uniform], count, transpose, v );
-  }
-
   GLuint ShaderProgram::getUBO( const char* name )
   {
     return glGetUniformBlockIndex( id, name );
@@ -135,10 +95,10 @@ namespace neko {
   ShaderProgram& Shaders::use( size_t program )
   {
     glUseProgram( programs_[program].id );
-    programs_[program].setUniformMatrix4fv( "model", 1, GL_FALSE, glm::value_ptr( model_ ) );
-    programs_[program].setUniformMatrix4fv( "view", 1, GL_FALSE, glm::value_ptr( view_ ) );
-    programs_[program].setUniformMatrix4fv( "projection", 1, GL_FALSE, glm::value_ptr( projection_ ) );
-    programs_[program].setUniform1i( "tex", 0 );
+    programs_[program].setUniform( "model", model_ );
+    programs_[program].setUniform( "view", view_ );
+    programs_[program].setUniform( "projection", projection_ );
+    programs_[program].setUniform( "tex", 0 );
     return programs_[program];
   }
 
@@ -160,7 +120,7 @@ namespace neko {
     }
   }
 
-  void Shaders::compileShader( GLenum type, const string& source, GLuint& shader_out )
+  void Shaders::compileShader( GLenum type, const string_view source, GLuint& shader_out )
   {
     switch ( type )
     {
@@ -180,7 +140,7 @@ namespace neko {
     if ( shader_out == 0 )
       NEKO_EXCEPT( "Unable to create shader" );
 
-    auto src = (const GLchar*)source.c_str();
+    auto src = (const GLchar*)source.data();
     glShaderSource( shader_out, 1, &src, nullptr );
     glCompileShader( shader_out );
 

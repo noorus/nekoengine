@@ -11,7 +11,6 @@ namespace neko {
   ThreadedLoader::ThreadedLoader():
     thread_( c_loaderThreadName, threadProc, this )
   {
-    OutputDebugStringA( "ThreadedLoader::ThreadedLoader()\r\n" );
   }
 
   bool ThreadedLoader::threadProc( platform::Event& running, platform::Event& wantStop, void* argument )
@@ -97,9 +96,6 @@ namespace neko {
     {
       if ( task.type_ == LoadTask::Load_Texture )
       {
-        char asd[256];
-        sprintf_s( asd, 256, "ThreadedLoader::handleNewTasks processing texture from %s\r\n", task.textureLoad.path_.c_str() );
-        OutputDebugStringA( asd );
         vector<uint8_t> input;
         unsigned int width, height;
         platform::FileReader( task.textureLoad.path_ ).readFullVector( input );
@@ -120,9 +116,6 @@ namespace neko {
       }
       else if ( task.type_ == LoadTask::Load_Fontface )
       {
-        char asd[256];
-        sprintf_s( asd, 256, "ThreadedLoader::handleNewTasks processing fontface from %s\r\n", task.fontfaceLoad.path_.c_str() );
-        OutputDebugStringA( asd );
         vector<uint8_t> input;
         platform::FileReader( task.fontfaceLoad.path_ ).readFullVector( input );
         task.fontfaceLoad.font_->manager_->loadFont( task.fontfaceLoad.font_, task.fontfaceLoad.specs_, input );
@@ -141,7 +134,6 @@ namespace neko {
 
   ThreadedLoader::~ThreadedLoader()
   {
-    OutputDebugStringA( "ThreadedLoader::~ThreadedLoader()\r\n" );
   }
 
 }

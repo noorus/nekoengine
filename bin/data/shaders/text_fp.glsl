@@ -9,7 +9,7 @@ out vec4 frag_colour;
 
 void main()
 {
-    vec4 texsmpl = texture(tex, texcoord);
-    float alpha = color.a * texsmpl.r;
-    frag_colour = vec4(color.rgb, alpha);
+  vec4 texsmpl = texture(tex, texcoord);
+  float alpha = color.a * texsmpl.r;
+  frag_colour = vec4(color.rgb, alpha);
 }

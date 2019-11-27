@@ -39,12 +39,9 @@ namespace neko {
   // 131218: Program/shader state performance warning...
   const std::array<GLuint, 1> c_ignoredGlDebugMessages = { 131218 };
 
-  void Gfx::openglDebugCallbackFunction(
-    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam )
+  void Gfx::openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+    const GLchar* message, const void* userParam )
   {
-    if ( !userParam )
-      return;
-
     for ( GLuint ignoredId : c_ignoredGlDebugMessages )
       if ( id == ignoredId )
         return;
@@ -52,8 +49,20 @@ namespace neko {
     if ( id == 1281 || id == 1285 || id == 0 )
       DebugBreak();
 
-    auto gfx = (Gfx*)userParam;
-    gfx->engine_->console()->printf( Console::srcGfx, "OpenGL Debug: %s (%d)", message, id );
+    if ( !userParam )
+      return;
+
+    auto gfx = static_cast<Gfx*>( const_cast<void*>( userParam ) );
+    if ( ( (uintptr_t)gfx & 0xCCCCCCCC ) == 0xCCCCCCCC || severity == GL_DEBUG_TYPE_ERROR )
+    {
+      utf8String msg = "OpenGL Error: ";
+      msg.append( message );
+      msg.append( "\r\n" );
+      OutputDebugStringA( msg.c_str() );
+      NEKO_EXCEPT( "OpenGL Error" );
+    }
+    else
+      gfx->engine_->console()->printf( Console::srcGfx, "OpenGL Debug: %s (%d)", message, id );
   }
 
   void Gfx::setOpenGLDebugLogging( const bool enable )

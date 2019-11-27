@@ -258,7 +258,9 @@ namespace neko {
     {
       if ( !mat->loaded_ )
         continue;
-      mat->texture_ = make_shared<Texture>( this, mat->image_.width_, mat->image_.height_, mat->image_.format_, mat->image_.data_.data(), Texture::ClampEdge, Texture::Mipmapped );
+      mat->texture_ = make_shared<Texture>( this,
+        mat->image_.width_, mat->image_.height_, mat->image_.format_, mat->image_.data_.data(),
+        Texture::ClampEdge, Texture::Mipmapped );
     }
   }
 
@@ -396,13 +398,15 @@ namespace neko {
     glDeleteFramebuffers( 1, &handle );
   }
 
-  MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
+  MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, PixelFormat format,
+    const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
     MaterialPtr mat = make_shared<Material>();
     mat->image_.format_ = format;
     mat->image_.width_ = (unsigned int)width;
     mat->image_.height_ = (unsigned int)height;
-    mat->texture_ = make_shared<Texture>( this, mat->image_.width_, mat->image_.height_, mat->image_.format_, data, wrapping, filtering );
+    mat->texture_ = make_shared<Texture>( this,
+      mat->image_.width_, mat->image_.height_, mat->image_.format_, data, wrapping, filtering );
     mat->loaded_ = true;
     return move( mat );
   }

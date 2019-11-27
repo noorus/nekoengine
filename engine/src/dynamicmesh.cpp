@@ -7,8 +7,6 @@
 
 namespace neko {
 
-  using namespace gl;
-
   DynamicMesh::DynamicMesh( MeshManagerPtr manager, VBOType vertexType, GLenum drawMode ):
     manager_( move( manager ) ), drawMode_( drawMode )
   {
