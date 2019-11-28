@@ -130,6 +130,7 @@ namespace neko {
   using DynamicTextPtr = shared_ptr<DynamicText>;
 
   static DynamicMeshPtr g_testMesh;
+  static DynamicMeshPtr g_testMesh2;
   static DynamicTextPtr g_testText;
 
   void glStartupFetchAndCheck( GLInformation& info )
@@ -289,17 +290,25 @@ namespace neko {
       g_testText->updateTexture( this );
     }
 
-    if ( !g_testMesh && !materials_.empty() && materials_[0]->loaded_ )
+    if ( !materials_.empty() && materials_[0]->loaded_ )
     {
-      const Real offset = 128.0f;
-      g_testMesh = meshes_->createDynamic( GL_TRIANGLES, VBO_2D );
-      auto positions = { vec2( offset, offset ), vec2( 1280.0f - offset, offset ), vec2( offset, 720.0f - offset ), vec2( 1280.0f - offset, 720.0f - offset ) };
-      for ( auto& pos : positions )
+      if ( !g_testMesh )
       {
-        auto verts = functional::map( BuiltinData::centeredQuad2D, [pos]( const Vertex2D& v ) -> Vertex2D {
-          return Vertex2D( pos.x + v.x * 128.0f, pos.y + v.y * 128.0f, v.s, v.t );
-        });
-        g_testMesh->append( verts, BuiltinData::quadIndices );
+        const Real offset = 128.0f;
+        g_testMesh = meshes_->createDynamic( GL_TRIANGLES, VBO_2D );
+        auto positions = { vec2( offset, offset ), vec2( 1280.0f - offset, offset ), vec2( offset, 720.0f - offset ), vec2( 1280.0f - offset, 720.0f - offset ) };
+        for ( auto& pos : positions )
+        {
+          auto verts = functional::map( BuiltinData::centeredQuad2D, [pos]( const Vertex2D& v ) -> Vertex2D {
+            return Vertex2D( pos.x + v.x * 128.0f, pos.y + v.y * 128.0f, v.s, v.t );
+          } );
+          g_testMesh->append( verts, BuiltinData::quadIndices );
+        }
+      }
+      if ( !g_testMesh2 )
+      {
+        g_testMesh2 = meshes_->createDynamic( GL_TRIANGLES, VBO_3D );
+        meshes_->generator().makePlane( *g_testMesh2, vec2( 256.0f ), vec2( 2 ), glm::normalize( vec3( 0.0f, 1.0f, -1.0f ) ) );
       }
     }
   }
@@ -419,14 +428,15 @@ namespace neko {
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    mat4 model( 1.0f );
-    model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
-    model = glm::translate( model, vec3( 1.0f, 1.0f, 0.0f ) );
-    shaders_->setMatrices( model, camera->view(), camera->projection() );
+    shaders_->setViewProjectionMat( camera->view(), camera->projection() );
 
     if ( g_testMesh )
     {
-      shaders_->use( 0 );
+      mat4 model( 1.0f );
+      model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
+      model = glm::translate( model, vec3( 1.0f, 1.0f, 0.0f ) );
+
+      shaders_->use( 0 ).setUniform( "model", model );
 
       if ( !materials_.empty() && materials_[0]->texture_ )
         glBindTextureUnit( 0, materials_[0]->texture_->handle() );
@@ -436,9 +446,29 @@ namespace neko {
       g_testMesh->draw();
     }
 
+    if ( g_testMesh2 )
+    {
+      mat4 model( 1.0f );
+      model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
+      model = glm::translate( model, vec3( 640.0f, 360.0f, 0.0f ) );
+
+      shaders_->use( 1 ).setUniform( "model", model );
+
+      if ( !materials_.empty() && materials_[0]->texture_ )
+        glBindTextureUnit( 0, materials_[0]->texture_->handle() );
+      else
+        glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
+
+      g_testMesh2->draw();
+    }
+
     if ( g_testText && g_textAdded )
     {
-      shaders_->use( 2 );
+      mat4 model( 1.0f );
+      model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
+      model = glm::translate( model, vec3( 1.0f, 1.0f, 0.0f ) );
+
+      shaders_->use( 3 ).setUniform( "model", model );
       g_testText->draw();
     }
   }
@@ -467,7 +497,7 @@ namespace neko {
     glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
-    shaders_->use( 1 );
+    shaders_->use( 2 );
 
     glDisable( GL_DEPTH_TEST );
     glBindTextureUnit( 0, g_framebuf->texture()->handle() );

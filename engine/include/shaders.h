@@ -92,7 +92,8 @@ namespace neko {
     void initialize();
     void shutdown();
     ~Shaders();
-    void setMatrices( const mat4& model, const mat4& view, const mat4& projection );
+    void setModelMat( const mat4& model );
+    void setViewProjectionMat( const mat4& view, const mat4& projection );
     ShaderProgram& get( size_t program );
     ShaderProgram& use( size_t program );
   };

@@ -194,6 +194,11 @@ namespace neko {
   using StaticMeshPtr = shared_ptr<StaticMesh>;
   using StaticMeshVector = vector<StaticMeshPtr>;
 
+  class MeshGenerator {
+  public:
+    void makePlane( DynamicMesh& mesh, vec2 dimensions, vec2u segments, vec3 normal );
+  };
+
   class MeshManager: public enable_shared_from_this<MeshManager> {
   private:
     ConsolePtr console_;
@@ -202,8 +207,10 @@ namespace neko {
     vector<VAOPtr> vaos_;
     DynamicMeshVector dynamics_;
     StaticMeshVector statics_;
+    MeshGenerator generator_;
   public:
     MeshManager( ConsolePtr console ): console_( move( console ) ) {}
+    inline MeshGenerator& generator() { return generator_; }
     VBOPtr pushVBO( const vector<Vertex3D>& vertices );
     VBOPtr pushVBO( const vector<Vertex2D>& vertices );
     VBOPtr pushVBO( const vector<VertexText3D>& vertices );

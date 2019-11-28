@@ -22,8 +22,9 @@ namespace neko {
 #pragma pack( push, 1 )
   struct Vertex3D {
     static const size_t element_count = 5;
-    float x, y, z; //!< Vertex coordinates
-    float s, t; //!< Texture coordinates
+    vec3 position; //!< Vertex coordinates
+    vec3 normal; //!< Vertex normal
+    vec2 texcoord; //!< Texture coordinates
   };
   struct Vertex2D {
     static const size_t element_count = 4;

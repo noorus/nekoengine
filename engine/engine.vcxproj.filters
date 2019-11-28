@@ -165,6 +165,9 @@
     <ClCompile Include="src\meshmanager.cpp">
       <Filter>Source Files\gfx\meshes</Filter>
     </ClCompile>
+    <ClCompile Include="src\meshgenerator.cpp">
+      <Filter>Source Files\gfx\meshes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -282,22 +285,28 @@
     </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\data\shaders\default_fp.glsl">
+    <None Include="..\bin\data\shaders\text3d_vp.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\default_vp.glsl">
+    <None Include="..\bin\data\shaders\text3d_fp.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\mainframebuf_fp.glsl">
+    <None Include="..\bin\data\shaders\mainframebuf2d_fp.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\mainframebuf_vp.glsl">
+    <None Include="..\bin\data\shaders\mainframebuf2d_vp.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\text_fp.glsl">
+    <None Include="..\bin\data\shaders\default2d_fp.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\text_vp.glsl">
+    <None Include="..\bin\data\shaders\default2d_vp.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\default3d_fp.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\default3d_vp.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -46,21 +46,25 @@ namespace neko {
     auto rootDirectory = platform::getCurrentDirectory();
     rootDirectory.append( R"(\data\shaders\)" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "default_vp.glsl" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "default_fp.glsl" );
+    shaders_.emplace_back( Shader::Vertex, rootDirectory + "default2d_vp.glsl" );
+    shaders_.emplace_back( Shader::Fragment, rootDirectory + "default2d_fp.glsl" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "mainframebuf_vp.glsl" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "mainframebuf_fp.glsl" );
+    shaders_.emplace_back( Shader::Vertex, rootDirectory + "default3d_vp.glsl" );
+    shaders_.emplace_back( Shader::Fragment, rootDirectory + "default3d_fp.glsl" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "text_vp.glsl" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "text_fp.glsl" );
+    shaders_.emplace_back( Shader::Vertex, rootDirectory + "mainframebuf2d_vp.glsl" );
+    shaders_.emplace_back( Shader::Fragment, rootDirectory + "mainframebuf2d_fp.glsl" );
+
+    shaders_.emplace_back( Shader::Vertex, rootDirectory + "text3d_vp.glsl" );
+    shaders_.emplace_back( Shader::Fragment, rootDirectory + "text3d_fp.glsl" );
 
     for ( auto& shader : shaders_ )
       compileShader( shader );
 
-    programs_.emplace_back( "default", 0, 1 );
-    programs_.emplace_back( "mainframebuf", 2, 3 );
-    programs_.emplace_back( "text", 4, 5 );
+    programs_.emplace_back( "default2d", 0, 1 );
+    programs_.emplace_back( "default3d", 2, 3 );
+    programs_.emplace_back( "mainframebuf2d", 4, 5 );
+    programs_.emplace_back( "text3d", 6, 7 );
 
     for ( auto& program : programs_ )
     {
@@ -80,9 +84,13 @@ namespace neko {
       glDeleteProgram( program.id );
   }
 
-  void Shaders::setMatrices( const mat4& model, const mat4& view, const mat4& projection )
+  void Shaders::setModelMat( const mat4& model )
   {
     model_ = model;
+  }
+
+  void Shaders::setViewProjectionMat( const mat4& view, const mat4& projection )
+  {
     view_ = view;
     projection_ = projection;
   }

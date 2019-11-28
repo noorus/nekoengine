@@ -81,7 +81,8 @@ namespace neko {
       {
         console->printf( Console::Source::srcGfx, "MeshManager uploading new vbo 0x%I64X", buf.get() );
         dirties.push_back( buf.get() );
-      } else if ( buf->dirty_ )
+      }
+      else if ( buf->dirty_ )
       {
         console->printf( Console::Source::srcGfx, "MeshManager uploading dirty vbo 0x%I64X", buf.get() );
         dirties.push_back( buf.get() );
@@ -97,33 +98,36 @@ namespace neko {
         if ( dirties[i]->uploaded_ )
           glDeleteBuffers( 1, &dirties[i]->id_ );
         dirties[i]->id_ = ids[i];
-        switch ( dirties[i]->type_ )
-        {
-          case VBO_2D:
+        if ( dirties[i]->empty() )
+          console->printf( Console::Source::srcGfx, "MeshManager oops, vbo 0x%I64X is empty", dirties[i] );
+        else
+          switch ( dirties[i]->type_ )
           {
-            auto& store = dirties[i]->v2d();
-            glNamedBufferStorage( dirties[i]->id_,
-              store.size() * sizeof( Vertex2D ),
-              store.data(),
-              GL_DYNAMIC_STORAGE_BIT );
-          } break;
-          case VBO_3D:
-          {
-            auto& store = dirties[i]->v3d();
-            glNamedBufferStorage( dirties[i]->id_,
-              store.size() * sizeof( Vertex3D ),
-              store.data(),
-              GL_DYNAMIC_STORAGE_BIT );
-          } break;
-          case VBO_Text:
-          {
-            auto& store = dirties[i]->vt3d();
-            glNamedBufferStorage( dirties[i]->id_,
-              store.size() * sizeof( VertexText3D ),
-              store.data(),
-              GL_DYNAMIC_STORAGE_BIT );
-          } break;
-        }
+            case VBO_2D:
+            {
+              auto& store = dirties[i]->v2d();
+              glNamedBufferStorage( dirties[i]->id_,
+                store.size() * sizeof( Vertex2D ),
+                store.data(),
+                GL_DYNAMIC_STORAGE_BIT );
+            } break;
+            case VBO_3D:
+            {
+              auto& store = dirties[i]->v3d();
+              glNamedBufferStorage( dirties[i]->id_,
+                store.size() * sizeof( Vertex3D ),
+                store.data(),
+                GL_DYNAMIC_STORAGE_BIT );
+            } break;
+            case VBO_Text:
+            {
+              auto& store = dirties[i]->vt3d();
+              glNamedBufferStorage( dirties[i]->id_,
+                store.size() * sizeof( VertexText3D ),
+                store.data(),
+                GL_DYNAMIC_STORAGE_BIT );
+            } break;
+          }
         dirties[i]->uploaded_ = true;
         dirties[i]->dirty_ = false;
       }
@@ -132,8 +136,8 @@ namespace neko {
 
   void MeshManager::uploadVBOs()
   {
-    for ( size_t i = 0; i < Max_VBOType; ++i )
-      vboUploadHelper( vbos_[i], console_.get() );
+    for ( auto& vbo : vbos_ )
+      vboUploadHelper( vbo, console_.get() );
   }
 
   // MeshManager: VAOs
@@ -240,6 +244,7 @@ namespace neko {
       {
         AttribWriter attribs;
         attribs.add( GL_FLOAT, 3 ); // vec3 position
+        attribs.add( GL_FLOAT, 3 ); // vec3 normal
         attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
         attribs.write( ids[i] );
         glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
