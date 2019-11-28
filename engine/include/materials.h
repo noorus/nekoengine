@@ -2,7 +2,7 @@
 #include "subsystem.h"
 #include "forwards.h"
 #include "gfx_types.h"
-#include "textures.h"
+#include "texture.h"
 
 namespace neko {
 

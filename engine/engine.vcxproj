@@ -230,12 +230,14 @@
     <ClInclude Include="include\memory.h" />
     <ClInclude Include="include\meshmanager.h" />
     <ClInclude Include="include\nekomath.h" />
+    <ClInclude Include="include\renderbuffer.h" />
     <ClInclude Include="include\renderer.h" />
     <ClInclude Include="include\scripting.h" />
     <ClInclude Include="include\shaders.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\subsystem.h" />
-    <ClInclude Include="include\textures.h" />
+    <ClInclude Include="include\surface.h" />
+    <ClInclude Include="include\texture.h" />
     <ClInclude Include="include\utilities.h" />
   </ItemGroup>
   <ItemGroup>
@@ -250,6 +252,7 @@
     <None Include="..\bin\data\shaders\mainframebuf2d_vp.glsl" />
     <None Include="..\bin\data\shaders\text3d_fp.glsl" />
     <None Include="..\bin\data\shaders\text3d_vp.glsl" />
+    <None Include="..\bin\script\initialization.js" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

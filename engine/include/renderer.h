@@ -2,7 +2,9 @@
 #include "neko_types.h"
 #include "gfx_types.h"
 #include "neko_platform.h"
-#include "textures.h"
+#include "texture.h"
+#include "framebuffer.h"
+#include "renderbuffer.h"
 #include "materials.h"
 #include "meshmanager.h"
 

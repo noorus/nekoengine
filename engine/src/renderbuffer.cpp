@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "gfx_types.h"
+#include "renderbuffer.h"
 #include "renderer.h"
 
 namespace neko {

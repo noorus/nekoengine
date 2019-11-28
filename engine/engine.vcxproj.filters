@@ -61,6 +61,9 @@
     <Filter Include="Source Files\gfx\meshes">
       <UniqueIdentifier>{388c7dea-8882-455e-be66-fa8d18c040f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scripts">
+      <UniqueIdentifier>{4672329b-8d04-4d51-914d-0517bfbe0195}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -215,9 +218,6 @@
     <ClInclude Include="include\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\framebuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\extern\lodepng\lodepng.h">
       <Filter>Header Files\extern</Filter>
     </ClInclude>
@@ -266,9 +266,6 @@
     <ClInclude Include="include\materials.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
-    <ClInclude Include="include\textures.h">
-      <Filter>Header Files\gfx</Filter>
-    </ClInclude>
     <ClInclude Include="include\js_math.h">
       <Filter>Header Files\scripting</Filter>
     </ClInclude>
@@ -277,6 +274,18 @@
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_pooledtypes.h">
       <Filter>Header Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="include\framebuffer.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\surface.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\renderbuffer.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\texture.h">
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -308,6 +317,9 @@
     </None>
     <None Include="..\bin\data\shaders\default3d_vp.glsl">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\script\initialization.js">
+      <Filter>Scripts</Filter>
     </None>
   </ItemGroup>
 </Project>
