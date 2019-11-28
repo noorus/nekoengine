@@ -2,6 +2,7 @@
 #include "neko_types.h"
 #include "gfx_types.h"
 #include "forwards.h"
+#include "neko_exception.h"
 
 namespace neko {
 
@@ -34,39 +35,39 @@ namespace neko {
     {
       auto& index = uniforms[name];
       if constexpr ( std::is_same_v<T, GLint> )
-        glProgramUniform1i( id, index, value );
+        gl::glProgramUniform1i( id, index, value );
       else if constexpr ( std::is_same_v<T, GLuint> )
-        glProgramUniform1ui( id, index, value );
+        gl::glProgramUniform1ui( id, index, value );
       else if constexpr ( std::is_same_v<T, bool> )
-        glProgramUniform1ui( id, index, value );
+        gl::glProgramUniform1ui( id, index, value );
       else if constexpr ( std::is_same_v<T, GLfloat> )
-        glProgramUniform1f( id, index, value );
+        gl::glProgramUniform1f( id, index, value );
       else if constexpr ( std::is_same_v<T, GLdouble> )
-        glProgramUniform1d( id, index, value );
+        gl::glProgramUniform1d( id, index, value );
       else if constexpr ( std::is_same_v<T, vec2f> )
-        glProgramUniform2fv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform2fv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, vec3f> )
-        glProgramUniform3fv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform3fv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, vec4f> )
-        glProgramUniform4fv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform4fv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, vec2i> )
-        glProgramUniform2iv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform2iv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, vec3i> )
-        glProgramUniform3iv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform3iv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, vec4i> )
-        glProgramUniform4iv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform4iv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, vec2u> )
-        glProgramUniform2uiv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform2uiv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, vec3u> )
-        glProgramUniform3uiv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform3uiv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, vec4u> )
-        glProgramUniform4uiv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform4uiv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, quaternion> )
-        glProgramUniform4fv( id, index, 1, glm::value_ptr( value ) );
+        gl::glProgramUniform4fv( id, index, 1, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, mat3> )
-        glProgramUniformMatrix3fv( id, index, 1, GL_FALSE, glm::value_ptr( value ) );
+        gl::glProgramUniformMatrix3fv( id, index, 1, gl::GL_FALSE, glm::value_ptr( value ) );
       else if constexpr ( std::is_same_v<T, mat4> )
-        glProgramUniformMatrix4fv( id, index, 1, GL_FALSE, glm::value_ptr( value ) );
+        gl::glProgramUniformMatrix4fv( id, index, 1, gl::GL_FALSE, glm::value_ptr( value ) );
       else
         NEKO_EXCEPT( "Unsupported uniform value type" );
     }

@@ -51,7 +51,7 @@ namespace neko {
       auto obj = T();
       obj.used_ = true;
       push_back( move( obj ) );
-      return ( size() - 1 );
+      return ( this->size() - 1 );
     }
     inline void pool_release( size_t index )
     {
