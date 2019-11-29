@@ -149,7 +149,7 @@ namespace neko {
     //! \param low   The low.
     //! \param high  The high.
     //! \return Clamped value.
-    inline Real clamp( Real value, Real low, Real high )
+    constexpr Real clamp( Real value, Real low, Real high )
     {
       return ( value < low ? low : ( value > high ? high : value ) );
     }
@@ -162,36 +162,62 @@ namespace neko {
     //! \param y2 The second y value.
     //! \return Manhattan distance between x1,y1 and x2,y2.
     template <typename T>
-    inline T manhattan( T x1, T y1, T x2, T y2 )
+    constexpr T manhattan( T x1, T y1, T x2, T y2 )
     {
       return ( abs( x2 - x1 ) + abs( y2 - y1 ) );
     }
     //! \fn inline T interpolateLinear( const T& v1, const T& v2, const Real interp )
     //! Linear interpolation between v1..v2 at interp[0..1]
     template <typename T>
-    inline T interpolateLinear( const T& v1, const T& v2, const Real interp )
+    constexpr T interpolateLinear( const T& v1, const T& v2, const Real interp )
     {
-      return ( v1 * ( NEKO_ONE - interp ) + v2 * interp );
+      return ( v1 * ( numbers::one - interp ) + v2 * interp );
+    }
+
+    //! \fn constexpr T interpolateSmoothstep(const T& v1, const T& v2, const float interp)
+    //! Smoothstep interpolation between v1..v2 at interp[0..1]
+    //! \param v1 Start value
+    //! \param v2 End value
+    //! \param interp Interpolation phase between [0..1]
+    //! \return Interpolated result of type T
+    template <typename T>
+    constexpr T interpolateSmoothstep( const T& v1, const T& v2, const float interp )
+    {
+      auto t = ( interp * interp * ( numbers::three - numbers::two * interp ) );
+      return ( v1 * ( numbers::one - t ) + v2 * t );
+    }
+
+    //! \fn constexpr T interpolateSmootherstep(const T& v1, const T& v2, const float interp)
+    //! Ken Perlin's smootherstep interpolation between v1..v2 at interp[0..1]
+    //! \param v1 Start value
+    //! \param v2 End value
+    //! \param interp Interpolation phase between [0..1]
+    //! \return Interpolated result of type T
+    template <typename T>
+    constexpr T interpolateSmootherstep( const T& v1, const T& v2, const float interp )
+    {
+      auto t = ( interp * interp * interp * ( interp * ( interp * numbers::six - numbers::fifteen ) + numbers::ten ) );
+      return ( v1 * ( numbers::one - t ) + v2 * t );
     }
 
     //! \fn inline T interpolateCosine( const T& v1, const T& v2, const Real interp )
     //! Cosine interpolation between v1..v2 at interp[0..1]
     template <typename T>
-    inline T interpolateCosine( const T& v1, const T& v2, const Real interp )
+    constexpr T interpolateCosine( const T& v1, const T& v2, const Real interp )
     {
-      const Real t = ( NEKO_ONE - cos( interp * pi ) ) / ( NEKO_ONE * 2 );
-      return ( v1 * ( NEKO_ONE - t ) + v2 * t );
+      auto t = ( numbers::one - cos( interp * numbers::pi ) ) / numbers::two;
+      return ( v1 * ( numbers::one - t ) + v2 * t );
     }
 
     //! \fn inline T interpolateCubic( const T& v0, const T& v1, const T& v2, const T& v3, const Real interp )
     //! Cubic spline between v1..v2 at interp[0..1]
     template <typename T>
-    inline T interpolateCubic( const T& v0, const T& v1, const T& v2, const T& v3, const Real interp )
+    constexpr T interpolateCubic( const T& v0, const T& v1, const T& v2, const T& v3, const Real interp )
     {
-      const Real t = interp * interp;
-      T a0 = v3 - v2 - v0 + v1;
-      T a1 = v0 - v1 - a0;
-      T a2 = v2 - v0;
+      auto t = interp * interp;
+      auto a0 = v3 - v2 - v0 + v1;
+      auto a1 = v0 - v1 - a0;
+      auto a2 = v2 - v0;
       return ( a0 * interp * t + a1 * t + a2 * interp + v1 );
     }
 
@@ -199,10 +225,10 @@ namespace neko {
     //! Quadratic Beziér interpolation between v1..v2 at interp[0..1]
     //! using control point control
     template <typename T>
-    inline T interpolateQuadraticBezier( const T& v1, const T& v2, const T& control, const Real interp )
+    constexpr T interpolateQuadraticBezier( const T& v1, const T& v2, const T& control, const Real interp )
     {
-      const Real t = ( NEKO_ONE - interp );
-      return t * t * v1 + 2 * t * interp * control + interp * interp * v2;
+      auto t = ( numbers::one - interp );
+      return t * t * v1 + numbers::two * t * interp * control + interp * interp * v2;
     }
 
     //! \fn inline Real angleBetween( vec2& v1, vec2& v2 )
