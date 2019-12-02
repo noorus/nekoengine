@@ -6,6 +6,7 @@
 #include "subsystem.h"
 #include "js_console.h"
 #include "js_math.h"
+#include "js_game.h"
 
 namespace neko {
 
@@ -59,12 +60,14 @@ namespace neko {
   protected:
     js::JSConsolePtr jsConsole_;
     js::JSMathPtr jsMath_;
+    js::JSGamePtr jsGame_;
     js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
   public:
     ConsolePtr console_;
     utf8String scriptDirectory_;
     ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
-    void tick();
+    void tick( GameTime tick, GameTime time );
+    void process();
     ~ScriptingContext();
     inline v8::Isolate* isolate() const throw() { return isolate_; }
     inline v8::Global<v8::Context>& ctx() throw() { return ctx_; }

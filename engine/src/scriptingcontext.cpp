@@ -9,7 +9,6 @@
 #include "console.h"
 #include "locator.h"
 #include "memory.h"
-#include "js_math.h"
 
 namespace neko {
 
@@ -81,9 +80,19 @@ namespace neko {
 
     jsConsole_ = js::Console::create( console_, isolate_, context->Global() );
     jsMath_ = js::Math::create( isolate_, context->Global() );
+    jsGame_ = js::Game::create( isolate_, context->Global() );
   }
 
-  void ScriptingContext::tick()
+  void ScriptingContext::tick( GameTime tick, GameTime time )
+  {
+    isolate_->Enter();
+    v8::HandleScope handleScope( isolate_ );
+    auto context = v8::Local<v8::Context>::New( isolate_, ctx_ );
+    jsGame_->update( context, tick, time );
+    isolate_->Exit();
+  }
+
+  void ScriptingContext::process()
   {
     isolate_->RunMicrotasks();
     v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_, v8::platform::MessageLoopBehavior::kDoNotWait );
@@ -92,6 +101,7 @@ namespace neko {
   ScriptingContext::~ScriptingContext()
   {
     vec2Registry_.clear();
+    jsGame_.reset();
     jsConsole_.reset();
     jsMath_.reset();
 

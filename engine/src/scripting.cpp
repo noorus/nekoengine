@@ -91,7 +91,8 @@ namespace neko {
 
   void Scripting::tick( GameTime tick, GameTime time )
   {
-    global_->tick();
+    global_->tick( tick, time );
+    global_->process();
   }
 
   void Scripting::postUpdate( GameTime delta, GameTime tick )

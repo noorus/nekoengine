@@ -105,6 +105,41 @@ namespace neko {
         return static_cast<Real>( val->NumberValue( isolate->GetCurrentContext() ).FromMaybe( static_cast<double>( defval ) ) );
       }
 
+      inline utf8String extractStringMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name )
+      {
+        const utf8String emptyString;
+        if ( maybeObject.IsEmpty() )
+        {
+          util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
+          return emptyString;
+        }
+        auto object = maybeObject.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
+        if ( object.IsEmpty() || !object->IsString() )
+        {
+          util::throwException( isolate, ( func + ": passed object has no string member \"" + name + "\"" ).c_str() );
+          return emptyString;
+        }
+        v8::String::Utf8Value value( isolate, object );
+        return ( *value ? *value : emptyString );
+      }
+
+      inline V8Function extractFunctionMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name )
+      {
+        const V8Function emptyFunc;
+        if ( maybeObject.IsEmpty() )
+        {
+          util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
+          return emptyFunc;
+        }
+        auto object = maybeObject.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
+        if ( object.IsEmpty() || !object->IsFunction() )
+        {
+          util::throwException( isolate, ( func + ": passed object has no function member \"" + name + "\"" ).c_str() );
+          return emptyFunc;
+        }
+        return move( V8Function::New( isolate, V8Function::Cast( object ) ) );
+      }
+
     }
 
   }

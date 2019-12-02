@@ -17,3 +17,31 @@ Console.print("equal:");
 Console.print(nm.eq(x,y));
 x = vec2(2,2);
 Console.print(y.equals(x));*/
+
+class Scene {
+  constructor( name )
+  {
+    this._name = name;
+  }
+  get name()
+  {
+    return this._name;
+  }
+}
+
+class DemoScene extends Scene {
+  constructor( name )
+  {
+    super(name);
+  }
+  initialize(time)
+  {
+    Console.print("SCRIPT: "+this._name+" INITIALIZE "+time);
+  }
+  update(time, delta)
+  {
+  }
+}
+
+let demo = new DemoScene("demo");
+Game.registerScene(demo);

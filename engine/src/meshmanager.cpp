@@ -13,7 +13,6 @@ namespace neko {
   VBOPtr MeshManager::createVBO( VBOType type )
   {
     VBOPtr ptr = make_shared<VBO>( type );
-    console_->printf( Console::Source::srcGfx, "MeshManager created %s vbo 0x%I64X", type == VBO_2D ? "2D" : type == VBO_3D ? "3D" : "Text3D", ptr.get() );
     vbos_[type].push_back( ptr );
     return move( ptr );
   }
@@ -27,7 +26,6 @@ namespace neko {
   EBOPtr MeshManager::createEBO()
   {
     EBOPtr ptr = make_shared<EBO>();
-    console_->printf( Console::Source::srcGfx, "MeshManager created ebo 0x%I64X", ptr.get() );
     ebos_.push_back( ptr );
     return move( ptr );
   }
@@ -40,7 +38,6 @@ namespace neko {
   VAOPtr MeshManager::createVAO()
   {
     VAOPtr ptr = make_shared<VAO>();
-    console_->printf( Console::Source::srcGfx, "MeshManager created vao 0x%I64X", ptr.get() );
     vaos_.push_back( ptr );
     return move( ptr );
   }
@@ -77,16 +74,8 @@ namespace neko {
   {
     vector<VBO*> dirties;
     for ( auto& buf : vbos )
-      if ( !buf->uploaded_ )
-      {
-        console->printf( Console::Source::srcGfx, "MeshManager uploading new vbo 0x%I64X", buf.get() );
+      if ( !buf->uploaded_ || buf->dirty_ )
         dirties.push_back( buf.get() );
-      }
-      else if ( buf->dirty_ )
-      {
-        console->printf( Console::Source::srcGfx, "MeshManager uploading dirty vbo 0x%I64X", buf.get() );
-        dirties.push_back( buf.get() );
-      }
 
     if ( !dirties.empty() )
     {
@@ -98,9 +87,7 @@ namespace neko {
         if ( dirties[i]->uploaded_ )
           glDeleteBuffers( 1, &dirties[i]->id_ );
         dirties[i]->id_ = ids[i];
-        if ( dirties[i]->empty() )
-          console->printf( Console::Source::srcGfx, "MeshManager oops, vbo 0x%I64X is empty", dirties[i] );
-        else
+        if ( !dirties[i]->empty() )
           switch ( dirties[i]->type_ )
           {
             case VBO_2D:
@@ -220,10 +207,7 @@ namespace neko {
     vector<VAO*> dirties;
     for ( auto& vao : vaos_ )
       if ( !vao->uploaded_ )
-      {
-        console_->printf( Console::Source::srcGfx, "MeshManager uploading new vao 0x%I64X", vao.get() );
         dirties.push_back( vao.get() );
-      }
 
     if ( dirties.empty() )
       return;
@@ -299,15 +283,8 @@ namespace neko {
   {
     vector<EBO*> dirties;
     for ( auto& ebo : ebos_ )
-      if ( !ebo->uploaded_ )
-      {
-        console_->printf( Console::Source::srcGfx, "MeshManager uploading new ebo 0x%I64X", ebo.get() );
+      if ( !ebo->uploaded_|| ebo->dirty_ )
         dirties.push_back( ebo.get() );
-      } else if ( ebo->dirty_ )
-      {
-        console_->printf( Console::Source::srcGfx, "MeshManager uploading dirty ebo 0x%I64X", ebo.get() );
-        dirties.push_back( ebo.get() );
-      }
 
     if ( !dirties.empty() )
     {

@@ -171,6 +171,9 @@
     <ClCompile Include="src\meshgenerator.cpp">
       <Filter>Source Files\gfx\meshes</Filter>
     </ClCompile>
+    <ClCompile Include="src\js_game.cpp">
+      <Filter>Source Files\scripting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -286,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="include\texture.h">
       <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_game.h">
+      <Filter>Header Files\scripting</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

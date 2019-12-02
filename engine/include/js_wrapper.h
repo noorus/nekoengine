@@ -11,6 +11,7 @@ namespace neko {
     enum WrappedType {
       Wrapped_Console, //!< Static: JSConsole
       Wrapped_Math, //!< Static: JSMath
+      Wrapped_Game,
       Wrapped_Vector2, //!< Dynamic: Vector2
       Max_WrappedType
     };
