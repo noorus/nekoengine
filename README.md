@@ -1,5 +1,5 @@
 # nekoengine
-Visual novel game engine..?
+Some kind of game engine..?
 
 #### Acknowledgements
 * Using [SFML](https://www.sfml-dev.org/) for windowing and GL context initiation.
@@ -7,5 +7,4 @@ Visual novel game engine..?
 * Using [glm](https://github.com/g-truc/glm) for pretty GLSL-like math primitives.
 * Using [lodepng](https://github.com/lvandeve/lodepng) for PNG image coding.
 * Using [ICU](http://site.icu-project.org/home) for Unicode text support.
-* Using the [V8](https://v8.dev/) JavaScript engine for scripting.
-* Using a modified version of [v8pp](https://github.com/pmed/v8pp) for V8 integration.
+* Using [V8](https://v8.dev/) for scripting.

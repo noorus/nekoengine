@@ -85,11 +85,15 @@ namespace neko {
 
 #ifdef NEKO_MATH_DOUBLE
   using Real = double;
-# define NEKO_ZERO 0.0
-# define NEKO_HALF 0.5
-# define NEKO_ONE 1.0
-  namespace math {
+  namespace numbers {
     using namespace boost::math::double_constants;
+    constexpr Real zero = 0.0;
+    constexpr Real one = 1.0;
+    constexpr Real two = 2.0;
+    constexpr Real three = 3.0;
+    constexpr Real six = 6.0;
+    constexpr Real ten = 10.0;
+    constexpr Real fifteen = 15.0;
   }
   using vec2 = glm::dvec2;
   using vec3 = glm::dvec3;
@@ -100,11 +104,15 @@ namespace neko {
   using quaternion = glm::dquat;
 #else
   using Real = float;
-# define NEKO_ZERO 0.0f
-# define NEKO_HALF 0.5f
-# define NEKO_ONE 1.0f
-  namespace math {
+  namespace numbers {
     using namespace boost::math::float_constants;
+    constexpr Real zero = 0.0f;
+    constexpr Real one = 1.0f;
+    constexpr Real two = 2.0f;
+    constexpr Real three = 3.0f;
+    constexpr Real six = 6.0f;
+    constexpr Real ten = 10.0f;
+    constexpr Real fifteen = 15.0f;
   }
   using vec2 = glm::fvec2;
   using vec3 = glm::fvec3;
