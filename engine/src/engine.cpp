@@ -86,11 +86,18 @@ namespace neko {
     while ( signal_ != Signal_Stop )
     {
       console_->executeBuffered();
+
+      delta = clock_.update();
+      if ( delta > 1.0 )
+      {
+        console_->print( Console::srcEngine, "Ignoring frame update, delta > 1.0" );
+        continue;
+      }
+
       scripting_->preUpdate( time_ );
       fonts_->prepare( time_ );
       gfx_->preUpdate( time_ );
 
-      delta = clock_.update();
       accumulator += delta;
 
       while ( accumulator >= cLogicStep )
