@@ -114,7 +114,7 @@ namespace neko {
           NEKO_EXCEPT( "Unsupport/unimplemented image format in load teture task" );
         }
       }
-      /*else if ( task.type_ == LoadTask::Load_Fontface )
+      else if ( task.type_ == LoadTask::Load_Fontface )
       {
         vector<uint8_t> input;
         platform::FileReader( task.fontfaceLoad.path_ ).readFullVector( input );
@@ -122,7 +122,7 @@ namespace neko {
         finishedTasksLock_.lock();
         finishedFonts_.push_back( task.fontfaceLoad.font_ );
         finishedTasksLock_.unlock();
-      }*/
+      }
     }
 
     if ( !finishedMaterials_.empty() )

@@ -23,14 +23,6 @@ namespace neko {
       { 255, 0,   255, 255 }
     };
 
-    const vector<Vertex2D> centeredQuad2D =
-    {   // x      y     s     t
-      { -0.5f,  0.5f, 0.0f, 0.0f },
-      { -0.5f, -0.5f, 0.0f, 1.0f },
-      {  0.5f, -0.5f, 1.0f, 1.0f },
-      {  0.5f,  0.5f, 1.0f, 0.0f }
-    };
-
     const vector<Vertex2D> screenQuad2D =
     {   // x      y     s     t
       { -1.0f,  1.0f, 0.0f, 1.0f },
@@ -94,10 +86,10 @@ namespace neko {
         auto index = (GLuint)mesh_->vertsCount();
         auto color = vec4( 0.0f, 1.0f, 0.0f, 1.0f );
         vector<VertexText3D> vertices = {
-          { vec3( p0.x, p1.y, 0.0f ), vec2( glyph->coords[0].s, glyph->coords[1].t ), color },
-          { vec3( p0.x, p0.y, 0.0f ), vec2( glyph->coords[0].s, glyph->coords[0].t ), color },
-          { vec3( p1.x, p0.y, 0.0f ), vec2( glyph->coords[1].s, glyph->coords[0].t ), color },
-          { vec3( p1.x, p1.y, 0.0f ), vec2( glyph->coords[1].s, glyph->coords[1].t ), color }
+          { vec3( p0.x, p1.y, 0.0f ), vec2( glyph->coords[0].x, glyph->coords[1].y ), color },
+          { vec3( p0.x, p0.y, 0.0f ), vec2( glyph->coords[0].x, glyph->coords[0].y ), color },
+          { vec3( p1.x, p0.y, 0.0f ), vec2( glyph->coords[1].x, glyph->coords[0].y ), color },
+          { vec3( p1.x, p1.y, 0.0f ), vec2( glyph->coords[1].x, glyph->coords[1].y ), color }
         };
         vector<GLuint> indices = {
           index + 0, index + 1, index + 2, index + 0, index + 2, index + 3
@@ -116,6 +108,10 @@ namespace neko {
       lodepng::encode( buffer, font_->impl_->atlas_->data_, font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, LCT_GREY, 8 );
       writer.writeBlob( buffer.data(), buffer.size() ); */
     }
+    void begin()
+    {
+      mesh_->begin();
+    }
     void draw()
     {
       glBindTextureUnit( 0, material_->texture_->handle() );
@@ -129,7 +125,6 @@ namespace neko {
 
   using DynamicTextPtr = shared_ptr<DynamicText>;
 
-  static DynamicMeshPtr g_testMesh;
   static DynamicMeshPtr g_testMesh2;
   static DynamicTextPtr g_testText;
 
@@ -227,6 +222,7 @@ namespace neko {
 
     meshes_ = make_shared<MeshManager>( engine_->console() );
 
+    glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
     builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
       (const void*)BuiltinData::placeholderImage2x2.data() );
     builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
@@ -292,19 +288,6 @@ namespace neko {
 
     if ( !materials_.empty() && materials_[0]->loaded_ )
     {
-      if ( !g_testMesh )
-      {
-        const Real offset = 128.0f;
-        g_testMesh = meshes_->createDynamic( GL_TRIANGLES, VBO_2D );
-        auto positions = { vec2( offset, offset ), vec2( 1280.0f - offset, offset ), vec2( offset, 720.0f - offset ), vec2( 1280.0f - offset, 720.0f - offset ) };
-        for ( auto& pos : positions )
-        {
-          auto verts = functional::map( BuiltinData::centeredQuad2D, [pos]( const Vertex2D& v ) -> Vertex2D {
-            return Vertex2D( pos.x + v.x * 128.0f, pos.y + v.y * 128.0f, v.s, v.t );
-          } );
-          g_testMesh->append( verts, BuiltinData::quadIndices );
-        }
-      }
       if ( !g_testMesh2 )
       {
         g_testMesh2 = meshes_->createDynamic( GL_TRIANGLES, VBO_3D );
@@ -430,29 +413,14 @@ namespace neko {
 
     shaders_->setViewProjectionMat( camera->view(), camera->projection() );
 
-    if ( g_testMesh )
-    {
-      mat4 model( 1.0f );
-      model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
-      model = glm::translate( model, vec3( 1.0f, 1.0f, 0.0f ) );
-
-      shaders_->use( 0 ).setUniform( "model", model );
-
-      if ( !materials_.empty() && materials_[0]->texture_ )
-        glBindTextureUnit( 0, materials_[0]->texture_->handle() );
-      else
-        glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
-
-      g_testMesh->draw();
-    }
-
     if ( g_testMesh2 )
     {
+      g_testMesh2->begin();
       mat4 model( 1.0f );
       model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
       model = glm::translate( model, vec3( 640.0f, 360.0f, 0.0f ) );
 
-      shaders_->use( 1 ).setUniform( "model", model );
+      shaders_->use( "default3d" ).setUniform( "model", model );
 
       if ( !materials_.empty() && materials_[0]->texture_ )
         glBindTextureUnit( 0, materials_[0]->texture_->handle() );
@@ -464,11 +432,12 @@ namespace neko {
 
     if ( g_testText && g_textAdded )
     {
+      g_testText->begin();
       mat4 model( 1.0f );
       model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
       model = glm::translate( model, vec3( 1.0f, 1.0f, 0.0f ) );
 
-      shaders_->use( 3 ).setUniform( "model", model );
+      shaders_->use( "text3d" ).setUniform( "model", model );
       g_testText->draw();
     }
   }
@@ -493,13 +462,14 @@ namespace neko {
     sceneDraw( camera );
     g_framebuf->end();
 
+    glBindVertexArray( builtin_.emptyVAO_ );
+
     // Framebuffer has been unbound, now draw to the default context, the window.
     glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
-    shaders_->use( 2 );
-
-    glDisable( GL_DEPTH_TEST );
+    builtin_.screenQuad_->begin();
+    shaders_->use( "mainframebuf2d" );
     glBindTextureUnit( 0, g_framebuf->texture()->handle() );
     builtin_.screenQuad_->draw();
   }
@@ -514,6 +484,9 @@ namespace neko {
 
     shaders_->shutdown();
     shaders_.reset();
+
+    if ( builtin_.emptyVAO_ )
+      glDeleteVertexArrays( 1, &builtin_.emptyVAO_ );
   }
 
 }

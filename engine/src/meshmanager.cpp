@@ -74,7 +74,7 @@ namespace neko {
   {
     vector<VBO*> dirties;
     for ( auto& buf : vbos )
-      if ( !buf->uploaded_ || buf->dirty_ )
+      if ( ( !buf->uploaded_ || buf->dirty_ ) && !buf->empty() )
         dirties.push_back( buf.get() );
 
     if ( !dirties.empty() )
@@ -206,7 +206,7 @@ namespace neko {
   {
     vector<VAO*> dirties;
     for ( auto& vao : vaos_ )
-      if ( !vao->uploaded_ )
+      if ( !vao->uploaded_ && vao->valid() )
         dirties.push_back( vao.get() );
 
     if ( dirties.empty() )
@@ -222,7 +222,11 @@ namespace neko {
       if ( !vbo->uploaded_ )
         NEKO_EXCEPT( "VBO used for VAO has not been uploaded" );
       if ( dirties[i]->ebo_ )
+      {
+        if ( !dirties[i]->ebo_->uploaded_ )
+          NEKO_EXCEPT( "EBO used for VAO has not been uploaded" );
         glVertexArrayElementBuffer( ids[i], dirties[i]->ebo_->id_ );
+      }
 
       if ( vbo->type_ == VBO_3D )
       {
@@ -258,9 +262,16 @@ namespace neko {
     }
   }
 
-  void VAO::draw( GLenum mode, GLsizei size )
+  void VAO::begin()
   {
     glBindVertexArray( id_ );
+  }
+
+  void VAO::draw( GLenum mode, GLsizei size )
+  {
+    if ( !valid() || !uploaded_ )
+      return;
+    assert( size > 0 );
     if ( ebo_ )
       glDrawElements( mode, size, GL_UNSIGNED_INT, nullptr );
     else
@@ -283,7 +294,7 @@ namespace neko {
   {
     vector<EBO*> dirties;
     for ( auto& ebo : ebos_ )
-      if ( !ebo->uploaded_|| ebo->dirty_ )
+      if ( ( !ebo->uploaded_ || ebo->dirty_ ) && !ebo->storage_.empty() )
         dirties.push_back( ebo.get() );
 
     if ( !dirties.empty() )
@@ -296,6 +307,7 @@ namespace neko {
         if ( dirties[i]->uploaded_ )
           glDeleteBuffers( 1, &dirties[i]->id_ );
         dirties[i]->id_ = ids[i];
+        assert( !dirties[i]->storage_.empty() );
         if ( !dirties[i]->storage_.empty() )
         {
           glNamedBufferStorage( dirties[i]->id_,

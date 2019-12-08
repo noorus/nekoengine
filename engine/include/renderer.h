@@ -31,6 +31,8 @@ namespace neko {
     struct StaticData {
       MaterialPtr placeholderTexture_;
       StaticMeshPtr screenQuad_;
+      GLuint emptyVAO_;
+      StaticData(): emptyVAO_( 0 ) {}
     } builtin_;
     GLuint implCreateTexture2D( size_t width, size_t height,
       GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,

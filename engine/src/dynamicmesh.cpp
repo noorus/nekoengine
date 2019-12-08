@@ -39,10 +39,18 @@ namespace neko {
     ebo_->dirty_ = true;
   }
 
+  void DynamicMesh::begin()
+  {
+    if ( !vao_->uploaded_ )
+      return;
+    vao_->begin();
+  }
+
   void DynamicMesh::draw()
   {
-    if ( vao_->uploaded_ )
-      vao_->draw( drawMode_, (GLsizei)indicesCount() );
+    if ( !vao_->uploaded_ )
+      return;
+    vao_->draw( drawMode_, (GLsizei)indicesCount() );
   }
 
   DynamicMesh::~DynamicMesh()

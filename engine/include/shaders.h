@@ -97,6 +97,15 @@ namespace neko {
     void setViewProjectionMat( const mat4& view, const mat4& projection );
     ShaderProgram& get( size_t program );
     ShaderProgram& use( size_t program );
+    ShaderProgram& use( string_view name )
+    {
+      for ( size_t i = 0; i < programs_.size(); ++i )
+      {
+        if ( programs_[i].name == name )
+          return use( i );
+      }
+      NEKO_EXCEPT( "Shader program not found" );
+    }
   };
 
 }

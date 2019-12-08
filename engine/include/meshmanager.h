@@ -132,7 +132,16 @@ namespace neko {
     EBOPtr ebo_; //!< Associated ebo, optional
     GLuint id_; //< GL name for this vao
     bool uploaded_; //!< Has this been uploaded yet?
+    void begin();
     void draw( GLenum mode, GLsizei size );
+    bool valid() const
+    {
+      if ( !vbo_ || !vbo_->uploaded_ || vbo_->dirty_ )
+        return false;
+      if ( ebo_ && ( !ebo_->uploaded_ || ebo_->dirty_ ) )
+        return false;
+      return true;
+    }
     VAO(): id_( 0 ), uploaded_( false ) {}
   };
 
@@ -162,6 +171,7 @@ namespace neko {
       assert( ebo_ );
       return ebo_->storage_.size();
     }
+    void begin();
     void draw();
     template <typename T>
     inline void append( const vector<T>& vertices, vector<GLuint> indices )
@@ -188,6 +198,7 @@ namespace neko {
     StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts );
     StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices );
     ~StaticMesh();
+    void begin();
     void draw();
   };
 

@@ -20,10 +20,18 @@ namespace neko {
     vao_ = manager_->pushVAO( vbo_, ebo_ );
   }
 
+  void StaticMesh::begin()
+  {
+    if ( !vao_->uploaded_ )
+      return;
+    vao_->begin();
+  }
+
   void StaticMesh::draw()
   {
-    if ( vao_->uploaded_ )
-      vao_->draw( drawMode_, size_ );
+    if ( !vao_->uploaded_ )
+      return;
+    vao_->draw( drawMode_, size_ );
   }
 
   StaticMesh::~StaticMesh()
