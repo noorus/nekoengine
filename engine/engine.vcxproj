@@ -246,14 +246,14 @@
     <Manifest Include="manifest\neko.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\data\shaders\default2d_fp.glsl" />
-    <None Include="..\bin\data\shaders\default2d_vp.glsl" />
-    <None Include="..\bin\data\shaders\default3d_fp.glsl" />
-    <None Include="..\bin\data\shaders\default3d_vp.glsl" />
-    <None Include="..\bin\data\shaders\mainframebuf2d_fp.glsl" />
-    <None Include="..\bin\data\shaders\mainframebuf2d_vp.glsl" />
-    <None Include="..\bin\data\shaders\text3d_fp.glsl" />
-    <None Include="..\bin\data\shaders\text3d_vp.glsl" />
+    <None Include="..\bin\data\shaders\default2d.frag" />
+    <None Include="..\bin\data\shaders\default2d.vert" />
+    <None Include="..\bin\data\shaders\default3d.frag" />
+    <None Include="..\bin\data\shaders\default3d.vert" />
+    <None Include="..\bin\data\shaders\mainframebuf2d.frag" />
+    <None Include="..\bin\data\shaders\mainframebuf2d.vert" />
+    <None Include="..\bin\data\shaders\text3d.frag" />
+    <None Include="..\bin\data\shaders\text3d.vert" />
     <None Include="..\bin\script\initialization.js" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

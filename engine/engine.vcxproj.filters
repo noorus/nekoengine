@@ -300,32 +300,32 @@
     </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\data\shaders\text3d_vp.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\text3d_fp.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\mainframebuf2d_fp.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\mainframebuf2d_vp.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\default2d_fp.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\default2d_vp.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\default3d_fp.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\default3d_vp.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\bin\script\initialization.js">
       <Filter>Scripts</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\default3d.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\default2d.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\mainframebuf2d.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\text3d.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\text3d.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\mainframebuf2d.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\default3d.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\default2d.frag">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

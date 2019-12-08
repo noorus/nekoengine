@@ -46,17 +46,17 @@ namespace neko {
     auto rootDirectory = platform::getCurrentDirectory();
     rootDirectory.append( R"(\data\shaders\)" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "default2d_vp.glsl" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "default2d_fp.glsl" );
+    shaders_.emplace_back( Shader::Vertex, rootDirectory + "default2d.vert" );
+    shaders_.emplace_back( Shader::Fragment, rootDirectory + "default2d.frag" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "default3d_vp.glsl" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "default3d_fp.glsl" );
+    shaders_.emplace_back( Shader::Vertex, rootDirectory + "default3d.vert" );
+    shaders_.emplace_back( Shader::Fragment, rootDirectory + "default3d.frag" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "mainframebuf2d_vp.glsl" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "mainframebuf2d_fp.glsl" );
+    shaders_.emplace_back( Shader::Vertex, rootDirectory + "mainframebuf2d.vert" );
+    shaders_.emplace_back( Shader::Fragment, rootDirectory + "mainframebuf2d.frag" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "text3d_vp.glsl" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "text3d_fp.glsl" );
+    shaders_.emplace_back( Shader::Vertex, rootDirectory + "text3d.vert" );
+    shaders_.emplace_back( Shader::Fragment, rootDirectory + "text3d.frag" );
 
     for ( auto& shader : shaders_ )
       compileShader( shader );
