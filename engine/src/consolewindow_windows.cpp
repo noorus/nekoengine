@@ -165,9 +165,9 @@ namespace neko {
     {
       lock_.lock();
       COLORREF clr = RGB(
-        (uint8_t)( color.r * 255.0f ),
-        (uint8_t)( color.g * 255.0f ),
-        (uint8_t)( color.b * 255.0f ) );
+        (uint8_t)( color.x * 255.0f ),
+        (uint8_t)( color.y * 255.0f ),
+        (uint8_t)( color.z * 255.0f ) );
       linesBuffer_.push_back({ utf8ToWide( str ), clr });
       lock_.unlock();
       PostMessageW( handle_, WM_HIVE_CONSOLEFLUSHBUFFER, 0, 0 );

@@ -25,7 +25,31 @@
 #include <any>
 #include <optional>
 #include <boost/math/constants/constants.hpp>
+
+// GLM
+#define GLM_FORCE_XYZW_ONLY // Hide rgba, stpq unions from vector types (avoiding bloat when examined in the debugger)
+#define GLM_FORCE_SIZE_T_LENGTH // Make size() on GLM types return size_t instead of int (for STL compatibility)
+#define GLM_FORCE_UNRESTRICTED_GENTYPE // Allow operation input types that strict GLSL wouldn't (such as int)
+#define GLM_ENABLE_EXPERIMENTAL // Enable experimental new features
+#if !defined(NEKO_VERBOSE_COMPILE) && !defined(_DEBUG)
+# define GLM_FORCE_SILENT_WARNINGS
+#endif
+#ifndef _DEBUG
+# define GLM_FORCE_INLINE // Force inlining in release build
+#endif
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_access.hpp>
+#include <glm/gtc/epsilon.hpp>
+#include <glm/gtc/noise.hpp>
+#include <glm/gtc/random.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/constants.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/exterior_product.hpp>
+#include <glm/gtx/projection.hpp>
+#include <glm/gtx/perpendicular.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #ifndef NEKO_NO_ICU
 # include <unicode/ustring.h>

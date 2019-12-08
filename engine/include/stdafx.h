@@ -94,28 +94,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/thread.hpp>
 
-// GLM
-#define GLM_FORCE_SIZE_T_LENGTH
-#define GLM_FORCE_RADIANS 1
-#define GLM_FORCE_UNRESTRICTED_GENTYPE
-#define GLM_ENABLE_EXPERIMENTAL
-#if !defined(NEKO_VERBOSE_COMPILE) && !defined(_DEBUG)
-# define GLM_FORCE_SILENT_WARNINGS
-#endif
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_access.hpp>
-#include <glm/gtc/epsilon.hpp>
-#include <glm/gtc/noise.hpp>
-#include <glm/gtc/random.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/constants.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtx/exterior_product.hpp>
-#include <glm/gtx/projection.hpp>
-#include <glm/gtx/perpendicular.hpp>
-#include <glm/gtx/quaternion.hpp>
-
 // OpenGL
 #include <glbinding/gl45core/gl.h>
 #include <glbinding/glbinding.h>

@@ -143,10 +143,10 @@ namespace neko {
 
       TextureGlyph glyph;
       glyph.codepoint = -1;
-      glyph.coords[0].s = ( region.x + 2 ) / (Real)atlas_->width_;
-      glyph.coords[0].t = ( region.y + 2 ) / (Real)atlas_->height_;
-      glyph.coords[1].s = ( region.x + 3 ) / (Real)atlas_->width_;
-      glyph.coords[1].t = ( region.y + 3 ) / (Real)atlas_->height_;
+      glyph.coords[0].x = ( region.x + 2 ) / (Real)atlas_->width_;
+      glyph.coords[0].y = ( region.y + 2 ) / (Real)atlas_->height_;
+      glyph.coords[1].x = ( region.x + 3 ) / (Real)atlas_->width_;
+      glyph.coords[1].y = ( region.y + 3 ) / (Real)atlas_->height_;
 
       glyphs_.push_back( move( glyph ) );
     }
@@ -270,10 +270,10 @@ namespace neko {
       glyph.height = tgt_h;
       glyph.rendermode = rendermode_;
       glyph.offset = glyphCoords;
-      glyph.coords[0].s = x / (Real)atlas_->width_;
-      glyph.coords[0].t = y / (Real)atlas_->height_;
-      glyph.coords[1].s = ( x + glyph.width ) / (Real)atlas_->width_;
-      glyph.coords[1].t = ( y + glyph.height ) / (Real)atlas_->height_;
+      glyph.coords[0].x = x / (Real)atlas_->width_;
+      glyph.coords[0].y = y / (Real)atlas_->height_;
+      glyph.coords[1].x = ( x + glyph.width ) / (Real)atlas_->width_;
+      glyph.coords[1].y = ( y + glyph.height ) / (Real)atlas_->height_;
 
       FT_Load_Glyph( face_, glyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_HINTING );
       slot = face_->glyph;
