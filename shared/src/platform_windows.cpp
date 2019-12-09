@@ -144,6 +144,106 @@ namespace neko {
       stop();
     }
 
+    // RenderWindowHandler
+
+    RenderWindowHandler* RenderWindowHandler::instance_ = nullptr;
+
+    RenderWindowHandler::RenderWindowHandler(): window_( 0 ), originalProc_( nullptr ),
+      vaspect_( 0.0f ), haspect_( 0.0f ), resolution_(), borders_()
+    {
+    }
+
+    void RenderWindowHandler::changeTargetResolution( const size2i targetResolution )
+    {
+      resolution_ = targetResolution;
+      vaspect_ = ( (float)resolution_.w / (float)resolution_.h );
+      haspect_ = ( (float)resolution_.h / (float)resolution_.w );
+    }
+
+    void RenderWindowHandler::getWindowBordersSize( HWND window, size2i& size, bool withClient )
+    {
+      auto style = (DWORD)GetWindowLongW( window, GWL_STYLE );
+      auto exstyle = (DWORD)GetWindowLongW( window, GWL_EXSTYLE );
+      RECT want;
+      want.left = 100;
+      want.right = 100 + resolution_.w;
+      want.top = 100;
+      want.bottom = 100 + resolution_.h;
+      AdjustWindowRectEx( &want, style, FALSE, exstyle );
+      size.w = ( want.right - want.left - resolution_.w );
+      size.h = ( want.bottom - want.top - resolution_.h );
+    }
+
+    void RenderWindowHandler::wmSizing( WPARAM wparam, LPARAM lparam )
+    {
+      auto rect = (RECT*)lparam;
+      auto dw = float( rect->right - rect->left );
+      auto dh = float( rect->bottom - rect->top );
+      auto w = dw - borders_.w;
+      auto h = dh - borders_.h;
+      bool sel = false;
+      if ( wparam == WMSZ_LEFT || wparam == WMSZ_RIGHT )
+        sel = true;
+      else if ( wparam == WMSZ_TOP || wparam == WMSZ_BOTTOM )
+        sel = false;
+      else
+        sel = ( ( w / h ) > vaspect_ );
+      float nw = w, nh = h;
+      if ( sel )
+        nh = ( w * haspect_ );
+      else
+        nw = ( h * vaspect_ );
+      nw += borders_.w;
+      nh += borders_.h;
+      if ( wparam == WMSZ_TOPLEFT || wparam == WMSZ_TOPRIGHT )
+      {
+        if ( wparam == WMSZ_TOPRIGHT )
+          rect->right = rect->left + (LONG)math::round( nw );
+        else
+          rect->left = rect->right - (LONG)math::round( nw );
+        rect->top = rect->bottom - (LONG)math::round( nh );
+        return;
+      }
+      switch ( wparam )
+      {
+        case WMSZ_TOP:
+        case WMSZ_BOTTOM:
+          rect->left = (LONG)math::round( (float)rect->left + ( ( dw - nw ) / 2.0f ) );
+        break;
+        case WMSZ_BOTTOMLEFT:
+          rect->left = (LONG)math::round( (float)rect->right - nw );
+          rect->top = sel ? rect->top : (LONG)math::round( (float)rect->bottom - nh );
+        break;
+      }
+      rect->right = rect->left + (LONG)math::round( nw );
+      rect->bottom = rect->top + (LONG)math::round( nh );
+    }
+
+    LRESULT RenderWindowHandler::wndProc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
+    {
+      if ( msg == WM_SIZING )
+      {
+        get().wmSizing( wparam, lparam );
+        return TRUE;
+      }
+      return get().originalProc_( wnd, msg, wparam, lparam );
+    }
+
+    void RenderWindowHandler::setWindow( HWND window )
+    {
+      if ( window_ )
+      {
+        SetWindowLongPtrW( window_, GWLP_WNDPROC, reinterpret_cast<DWORD_PTR>( originalProc_ ) );
+      }
+      window_ = window;
+      if ( window_ )
+      {
+        getWindowBordersSize( window_, borders_, true );
+        originalProc_ = reinterpret_cast<WNDPROC>( GetWindowLongPtrW( window_, GWLP_WNDPROC ) );
+        SetWindowLongPtrW( window_, GWLP_WNDPROC, reinterpret_cast<DWORD_PTR>( RenderWindowHandler::wndProc ) );
+      }
+    }
+
   }
 
 }

@@ -165,6 +165,78 @@ namespace neko {
   using vec3f = glm::fvec3;
   using vec4f = glm::fvec4;
 
+  struct size2i {
+    int64_t w;
+    int64_t h;
+    explicit size2i(): w( 0.0f ), h( 0.0f ) {}
+    inline size2i( const size2i& other ): w( other.w ), h( other.h ) {}
+    inline size2i( const int64_t width, const int64_t height ): w( width ), h( height ) {}
+    inline size2i( const vec2i& v ): w( v.x ), h( v.y ) {}
+    inline size2i& operator *= ( const int64_t scalar )
+    {
+      w *= scalar;
+      h *= scalar;
+      return *this;
+    }
+    inline size2i& operator /= ( const int64_t scalar )
+    {
+      w /= scalar;
+      h /= scalar;
+      return *this;
+    }
+    inline size2i& operator += ( const int64_t scalar )
+    {
+      w += scalar;
+      h += scalar;
+      return *this;
+    }
+    inline size2i& operator -= ( const int64_t scalar )
+    {
+      w -= scalar;
+      h -= scalar;
+      return *this;
+    }
+    inline size2i& operator += ( const vec2i& rhs )
+    {
+      w += rhs.x;
+      h += rhs.y;
+      return *this;
+    }
+    inline size2i& operator -= ( const vec2i& rhs )
+    {
+      w -= rhs.x;
+      h -= rhs.y;
+      return *this;
+    }
+    inline bool operator == ( const size2i& rhs ) const
+    {
+      return ( w == rhs.w && h == rhs.h );
+    }
+    inline bool operator != ( const size2i& rhs ) const
+    {
+      return !( *this == rhs );
+    }
+    inline bool operator < ( const size2i& rhs ) const
+    {
+      return ( w < rhs.w && h < rhs.h );
+    }
+    inline bool operator > ( const size2i& rhs ) const
+    {
+      return ( w > rhs.w && h > rhs.h );
+    }
+    inline bool operator <= ( const size2i& rhs ) const
+    {
+      return ( w <= rhs.w && h <= rhs.h );
+    }
+    inline bool operator >= ( const size2i& rhs ) const
+    {
+      return ( w >= rhs.w && h >= rhs.h );
+    }
+#ifdef NEKO_PLATFORM_WINDOWS
+    inline size2i( const SIZE& sz ): w( sz.cx ), h( sz.cy ) {}
+#endif
+  };
+
   enum CharacterConstants {
     TAB = 9,
     LF = 10,

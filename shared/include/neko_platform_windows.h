@@ -98,6 +98,40 @@ namespace neko {
       ~Thread();
     };
 
+    class RenderWindowHandler {
+    private:
+      size2i resolution_;
+      float vaspect_;
+      float haspect_;
+      size2i borders_;
+      HWND window_;
+      WNDPROC originalProc_;
+      void getWindowBordersSize( HWND window, size2i& size, bool withClient );
+      void wmSizing( WPARAM wparam, LPARAM lparam );
+    public:
+      RenderWindowHandler();
+      void changeTargetResolution( const size2i targetResolution );
+      void setWindow( HWND window );
+    private:
+      static LRESULT wndProc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
+      static RenderWindowHandler* instance_;
+    public:
+      static RenderWindowHandler& get()
+      {
+        if ( !instance_ )
+          instance_ = new RenderWindowHandler();
+        return *instance_;
+      }
+      static void free()
+      {
+        if ( instance_ )
+        {
+          delete instance_;
+          instance_ = nullptr;
+        }
+      }
+    };
+
     //! \class PerformanceTimer
     //! Native performance timer implementation for high-precision timing of tasks.
     class PerformanceTimer {
