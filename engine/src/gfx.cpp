@@ -37,7 +37,8 @@ namespace neko {
 
   // 131185: Buffer detailed info...
   // 131218: Program/shader state performance warning...
-  const std::array<GLuint, 1> c_ignoredGlDebugMessages = { 131218 };
+  // 131204: The texture object does not have a defined base level...
+  const std::array<GLuint, 3> c_ignoredGlDebugMessages = { 131185, 131218, 131204 };
 
   void Gfx::openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
     const GLchar* message, const void* userParam )
@@ -46,13 +47,14 @@ namespace neko {
       if ( id == ignoredId )
         return;
 
+    auto gfx = static_cast<Gfx*>( const_cast<void*>( userParam ) );
+
     if ( id == 1281 || id == 1285 || id == 0 )
       DebugBreak();
 
-    if ( !userParam )
+    if ( !gfx )
       return;
 
-    auto gfx = static_cast<Gfx*>( const_cast<void*>( userParam ) );
     if ( ( (uintptr_t)gfx & 0xCCCCCCCC ) == 0xCCCCCCCC || severity == GL_DEBUG_TYPE_ERROR )
     {
       utf8String msg = "OpenGL Error: ";
@@ -81,6 +83,93 @@ namespace neko {
     }
   }
 
+  class WindowProcDetour: boost::noncopyable {
+  public:
+    HWND window_;
+    WNDPROC original_;
+    explicit WindowProcDetour( HWND window, WNDPROC newProc ): window_( window )
+    {
+      original_ = reinterpret_cast<WNDPROC>( GetWindowLongPtrW( window_, GWLP_WNDPROC ) );
+      SetWindowLongPtrW( window_, GWLP_WNDPROC, reinterpret_cast<DWORD_PTR>( newProc ) );
+    }
+    ~WindowProcDetour()
+    {
+      SetWindowLongPtrW( window_, GWLP_WNDPROC, reinterpret_cast<DWORD_PTR>( original_ ) );
+    }
+  };
+
+  WindowProcDetour* detour = nullptr;
+
+  const auto targetResolution = vec2i( 1920, 1080 );
+
+  void getWindowBordersSize( HWND wnd, SIZE& size, bool withClient )
+  {
+    auto style = (DWORD)GetWindowLongW( wnd, GWL_STYLE );
+    auto exstyle = (DWORD)GetWindowLongW( wnd, GWL_EXSTYLE );
+    RECT want;
+    want.left = 100;
+    want.right = 100 + targetResolution.x;
+    want.top = 100;
+    want.bottom = 100 + targetResolution.y;
+    AdjustWindowRectEx( &want, style, FALSE, exstyle );
+    size.cx = ( want.right - want.left - targetResolution.x );
+    size.cy = ( want.bottom - want.top - targetResolution.y );
+  }
+
+  LRESULT wndProc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
+  {
+    const float vaspect = ( (float)targetResolution.x / (float)targetResolution.y );
+    const float haspect = ( (float)targetResolution.y / (float)targetResolution.x );
+    if ( msg == WM_SIZING )
+    {
+      SIZE borders;
+      getWindowBordersSize( wnd, borders, true );
+      auto rekt = (RECT*)lparam;
+      auto dw = float( rekt->right - rekt->left );
+      auto dh = float( rekt->bottom - rekt->top );
+      auto w = dw - borders.cx;
+      auto h = dh - borders.cy;
+      bool sel = false;
+      if ( wparam == WMSZ_LEFT || wparam == WMSZ_RIGHT )
+        sel = true;
+      else if ( wparam == WMSZ_TOP || wparam == WMSZ_BOTTOM )
+        sel = false;
+      else
+        sel = ( ( w / h ) > vaspect );
+      float nw = w, nh = h;
+      if ( sel )
+        nh = ( w * haspect );
+      else
+        nw = ( h * vaspect );
+      nw += borders.cx;
+      nh += borders.cy;
+      if ( wparam == WMSZ_TOPLEFT || wparam == WMSZ_TOPRIGHT )
+      {
+        if ( wparam == WMSZ_TOPRIGHT )
+          rekt->right = rekt->left + (LONG)math::round( nw );
+        else
+          rekt->left = rekt->right - (LONG)math::round( nw );
+        rekt->top = rekt->bottom - (LONG)math::round( nh );
+        return TRUE;
+      }
+      switch ( wparam )
+      {
+        case WMSZ_TOP:
+        case WMSZ_BOTTOM:
+          rekt->left = (LONG)math::round( (float)rekt->left + ( ( dw - nw ) / 2.0f ) );
+        break;
+        case WMSZ_BOTTOMLEFT:
+          rekt->left = (LONG)math::round( (float)rekt->right - nw );
+          rekt->top = sel ? rekt->top : (LONG)math::round( (float)rekt->bottom - nh );
+        break;
+      }
+      rekt->right = rekt->left + (LONG)math::round( nw );
+      rekt->bottom = rekt->top + (LONG)math::round( nh );
+      return TRUE;
+    }
+    return detour->original_( wnd, msg, wparam, lparam );
+  }
+
   void Gfx::preInitialize()
   {
     info_.clear();
@@ -102,6 +191,8 @@ namespace neko {
     window_->setFramerateLimit( 0 ); // no sleep till Brooklyn
 
     window_->setActive( true );
+    auto handle = window_->getSystemHandle();
+    detour = new WindowProcDetour( handle, wndProc );
 
     glbinding::initialize( nullptr );
 
