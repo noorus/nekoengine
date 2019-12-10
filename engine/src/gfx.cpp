@@ -38,7 +38,8 @@ namespace neko {
   // 131185: Buffer detailed info...
   // 131218: Program/shader state performance warning...
   // 131204: The texture object does not have a defined base level...
-  const std::array<GLuint, 3> c_ignoredGlDebugMessages = { 131185, 131218, 131204 };
+  // 131154: Pixel-path performance warning: Pixel transfer is synchronized with 3D rendering.
+  const std::array<GLuint, 4> c_ignoredGlDebugMessages = { 131185, 131218, 131204, 131154 };
 
   void Gfx::openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
     const GLchar* message, const void* userParam )
@@ -202,7 +203,7 @@ namespace neko {
     lastCapture_.buffer_.resize( lastCapture_.size_.w * lastCapture_.size_.h * 4 * sizeof( uint8_t ) );
     glReadnPixels( 0, 0,
       lastCapture_.size_.w, lastCapture_.size_.h,
-      GL_RGBA, GL_UNSIGNED_BYTE,
+      GL_BGRA, GL_UNSIGNED_BYTE,
       (GLsizei)lastCapture_.buffer_.size(), lastCapture_.buffer_.data() );
     return lastCapture_;
   }
