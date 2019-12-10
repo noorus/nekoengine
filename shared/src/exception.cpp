@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "neko_exception.h"
+#ifdef NEKO_PLATFORM_WINDOWS
+# include "windows.h"
+#endif
 
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  { e, s },
@@ -17,11 +20,25 @@ namespace neko {
   {
   }
 
-  Exception::Exception( const string& description, const string& source ) :
+  Exception::Exception( const string& description, const string& source, Exception::Type type ) :
     description_( description ), source_( source )
   {
+#ifdef NEKO_PLATFORM_WINDOWS
+    if ( type == Exception::Type_WinAPI )
+    {
+      LPSTR message = nullptr;
+      auto code = GetLastError();
+      FormatMessageA(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL, code, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
+        (LPSTR)&message, 0, NULL );
+      description_.append( message );
+      LocalFree( message );
+    }
+#endif
   }
-
 
   Exception::Exception( const string& description, FT_Error error, const string& source ):
     description_( description ), source_( source )
