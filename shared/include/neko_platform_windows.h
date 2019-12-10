@@ -98,6 +98,69 @@ namespace neko {
       ~Thread();
     };
 
+    //! \class SnapshotPainter
+    //! \brief Stores an arbitrary bitmap image and can paint it resized onto another DC later.
+    //!        Used to crudely scale last render of window contents when drag-sizing the render window.
+    class SnapshotPainter {
+    private:
+      HDC dc_;
+      HBITMAP hbitmap_;
+      uint8_t* buffer_;
+      size2i size_;
+    public:
+      SnapshotPainter(): dc_( nullptr ), hbitmap_( nullptr ), buffer_( nullptr ), size_() {}
+      void reset()
+      {
+        if ( hbitmap_ )
+        {
+          DeleteObject( hbitmap_ );
+          hbitmap_ = nullptr;
+          buffer_ = nullptr;
+        }
+        if ( dc_ )
+        {
+          DeleteDC( dc_ );
+          dc_ = nullptr;
+        }
+      }
+      void store( HDC windowDC, size2i size, const vector<uint8_t>& data )
+      {
+        size_ = size;
+        dc_ = CreateCompatibleDC( windowDC );
+        BITMAPINFOHEADER header = { 0 };
+        header.biSize = sizeof( BITMAPINFOHEADER );
+        header.biWidth = (LONG)size_.w;
+        header.biHeight = (LONG)size_.h;
+        header.biPlanes = 1;
+        header.biBitCount = 32;
+        header.biCompression = BI_RGB;
+        hbitmap_ = CreateDIBSection( windowDC, (BITMAPINFO*)( &header ), DIB_RGB_COLORS, (void**)&buffer_, nullptr, 0 );
+        if ( !hbitmap_ || !buffer_ )
+          NEKO_WINAPI_EXCEPT( "CreateDIBSection failed" );
+        memcpy( buffer_, data.data(), data.size() );
+      }
+      void paint( HDC dc, size2i size )
+      {
+        if ( !hbitmap_ )
+          return;
+        auto oldbmp = SelectObject( dc_, hbitmap_ );
+        StretchBlt(
+          dc, 0, 0, size.w, size.h,
+          dc_, 0, 0, size_.w, size_.h,
+          SRCCOPY );
+        SelectObject( dc_, oldbmp );
+      }
+      ~SnapshotPainter()
+      {
+        reset();
+      }
+    };
+
+    class RenderWindowEventRecipient {
+    public:
+      virtual const Image& renderWindowReadPixels() = 0;
+    };
+
     class RenderWindowHandler {
     private:
       size2i resolution_;
@@ -108,10 +171,18 @@ namespace neko {
       WNDPROC originalProc_;
       void getWindowBordersSize( HWND window, size2i& size, bool withClient );
       void wmSizing( WPARAM wparam, LPARAM lparam );
+      void wmEnterSizeMove();
+      void wmExitSizeMove();
+      bool wmPaint();
+      bool resizing_;
+      size2i lastSize_;
+      void checkStartSizing();
+      RenderWindowEventRecipient* target_;
+      SnapshotPainter snapshotPainter_;
     public:
       RenderWindowHandler();
       void changeTargetResolution( const size2i targetResolution );
-      void setWindow( HWND window );
+      void setWindow( RenderWindowEventRecipient* callback, HWND window );
     private:
       static LRESULT wndProc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam );
       static RenderWindowHandler* instance_;

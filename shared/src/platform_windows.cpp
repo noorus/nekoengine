@@ -148,7 +148,8 @@ namespace neko {
 
     RenderWindowHandler* RenderWindowHandler::instance_ = nullptr;
 
-    RenderWindowHandler::RenderWindowHandler(): window_( 0 ), originalProc_( nullptr ),
+    RenderWindowHandler::RenderWindowHandler():
+      window_( 0 ), originalProc_( nullptr ),
       vaspect_( 0.0f ), haspect_( 0.0f ), resolution_(), borders_()
     {
     }
@@ -176,6 +177,7 @@ namespace neko {
 
     void RenderWindowHandler::wmSizing( WPARAM wparam, LPARAM lparam )
     {
+      checkStartSizing();
       auto rect = (RECT*)lparam;
       auto dw = float( rect->right - rect->left );
       auto dh = float( rect->bottom - rect->top );
@@ -217,6 +219,47 @@ namespace neko {
       }
       rect->right = rect->left + (LONG)math::round( nw );
       rect->bottom = rect->top + (LONG)math::round( nh );
+      lastSize_ = size2i( *rect );
+      RECT newClientRect = { 0, 0, (LONG)lastSize_.w, (LONG)lastSize_.h };
+      InvalidateRect( window_, &newClientRect, FALSE );
+    }
+
+    void RenderWindowHandler::checkStartSizing()
+    {
+      if ( !resizing_ )
+      {
+        resizing_ = true;
+        auto img = &target_->renderWindowReadPixels();
+        auto dc = GetDC( window_ );
+        snapshotPainter_.reset();
+        snapshotPainter_.store( dc, img->size_, img->buffer_ );
+        resizing_ = true;
+        ReleaseDC( window_, dc );
+      }
+    }
+
+    void RenderWindowHandler::wmEnterSizeMove()
+    {
+      checkStartSizing();
+    }
+
+    void RenderWindowHandler::wmExitSizeMove()
+    {
+      resizing_ = false;
+      InvalidateRect( window_, nullptr, FALSE );
+    }
+
+    bool RenderWindowHandler::wmPaint()
+    {
+      if ( resizing_ )
+      {
+        PAINTSTRUCT ps;
+        auto dc = BeginPaint( window_, &ps );
+        snapshotPainter_.paint( dc, lastSize_ );
+        EndPaint( window_, &ps );
+        return true;
+      } else
+        return false;
     }
 
     LRESULT RenderWindowHandler::wndProc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
@@ -226,11 +269,29 @@ namespace neko {
         get().wmSizing( wparam, lparam );
         return TRUE;
       }
+      else if ( msg == WM_ENTERSIZEMOVE )
+      {
+        get().wmEnterSizeMove();
+      }
+      else if ( msg == WM_EXITSIZEMOVE )
+      {
+        get().wmExitSizeMove();
+      }
+      else if ( msg == WM_ERASEBKGND )
+      {
+        return 1;
+      }
+      else if ( msg == WM_PAINT )
+      {
+        if ( get().wmPaint() )
+          return 0;
+      }
       return get().originalProc_( wnd, msg, wparam, lparam );
     }
 
-    void RenderWindowHandler::setWindow( HWND window )
+    void RenderWindowHandler::setWindow( RenderWindowEventRecipient* callback, HWND window )
     {
+      target_ = callback;
       if ( window_ )
       {
         SetWindowLongPtrW( window_, GWLP_WNDPROC, reinterpret_cast<DWORD_PTR>( originalProc_ ) );

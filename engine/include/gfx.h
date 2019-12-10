@@ -2,12 +2,10 @@
 #include "subsystem.h"
 #include "forwards.h"
 #include "gfx_types.h"
+#include "neko_types.h"
+#include "neko_platform.h"
 
 namespace neko {
-
-  NEKO_EXTERN_CONVAR( vid_screenwidth );
-  NEKO_EXTERN_CONVAR( vid_screenheight );
-  NEKO_EXTERN_CONVAR( gl_debuglog );
 
   struct Viewport {
     vec2i size_;
@@ -15,7 +13,7 @@ namespace neko {
     Viewport( size_t width, size_t height ): size_( width, height ) {}
   };
 
-  class Gfx: public Subsystem {
+  class Gfx: public Subsystem, public platform::RenderWindowEventRecipient {
   public:
     struct Info {
       string renderer_;
@@ -35,6 +33,7 @@ namespace neko {
     CameraPtr camera_;
     RendererPtr renderer_;
     Viewport viewport_;
+    Image lastCapture_;
     void preInitialize();
     void printInfo();
     void resize( size_t width, size_t height );
@@ -49,9 +48,10 @@ namespace neko {
   public:
     void postInitialize();
     Gfx( EnginePtr engine );
-    virtual void preUpdate( GameTime time ) override;
-    virtual void tick( GameTime tick, GameTime time ) override;
-    virtual void postUpdate( GameTime delta, GameTime tick ) override;
+    const Image& renderWindowReadPixels() override;
+    void preUpdate( GameTime time ) override;
+    void tick( GameTime tick, GameTime time ) override;
+    void postUpdate( GameTime delta, GameTime tick ) override;
     void shutdown();
     void restart();
     virtual ~Gfx();

@@ -107,8 +107,8 @@ namespace neko {
 
     const auto targetResolution = size2i( 1920, 1080 );
 
+    platform::RenderWindowHandler::get().setWindow( this, window_->getSystemHandle() );
     platform::RenderWindowHandler::get().changeTargetResolution( targetResolution );
-    platform::RenderWindowHandler::get().setWindow( window_->getSystemHandle() );
 
     glbinding::initialize( nullptr );
 
@@ -195,13 +195,25 @@ namespace neko {
     window_->display();
   }
 
+  const Image& Gfx::renderWindowReadPixels()
+  {
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    lastCapture_.size_ = size2i( viewport_.size_ );
+    lastCapture_.buffer_.resize( lastCapture_.size_.w * lastCapture_.size_.h * 4 * sizeof( uint8_t ) );
+    glReadnPixels( 0, 0,
+      lastCapture_.size_.w, lastCapture_.size_.h,
+      GL_RGBA, GL_UNSIGNED_BYTE,
+      (GLsizei)lastCapture_.buffer_.size(), lastCapture_.buffer_.data() );
+    return lastCapture_;
+  }
+
   void Gfx::shutdown()
   {
     engine_->operationSuspendVideo();
 
     camera_.reset();
 
-    platform::RenderWindowHandler::get().setWindow( nullptr );
+    platform::RenderWindowHandler::get().setWindow( nullptr, nullptr );
 
     window_->close();
     window_.reset();

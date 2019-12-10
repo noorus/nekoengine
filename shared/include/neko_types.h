@@ -232,9 +232,22 @@ namespace neko {
     {
       return ( w >= rhs.w && h >= rhs.h );
     }
+    inline size2i& operator = ( const int64_t scalar )
+    {
+      w = scalar;
+      h = scalar;
+      return *this;
+    }
 #ifdef NEKO_PLATFORM_WINDOWS
     inline size2i( const SIZE& sz ): w( sz.cx ), h( sz.cy ) {}
+    inline size2i( const RECT& rect ): w( rect.right - rect.left ), h( rect.bottom - rect.top ) {}
 #endif
+  };
+
+  struct Image {
+    size2i size_;
+    vector<uint8_t> buffer_;
+    Image(): size_() {}
   };
 
   enum CharacterConstants {
