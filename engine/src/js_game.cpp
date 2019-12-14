@@ -2,6 +2,8 @@
 #include "js_console.h"
 #include "js_util.h"
 #include "js_game.h"
+#include "scripting.h"
+#include "console.h"
 
 namespace neko {
 
@@ -72,14 +74,23 @@ namespace neko {
 
       for ( int i = 0; i < args.Length(); i++ )
       {
-        auto maybeObj = args[0]->ToObject( context );
-        auto name = util::extractStringMember( isolate, funcName, maybeObj, "name" );
+        auto maybeObj   = args[0]->ToObject( context );
+        auto name       = util::extractStringMember( isolate, funcName, maybeObj, "name" );
         auto initialize = util::extractFunctionMember( isolate, funcName, maybeObj, "initialize" );
-        auto update = util::extractFunctionMember( isolate, funcName, maybeObj, "update" );
+        auto update     = util::extractFunctionMember( isolate, funcName, maybeObj, "update" );
+        auto enter      = util::extractFunctionMember( isolate, funcName, maybeObj, "enter" );
+        auto leave      = util::extractFunctionMember( isolate, funcName, maybeObj, "leave" );
+
+        if ( scenes_.find( name ) != scenes_.end() )
+          util::throwException( isolate, ( "registerScene: Scene named \"" + name + "\" already exists" ).c_str() );
+
         Scene scene( name );
         scene.fnInitialize_.Reset( isolate, initialize );
         scene.fnUpdate_.Reset( isolate, update );
+        scene.fnEnter_.Reset( isolate, enter );
+        scene.fnLeave_.Reset( isolate, leave );
         scene.validate();
+
         scenes_[name] = move( scene );
       }
 
@@ -93,6 +104,8 @@ namespace neko {
       {
         if ( !scene.second.initialized_ )
         {
+          getScriptContext( context->GetIsolate() )->console_->printf( neko::Console::srcScripting,
+            "Initializing scene %s", scene.second.name().c_str() );
           scene.second.initialize( context, time );
           scene.second.initialized_ = true;
         }

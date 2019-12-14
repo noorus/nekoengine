@@ -18,7 +18,8 @@ Console.print(nm.eq(x,y));
 x = vec2(2,2);
 Console.print(y.equals(x));*/
 
-class Scene {
+class Scene
+{
   constructor( name )
   {
     this._name = name;
@@ -29,14 +30,20 @@ class Scene {
   }
 }
 
-class DemoScene extends Scene {
+class DemoScene extends Scene
+{
   constructor( name )
   {
-    super(name);
+    super( name );
   }
   initialize(time)
   {
-    Console.print("SCRIPT: "+this._name+" INITIALIZE "+time);
+  }
+  enter()
+  {
+  }
+  leave()
+  {
   }
   update(time, delta)
   {

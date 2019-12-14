@@ -15,6 +15,8 @@ namespace neko {
     public:
       v8::Global<v8::Function> fnInitialize_;
       v8::Global<v8::Function> fnUpdate_;
+      v8::Global<v8::Function> fnEnter_;
+      v8::Global<v8::Function> fnLeave_;
       bool initialized_;
     private:
       utf8String name_;
@@ -24,6 +26,7 @@ namespace neko {
       void validate();
       void initialize( V8Context& ctx, GameTime time );
       void update( V8Context& ctx, GameTime time, GameTime delta );
+      inline const utf8String& name() const { return name_; }
     };
 
     using SceneMap = map<string, Scene>;
