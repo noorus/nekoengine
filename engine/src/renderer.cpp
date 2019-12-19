@@ -457,12 +457,13 @@ namespace neko {
     glDisable( GL_LINE_SMOOTH );
     glDisable( GL_POLYGON_SMOOTH );
 
+    // Default to empty VAO, since not having a bound VAO is illegal per 4.5 spec
+    glBindVertexArray( builtin_.emptyVAO_ );
+
     // Draw the scene inside the framebuffer.
     g_framebuf->begin();
     sceneDraw( camera );
     g_framebuf->end();
-
-    glBindVertexArray( builtin_.emptyVAO_ );
 
     // Framebuffer has been unbound, now draw to the default context, the window.
     glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );

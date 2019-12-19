@@ -49,6 +49,7 @@ namespace neko {
     void postInitialize();
     Gfx( EnginePtr engine );
     const Image& renderWindowReadPixels() override;
+    void processEvents(); //!< Process vital window events and such.
     void preUpdate( GameTime time ) override;
     void tick( GameTime tick, GameTime time ) override;
     void postUpdate( GameTime delta, GameTime tick ) override;

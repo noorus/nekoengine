@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "fontmanager.h"
 #include "console.h"
+#include "messaging.h"
 
 namespace neko {
 
@@ -161,10 +162,9 @@ namespace neko {
     glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
   }
 
-  void Gfx::tick( GameTime tick, GameTime time )
+  void Gfx::processEvents()
   {
     sf::Event evt;
-
     while ( window_->pollEvent( evt ) )
     {
       if ( evt.type == sf::Event::Closed )
@@ -174,8 +174,19 @@ namespace neko {
         resize( evt.size.width, evt.size.height );
         flags_.resized = true;
       }
+      else if ( evt.type == sf::Event::LostFocus )
+      {
+        engine_->msgs()->send( M_Window_LostFocus );
+      }
+      else if ( evt.type == sf::Event::GainedFocus )
+      {
+        engine_->msgs()->send( M_Window_GainedFocus );
+      }
     }
+  }
 
+  void Gfx::tick( GameTime tick, GameTime time )
+  {
     camera_->update( tick, time );
   }
 

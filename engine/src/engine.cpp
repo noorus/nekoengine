@@ -6,6 +6,7 @@
 #include "gfx.h"
 #include "scripting.h"
 #include "loader.h"
+#include "messaging.h"
 
 namespace neko {
 
@@ -45,6 +46,10 @@ namespace neko {
     loader_ = make_shared<ThreadedLoader>();
     loader_->start();
 
+    messaging_ = make_shared<Messaging>( shared_from_this() );
+    Locator::provideMessaging( messaging_ ); // WARN Technically a bad pattern, but fine as long as there's one Engine
+    messaging_->listen( this );
+
     timer.start();
     gfx_ = make_shared<Gfx>( shared_from_this() );
     gfx_->postInitialize();
@@ -75,6 +80,32 @@ namespace neko {
     signalStop();
   }
 
+  void Engine::onMessage( const Message& msg )
+  {
+    switch ( msg.code )
+    {
+      case M_Window_LostFocus:
+        state_.focusLost = true;
+        break;
+      case M_Window_GainedFocus:
+        state_.focusLost = false;
+        break;
+      case M_Window_EnterMove:
+        state_.windowMove = true;
+        break;
+      case M_Window_ExitMove:
+        state_.windowMove = false;
+        break;
+    }
+  }
+
+  bool Engine::paused()
+  {
+    if ( state_.focusLost || state_.windowMove )
+      return true;
+    return false;
+  }
+
   void Engine::run()
   {
     clock_.init();
@@ -88,24 +119,25 @@ namespace neko {
       console_->executeBuffered();
 
       delta = clock_.update();
-      if ( delta > 1.0 )
-      {
-        console_->print( Console::srcEngine, "Ignoring frame update, delta > 1.0" );
-        continue;
-      }
+
+      gfx_->processEvents();
+      messaging_->processEvents();
 
       scripting_->preUpdate( time_ );
       fonts_->prepare( time_ );
       gfx_->preUpdate( time_ );
 
-      accumulator += delta;
-
-      while ( accumulator >= cLogicStep )
+      if ( !paused() )
       {
-        scripting_->tick( cLogicStep, time_ );
-        gfx_->tick( cLogicStep, time_ );
-        time_ += cLogicStep;
-        accumulator -= cLogicStep;
+        accumulator += delta;
+        while ( accumulator >= cLogicStep )
+        {
+          scripting_->tick( cLogicStep, time_ );
+          messaging_->tick( cLogicStep, time_ );
+          gfx_->tick( cLogicStep, time_ );
+          time_ += cLogicStep;
+          accumulator -= cLogicStep;
+        }
       }
 
       scripting_->postUpdate( delta, time_ );
@@ -132,6 +164,9 @@ namespace neko {
     gfx_.reset();
 
     fonts_.reset();
+
+    messaging_.reset();
+    Locator::provideMessaging( MessagingPtr() );
 
     console_->resetEngine();
   }

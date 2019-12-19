@@ -3,12 +3,13 @@
 #include "forwards.h"
 #include "subsystem.h"
 #include "console.h"
+#include "messaging.h"
 
 namespace neko {
 
   //! \class Engine
   //! The main engine class that makes the world go round
-  class Engine: public enable_shared_from_this<Engine> {
+  class Engine: public enable_shared_from_this<Engine>, public Listener {
   public:
     //! Possible signal values interpreted by the engine's gameloop
     enum Signal {
@@ -30,10 +31,20 @@ namespace neko {
     ScriptingPtr scripting_;
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
+    MessagingPtr messaging_;
   protected:
+    struct State {
+      bool focusLost;
+      bool windowMove;
+      State(): focusLost( false ), windowMove( false ) {}
+    } state_;
     platform::PerformanceClock clock_;
     GameTime time_;
     volatile Signal signal_;
+    bool paused();
+  protected:
+    //! Message listener callback.
+    void onMessage( const Message& msg ) override;
   public:
     inline ConsolePtr console() throw() { return console_; }
     inline GfxPtr gfx() throw() { return gfx_; }
@@ -41,6 +52,7 @@ namespace neko {
     inline GameTime time() const throw() { return time_; }
     inline ThreadedLoaderPtr loader() throw() { return loader_; }
     inline FontManagerPtr fonts() throw() { return fonts_; }
+    inline MessagingPtr msgs() throw( ) { return messaging_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console );

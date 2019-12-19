@@ -186,6 +186,7 @@
     <ClCompile Include="src\memory.cpp" />
     <ClCompile Include="src\meshgenerator.cpp" />
     <ClCompile Include="src\meshmanager.cpp" />
+    <ClCompile Include="src\messaging.cpp" />
     <ClCompile Include="src\renderbuffer.cpp" />
     <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\script.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="include\materials.h" />
     <ClInclude Include="include\memory.h" />
     <ClInclude Include="include\meshmanager.h" />
+    <ClInclude Include="include\messaging.h" />
     <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\renderbuffer.h" />
     <ClInclude Include="include\renderer.h" />

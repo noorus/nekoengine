@@ -30,6 +30,15 @@ namespace neko {
     colorBuffer_ = make_shared<Texture>( renderer_, width_, height_, PixFmtColorRGB8, nullptr, Texture::ClampEdge, Texture::Nearest );
     depthBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepth32f );
 
+    array<GLenum, 32> drawBuffers;
+    auto colorHandle = colorBuffer_->handle();
+    for ( unsigned int i = 0; i < 1; ++i )
+    {
+      drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+    }
+
+    glNamedFramebufferDrawBuffers( handle_, 1, drawBuffers.data() );
+
     glNamedFramebufferTexture( handle_, GL_COLOR_ATTACHMENT0, colorBuffer_->handle(), 0 );
     glNamedFramebufferRenderbuffer( handle_, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_->handle() );
   }

@@ -4,6 +4,8 @@
 
 #include "neko_platform_windows.h"
 #include "neko_exception.h"
+#include "messaging.h"
+#include "locator.h"
 
 #include <windows.h>
 #include <unknwn.h>
@@ -149,7 +151,7 @@ namespace neko {
     RenderWindowHandler* RenderWindowHandler::instance_ = nullptr;
 
     RenderWindowHandler::RenderWindowHandler():
-      window_( 0 ), originalProc_( nullptr ),
+      window_( nullptr ), originalProc_( nullptr ),
       vaspect_( 0.0f ), haspect_( 0.0f ), resolution_(), borders_()
     {
     }
@@ -233,8 +235,9 @@ namespace neko {
         auto dc = GetDC( window_ );
         snapshotPainter_.reset();
         snapshotPainter_.store( dc, img->size_, img->buffer_ );
-        resizing_ = true;
         ReleaseDC( window_, dc );
+        if ( Locator::hasMessaging() )
+          Locator::messaging().send( M_Window_EnterMove );
       }
     }
 
@@ -247,6 +250,8 @@ namespace neko {
     {
       resizing_ = false;
       InvalidateRect( window_, nullptr, FALSE );
+      if ( Locator::hasMessaging() )
+        Locator::messaging().send( M_Window_ExitMove );
     }
 
     bool RenderWindowHandler::wmPaint()

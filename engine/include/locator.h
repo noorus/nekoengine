@@ -10,6 +10,7 @@ namespace neko {
   private:
     static MemoryPtr memoryService_; //!< Currently provided memory service.
     static ConsolePtr consoleService_; //!< Currently provided console service.
+    static MessagingPtr messagingService_; //!< Currently provided messaging service.
   public:
     static const bool hasMemory() throw() { return ( memoryService_ ? true : false ); }
     static Memory& memory() { return *memoryService_; }
@@ -22,6 +23,12 @@ namespace neko {
     static void provideConsole( ConsolePtr console )
     {
       consoleService_ = move( console );
+    }
+    static const bool hasMessaging() throw( ) { return ( messagingService_ ? true : false ); }
+    static Messaging& messaging() { return *messagingService_; }
+    static void provideMessaging ( MessagingPtr messaging )
+    {
+      messagingService_ = move( messaging );
     }
   };
 

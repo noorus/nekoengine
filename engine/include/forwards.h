@@ -39,4 +39,7 @@ namespace neko {
   class FontManager;
   using FontManagerPtr = shared_ptr<FontManager>;
 
+  class Messaging;
+  using MessagingPtr = shared_ptr<Messaging>;
+
 }
