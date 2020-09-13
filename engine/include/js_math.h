@@ -80,9 +80,63 @@ namespace neko {
 
     using Vector2Ptr = shared_ptr<Vector2>;
 
+    //! \class Vector3
+    //! \brief Implementation of JavaScript vec3().
+    class Vector3 : public DynamicObjectWrapper<Vector3, vec3>
+    {
+    private:
+      vec3 v_; //!< Internal vec3.
+    protected:
+      //! Properties
+      void js_getX( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setX( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getY( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setY( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getZ( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setZ( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      //! Comparisons
+      void js_equals( const V8CallbackArgs& args );
+      void js_greater( const V8CallbackArgs& args );
+      void js_greaterOrEqual( const V8CallbackArgs& args );
+      void js_lesser( const V8CallbackArgs& args );
+      void js_lesserOrEqual( const V8CallbackArgs& args );
+      //! Functions
+      void js_toString( const V8CallbackArgs& args );
+      void js_length( const V8CallbackArgs& args );
+      void js_distance( const V8CallbackArgs& args );
+      void js_normalise( const V8CallbackArgs& args );
+      void js_normalisedCopy( const V8CallbackArgs& args );
+      void js_midPoint( const V8CallbackArgs& args );
+      void js_angleBetween( const V8CallbackArgs& args );
+      void js_makeFloor( const V8CallbackArgs& args );
+      void js_makeCeil( const V8CallbackArgs& args );
+
+    public:
+      static void jsConstructor( const V8CallbackArgs& info );
+      static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
+
+    public:
+      Vector3( const vec3& source ): v_( source ) {}
+      Vector3(): v_( 0.0f, 0.0f, 0.0f ) {}
+      inline void setFrom( const vec3& other )
+      {
+        v_.x = other.x;
+        v_.y = other.y;
+        v_.z = other.z;
+      }
+      inline vec3& v() { return v_; } //!< Get the internal vec3.
+      inline operator vec3() const { return v_; }
+    };
+
+    using Vector3Ptr = shared_ptr<Vector3>;
+
     //! Expect and extract a Vector2 object as args[arg],
     //! throw JS exception and return null on failure.
     Vector2Ptr extractVector2( int arg, const V8CallbackArgs& args );
+
+    //! Expect and extract a Vector3 object as args[arg],
+    //! throw JS exception and return null on failure.
+    Vector3Ptr extractVector3( int arg, const V8CallbackArgs& args );
 
     template <class T>
     inline shared_ptr<T> extractWrappedDynamic( V8Context& context, const V8Value& value )

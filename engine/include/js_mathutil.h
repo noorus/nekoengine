@@ -68,6 +68,12 @@ namespace neko {
           auto robj = extractWrappedDynamic<Vector2>( context, rhs );
           retval = glm::all( glm::equal( lobj->v(), robj->v() ) );
         }
+        else if ( type == Wrapped_Vector3 )
+        {
+          auto lobj = extractWrappedDynamic<Vector3>( context, lhs );
+          auto robj = extractWrappedDynamic<Vector3>( context, rhs );
+          retval = glm::all( glm::equal( lobj->v(), robj->v() ) );
+        }
 
         return retval;
       }
@@ -84,6 +90,12 @@ namespace neko {
           auto robj = extractWrappedDynamic<Vector2>( context, rhs );
           retval = glm::all( orEqual ? glm::greaterThanEqual( lobj->v(), robj->v() ) : glm::greaterThan( lobj->v(), robj->v() ) );
         }
+        else if ( type == Wrapped_Vector3 )
+        {
+          auto lobj = extractWrappedDynamic<Vector3>( context, lhs );
+          auto robj = extractWrappedDynamic<Vector3>( context, rhs );
+          retval = glm::all( orEqual ? glm::greaterThanEqual( lobj->v(), robj->v() ) : glm::greaterThan( lobj->v(), robj->v() ) );
+        }
 
         return retval;
       }
@@ -98,6 +110,12 @@ namespace neko {
         {
           auto lobj = extractWrappedDynamic<Vector2>( context, lhs );
           auto robj = extractWrappedDynamic<Vector2>( context, rhs );
+          retval = glm::all( orEqual ? glm::lessThanEqual( lobj->v(), robj->v() ) : glm::lessThan( lobj->v(), robj->v() ) );
+        }
+        else if ( type == Wrapped_Vector3 )
+        {
+          auto lobj = extractWrappedDynamic<Vector3>( context, lhs );
+          auto robj = extractWrappedDynamic<Vector3>( context, rhs );
           retval = glm::all( orEqual ? glm::lessThanEqual( lobj->v(), robj->v() ) : glm::lessThan( lobj->v(), robj->v() ) );
         }
 

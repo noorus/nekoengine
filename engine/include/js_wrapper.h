@@ -13,6 +13,7 @@ namespace neko {
       Wrapped_Math, //!< Static: JSMath
       Wrapped_Game,
       Wrapped_Vector2, //!< Dynamic: Vector2
+      Wrapped_Vector3, //!< Dynamic: Vector3
       Max_WrappedType
     };
 
