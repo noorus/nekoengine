@@ -17,9 +17,9 @@ namespace neko {
   };
 
   const ShaderMapper cShaderTypes[3] = {
-    { Shader::Vertex, GL_VERTEX_SHADER, "vertex" },
-    { Shader::Fragment, GL_FRAGMENT_SHADER, "fragment" },
-    { Shader::Geometry, GL_GEOMETRY_SHADER, "geometry" }
+    { Shader::Type::Vertex, GL_VERTEX_SHADER, "vertex" },
+    { Shader::Type::Fragment, GL_FRAGMENT_SHADER, "fragment" },
+    { Shader::Type::Geometry, GL_GEOMETRY_SHADER, "geometry" }
   };
 
   // Program
@@ -31,7 +31,7 @@ namespace neko {
 
   // Shaders
 
-  Shaders::Shaders( EnginePtr engine ): engine_( move( engine ) )
+  Shaders::Shaders( ConsolePtr console ): console_( move( console ) )
   {
   }
 
@@ -39,24 +39,24 @@ namespace neko {
   {
     GLboolean hasCompiler;
     glGetBooleanv( GL_SHADER_COMPILER, &hasCompiler );
-    engine_->console()->printf( Console::srcGfx, "Shader compiler supported: %s", hasCompiler == GL_TRUE ? "yes" : "no" );
+    console_->printf( Console::srcGfx, "Shader compiler supported: %s", hasCompiler == GL_TRUE ? "yes" : "no" );
     if ( hasCompiler != GL_TRUE )
       NEKO_EXCEPT( "Shader compiler is not present on this platform" );
 
     auto rootDirectory = platform::getCurrentDirectory();
     rootDirectory.append( R"(\data\shaders\)" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "default2d.vert" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "default2d.frag" );
+    shaders_.emplace_back( Shader::Type::Vertex, rootDirectory + "default2d.vert" );
+    shaders_.emplace_back( Shader::Type::Fragment, rootDirectory + "default2d.frag" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "default3d.vert" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "default3d.frag" );
+    shaders_.emplace_back( Shader::Type::Vertex, rootDirectory + "default3d.vert" );
+    shaders_.emplace_back( Shader::Type::Fragment, rootDirectory + "default3d.frag" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "mainframebuf2d.vert" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "mainframebuf2d.frag" );
+    shaders_.emplace_back( Shader::Type::Vertex, rootDirectory + "mainframebuf2d.vert" );
+    shaders_.emplace_back( Shader::Type::Fragment, rootDirectory + "mainframebuf2d.frag" );
 
-    shaders_.emplace_back( Shader::Vertex, rootDirectory + "text3d.vert" );
-    shaders_.emplace_back( Shader::Fragment, rootDirectory + "text3d.frag" );
+    shaders_.emplace_back( Shader::Type::Vertex, rootDirectory + "text3d.vert" );
+    shaders_.emplace_back( Shader::Type::Fragment, rootDirectory + "text3d.frag" );
 
     for ( auto& shader : shaders_ )
       compileShader( shader );
@@ -120,11 +120,11 @@ namespace neko {
     if ( blen > 1 )
     {
       GLsizei slen = 0;
-      auto compiler_log = (GLchar*)Locator::memory().alloc( Memory::Graphics, blen );
+      auto compiler_log = (GLchar*)Locator::memory().alloc( Memory::Sector::Graphics, blen );
       glGetInfoLogARB( target, blen, &slen, compiler_log );
       auto log = string( compiler_log );
-      Locator::memory().free( Memory::Graphics, compiler_log );
-      engine_->console()->printf( Console::srcGfx, "GL Shader error: %s", log.c_str() );
+      Locator::memory().free( Memory::Sector::Graphics, compiler_log );
+      console_->printf( Console::srcGfx, "GL Shader error: %s", log.c_str() );
     }
   }
 
@@ -165,7 +165,7 @@ namespace neko {
 
   void Shaders::compileShader( Shader& shader )
   {
-    engine_->console()->printf( Console::srcGfx,
+    console_->printf( Console::srcGfx,
         "Compiling %s shader %s",
       cShaderTypes[shader.type_].name.c_str(),
         shader.filename_.c_str() );
@@ -204,7 +204,7 @@ namespace neko {
 
   void Shaders::linkProgram( ShaderProgram& program )
   {
-    engine_->console()->printf( Console::srcGfx,
+    console_->printf( Console::srcGfx,
         "Linking program: %s", program.name.c_str() );
 
     linkProgram( shaders_[program.vp].id_, shaders_[program.fp].id_, program.id );

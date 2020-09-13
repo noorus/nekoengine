@@ -55,10 +55,10 @@ namespace neko {
   };
 
   struct ImageData {
-    unsigned int width_;
-    unsigned int height_;
+    unsigned int width_ = 0;
+    unsigned int height_ = 0;
     vector<uint8_t> data_;
-    PixelFormat format_;
+    PixelFormat format_ = PixFmtColorRGBA8;
   };
 
 }

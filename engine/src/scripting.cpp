@@ -25,7 +25,7 @@ namespace neko {
     Subsystem( move( engine ) ),
     v8::ArrayBuffer::Allocator()
   {
-    engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
+    engine_->console()->printf( Console::Source::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
 
     rootDirectory_ = platform::getCurrentDirectory();
     dataDirectory_ = rootDirectory_;
@@ -53,7 +53,7 @@ namespace neko {
   {
     global_ = make_shared<ScriptingContext>( this, this );
     global_->scriptDirectory_ = rootDirectory_;
-    global_->scriptDirectory_.append( "\\script\\" );
+    global_->scriptDirectory_.append( R"(\script\)" );
   }
 
   void Scripting::postInitialize()
@@ -66,17 +66,17 @@ namespace neko {
 
   void* Scripting::Allocate( size_t length )
   {
-    return Locator::memory().allocZeroed( Memory::Scripting, length );
+    return Locator::memory().allocZeroed( Memory::Sector::Scripting, length );
   }
 
   void* Scripting::AllocateUninitialized( size_t length )
   {
-    return Locator::memory().alloc( Memory::Scripting, length );
+    return Locator::memory().alloc( Memory::Sector::Scripting, length );
   }
 
   void Scripting::Free( void* data, size_t length )
   {
-    Locator::memory().free( Memory::Scripting, data );
+    Locator::memory().free( Memory::Sector::Scripting, data );
   }
 
   void Scripting::shutdown()

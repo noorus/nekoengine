@@ -8,6 +8,23 @@ namespace neko {
 
   namespace platform {
 
+    namespace api {
+
+      using fnGetDpiForSystem = UINT( WINAPI* )( VOID );
+      using fnSetThreadDpiAwarenessContext = DPI_AWARENESS_CONTEXT( WINAPI* )( DPI_AWARENESS_CONTEXT );
+
+      struct WinapiCalls
+      {
+        fnGetDpiForSystem pfnGetDpiForSystem = nullptr;
+        fnSetThreadDpiAwarenessContext pfnSetThreadDpiAwarenessContext = nullptr;
+      };
+
+      extern WinapiCalls g_calls;
+
+      void initialize();
+
+    }
+
     void initialize();
     void prepareProcess();
     void shutdown();
@@ -145,8 +162,8 @@ namespace neko {
           return;
         auto oldbmp = SelectObject( dc_, hbitmap_ );
         StretchBlt(
-          dc, 0, 0, size.w, size.h,
-          dc_, 0, 0, size_.w, size_.h,
+          dc, 0, 0, (int)size.w, (int)size.h,
+          dc_, 0, 0, (int)size_.w, (int)size_.h,
           SRCCOPY );
         SelectObject( dc_, oldbmp );
       }
@@ -369,7 +386,7 @@ namespace neko {
         uint32_t length = ( (uint32_t)size_ - pos );
         ret.resize( length );
         DWORD read = 0;
-        if ( ReadFile( file_, (LPVOID)ret.data(), length, &read, nullptr ) != TRUE || read != length )
+        if ( ReadFile( file_, (LPVOID)ret.data(), (DWORD)length, &read, nullptr ) != TRUE || read != length )
           NEKO_EXCEPT( "File read failed or length mismatch" );
         return move( ret );
       }
@@ -377,7 +394,7 @@ namespace neko {
       {
         out.resize( size_ );
         DWORD read = 0;
-        if ( ReadFile( file_, (LPVOID)out.data(), size_, &read, nullptr ) != TRUE || read != size_ )
+        if ( ReadFile( file_, (LPVOID)out.data(), (DWORD)size_, &read, nullptr ) != TRUE || read != size_ )
           NEKO_EXCEPT( "File read failed or length mismatch" );
       }
     };

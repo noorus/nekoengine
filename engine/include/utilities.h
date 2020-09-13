@@ -70,7 +70,7 @@ namespace neko {
       return result;
     }
 
-    inline uint32_t utf8_to_utf32( const char * character )
+    inline uint32_t utf8_to_utf32( const char* character )
     {
       uint32_t result = -1;
 
@@ -107,14 +107,16 @@ namespace neko {
       return result;
     }
 
-    class DumbBuffer {
+    class DumbBuffer
+    {
     private:
       Memory::Sector sector_;
       uint8_t* buffer_;
       size_t length_;
+
     public:
-      DumbBuffer( Memory::Sector sector, const vector<uint8_t>& source ):
-        sector_( sector ), buffer_( nullptr ), length_( 0 )
+      DumbBuffer( Memory::Sector sector, const vector<uint8_t>& source )
+          : sector_( sector ), buffer_( nullptr ), length_( 0 )
       {
         length_ = source.size();
         buffer_ = static_cast<uint8_t*>( Locator::memory().alloc( sector_, length_ ) );
@@ -134,7 +136,8 @@ namespace neko {
 
   //! \class ScopedRWLock
   //! Automation for scoped acquisition and release of an RWLock.
-  class ScopedRWLock: noncopyable {
+  class ScopedRWLock : noncopyable
+  {
   protected:
     platform::RWLock* lock_;
     bool exclusive_;
@@ -145,7 +148,7 @@ namespace neko {
     //! \param  lock      The lock to acquire.
     //! \param  exclusive (Optional) true to acquire in exclusive mode, false for shared.
     ScopedRWLock( platform::RWLock* lock, bool exclusive = true )
-      : lock_( lock ), exclusive_( exclusive ), locked_( true )
+        : lock_( lock ), exclusive_( exclusive ), locked_( true )
     {
       exclusive_ ? lock_->lock() : lock_->lockShared();
     }
@@ -164,12 +167,14 @@ namespace neko {
 
   //! \class TextFileWriter
   //! Simple text file writer that will append to existing files.
-  class TextFileWriter {
+  class TextFileWriter
+  {
   protected:
     platform::FileWriter impl_;
+
   public:
-    TextFileWriter( const string& filename ):
-      impl_( filename, true )
+    TextFileWriter( const string& filename )
+        : impl_( filename, true )
     {
     }
     inline void write( const string& str )
@@ -180,12 +185,14 @@ namespace neko {
 
   //! \class TextFileReader
   //! Simple text file reader that will read the full text file to memory and skip an utf-8 BOM.
-  class TextFileReader {
+  class TextFileReader
+  {
   protected:
     platform::FileReader impl_;
+
   public:
-    TextFileReader( const utf8String& filename ):
-      impl_( filename )
+    TextFileReader( const utf8String& filename )
+        : impl_( filename )
     {
     }
     inline utf8String readFullAssumeUtf8()
@@ -194,7 +201,7 @@ namespace neko {
       if ( str.length() < 3 )
         return str;
 
-      const uint8_t utf8BOM[3] = { 0xEF, 0xBB, 0xBF };
+      const uint8_t utf8BOM[3] = {0xEF, 0xBB, 0xBF};
       if ( memcmp( str.data(), utf8BOM, 3 ) == 0 )
         str.erase( 0, 3 );
 

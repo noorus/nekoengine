@@ -47,19 +47,19 @@ const char* LODEPNG_VERSION_STRING = "20190210";
 
 __forceinline void* lodepng_malloc( size_t size )
 {
-  return neko::Locator::memory().alloc( neko::Memory::Graphics, size );
+  return neko::Locator::memory().alloc( neko::Memory::Sector::Graphics, size );
 }
 
 constexpr inline void* lodepng_realloc( void* ptr, size_t new_size )
 {
   return ( !ptr
     ? lodepng_malloc( new_size )
-    : neko::Locator::memory().realloc( neko::Memory::Graphics, ptr, new_size ) );
+    : neko::Locator::memory().realloc( neko::Memory::Sector::Graphics, ptr, new_size ) );
 }
 
 __forceinline void lodepng_free( void* ptr )
 {
-  neko::Locator::memory().free( neko::Memory::Graphics, ptr );
+  neko::Locator::memory().free( neko::Memory::Sector::Graphics, ptr );
 }
 
 /* ////////////////////////////////////////////////////////////////////////// */

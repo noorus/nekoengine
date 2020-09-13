@@ -21,22 +21,6 @@ namespace neko {
     shutdown();
   }
 
-  void Engine::operationSuspendVideo()
-  {
-  }
-
-  void Engine::operationContinueVideo()
-  {
-  }
-
-  void Engine::operationSuspendAudio()
-  {
-  }
-
-  void Engine::operationContinueAudio()
-  {
-  }
-
   void Engine::initialize( const Options& options )
   {
     console_->setEngine( shared_from_this() );
@@ -51,14 +35,17 @@ namespace neko {
     messaging_->listen( this );
 
     timer.start();
-    gfx_ = make_shared<Gfx>( shared_from_this() );
-    gfx_->postInitialize();
-    console_->printf( Console::srcGfx, "Gfx init took %dms", (int)timer.stop() );
-
-    timer.start();
     fonts_ = make_shared<FontManager>( shared_from_this() );
     fonts_->initialize();
     console_->printf( Console::srcEngine, "Font manager init took %dms", (int)timer.stop() );
+
+    /*timer.start();
+    gfx_ = make_shared<Gfx>( loader_, fonts_, console_ );
+    gfx_->postInitialize();
+    console_->printf( Console::srcGfx, "Gfx init took %dms", (int)timer.stop() );*/
+
+    renderer_ = make_shared<ThreadedRenderer>( loader_, fonts_, messaging_, console_ );
+    renderer_->start();
 
 #ifndef NEKO_NO_SCRIPTING
     timer.start();
@@ -70,14 +57,9 @@ namespace neko {
     scripting_->postInitialize();
   }
 
-  void Engine::signalStop()
-  {
-    signal_ = Signal_Stop;
-  }
-
   void Engine::triggerFatalError( FatalError error )
   {
-    signalStop();
+    signal_ = Signal_Stop;
   }
 
   void Engine::onMessage( const Message& msg )
@@ -95,6 +77,9 @@ namespace neko {
         break;
       case M_Window_ExitMove:
         state_.windowMove = false;
+        break;
+      case M_Window_Close:
+        signal_ = Signal_Stop;
         break;
     }
   }
@@ -120,12 +105,12 @@ namespace neko {
 
       delta = clock_.update();
 
-      gfx_->processEvents();
+      //gfx_->processEvents();
       messaging_->processEvents();
 
       scripting_->preUpdate( time_ );
       fonts_->prepare( time_ );
-      gfx_->preUpdate( time_ );
+      //gfx_->preUpdate( time_ );
 
       if ( !paused() )
       {
@@ -134,7 +119,7 @@ namespace neko {
         {
           scripting_->tick( cLogicStep, time_ );
           messaging_->tick( cLogicStep, time_ );
-          gfx_->tick( cLogicStep, time_ );
+          //gfx_->tick( cLogicStep, time_ );
           time_ += cLogicStep;
           accumulator -= cLogicStep;
         }
@@ -142,9 +127,11 @@ namespace neko {
 
       scripting_->postUpdate( delta, time_ );
 
+      Sleep( 10 );
+
       if ( delta > 0.0 && signal_ != Signal_Stop )
       {
-        gfx_->postUpdate( delta, time_ );
+        //gfx_->postUpdate( delta, time_ );
       }
     }
   }
@@ -152,6 +139,9 @@ namespace neko {
   void Engine::shutdown()
   {
     scripting_.reset();
+
+    if ( renderer_ )
+      renderer_->stop();
 
     if ( loader_ )
       loader_->stop();
@@ -161,7 +151,7 @@ namespace neko {
     if ( fonts_ )
       fonts_->shutdown();
 
-    gfx_.reset();
+    renderer_.reset();
 
     fonts_.reset();
 

@@ -70,6 +70,7 @@ namespace neko {
   void ScriptingContext::registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global )
   {
     vec2Registry_.initialize( isolate_, global );
+    vec3Registry_.initialize( isolate_, global );
   }
 
   void ScriptingContext::registerContextGlobals( v8::Global<v8::Context>& globalContext )
@@ -101,6 +102,7 @@ namespace neko {
   ScriptingContext::~ScriptingContext()
   {
     vec2Registry_.clear();
+    vec3Registry_.clear();
     jsGame_.reset();
     jsConsole_.reset();
     jsMath_.reset();

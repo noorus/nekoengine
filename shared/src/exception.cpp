@@ -49,7 +49,11 @@ namespace neko {
   Exception::Exception( const string& description, gl::GLenum gle, const string& source ):
     description_( description ), source_( source )
   {
+#ifndef RELEASE
     description_.append( " (" + glbinding::aux::Meta::getString( gle ) + ")" );
+#else
+    description_.append( " (" + std::to_string( (unsigned int)gle ) + ")" );
+#endif
   }
 
   const string& Exception::getFullDescription() const

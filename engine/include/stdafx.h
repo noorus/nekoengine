@@ -82,22 +82,15 @@
 #include <any>
 #include <optional>
 
-// Boost
-#include <boost/utility.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/find.hpp>
-#include <boost/algorithm/clamp.hpp>
-#include <boost/random.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/variant.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/thread.hpp>
+// GSL
+#include <gsl/gsl>
 
 // OpenGL
 #include <glbinding/gl45core/gl.h>
 #include <glbinding/glbinding.h>
-#include <glbinding-aux/Meta.h>
+#ifndef RELEASE
+# include <glbinding-aux/Meta.h>
+#endif
 
 // SFML
 #include <SFML/System.hpp>

@@ -2,6 +2,7 @@
 #include "console.h"
 #include "utilities.h"
 #include "neko_exception.h"
+#include "neko_algorithm.h"
 #include "engine.h"
 
 // Used in the log filename and in the log startup banner.
@@ -209,7 +210,7 @@ namespace neko {
 
     for ( auto base : console->cvars_ )
     {
-      if ( boost::iequals( base->name(), arguments[1] ) )
+      if ( algorithm::iequals( base->name(), arguments[1] ) )
       {
         console->describe( base );
         return;
@@ -226,14 +227,11 @@ namespace neko {
       console->print( srcEngine, "Format: find <text>" );
       return;
     }
-    using StringRange = const boost::iterator_range<string::const_iterator>;
     for ( auto base : console->cvars_ )
     {
       for ( size_t i = 1; i < arguments.size(); i++ )
       {
-        if ( boost::ifind_first(
-          StringRange( base->name().begin(), base->name().end() ),
-          StringRange( arguments[i].begin(), arguments[i].end() ) ) )
+        if ( base->name().find( arguments[i] ) != utf8String::npos )
         {
           console->describe( base );
           break;
@@ -333,11 +331,11 @@ namespace neko {
   void Console::autoComplete( const string& line, CVarList& matches )
   {
     matches.clear();
-    auto trimmed = boost::trim_copy( line );
+    auto trimmed = algorithm::trim_copy( line );
     for ( ConBase* base : cvars_ )
     {
       auto comparison = base->name().substr( 0, trimmed.length() );
-      if ( boost::iequals( trimmed, comparison ) )
+      if ( algorithm::iequals( trimmed, comparison ) )
         matches.push_back( base );
     }
   }
@@ -467,7 +465,7 @@ namespace neko {
 
   void Console::execute( string commandLine, const bool echo )
   {
-    boost::trim( commandLine );
+    algorithm::trim( commandLine );
     if ( commandLine.empty() )
       return;
 
@@ -485,7 +483,7 @@ namespace neko {
     {
       if ( !base->isRegistered() )
         continue;
-      if ( boost::iequals( base->name(), command ) )
+      if ( algorithm::iequals( base->name(), command ) )
       {
         if ( base->isCommand() )
         {
@@ -564,7 +562,7 @@ namespace neko {
     {
       if ( content[i] != 0 && content[i] != LF && content[i] != CR )
       {
-        line.append( 1, content[i] );
+        line.append( 1, (const char)content[i] );
       }
       else if ( content[i] == LF )
       {
@@ -588,7 +586,7 @@ namespace neko {
     {
       if ( !base->isRegistered() )
         continue;
-      if ( boost::iequals( name, base->name() ) )
+      if ( algorithm::iequals( name, string_view( base->name() ) ) )
         return ( base->isCommand() ? nullptr : (ConVar*)base );
     }
 
@@ -601,7 +599,7 @@ namespace neko {
     {
       if ( !base->isRegistered() )
         continue;
-      if ( boost::iequals( name, base->name() ) )
+      if ( algorithm::iequals( name, string_view( base->name() ) ) )
         return ( base->isCommand() ? (ConCmd*)base : nullptr );
     }
 

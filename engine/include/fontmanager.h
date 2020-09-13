@@ -148,8 +148,8 @@ namespace neko {
       ALIGN_RIGHT
     };
 
-#define LCD_FILTERING_ON 3
-#define LCD_FILTERING_OFF 1
+constexpr auto LCD_FILTERING_ON = 3;
+constexpr auto LCD_FILTERING_OFF = 1;
 
     struct TextBuffer {
       // VertexBufferPtr buffer;

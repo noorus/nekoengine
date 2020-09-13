@@ -10,17 +10,17 @@ namespace neko {
 
   static void* ftMemoryAllocate( FT_Memory memory, long size )
   {
-    return Locator::memory().alloc( Memory::Graphics, size );
+    return Locator::memory().alloc( Memory::Sector::Graphics, size );
   }
 
   static void* ftMemoryReallocate( FT_Memory memory, long currentSize, long newSize, void* block )
   {
-    return Locator::memory().realloc( Memory::Graphics, block, newSize );
+    return Locator::memory().realloc( Memory::Sector::Graphics, block, newSize );
   }
 
   void ftMemoryFree( FT_Memory memory, void* block )
   {
-    Locator::memory().free( Memory::Graphics, block );
+    Locator::memory().free( Memory::Sector::Graphics, block );
   }
 
   FontManager::FontManager( EnginePtr engine ): engine_( move( engine ) ), freeType_( nullptr )

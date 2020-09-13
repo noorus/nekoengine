@@ -42,4 +42,7 @@ namespace neko {
   class Messaging;
   using MessagingPtr = shared_ptr<Messaging>;
 
+  class ThreadedRenderer;
+  using ThreadedRendererPtr = shared_ptr<ThreadedRenderer>;
+
 }

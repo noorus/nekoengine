@@ -62,6 +62,7 @@ namespace neko {
     js::JSMathPtr jsMath_;
     js::JSGamePtr jsGame_;
     js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
+    js::DynamicObjectsRegistry<js::Vector3, vec3> vec3Registry_;
   public:
     ConsolePtr console_;
     utf8String scriptDirectory_;
@@ -72,6 +73,7 @@ namespace neko {
     inline v8::Isolate* isolate() const throw() { return isolate_; }
     inline v8::Global<v8::Context>& ctx() throw() { return ctx_; }
     inline js::DynamicObjectsRegistry<js::Vector2, vec2>& vec2reg() { return vec2Registry_; }
+    inline js::DynamicObjectsRegistry<js::Vector3, vec3>& vec3reg() { return vec3Registry_; }
   };
 
   class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {

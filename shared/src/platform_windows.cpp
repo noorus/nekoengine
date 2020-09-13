@@ -9,16 +9,32 @@
 
 #include <windows.h>
 #include <unknwn.h>
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#define min(a,b) (((a) < (b)) ? (a) : (b))
+#define max( a, b ) ( ( ( a ) > ( b ) ) ? ( a ) : ( b ) )
+#define min( a, b ) ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
 #include <gdiplus.h>
 
-#pragma comment(lib, "comctl32.lib")
-#pragma comment(lib, "gdiplus.lib")
+#pragma comment( lib, "comctl32.lib" )
+#pragma comment( lib, "gdiplus.lib" )
 
 namespace neko {
 
   namespace platform {
+
+    namespace api {
+
+      WinapiCalls g_calls;
+
+      void initialize()
+      {
+        auto user32 = LoadLibraryW( L"user32.dll" );
+        if ( user32 )
+        {
+          g_calls.pfnGetDpiForSystem = (fnGetDpiForSystem)GetProcAddress( user32, "GetDpiForSystem" );
+          g_calls.pfnSetThreadDpiAwarenessContext = (fnSetThreadDpiAwarenessContext)GetProcAddress( user32, "SetThreadDpiAwarenessContext" );
+        }
+      }
+
+    }
 
     HINSTANCE g_instance = nullptr;
 
@@ -61,6 +77,7 @@ namespace neko {
 
     void initialize()
     {
+      api::initialize();
       initializeGUI();
     }
 
@@ -80,8 +97,8 @@ namespace neko {
 
     // Thread
 
-    Thread::Thread( const string& name, Callback callback, void* argument ):
-      thread_( nullptr ), id_( 0 ), name_( name ), callback_( callback ), argument_( argument )
+    Thread::Thread( const string& name, Callback callback, void* argument )
+        : thread_( nullptr ), id_( 0 ), name_( name ), callback_( callback ), argument_( argument )
     {
     }
 
@@ -104,8 +121,7 @@ namespace neko {
         NEKO_EXCEPT( "Thread resume failed" );
 
       HANDLE events[2] = {
-        run_.get(), thread_
-      };
+        run_.get(), thread_};
 
       auto wait = WaitForMultipleObjects( 2, events, FALSE, INFINITE );
       if ( wait == WAIT_OBJECT_0 )
@@ -150,9 +166,10 @@ namespace neko {
 
     RenderWindowHandler* RenderWindowHandler::instance_ = nullptr;
 
-    RenderWindowHandler::RenderWindowHandler():
-      window_( nullptr ), originalProc_( nullptr ),
-      vaspect_( 0.0f ), haspect_( 0.0f ), resolution_(), borders_()
+    RenderWindowHandler::RenderWindowHandler()
+        : window_( nullptr ), originalProc_( nullptr ),
+          vaspect_( 0.0f ), haspect_( 0.0f ), resolution_(), borders_(),
+          resizing_( false ), target_( nullptr )
     {
     }
 
@@ -169,12 +186,12 @@ namespace neko {
       auto exstyle = (DWORD)GetWindowLongW( window, GWL_EXSTYLE );
       RECT want;
       want.left = 100;
-      want.right = 100 + resolution_.w;
+      want.right = 100 + (LONG)resolution_.w;
       want.top = 100;
-      want.bottom = 100 + resolution_.h;
+      want.bottom = 100 + (LONG)resolution_.h;
       AdjustWindowRectEx( &want, style, FALSE, exstyle );
-      size.w = ( want.right - want.left - resolution_.w );
-      size.h = ( want.bottom - want.top - resolution_.h );
+      size.w = ( (int64_t)want.right - want.left - resolution_.w );
+      size.h = ( (int64_t)want.bottom - want.top - resolution_.h );
     }
 
     void RenderWindowHandler::wmSizing( WPARAM wparam, LPARAM lparam )
@@ -213,16 +230,16 @@ namespace neko {
         case WMSZ_TOP:
         case WMSZ_BOTTOM:
           rect->left = (LONG)math::round( (float)rect->left + ( ( dw - nw ) / 2.0f ) );
-        break;
+          break;
         case WMSZ_BOTTOMLEFT:
           rect->left = (LONG)math::round( (float)rect->right - nw );
           rect->top = sel ? rect->top : (LONG)math::round( (float)rect->bottom - nh );
-        break;
+          break;
       }
       rect->right = rect->left + (LONG)math::round( nw );
       rect->bottom = rect->top + (LONG)math::round( nh );
       lastSize_ = size2i( *rect );
-      RECT newClientRect = { 0, 0, (LONG)lastSize_.w, (LONG)lastSize_.h };
+      RECT newClientRect = {0, 0, (LONG)lastSize_.w, (LONG)lastSize_.h};
       InvalidateRect( window_, &newClientRect, FALSE );
     }
 
@@ -263,7 +280,8 @@ namespace neko {
         snapshotPainter_.paint( dc, lastSize_ );
         EndPaint( window_, &ps );
         return true;
-      } else
+      }
+      else
         return false;
     }
 

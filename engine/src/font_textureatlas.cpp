@@ -65,7 +65,7 @@ namespace neko {
         ++i;
       }
 
-      return y;
+      return (int)y;
     }
 
     void TextureAtlas::merge()
@@ -124,13 +124,13 @@ namespace neko {
       nodes_.insert( nodes_.begin() + best_index, node );
 
       size_t i;
-      for ( i = best_index + 1; i < nodes_.size(); ++i )
+      for ( i = (size_t)best_index + 1; i < nodes_.size(); ++i )
       {
         auto node = &nodes_[i];
         auto prev = &nodes_[i - 1];
         if ( node->x < ( prev->x + prev->z ) )
         {
-          int shrink = prev->x + prev->z - node->x;
+          auto shrink = prev->x + prev->z - node->x;
           node->x += shrink;
           node->z -= shrink;
           if ( node->z <= 0 )

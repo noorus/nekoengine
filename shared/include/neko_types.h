@@ -24,7 +24,14 @@
 #include <variant>
 #include <any>
 #include <optional>
+#include <atomic>
 #include <boost/math/constants/constants.hpp>
+
+#undef min
+#undef max
+
+#include <moodycamel/readerwriterqueue.h>
+#include <gsl/gsl>
 
 // GLM
 #define GLM_FORCE_XYZW_ONLY // Hide rgba, stpq unions from vector types (avoiding bloat when examined in the debugger)
@@ -80,6 +87,10 @@ namespace neko {
   using std::shared_ptr;
   using std::make_unique;
   using std::unique_ptr;
+
+  using std::atomic;
+  using moodycamel::ReaderWriterQueue;
+  using gsl::span;
 
   using std::move;
   using std::pair;
@@ -168,7 +179,7 @@ namespace neko {
   struct size2i {
     int64_t w;
     int64_t h;
-    explicit size2i(): w( 0.0f ), h( 0.0f ) {}
+    explicit size2i(): w( 0 ), h( 0 ) {}
     inline size2i( const size2i& other ): w( other.w ), h( other.h ) {}
     inline size2i( const int64_t width, const int64_t height ): w( width ), h( height ) {}
     inline size2i( const vec2i& v ): w( v.x ), h( v.y ) {}

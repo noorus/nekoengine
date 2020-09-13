@@ -39,7 +39,8 @@ namespace neko {
     bool dirty_; //!< Whether to just sub-update data
     MeshDataModifyHint hint_; //!< What usage hint to use
 
-    explicit VBO( const VBOType type ): type_( type ), id_( 0 ), uploaded_( false ), dirty_( false ), hint_( ModifyHint_Often )
+    explicit VBO( const VBOType type ):
+    type_( type ), id_( 0 ), uploaded_( false ), dirty_( false ), hint_( MeshDataModifyHint::ModifyHint_Often )
     {
       switch ( type_ )
       {

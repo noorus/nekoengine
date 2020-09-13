@@ -25,7 +25,9 @@ namespace neko {
     }
     va_end( va_alist );
 
+    lock_.lock();
     messages_.push_back( msg );
+    lock_.unlock();
   }
 
   void Messaging::preUpdate( GameTime time )

@@ -44,7 +44,9 @@ namespace neko {
     void implDeleteFramebuffer( GLuint handle );
   protected:
     GLInformation info_;
-    EnginePtr engine_;
+    ConsolePtr console_;
+    ThreadedLoaderPtr loader_;
+    FontManagerPtr fonts_;
     ShadersPtr shaders_;
     MeshManagerPtr meshes_;
     platform::RWLock loadLock_;
@@ -52,7 +54,7 @@ namespace neko {
     void sceneDraw( CameraPtr camera );
     void clearErrors();
   public:
-    Renderer( EnginePtr engine );
+    Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, ConsolePtr console );
     void preInitialize();
     void initialize( size_t width, size_t height );
     MaterialPtr createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );

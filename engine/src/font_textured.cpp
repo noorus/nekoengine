@@ -37,7 +37,7 @@ namespace neko {
       assert( !data_.get() );
       assert( size_ < 1.0f );
 
-      data_ = make_unique<utils::DumbBuffer>( Memory::Graphics, source );
+      data_ = make_unique<utils::DumbBuffer>( Memory::Sector::Graphics, source );
       size_ = pointSize;
 
       auto ftlib = manager_->lib();
@@ -246,7 +246,7 @@ namespace neko {
       auto x = region.x;
       auto y = region.y;
 
-      auto buffer = (uint8_t*)Locator::memory().alloc( Memory::Graphics, tgt_w * tgt_h * atlas_->depth_ );
+      auto buffer = (uint8_t*)Locator::memory().alloc( Memory::Sector::Graphics, tgt_w * tgt_h * atlas_->depth_ );
       auto dst_ptr = buffer + ( padding.y * tgt_w + padding.x ) * atlas_->depth_;
       auto src_ptr = bitmap.buffer;
       for ( int i = 0; i < src_h; ++i )
@@ -262,7 +262,7 @@ namespace neko {
       }
 
       atlas_->setRegion( x, y, tgt_w, tgt_h, buffer, tgt_w * atlas_->depth_ );
-      Locator::memory().free( Memory::Graphics, buffer );
+      Locator::memory().free( Memory::Sector::Graphics, buffer );
 
       TextureGlyph glyph;
       glyph.codepoint = codepoint;

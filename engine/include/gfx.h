@@ -1,9 +1,9 @@
 #pragma once
-#include "subsystem.h"
 #include "forwards.h"
 #include "gfx_types.h"
 #include "neko_types.h"
 #include "neko_platform.h"
+#include "messaging.h"
 
 namespace neko {
 
@@ -13,7 +13,17 @@ namespace neko {
     Viewport( size_t width, size_t height ): size_( width, height ) {}
   };
 
-  class Gfx: public Subsystem, public platform::RenderWindowEventRecipient {
+  struct FrameData {
+    atomic<bool> frameCurrentlyProcessing = false;
+  };
+
+  struct Processor {
+    static constexpr uint32_t maxQueuedFrames = 2;
+    atomic<uint32_t> frameIndex;
+    FrameData frameData[maxQueuedFrames];
+  };
+
+  class Gfx: public platform::RenderWindowEventRecipient {
   public:
     struct Info {
       string renderer_;
@@ -27,6 +37,11 @@ namespace neko {
         vendor_ = "Unknown";
       }
     };
+  protected:
+    ConsolePtr console_;
+    ThreadedLoaderPtr loader_;
+    FontManagerPtr fonts_;
+    MessagingPtr messaging_;
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;
@@ -47,15 +62,49 @@ namespace neko {
     void setOpenGLDebugLogging( const bool enable );
   public:
     void postInitialize();
-    Gfx( EnginePtr engine );
+    Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, ConsolePtr console );
     const Image& renderWindowReadPixels() override;
     void processEvents(); //!< Process vital window events and such.
-    void preUpdate( GameTime time ) override;
-    void tick( GameTime tick, GameTime time ) override;
-    void postUpdate( GameTime delta, GameTime tick ) override;
+    void preUpdate( GameTime time );
+    void tick( GameTime tick, GameTime time );
+    void postUpdate( GameTime delta, GameTime tick );
     void shutdown();
     void restart();
     virtual ~Gfx();
   };
+
+  //struct FrameData {
+  //};
+
+  class FrameQueue {
+  private:
+    ReaderWriterQueue<FrameData> queue_;
+  public:
+    FrameQueue();
+    ~FrameQueue();
+  };
+
+  class ThreadedRenderer: public enable_shared_from_this<ThreadedRenderer> {
+  private:
+    platform::Thread thread_;
+    GfxPtr gfx_;
+    ReaderWriterQueue<FrameData> frameQueue_;
+  protected:
+    ThreadedLoaderPtr loader_;
+    FontManagerPtr fonts_;
+    MessagingPtr messaging_;
+    ConsolePtr console_;
+  protected:
+    static bool threadProc( platform::Event& running, platform::Event& wantStop, void* argument );
+    void initialize();
+    void run( platform::Event& wantStop );
+  public:
+    ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, ConsolePtr console );
+    void start();
+    void stop();
+    ~ThreadedRenderer();
+  };
+
+  using ThreadedRendererPtr = shared_ptr<ThreadedRenderer>;
 
 }

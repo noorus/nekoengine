@@ -80,7 +80,7 @@ namespace neko {
     mat4 model_;
     mat4 view_;
     mat4 projection_;
-    EnginePtr engine_;
+    ConsolePtr console_;
     ShaderVector shaders_;
     ShaderProgramVector programs_;
     void dumpLog( const GLuint &target, const bool isProgram = false );
@@ -89,7 +89,7 @@ namespace neko {
     void compileShader( GLenum type, const string_view source, GLuint& out );
     void compileShader( Shader& shader );
   public:
-    Shaders( EnginePtr engine );
+    Shaders( ConsolePtr console );
     void initialize();
     void shutdown();
     ~Shaders();

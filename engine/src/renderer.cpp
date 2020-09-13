@@ -48,10 +48,10 @@ namespace neko {
     FontPtr font_;
     MaterialPtr material_;
   public:
-    DynamicText( EnginePtr engine, MeshManagerPtr meshmgr, FontManagerPtr fontmgr )
+    DynamicText( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontManagerPtr fontmgr )
     {
       font_ = fontmgr->createFont();
-      engine->loader()->addLoadTask( { LoadTask( font_, R"(data\fonts\LuckiestGuy.ttf)", 32.0f ) } );
+      loader->addLoadTask( { LoadTask( font_, R"(data\fonts\LuckiestGuy.ttf)", 32.0f ) } );
       mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_Text );
     }
     inline bool fontLoaded()
@@ -132,7 +132,11 @@ namespace neko {
   {
     auto glbAuxStr = []( GLenum e ) -> utf8String
     {
+#ifndef RELEASE
       return glbinding::aux::Meta::getString( e );
+#else
+      return utf8String( std::to_string( (unsigned int)e ) );
+#endif
     };
     auto glvGetI32NoThrow = []( GLenum e  ) -> int32_t
     {
@@ -204,11 +208,14 @@ namespace neko {
     }
     if ( !errorCount )
       return;
-    engine_->console()->printf( Console::srcGfx, "Cleared %d GL errors...", errorCount );
+    console_->printf( Console::srcGfx, "Cleared %d GL errors...", errorCount );
   }
 
-  Renderer::Renderer( EnginePtr engine ): engine_( move( engine ) )
+  Renderer::Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, ConsolePtr console ):
+    loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) )
   {
+    assert( loader_ && fonts_ && console_ );
+
     clearErrors();
     glStartupFetchAndCheck( info_ );
   }
@@ -217,10 +224,10 @@ namespace neko {
   {
     clearErrors();
 
-    shaders_ = make_shared<Shaders>( engine_ );
+    shaders_ = make_shared<Shaders>( console_ );
     shaders_->initialize();
 
-    meshes_ = make_shared<MeshManager>( engine_->console() );
+    meshes_ = make_shared<MeshManager>( console_ );
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
     builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
@@ -232,7 +239,7 @@ namespace neko {
   {
     MaterialPtr myMat = make_shared<Material>();
     materials_.push_back( myMat );
-    engine_->loader()->addLoadTask( { LoadTask( myMat, R"(data\textures\test.png)" ) } );
+    loader_->addLoadTask( { LoadTask( myMat, R"(data\textures\test.png)" ) } );
 
     g_framebuf = make_shared<Framebuffer>( this );
 
@@ -248,9 +255,9 @@ namespace neko {
   void Renderer::uploadTextures()
   {
     MaterialVector mats;
-    engine_->loader()->getFinishedMaterials( mats );
+    loader_->getFinishedMaterials( mats );
     if ( !mats.empty() )
-      engine_->console()->printf( Console::srcGfx, "Renderer::uploadTextures got %d new materials", mats.size() );
+      console_->printf( Console::srcGfx, "Renderer::uploadTextures got %d new materials", mats.size() );
     for ( auto& mat : mats )
     {
       if ( !mat->loaded_ )
@@ -276,7 +283,7 @@ namespace neko {
 
     if ( !g_testText )
     {
-      g_testText = make_shared<DynamicText>( engine_->shared_from_this(), meshes_, engine_->fonts() );
+      g_testText = make_shared<DynamicText>( loader_, meshes_, fonts_ );
     }
 
     if ( g_testText && g_testText->fontLoaded() && !g_textAdded )

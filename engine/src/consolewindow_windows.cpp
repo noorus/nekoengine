@@ -7,6 +7,8 @@
 #include "neko_platform_windows.h"
 #include "neko_exception.h"
 
+#pragma warning( push )
+#pragma warning( disable : 26454 )
 #include <windows.h>
 #include <unknwn.h>
 #define max(a,b) (((a) > (b)) ? (a) : (b))
@@ -15,6 +17,8 @@
 
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "gdiplus.lib")
+
+#pragma warning( pop )
 
 namespace neko {
 
@@ -32,7 +36,7 @@ namespace neko {
     inline wstring getWindowText( HWND wnd ) throw( )
     {
       wstring str;
-      int length = GetWindowTextLengthW( wnd );
+      auto length = (int)GetWindowTextLengthW( wnd );
       if ( !length )
         return str;
       str.resize( length + 1, '\0' );
@@ -129,8 +133,6 @@ namespace neko {
     const long minWidth = 320;
     const long minHeight = 240;
 
-    static bool g_haveSysDpiCall = false;
-
     void ConsoleWindow::Autocomplete::reset()
     {
       matches.clear();
@@ -146,12 +148,10 @@ namespace neko {
     }
 
     ConsoleWindow::ConsoleWindow( ConsolePtr console, const string& title, int x, int y, int w, int h ):
-      Window( g_instance, wndProc, this ),
-      cmdline_( nullptr ), log_( nullptr ),
-      console_( move( console ) )
+      Window( g_instance, wndProc, this ), console_( move( console ) ),
+      cmdline_( nullptr ), log_( nullptr ), logFit_(), unpauseButton_( 0 ),
+      baseCmdlineProc_( nullptr ), baseLogProc_( nullptr ), dpiScaling_( 1.0f )
     {
-      // Check and set a global flag for whether GetDpiForSystem API exists on this system (Windows 10 only)
-      g_haveSysDpiCall = ( GetProcAddress( LoadLibraryW( L"user32.dll" ), "GetDpiForSystem" ) != nullptr );
       console_->addListener( this );
       create( c_consoleClassname, title, x, y, w, h );
     }
@@ -605,11 +605,8 @@ namespace neko {
         self->initTextControl( self->log_, false );
         self->initTextControl( self->cmdline_, true );
 
-#ifdef NEKO_TEST_WINVISTACOMPAT
-        auto dpi = cNativeDPI;
-#else
-        auto dpi = ( g_haveSysDpiCall ? GetDpiForSystem() : cNativeDPI );
-#endif
+        auto dpi = ( api::g_calls.pfnGetDpiForSystem ? api::g_calls.pfnGetDpiForSystem() : cNativeDPI );
+
         self->dpiScaling_ = static_cast<float>( dpi ) / cNativeDPI;
 
         SetWindowPos( wnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE );

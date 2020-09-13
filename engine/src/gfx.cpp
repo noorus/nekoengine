@@ -24,16 +24,19 @@ namespace neko {
   NEKO_DECLARE_CONVAR( gl_debuglog,
     "Whether to print OpenGL debug log output.", true );
 
-  Gfx::Gfx( EnginePtr engine ): Subsystem( move( engine ) )
+  Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, ConsolePtr console )
+      : loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ), messaging_( move( messaging ) )
   {
+    assert( loader_ && fonts_ && console_ );
+
     preInitialize();
   }
 
   void Gfx::printInfo()
   {
-    engine_->console()->print( Console::srcGfx, "GL Vendor: " + info_.vendor_ );
-    engine_->console()->print( Console::srcGfx, "GL Version: " + info_.version_ );
-    engine_->console()->print( Console::srcGfx, "GL Renderer: " + info_.renderer_ );
+    console_->print( Console::srcGfx, "GL Vendor: " + info_.vendor_ );
+    console_->print( Console::srcGfx, "GL Version: " + info_.version_ );
+    console_->print( Console::srcGfx, "GL Renderer: " + info_.renderer_ );
   }
 
   // 131185: Buffer detailed info...
@@ -66,7 +69,7 @@ namespace neko {
       NEKO_EXCEPT( "OpenGL Error" );
     }
     else
-      gfx->engine_->console()->printf( Console::srcGfx, "OpenGL Debug: %s (%d)", message, id );
+      gfx->console_->printf( Console::srcGfx, "OpenGL Debug: %s (%d)", message, id );
   }
 
   void Gfx::setOpenGLDebugLogging( const bool enable )
@@ -130,7 +133,7 @@ namespace neko {
 
   void Gfx::postInitialize()
   {
-    renderer_ = make_shared<Renderer>( engine_ );
+    renderer_ = make_shared<Renderer>( loader_, fonts_, console_ );
     renderer_->preInitialize();
 
     setOpenGLDebugLogging( g_CVar_gl_debuglog.as_b() );
@@ -141,8 +144,6 @@ namespace neko {
     resize( window_->getSize().x, window_->getSize().y );
 
     renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
-
-    engine_->operationContinueVideo();
   }
 
   void Gfx::preUpdate( GameTime time )
@@ -154,7 +155,7 @@ namespace neko {
   {
     viewport_.size_ = vec2i( width, height );
 
-    engine_->console()->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
+    console_->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
 
     auto realResolution = vec2( (Real)width, (Real)height );
     camera_->setViewport( realResolution );
@@ -168,7 +169,9 @@ namespace neko {
     while ( window_->pollEvent( evt ) )
     {
       if ( evt.type == sf::Event::Closed )
-        engine_->signalStop();
+      {
+        messaging_->send( M_Window_Close );
+      }
       else if ( evt.type == sf::Event::Resized )
       {
         resize( evt.size.width, evt.size.height );
@@ -176,11 +179,11 @@ namespace neko {
       }
       else if ( evt.type == sf::Event::LostFocus )
       {
-        engine_->msgs()->send( M_Window_LostFocus );
+        messaging_->send( M_Window_LostFocus );
       }
       else if ( evt.type == sf::Event::GainedFocus )
       {
-        engine_->msgs()->send( M_Window_GainedFocus );
+        messaging_->send( M_Window_GainedFocus );
       }
     }
   }
@@ -213,7 +216,7 @@ namespace neko {
     lastCapture_.size_ = size2i( viewport_.size_ );
     lastCapture_.buffer_.resize( lastCapture_.size_.w * lastCapture_.size_.h * 4 * sizeof( uint8_t ) );
     glReadnPixels( 0, 0,
-      lastCapture_.size_.w, lastCapture_.size_.h,
+      (GLsizei)lastCapture_.size_.w, (GLsizei)lastCapture_.size_.h,
       GL_BGRA, GL_UNSIGNED_BYTE,
       (GLsizei)lastCapture_.buffer_.size(), lastCapture_.buffer_.data() );
     return lastCapture_;
@@ -221,8 +224,6 @@ namespace neko {
 
   void Gfx::shutdown()
   {
-    engine_->operationSuspendVideo();
-
     camera_.reset();
 
     platform::RenderWindowHandler::get().setWindow( nullptr, nullptr );
@@ -243,6 +244,67 @@ namespace neko {
   Gfx::~Gfx()
   {
     shutdown();
+  }
+
+  const string c_gfxThreadName = "nekoRenderer";
+
+  ThreadedRenderer::ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, ConsolePtr console )
+      : loader_( move( loader ) ), fonts_( move( fonts ) ), messaging_( move( messaging ) ), console_( move( console ) ),
+        thread_( c_gfxThreadName, threadProc, this )
+  {
+  }
+
+  void ThreadedRenderer::initialize()
+  {
+    gfx_ = make_shared<Gfx>( loader_, fonts_, messaging_, console_ );
+    gfx_->postInitialize();
+  }
+
+  void ThreadedRenderer::run( platform::Event& wantStop )
+  {
+    while ( true )
+    {
+      if ( wantStop.check() )
+        break;
+
+      gfx_->processEvents();
+
+      gfx_->preUpdate( 0.0f );
+
+      gfx_->tick( 0.0f, 0.0f );
+
+      gfx_->postUpdate( 0.0f, 0.0f );
+
+      Sleep( 10 );
+    }
+  }
+
+  bool ThreadedRenderer::threadProc( platform::Event& running, platform::Event& wantStop, void* argument )
+  {
+    auto gfx = ( (ThreadedRenderer*)argument )->shared_from_this();
+    gfx->initialize();
+    running.set();
+    gfx->run( wantStop );
+    return true;
+  }
+
+  void ThreadedRenderer::start()
+  {
+    thread_.start();
+  }
+
+  void ThreadedRenderer::stop()
+  {
+    thread_.stop();
+  }
+
+  ThreadedRenderer::~ThreadedRenderer()
+  {
+    //
+  }
+
+  FrameQueue::FrameQueue()
+  {
   }
 
 }

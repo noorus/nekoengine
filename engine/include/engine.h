@@ -27,7 +27,8 @@ namespace neko {
     };
   protected:
     ConsolePtr console_;
-    GfxPtr gfx_;
+    //GfxPtr gfx_;
+    ThreadedRendererPtr renderer_;
     ScriptingPtr scripting_;
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
@@ -47,7 +48,7 @@ namespace neko {
     void onMessage( const Message& msg ) override;
   public:
     inline ConsolePtr console() throw() { return console_; }
-    inline GfxPtr gfx() throw() { return gfx_; }
+    //inline GfxPtr gfx() throw() { return gfx_; }
     inline ScriptingPtr scripting() throw() { return scripting_; }
     inline GameTime time() const throw() { return time_; }
     inline ThreadedLoaderPtr loader() throw() { return loader_; }
@@ -58,18 +59,8 @@ namespace neko {
     Engine( ConsolePtr console );
     //! Destructor.
     ~Engine();
-    //! Raises a stop signal on the next cycle.
-    void signalStop();
     //! Triggers a "graceful" quit in case of a fatal error.
     void triggerFatalError( FatalError error );
-    //! Shutdown state for gfx restart.
-    void operationSuspendVideo();
-    //! Continue state after gfx restart.
-    void operationContinueVideo();
-    //! Shutdown state for audio restart.
-    void operationSuspendAudio();
-    //! Continue state after audio restart.
-    void operationContinueAudio();
     //! Initializes the Engine.
     void initialize( const Options& options );
     //! Runs the Engine.

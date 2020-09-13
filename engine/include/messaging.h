@@ -2,6 +2,7 @@
 #include "neko_types.h"
 #include "forwards.h"
 #include "subsystem.h"
+#include "neko_platform.h"
 
 namespace neko {
 
@@ -9,7 +10,8 @@ namespace neko {
     M_Window_LostFocus,
     M_Window_GainedFocus,
     M_Window_EnterMove,
-    M_Window_ExitMove
+    M_Window_ExitMove,
+    M_Window_Close
   };
 
   struct Message {
@@ -38,6 +40,7 @@ namespace neko {
   protected:
     Listeners listeners_;
     MessageVector messages_;
+    platform::RWLock lock_;
   public:
     Messaging( EnginePtr engine );
     void send( MessageCode code, int numargs = 0, ... );

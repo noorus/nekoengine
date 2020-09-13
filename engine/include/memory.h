@@ -5,7 +5,7 @@ namespace neko {
 
   class Memory: public noncopyable {
   public:
-    enum Sector {
+    enum class Sector {
       Generic,
       Graphics,
       Audio,
