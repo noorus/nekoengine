@@ -6,7 +6,9 @@
 #include "subsystem.h"
 #include "js_console.h"
 #include "js_math.h"
+#include "js_mesh.h"
 #include "js_game.h"
+#include "director.h"
 
 namespace neko {
 
@@ -53,6 +55,7 @@ namespace neko {
     v8::Isolate* isolate_;
     v8::Global<v8::Context> ctx_;
     Scripting* owner_;
+    DirectorPtr director_;
     void initialize();
   private:
     void registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global );
@@ -63,7 +66,9 @@ namespace neko {
     js::JSGamePtr jsGame_;
     js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
     js::DynamicObjectsRegistry<js::Vector3, vec3> vec3Registry_;
+    js::DynamicObjectsRegistry<js::Mesh, JSMesh> meshRegistry_;
   public:
+    EnginePtr engine_;
     ConsolePtr console_;
     utf8String scriptDirectory_;
     ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
@@ -74,6 +79,8 @@ namespace neko {
     inline v8::Global<v8::Context>& ctx() throw() { return ctx_; }
     inline js::DynamicObjectsRegistry<js::Vector2, vec2>& vec2reg() { return vec2Registry_; }
     inline js::DynamicObjectsRegistry<js::Vector3, vec3>& vec3reg() { return vec3Registry_; }
+    inline js::DynamicObjectsRegistry<js::Mesh, JSMesh>& meshreg() { return meshRegistry_; }
+    inline RenderSyncContext& renderSync() { return director_->renderSync(); }
   };
 
   class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {

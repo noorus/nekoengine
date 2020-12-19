@@ -24,10 +24,11 @@ namespace neko {
   NEKO_DECLARE_CONVAR( gl_debuglog,
     "Whether to print OpenGL debug log output.", true );
 
-  Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, ConsolePtr console )
-      : loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ), messaging_( move( messaging ) )
+  Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console )
+      : loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ), messaging_( move( messaging ) ),
+    director_( move( director ) )
   {
-    assert( loader_ && fonts_ && console_ );
+    assert( loader_ && fonts_ && director_  && messaging_ && console_ );
 
     preInitialize();
   }
@@ -133,7 +134,7 @@ namespace neko {
 
   void Gfx::postInitialize()
   {
-    renderer_ = make_shared<Renderer>( loader_, fonts_, console_ );
+    renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
     renderer_->preInitialize();
 
     setOpenGLDebugLogging( g_CVar_gl_debuglog.as_b() );
@@ -248,15 +249,15 @@ namespace neko {
 
   const string c_gfxThreadName = "nekoRenderer";
 
-  ThreadedRenderer::ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, ConsolePtr console )
-      : loader_( move( loader ) ), fonts_( move( fonts ) ), messaging_( move( messaging ) ), console_( move( console ) ),
+  ThreadedRenderer::ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console )
+      : loader_( move( loader ) ), fonts_( move( fonts ) ), messaging_( move( messaging ) ), director_( move( director ) ), console_( move( console ) ),
         thread_( c_gfxThreadName, threadProc, this )
   {
   }
 
   void ThreadedRenderer::initialize()
   {
-    gfx_ = make_shared<Gfx>( loader_, fonts_, messaging_, console_ );
+    gfx_ = make_shared<Gfx>( loader_, fonts_, messaging_, director_, console_ );
     gfx_->postInitialize();
   }
 

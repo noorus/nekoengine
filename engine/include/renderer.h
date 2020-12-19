@@ -7,6 +7,7 @@
 #include "renderbuffer.h"
 #include "materials.h"
 #include "meshmanager.h"
+#include "scripting.h"
 
 namespace neko {
 
@@ -51,10 +52,11 @@ namespace neko {
     MeshManagerPtr meshes_;
     platform::RWLock loadLock_;
     MaterialVector materials_;
+    DirectorPtr director_;
     void sceneDraw( CameraPtr camera );
     void clearErrors();
   public:
-    Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, ConsolePtr console );
+    Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
     void preInitialize();
     void initialize( size_t width, size_t height );
     MaterialPtr createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );

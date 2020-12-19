@@ -45,4 +45,7 @@ namespace neko {
   class ThreadedRenderer;
   using ThreadedRendererPtr = shared_ptr<ThreadedRenderer>;
 
+  class Director;
+  using DirectorPtr = shared_ptr<Director>;
+
 }

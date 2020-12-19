@@ -14,6 +14,7 @@ namespace neko {
       Wrapped_Game,
       Wrapped_Vector2, //!< Dynamic: Vector2
       Wrapped_Vector3, //!< Dynamic: Vector3
+      Wrapped_Mesh, //!< Dynamic: DynamicMesh
       Max_WrappedType
     };
 

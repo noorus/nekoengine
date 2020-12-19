@@ -9,6 +9,7 @@
 #include "console.h"
 #include "locator.h"
 #include "memory.h"
+#include "js_math.h"
 
 namespace neko {
 
@@ -27,6 +28,8 @@ namespace neko {
   {
     assert( owner_ );
 
+    director_ = owner_->engine_->director();
+
     if ( !isolate_ )
     {
       Isolate::CreateParams params;
@@ -41,6 +44,7 @@ namespace neko {
     isolate_->SetData( js::IsolateData_ScriptingContext, this );
     isolate_->SetMicrotasksPolicy( v8::MicrotasksPolicy::kExplicit );
 
+    engine_ = owner->engine_;
     console_ = owner_->engine_->console();
 
     initialize();
@@ -71,6 +75,7 @@ namespace neko {
   {
     vec2Registry_.initialize( isolate_, global );
     vec3Registry_.initialize( isolate_, global );
+    meshRegistry_.initialize( isolate_, global );
   }
 
   void ScriptingContext::registerContextGlobals( v8::Global<v8::Context>& globalContext )
@@ -90,6 +95,10 @@ namespace neko {
     v8::HandleScope handleScope( isolate_ );
     auto context = v8::Local<v8::Context>::New( isolate_, ctx_ );
     jsGame_->update( context, tick, time );
+
+    // FIXME: no idea whether it makes more sense to run this in tick or process()
+    renderSync().syncFromScripting();
+
     isolate_->Exit();
   }
 
@@ -101,8 +110,10 @@ namespace neko {
 
   ScriptingContext::~ScriptingContext()
   {
+    meshRegistry_.clear();
     vec2Registry_.clear();
     vec3Registry_.clear();
+
     jsGame_.reset();
     jsConsole_.reset();
     jsMath_.reset();

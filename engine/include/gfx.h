@@ -42,6 +42,7 @@ namespace neko {
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
+    DirectorPtr director_;
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;
@@ -62,7 +63,7 @@ namespace neko {
     void setOpenGLDebugLogging( const bool enable );
   public:
     void postInitialize();
-    Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, ConsolePtr console );
+    Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     const Image& renderWindowReadPixels() override;
     void processEvents(); //!< Process vital window events and such.
     void preUpdate( GameTime time );
@@ -94,12 +95,13 @@ namespace neko {
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
     ConsolePtr console_;
+    DirectorPtr director_;
   protected:
     static bool threadProc( platform::Event& running, platform::Event& wantStop, void* argument );
     void initialize();
     void run( platform::Event& wantStop );
   public:
-    ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, ConsolePtr console );
+    ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     void start();
     void stop();
     ~ThreadedRenderer();

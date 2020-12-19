@@ -35,20 +35,45 @@ class DemoScene extends Scene
   constructor( name )
   {
     super( name );
+    this._mesh = null;
   }
-  initialize(time)
+  initialize( time )
   {
+    Console.print( "DemoScene.initialize: " + time );
+    const verts = [
+      [-1, 1, 0, 1],
+      [-1, -1, 0, 0],
+      [1, -1, 1, 0],
+      [1,1,1,1]
+    ];
+    const indices = [
+      0, 1, 2, 0, 2, 3
+    ];
+    this._mesh = new mesh(verts, indices);
+    this._ctr = 0;
+    Console.print(this._mesh);
+    Console.print("DemoScene.initialize leaving fucntion" );
   }
   enter()
   {
+    Console.print( "DemoScene.enter" );
   }
   leave()
   {
+    Console.print( "DemoScene.leave" );
   }
-  update(time, delta)
+  update( time, delta )
   {
+    if (this._ctr < 10) {
+      Console.print("update " + this._ctr + " - time " + time);
+      Console.print(this._mesh);
+    }
+    if (this._ctr == 11) {
+      this._mesh = null;
+    }
+    this._ctr++;
   }
 }
 
-let demo = new DemoScene("demo");
-Game.registerScene(demo);
+let demoscene = new DemoScene( "demo" );
+Game.registerScene( demoscene );

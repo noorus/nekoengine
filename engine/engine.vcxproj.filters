@@ -180,6 +180,12 @@
     <ClCompile Include="src\js_vector3.cpp">
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
+    <ClCompile Include="src\js_mesh.cpp">
+      <Filter>Source Files\scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\director.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -304,6 +310,15 @@
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_algorithm.h">
       <Filter>Header Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_mesh.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mesh_primitives.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\director.h">
+      <Filter>Header Files\engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

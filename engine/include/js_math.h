@@ -33,7 +33,8 @@ namespace neko {
 
     //! \class Vector2
     //! \brief Implementation of JavaScript vec2().
-    class Vector2: public DynamicObjectWrapper<Vector2, vec2> {
+    class Vector2 : public DynamicObjectWrapper<Vector2, neko::vec2>
+    {
     private:
       vec2 v_; //!< Internal vec2.
     protected:
@@ -82,7 +83,7 @@ namespace neko {
 
     //! \class Vector3
     //! \brief Implementation of JavaScript vec3().
-    class Vector3 : public DynamicObjectWrapper<Vector3, vec3>
+    class Vector3 : public DynamicObjectWrapper<Vector3, neko::vec3>
     {
     private:
       vec3 v_; //!< Internal vec3.

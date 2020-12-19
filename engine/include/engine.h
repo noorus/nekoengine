@@ -4,6 +4,7 @@
 #include "subsystem.h"
 #include "console.h"
 #include "messaging.h"
+#include "director.h"
 
 namespace neko {
 
@@ -33,6 +34,7 @@ namespace neko {
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
+    DirectorPtr director_;
   protected:
     struct State {
       bool focusLost;
@@ -53,7 +55,8 @@ namespace neko {
     inline GameTime time() const throw() { return time_; }
     inline ThreadedLoaderPtr loader() throw() { return loader_; }
     inline FontManagerPtr fonts() throw() { return fonts_; }
-    inline MessagingPtr msgs() throw( ) { return messaging_; }
+    inline MessagingPtr msgs() throw() { return messaging_; }
+    inline DirectorPtr director() throw() { return director_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console );

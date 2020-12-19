@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "gfx_types.h"
 #include "meshmanager.h"
+#include "renderer.h"
 #include "neko_exception.h"
 #include "console.h"
 
@@ -45,6 +46,49 @@ namespace neko {
   void MeshManager::freeVAO( VAOPtr vao )
   {
     vaos_.erase( std::remove( vaos_.begin(), vaos_.end(), move( vao ) ), vaos_.end() );
+  }
+
+  void MeshManager::addJSMesh( JSMesh& mesh )
+  {
+    assert(
+      ( !mesh.vbo_->uploaded_ ) &&
+      ( !mesh.ebo_->uploaded_ ) &&
+      ( !mesh.vao_ || !mesh.vao_->uploaded_ ) );
+
+    vbos_[mesh.vbo_->type_].push_back( mesh.vbo_ );
+    ebos_.push_back( mesh.ebo_ );
+    mesh.vao_ = move( pushVAO( mesh.vbo_, mesh.ebo_ ) );
+  }
+
+  void MeshManager::removeJSMesh( JSMesh& mesh )
+  {
+    if ( mesh.vao_ )
+      freeVAO( mesh.vao_ );
+    if ( mesh.ebo_ )
+      freeEBO( mesh.ebo_ );
+    if ( mesh.vbo_ )
+      freeVBO( mesh.vbo_ );
+  }
+
+  void MeshManager::jsUpdate( RenderSyncContext& renderCtx )
+  {
+    js::MeshVector inMeshes;
+    js::MeshVector outMeshes;
+    renderCtx.syncFromRenderer( inMeshes, outMeshes );
+    if ( !inMeshes.empty() || !outMeshes.empty() )
+    {
+      Locator::console().printf( Console::srcGfx,
+        "MeshManager::jsUpdate adding %i meshes, removing %i meshes",
+        inMeshes.size(), outMeshes.size() );
+    }
+    for ( auto& newMesh : inMeshes )
+    {
+      addJSMesh( newMesh->mesh() );
+    }
+    for ( auto& deletingMesh : outMeshes )
+    {
+      removeJSMesh( deletingMesh->mesh() );
+    }
   }
 
   // MeshManager: VBOs

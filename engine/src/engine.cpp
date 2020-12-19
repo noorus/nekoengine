@@ -7,6 +7,7 @@
 #include "scripting.h"
 #include "loader.h"
 #include "messaging.h"
+#include "director.h"
 
 namespace neko {
 
@@ -34,18 +35,19 @@ namespace neko {
     Locator::provideMessaging( messaging_ ); // WARN Technically a bad pattern, but fine as long as there's one Engine
     messaging_->listen( this );
 
+    director_ = make_shared<Director>();
+    director_->reset();
+    Locator::provideDirector( director_ );
+
     timer.start();
     fonts_ = make_shared<FontManager>( shared_from_this() );
     fonts_->initialize();
     console_->printf( Console::srcEngine, "Font manager init took %dms", (int)timer.stop() );
 
-    /*timer.start();
-    gfx_ = make_shared<Gfx>( loader_, fonts_, console_ );
-    gfx_->postInitialize();
-    console_->printf( Console::srcGfx, "Gfx init took %dms", (int)timer.stop() );*/
-
-    renderer_ = make_shared<ThreadedRenderer>( loader_, fonts_, messaging_, console_ );
+    timer.start();
+    renderer_ = make_shared<ThreadedRenderer>( loader_, fonts_, messaging_, director_, console_ );
     renderer_->start();
+    console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );
 
 #ifndef NEKO_NO_SCRIPTING
     timer.start();

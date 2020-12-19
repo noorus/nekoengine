@@ -125,8 +125,8 @@ namespace neko {
 
   using DynamicTextPtr = shared_ptr<DynamicText>;
 
-  static DynamicMeshPtr g_testMesh2;
-  static DynamicTextPtr g_testText;
+  // static DynamicMeshPtr g_testMesh2;
+  // static DynamicTextPtr g_testText;
 
   void glStartupFetchAndCheck( GLInformation& info )
   {
@@ -211,10 +211,10 @@ namespace neko {
     console_->printf( Console::srcGfx, "Cleared %d GL errors...", errorCount );
   }
 
-  Renderer::Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, ConsolePtr console ):
-    loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) )
+  Renderer::Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console ):
+    loader_( move( loader ) ), fonts_( move( fonts ) ), director_( move( director ) ), console_( move( console ) )
   {
-    assert( loader_ && fonts_ && console_ );
+    assert( loader_ && fonts_ && director_ && console_ );
 
     clearErrors();
     glStartupFetchAndCheck( info_ );
@@ -275,13 +275,15 @@ namespace neko {
     // Upload any new textures. Could this be parallellized?
     uploadTextures();
 
+    meshes_->jsUpdate( director_->renderSync() );
+
     // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point at which we try to create the VAO.
     // Thus uploading the VAOs should always come last.
     meshes_->uploadVBOs();
     meshes_->uploadEBOs();
     meshes_->uploadVAOs();
 
-    if ( !g_testText )
+    /*if ( !g_testText )
     {
       g_testText = make_shared<DynamicText>( loader_, meshes_, fonts_ );
     }
@@ -300,7 +302,7 @@ namespace neko {
         g_testMesh2 = meshes_->createDynamic( GL_TRIANGLES, VBO_3D );
         meshes_->generator().makePlane( *g_testMesh2, vec2( 256.0f ), vec2( 2 ), glm::normalize( vec3( 0.0f, 1.0f, -1.0f ) ) );
       }
-    }
+    }*/
   }
 
   //! Called by Texture::Texture()
@@ -420,7 +422,7 @@ namespace neko {
 
     shaders_->setViewProjectionMat( camera->view(), camera->projection() );
 
-    if ( g_testMesh2 )
+    /*if ( g_testMesh2 )
     {
       g_testMesh2->begin();
       mat4 model( 1.0f );
@@ -446,7 +448,7 @@ namespace neko {
 
       shaders_->use( "text3d" ).setUniform( "model", model );
       g_testText->draw();
-    }
+    }*/
   }
 
   void Renderer::draw( CameraPtr camera )
@@ -484,7 +486,7 @@ namespace neko {
 
   Renderer::~Renderer()
   {
-    g_testText.reset();
+    // g_testText.reset();
 
     g_framebuf.reset();
 
