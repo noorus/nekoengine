@@ -6,6 +6,9 @@
 
 namespace neko {
 
+#pragma warning(push)
+#pragma warning(disable: 4244)
+
   void MeshGenerator::makePlane( DynamicMesh& mesh, vec2 dimensions, vec2u segments, vec3 normal )
   {
     vector<Vertex3D> verts;
@@ -50,5 +53,7 @@ namespace neko {
 
     mesh.append( verts, indices );
   }
+
+#pragma warning(pop)
 
 }
