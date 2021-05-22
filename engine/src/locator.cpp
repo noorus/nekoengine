@@ -7,5 +7,6 @@ namespace neko {
   ConsolePtr Locator::consoleService_;
   MessagingPtr Locator::messagingService_;
   DirectorPtr Locator::directorService_;
+  MeshGeneratorPtr Locator::meshGeneratorService_;
 
 }

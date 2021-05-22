@@ -37,8 +37,10 @@ inline int runMain()
   platform::prepareProcess();
 
   ConsolePtr console = make_shared<Console>();
-
   Locator::provideConsole( console );
+
+  MeshGeneratorPtr globalMeshGenerator = make_shared<MeshGenerator>();
+  Locator::provideMeshGenerator( globalMeshGenerator );
 
   platform::Thread consoleWindowThread( c_consoleThreadName,
     []( platform::Event& running, platform::Event& wantStop, void* argument ) -> bool
@@ -46,8 +48,8 @@ inline int runMain()
     auto console = ( (Console*)argument )->shared_from_this();
     platform::ConsoleWindowPtr window = make_shared<platform::ConsoleWindow>(
       console, c_consoleTitle,
-      c_consolePos[0], c_consolePos[1], // x, y
-      c_consoleDims[0], c_consoleDims[1]  // w, h
+      (int)c_consolePos[0], (int)c_consolePos[1], // x, y
+      (int)c_consoleDims[0], (int)c_consoleDims[1] // w, h
     );
     running.set();
     window->messageLoop( wantStop );

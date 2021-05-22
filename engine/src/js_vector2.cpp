@@ -34,7 +34,9 @@ namespace neko {
       JS_WRAPPER_SETMEMBER( tpl, Vector2, dotProduct );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, crossProduct );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, normalise );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, normalise, normalize );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, normalisedCopy );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, normalisedCopy, normalizedCopy );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, midPoint );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, angleBetween );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, angleTo );

@@ -76,6 +76,7 @@ namespace neko {
     vec2Registry_.initialize( isolate_, global );
     vec3Registry_.initialize( isolate_, global );
     meshRegistry_.initialize( isolate_, global );
+    modelRegistry_.initialize( isolate_, global );
   }
 
   void ScriptingContext::registerContextGlobals( v8::Global<v8::Context>& globalContext )
@@ -110,24 +111,32 @@ namespace neko {
 
   ScriptingContext::~ScriptingContext()
   {
-    meshRegistry_.clear();
-    vec2Registry_.clear();
-    vec3Registry_.clear();
+    if ( isolate_ )
+    {
+      isolate_->IdleNotificationDeadline( owner_->platform_->MonotonicallyIncreasingTime() + 1.0 );
+      Sleep( 1000 );
+      //isolate_->LowMemoryNotification();
+    }
 
     jsGame_.reset();
-    jsConsole_.reset();
     jsMath_.reset();
+
+    jsConsole_.reset();
+
+    modelRegistry_.clear();
+    meshRegistry_.clear();
+    vec3Registry_.clear();
+    vec2Registry_.clear();
 
     ctx_.Reset();
 
     if ( isolate_ && !externalIsolate_ )
     {
-      isolate_->Exit();
+      //isolate_->Exit();
       isolate_->ContextDisposedNotification();
       // None of these matter. It still leaks f*****g memory.
-      isolate_->IdleNotificationDeadline( owner_->platform_->MonotonicallyIncreasingTime() + 1.0 );
-      isolate_->LowMemoryNotification();
-      isolate_->TerminateExecution();
+      //isolate_->TerminateExecution();
+      isolate_->Exit();
       isolate_->Dispose();
     }
   }

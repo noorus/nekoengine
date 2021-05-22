@@ -125,7 +125,6 @@ namespace neko {
 
   using DynamicTextPtr = shared_ptr<DynamicText>;
 
-  // static DynamicMeshPtr g_testMesh2;
   // static DynamicTextPtr g_testText;
 
   void glStartupFetchAndCheck( GLInformation& info )
@@ -228,6 +227,7 @@ namespace neko {
     shaders_->initialize();
 
     meshes_ = make_shared<MeshManager>( console_ );
+    models_ = make_shared<ModelManager>( console_ );
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
     builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
@@ -283,6 +283,8 @@ namespace neko {
     meshes_->uploadEBOs();
     meshes_->uploadVAOs();
 
+    models_->jsUpdate( director_->renderSync() );
+
     /*if ( !g_testText )
     {
       g_testText = make_shared<DynamicText>( loader_, meshes_, fonts_ );
@@ -293,15 +295,6 @@ namespace neko {
       g_textAdded = true;
       g_testText->addText( "nekoengine", vec2( 256.0f, 720.0f - 256.0f + 32.0f ) );
       g_testText->updateTexture( this );
-    }
-
-    if ( !materials_.empty() && materials_[0]->loaded_ )
-    {
-      if ( !g_testMesh2 )
-      {
-        g_testMesh2 = meshes_->createDynamic( GL_TRIANGLES, VBO_3D );
-        meshes_->generator().makePlane( *g_testMesh2, vec2( 256.0f ), vec2( 2 ), glm::normalize( vec3( 0.0f, 1.0f, -1.0f ) ) );
-      }
     }*/
   }
 
@@ -422,24 +415,40 @@ namespace neko {
 
     shaders_->setViewProjectionMat( camera->view(), camera->projection() );
 
-    /*if ( g_testMesh2 )
+    // FIXME ridiculously primitive
+    if ( models_ )
     {
-      g_testMesh2->begin();
-      mat4 model( 1.0f );
-      model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
-      model = glm::translate( model, vec3( 640.0f, 360.0f, 0.0f ) );
+      for ( auto& modelptr : models_->models() )
+      {
+        if ( !modelptr.second )
+          continue;
 
-      shaders_->use( "default3d" ).setUniform( "model", model );
+        auto model = modelptr.second->model();
+        auto mesh = model.mesh_;
 
-      if ( !materials_.empty() && materials_[0]->texture_ )
-        glBindTextureUnit( 0, materials_[0]->texture_->handle() );
-      else
-        glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
+        if ( !mesh || !mesh->mesh().vao_->uploaded_ )
+          continue;
 
-      g_testMesh2->draw();
+        mesh->mesh().vao_->begin();
+
+        mat4 mdl( 1.0f );
+        mdl = glm::translate( mdl, model.translate_->v() );
+        mdl = glm::scale( mdl, model.scale_->v() );
+        //mdl = glm::rotate( mdl, glm::radians( 45.0f ), vec3( 0.0f, 0.0f, 1.0f ) );
+
+        shaders_->use( "default3d" ).setUniform( "model", mdl );
+
+        if ( !materials_.empty() && materials_[0]->texture_ )
+          glBindTextureUnit( 0, materials_[0]->texture_->handle() );
+        else
+          glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
+
+        auto indices = mesh->mesh().ebo_->storage_.size();
+        mesh->mesh().vao_->draw( GL_TRIANGLES, (GLsizei)indices );
+      }
     }
 
-    if ( g_testText && g_textAdded )
+    /*if ( g_testText && g_textAdded )
     {
       g_testText->begin();
       mat4 model( 1.0f );
@@ -490,6 +499,7 @@ namespace neko {
 
     g_framebuf.reset();
 
+    models_->teardown();
     meshes_->teardown();
 
     shaders_->shutdown();

@@ -12,6 +12,7 @@ namespace neko {
     static ConsolePtr consoleService_; //!< Currently provided console service.
     static MessagingPtr messagingService_; //!< Currently provided messaging service.
     static DirectorPtr directorService_; //!< Currently provided director service.
+    static MeshGeneratorPtr meshGeneratorService_; //!< Currently provided mesh generator service.
   public:
     static const bool hasMemory() throw() { return ( memoryService_ ? true : false ); }
     static Memory& memory() { return *memoryService_; }
@@ -36,6 +37,12 @@ namespace neko {
     static void provideDirector( DirectorPtr messaging )
     {
       directorService_ = move( messaging );
+    }
+    static const bool hasMeshGenerator() throw() { return ( meshGeneratorService_ ? true : false ); }
+    static MeshGenerator& meshGenerator() { return *meshGeneratorService_; }
+    static void provideMeshGenerator( MeshGeneratorPtr generator )
+    {
+      meshGeneratorService_ = move( generator );
     }
   };
 

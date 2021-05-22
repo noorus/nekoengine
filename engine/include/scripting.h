@@ -7,6 +7,7 @@
 #include "js_console.h"
 #include "js_math.h"
 #include "js_mesh.h"
+#include "js_model.h"
 #include "js_game.h"
 #include "director.h"
 
@@ -67,6 +68,7 @@ namespace neko {
     js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
     js::DynamicObjectsRegistry<js::Vector3, vec3> vec3Registry_;
     js::DynamicObjectsRegistry<js::Mesh, JSMesh> meshRegistry_;
+    js::DynamicObjectsRegistry<js::Model, js::JSModel> modelRegistry_;
   public:
     EnginePtr engine_;
     ConsolePtr console_;
@@ -80,6 +82,7 @@ namespace neko {
     inline js::DynamicObjectsRegistry<js::Vector2, vec2>& vec2reg() { return vec2Registry_; }
     inline js::DynamicObjectsRegistry<js::Vector3, vec3>& vec3reg() { return vec3Registry_; }
     inline js::DynamicObjectsRegistry<js::Mesh, JSMesh>& meshreg() { return meshRegistry_; }
+    inline js::DynamicObjectsRegistry<js::Model, js::JSModel>& modelreg() { return modelRegistry_; }
     inline RenderSyncContext& renderSync() { return director_->renderSync(); }
   };
 

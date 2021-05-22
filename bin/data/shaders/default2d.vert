@@ -15,7 +15,7 @@ out vec2 texcoord;
 
 void main()
 {
-  mat4 modelViewProjection = projection * model;
-  gl_Position = modelViewProjection * vec4(position, 0.0, 1.0);
+  mat4 modelProjection = projection * model;
+  gl_Position = modelProjection * vec4(position, 0.0, 1.0);
   texcoord = vboTexcoord;
 }

@@ -15,6 +15,7 @@ namespace neko {
       Wrapped_Vector2, //!< Dynamic: Vector2
       Wrapped_Vector3, //!< Dynamic: Vector3
       Wrapped_Mesh, //!< Dynamic: DynamicMesh
+      Wrapped_Model, //!< Dynamic: Model
       Max_WrappedType
     };
 
@@ -211,6 +212,8 @@ namespace neko {
       static void WeakCallback( const v8::WeakCallbackInfo<DynamicObjectWrapper>& data )
       {
         auto wrap = (T*)data.GetParameter();
+        if ( !wrap )
+          return;
         assert( wrap->refs_ == 0 );
         wrap->handle_.Reset();
         delete wrap;

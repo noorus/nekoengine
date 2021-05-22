@@ -46,6 +46,8 @@ namespace neko {
     using MeshPtr = shared_ptr<Mesh>;
     using MeshVector = vector<MeshPtr>;
 
+    MeshPtr extractMeshMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow );
+
   }
 
 }

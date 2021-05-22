@@ -7,6 +7,7 @@
 #include "renderbuffer.h"
 #include "materials.h"
 #include "meshmanager.h"
+#include "modelmanager.h"
 #include "scripting.h"
 
 namespace neko {
@@ -50,6 +51,7 @@ namespace neko {
     FontManagerPtr fonts_;
     ShadersPtr shaders_;
     MeshManagerPtr meshes_;
+    ModelManagerPtr models_;
     platform::RWLock loadLock_;
     MaterialVector materials_;
     DirectorPtr director_;

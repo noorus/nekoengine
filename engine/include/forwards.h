@@ -48,4 +48,7 @@ namespace neko {
   class Director;
   using DirectorPtr = shared_ptr<Director>;
 
+  class MeshGenerator;
+  using MeshGeneratorPtr = shared_ptr<MeshGenerator>;
+
 }

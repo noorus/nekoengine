@@ -38,6 +38,26 @@ namespace neko {
       return Vector3Ptr();
     }
 
+    Vector3Ptr extractVector3Member( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow )
+    {
+      const Vector3Ptr emptyPtr;
+      if ( maybeObject.IsEmpty() )
+      {
+        if ( shouldThrow )
+          util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
+        return emptyPtr;
+      }
+      auto object = maybeObject.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
+      auto asdasd = v8::Local<v8::Object>::Cast( object );
+      if ( object.IsEmpty() || !util::isWrappedType( isolate->GetCurrentContext(), asdasd, Wrapped_Vector3 ) )
+      {
+        if ( shouldThrow )
+          util::throwException( isolate, ( func + ": passed object has no vec3 member \"" + name + "\"" ).c_str() );
+        return emptyPtr;
+      }
+      return move( Vector3::unwrap( asdasd )->shared_from_this() );
+    }
+
   }
 
 }

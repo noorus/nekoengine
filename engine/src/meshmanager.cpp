@@ -74,7 +74,7 @@ namespace neko {
   {
     js::MeshVector inMeshes;
     js::MeshVector outMeshes;
-    renderCtx.syncFromRenderer( inMeshes, outMeshes );
+    renderCtx.syncMeshesFromRenderer( inMeshes, outMeshes );
     if ( !inMeshes.empty() || !outMeshes.empty() )
     {
       Locator::console().printf( Console::srcGfx,

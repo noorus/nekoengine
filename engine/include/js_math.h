@@ -111,6 +111,7 @@ namespace neko {
       void js_angleBetween( const V8CallbackArgs& args );
       void js_makeFloor( const V8CallbackArgs& args );
       void js_makeCeil( const V8CallbackArgs& args );
+      void js_add( const V8CallbackArgs& args );
 
     public:
       static void jsConstructor( const V8CallbackArgs& info );
@@ -138,6 +139,8 @@ namespace neko {
     //! Expect and extract a Vector3 object as args[arg],
     //! throw JS exception and return null on failure.
     Vector3Ptr extractVector3( int arg, const V8CallbackArgs& args );
+
+    Vector3Ptr extractVector3Member( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow );
 
     template <class T>
     inline shared_ptr<T> extractWrappedDynamic( V8Context& context, const V8Value& value )

@@ -140,8 +140,6 @@ namespace neko {
 
   void Engine::shutdown()
   {
-    scripting_.reset();
-
     if ( renderer_ )
       renderer_->stop();
 
@@ -156,6 +154,8 @@ namespace neko {
     renderer_.reset();
 
     fonts_.reset();
+
+    scripting_.reset();
 
     messaging_.reset();
     Locator::provideMessaging( MessagingPtr() );

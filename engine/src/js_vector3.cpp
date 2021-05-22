@@ -33,7 +33,9 @@ namespace neko {
       JS_WRAPPER_SETMEMBER( tpl, Vector3, length );
       JS_WRAPPER_SETMEMBER( tpl, Vector3, distance );
       JS_WRAPPER_SETMEMBER( tpl, Vector3, normalise );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, normalise, normalize );
       JS_WRAPPER_SETMEMBER( tpl, Vector3, normalisedCopy );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, normalisedCopy, normalizedCopy );
       JS_WRAPPER_SETMEMBER( tpl, Vector3, midPoint );
       JS_WRAPPER_SETMEMBER( tpl, Vector3, makeFloor );
       JS_WRAPPER_SETMEMBER( tpl, Vector3, makeCeil );
@@ -192,7 +194,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! String vec2.toString
+    //! String vec3.toString
     //! \endverbatim
     void Vector3::js_toString( const V8CallbackArgs& args )
     {
@@ -202,7 +204,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! bool vec2.equals( vec2 )
+    //! bool vec3.equals( vec3 )
     //! \endverbatim
     void Vector3::js_equals( const V8CallbackArgs& args )
     {
@@ -224,7 +226,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! bool vec2.greaterThan( vec2 )
+    //! bool vec3.greaterThan( vec3 )
     //! \endverbatim
     void Vector3::js_greater( const V8CallbackArgs& args )
     {
@@ -246,7 +248,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! bool vec2.greaterThanOrEqual( vec2 )
+    //! bool vec3.greaterThanOrEqual( vec3 )
     //! \endverbatim
     void Vector3::js_greaterOrEqual( const V8CallbackArgs& args )
     {
@@ -268,7 +270,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! bool vec2.lessThan( vec2 )
+    //! bool vec3.lessThan( vec3 )
     //! \endverbatim
     void Vector3::js_lesser( const V8CallbackArgs& args )
     {
@@ -290,7 +292,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! bool vec2.lessThanOrEqual( vec2 )
+    //! bool vec3.lessThanOrEqual( vec3 )
     //! \endverbatim
     void Vector3::js_lesserOrEqual( const V8CallbackArgs& args )
     {
@@ -312,7 +314,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! Real vec2.length()
+    //! Real vec3.length()
     //! \endverbatim
     void Vector3::js_length( const V8CallbackArgs& args )
     {
@@ -321,7 +323,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! Real vec2.distance( vec2 )
+    //! Real vec3.distance( vec3 )
     //! \endverbatim
     void Vector3::js_distance( const V8CallbackArgs& args )
     {
@@ -334,7 +336,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! vec2.normalise()
+    //! vec3.normalise()
     //! \endverbatim
     void Vector3::js_normalise( const V8CallbackArgs& args )
     {
@@ -342,7 +344,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! vec2 vec2.normalisedCopy()
+    //! vec3 vec3.normalisedCopy()
     //! \endverbatim
     void Vector3::js_normalisedCopy( const V8CallbackArgs& args )
     {
@@ -353,7 +355,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! vec2 vec2.midPoint( vec2 )
+    //! vec3 vec3.midPoint( vec3 )
     //! \endverbatim
     void Vector3::js_midPoint( const V8CallbackArgs& args )
     {
@@ -371,7 +373,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! vec2.makeFloor( vec2 )
+    //! vec3.makeFloor( vec3 )
     //! \endverbatim
     void Vector3::js_makeFloor( const V8CallbackArgs& args )
     {
@@ -388,7 +390,7 @@ namespace neko {
     }
 
     //! \verbatim
-    //! vec2.makeCeil( vec2 )
+    //! vec3.makeCeil( vec3 )
     //! \endverbatim
     void Vector3::js_makeCeil( const V8CallbackArgs& args )
     {

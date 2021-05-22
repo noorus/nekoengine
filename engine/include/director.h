@@ -4,6 +4,7 @@
 #include "forwards.h"
 #include "subsystem.h"
 #include "js_mesh.h"
+#include "js_model.h"
 
 namespace neko {
 
@@ -11,15 +12,22 @@ namespace neko {
   {
     platform::RWLock lock_;
     // per frame containers
-    vector<js::MeshPtr> frameNewMeshes;
-    vector<js::MeshPtr> frameDeletedMeshes;
+    js::MeshVector frameNewMeshes;
+    js::MeshVector frameDeletedMeshes;
+    js::ModelVector frameNewModels;
+    js::ModelVector frameDeletedModels;
     // accumulating containers (gfx thread empties)
-    vector<js::MeshPtr> totalNewMeshes;
-    vector<js::MeshPtr> totalDeletedMeshes;
+    js::MeshVector totalNewMeshes;
+    js::MeshVector totalDeletedMeshes;
+    js::ModelVector totalNewModels;
+    js::ModelVector totalDeletedModels;
     void constructed( js::MeshPtr mesh );
     void destructed( js::MeshPtr mesh );
+    void constructed( js::ModelPtr model );
+    void destructed( js::ModelPtr model );
     void syncFromScripting();
-    void syncFromRenderer( js::MeshVector& outCreated, js::MeshVector& outDeleted );
+    void syncMeshesFromRenderer( js::MeshVector& outCreated, js::MeshVector& outDeleted );
+    void syncModelsFromRenderer( js::ModelVector& outCreated, js::ModelVector& outDeleted );
   };
 
   class Director {

@@ -202,12 +202,6 @@ namespace neko {
 
   using VAOPtr = shared_ptr<VAO>;
 
-  struct BareVAO {
-    GLuint id_;
-    bool uploaded_;
-    BareVAO(): id_( 0 ), uploaded_( false ) {}
-  };
-
   class DynamicMesh {
   public:
     MeshManagerPtr manager_;
@@ -247,19 +241,6 @@ namespace neko {
   using DynamicMeshPtr = shared_ptr<DynamicMesh>;
   using DynamicMeshVector = vector<DynamicMeshPtr>;
 
-  /*class JSMesh {
-  public:
-    VBO localVBO_;
-    EBO localEBO_;
-    BareVAO localVAO_;
-    /*void copyFrom( const JSMesh& other )
-    {
-      localVBO_.type_ = other.localVBO_.type_;
-      localVBO_.
-    }*
-    JSMesh(): localVBO_( VBO_2D ) {}
-  };*/
-
   class JSMesh {
   public:
     VBOPtr vbo_;
@@ -291,5 +272,10 @@ namespace neko {
 
   using StaticMeshPtr = shared_ptr<StaticMesh>;
   using StaticMeshVector = vector<StaticMeshPtr>;
+
+  class MeshGenerator {
+  public:
+    pair<vector<Vertex3D>, vector<GLuint>> makePlane( vec2 dimensions, vec2u segments, vec3 normal );
+  };
 
 }

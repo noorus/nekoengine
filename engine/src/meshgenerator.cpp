@@ -9,7 +9,7 @@ namespace neko {
 #pragma warning(push)
 #pragma warning(disable: 4244)
 
-  void MeshGenerator::makePlane( DynamicMesh& mesh, vec2 dimensions, vec2u segments, vec3 normal )
+  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makePlane( vec2 dimensions, vec2u segments, vec3 normal )
   {
     vector<Vertex3D> verts;
     verts.resize( ( segments.x + 1 ) * ( segments.y + 1 ) );
@@ -51,7 +51,7 @@ namespace neko {
       offset++;
     }
 
-    mesh.append( verts, indices );
+    return make_pair( verts, indices );
   }
 
 #pragma warning(pop)
