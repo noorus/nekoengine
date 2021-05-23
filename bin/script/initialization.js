@@ -55,12 +55,23 @@ class DemoScene extends Scene
     this._ctr = 0;
     Console.print(this._mesh);
     Console.print("creating model");
-    this._model = new model({
-      mesh: this._mesh,
-      scale: vec3( 1, 1, 1 ),
-      translate: vec3( 640, 360, 0 )
-    });
-    Console.print(this._model);
+    this._models = [
+      new model({
+        mesh: this._mesh,
+        scale: vec3(1, 1, 1),
+        translate: vec3(640 - 128, 360 - 128, 1)
+      }),
+      new model({
+        mesh: this._mesh,
+        scale: vec3(1, 1, 1),
+        translate: vec3(640, 360, 0)
+      }),
+      new model({
+        mesh: this._mesh,
+        scale: vec3(1, 1, 1),
+        translate: vec3(640 + 128, 360 + 128, 0)
+      })
+    ]
     Console.print("DemoScene.initialize leaving function" );
   }
   enter()
@@ -73,9 +84,12 @@ class DemoScene extends Scene
   }
   update( time, delta )
   {
-    const scalar = 2 + Math.sin(time * 2) * 1.5;
+    const scalar = 1 + Math.sin(time * 2) * 1;
+    const sceler = 1 + Math.cos(time * 2) * 1;
     // Console.print("Scalar " + scalar);
-    this._model.scale = vec3(scalar);
+    this._models[0].scale.x = scalar;
+    this._models[0].scale.y = sceler;
+    this._models[2].translate.z = Math.sin(time * 2) * 2;
     /*if (this._ctr < 12) {
       Console.print("update " + this._ctr + " - time " + time);
       Console.print(this._mesh);

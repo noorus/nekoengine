@@ -110,10 +110,12 @@ namespace neko {
         obj->js_##x( args ); \
     } ) )
 
+    // ex. js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
+
     template <class T, class Y>
     class DynamicObjectsRegistry {
     public:
-      using PtrType = shared_ptr<T>;
+      using PtrType = shared_ptr<T>; // ex. shared_ptr<js::Vector2>
     protected:
       vector<PtrType> pool_;
       //! My JS constructor store
@@ -122,7 +124,13 @@ namespace neko {
       template <class... Args>
       inline PtrType createFromJS( v8::Handle<v8::Object>& handle, Args... args )
       {
-        auto ptr = make_shared<T>( args... );
+        auto obj = new T( args... );
+        auto ptr = PtrType( obj, [=]( T* baleet )
+        {
+          // This is the shared_ptr deleter, but actually we just remove our
+          // previously-added reference. The actual deletion is left to V8.
+          baleet->unref();
+        });
         ptr->wrapperWrap( handle );
         pool_.push_back( ptr );
         return ptr;
@@ -139,6 +147,7 @@ namespace neko {
         inst.ToLocal( &object );
         auto unwr = T::unwrap( object );
         assert( unwr );
+        // Don't worry, even unwr here has been created through createFromJS above.
         auto ptr = unwr->shared_from_this();
         assert( ptr );
         ptr->setFrom( source );
@@ -209,7 +218,7 @@ namespace neko {
       v8::Persistent<v8::Object> handle_;
       int refs_;
     private:
-      static void WeakCallback( const v8::WeakCallbackInfo<DynamicObjectWrapper>& data )
+      static void weakCallback( const v8::WeakCallbackInfo<DynamicObjectWrapper>& data )
       {
         auto wrap = (T*)data.GetParameter();
         if ( !wrap )
@@ -219,23 +228,9 @@ namespace neko {
         delete wrap;
       }
     protected:
-      inline void MakeWeak()
+      inline void makeWeak()
       {
-        persistent().SetWeak( this, WeakCallback, v8::WeakCallbackType::kParameter );
-      }
-      virtual void Ref()
-      {
-        assert( !persistent().IsEmpty() );
-        persistent().ClearWeak();
-        refs_++;
-      }
-      virtual void Unref()
-      {
-        assert( !persistent().IsEmpty() );
-        assert( !persistent().IsWeak() );
-        assert( refs_ > 0 );
-        if ( --refs_ == 0 )
-          MakeWeak();
+        persistent().SetWeak( this, weakCallback, v8::WeakCallbackType::kParameter );
       }
     protected:
       inline void wrapperWrap( v8::Handle<v8::Object>& handle )
@@ -245,8 +240,12 @@ namespace neko {
         handle->SetInternalField( WrapField_Type, v8::Uint32::New( handle->GetIsolate(), internalType ) );
         handle->SetAlignedPointerInInternalField( WrapField_Pointer, this );
         persistent().Reset( v8::Isolate::GetCurrent(), handle );
-        MakeWeak();
+        makeWeak();
         handle->GetIsolate()->AdjustAmountOfExternalAllocatedMemory( sizeof( T ) );
+        // this is a clutch, but as long as wrapperWrap is called ONLY ONCE
+        // when creating a new object, we can safely add that one refcount
+        // here, which will be later subtracted by the shared_ptr deleter.
+        ref();
       }
       static inline V8FunctionTemplate wrapperImplConstructor( Isolate* isolate )
       {
@@ -263,6 +262,20 @@ namespace neko {
     public:
       DynamicObjectWrapper(): refs_( 0 )
       {
+      }
+      virtual void ref()
+      {
+        assert( !persistent().IsEmpty() );
+        persistent().ClearWeak();
+        refs_++;
+      }
+      virtual void unref()
+      {
+        assert( !persistent().IsEmpty() );
+        assert( !persistent().IsWeak() );
+        assert( refs_ > 0 );
+        if ( --refs_ == 0 )
+          makeWeak();
       }
       void reset()
       {

@@ -114,8 +114,8 @@ namespace neko {
     if ( isolate_ )
     {
       isolate_->IdleNotificationDeadline( owner_->platform_->MonotonicallyIncreasingTime() + 1.0 );
-      Sleep( 1000 );
-      //isolate_->LowMemoryNotification();
+      platform::sleep( 1000 );
+      isolate_->LowMemoryNotification();
     }
 
     jsGame_.reset();
@@ -132,10 +132,9 @@ namespace neko {
 
     if ( isolate_ && !externalIsolate_ )
     {
-      //isolate_->Exit();
       isolate_->ContextDisposedNotification();
       // None of these matter. It still leaks f*****g memory.
-      //isolate_->TerminateExecution();
+      isolate_->TerminateExecution();
       isolate_->Exit();
       isolate_->Dispose();
     }
