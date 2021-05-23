@@ -11,7 +11,9 @@
 
 namespace neko {
 
-  GameTime cLogicStep = ( 1.0 / 60.0 ); //!< 60 fps
+  GameTime cLogicFPS = 60.0; //!< 60 fps
+  GameTime cLogicStep = ( 1.0 / cLogicFPS ); //!< tick ms
+  uint64_t cLogicMaxFrameMicroseconds = static_cast<uint64_t>( ( cLogicStep * 1000.0 ) * 1000.0 ); //!< max us
 
   Engine::Engine( ConsolePtr console ): console_( move( console ) ), time_( 0.0 )
   {
@@ -101,11 +103,16 @@ namespace neko {
     GameTime accumulator = 0.0;
     GameTime delta = 0.0;
 
+    const auto maxSleepytimeMs = math::ifloor( (double)cLogicMaxFrameMicroseconds / 1000.0 );
+
+    console_->printf( Console::srcEngine, "Logic: targeting %.02f FPS, logic step %.02fms, max frame time %I64uus, max sleep %ims",
+      (float)cLogicFPS, static_cast<float>( cLogicStep * 1000.0 ), cLogicMaxFrameMicroseconds, maxSleepytimeMs );
+
     while ( signal_ != Signal_Stop )
     {
-      console_->executeBuffered();
-
       delta = clock_.update();
+
+      console_->executeBuffered();
 
       //gfx_->processEvents();
       messaging_->processEvents();
@@ -129,11 +136,25 @@ namespace neko {
 
       scripting_->postUpdate( delta, time_ );
 
-      Sleep( 10 );
-
       if ( delta > 0.0 && signal_ != Signal_Stop )
       {
         //gfx_->postUpdate( delta, time_ );
+      }
+
+      auto us = clock_.peekMicroseconds();
+      if ( us >= cLogicMaxFrameMicroseconds )
+      {
+        console_->printf( Console::srcEngine, "WARNING: Logic frame exceeded max time (%I64uus)", us );
+      }
+      else
+      {
+        /* this pretty sleep math is for if you really want to save on CPU, but makes for some jitter.
+        auto ms = math::ifloor( static_cast<double>( cLogicMaxFrameMicroseconds - us ) / 1000.0 );
+        static char asd[64];
+        sprintf_s( asd, 64, "sleeping for %i ms\r\n", ms );
+        OutputDebugStringA( asd );
+        platform::sleep( std::max( 1, ms ) );*/
+        platform::sleep( 2 );
       }
     }
   }

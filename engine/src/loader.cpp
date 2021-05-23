@@ -15,6 +15,8 @@ namespace neko {
 
   bool ThreadedLoader::threadProc( platform::Event& running, platform::Event& wantStop, void* argument )
   {
+    platform::performanceInitializeLoaderThread();
+
     auto loader = ( (ThreadedLoader*)argument )->shared_from_this();
     running.set();
     platform::EventVector events = { loader->newTasksEvent_.get(), wantStop.get() };
@@ -34,6 +36,8 @@ namespace neko {
       else
         break;
     }
+
+    platform::performanceTeardownCurrentThread();
     return true;
   }
 

@@ -12,11 +12,13 @@ namespace neko {
 
       using fnGetDpiForSystem = UINT( WINAPI* )( VOID );
       using fnSetThreadDpiAwarenessContext = DPI_AWARENESS_CONTEXT( WINAPI* )( DPI_AWARENESS_CONTEXT );
+      using fnSetThreadDescription = HRESULT( WINAPI* )( HANDLE hThread, PCWSTR lpThreadDescription );
 
       struct WinapiCalls
       {
         fnGetDpiForSystem pfnGetDpiForSystem = nullptr;
         fnSetThreadDpiAwarenessContext pfnSetThreadDpiAwarenessContext = nullptr;
+        fnSetThreadDescription pfnSetThreadDescription = nullptr;
       };
 
       extern WinapiCalls g_calls;
@@ -28,6 +30,14 @@ namespace neko {
     void initialize();
     void prepareProcess();
     void shutdown();
+
+    // Performance stuff
+    void performanceInitializeProcess();
+    void performanceTeardownProcess();
+    void performanceInitializeGameThread();
+    void performanceInitializeRenderThread();
+    void performanceInitializeLoaderThread();
+    void performanceTeardownCurrentThread();
 
     extern HINSTANCE g_instance;
 
@@ -253,13 +263,15 @@ namespace neko {
     private:
       LARGE_INTEGER current_;
       GameTime frequency_;
+      double inverse_;
     public:
-      PerformanceClock()
+      PerformanceClock(): current_({ 0, 0 })
       {
         LARGE_INTEGER frequency;
         if ( !QueryPerformanceFrequency( &frequency ) )
           NEKO_EXCEPT( "Couldn't query HPC frequency" );
         frequency_ = (GameTime)frequency.QuadPart;
+        inverse_ = ( 1000000.0 / frequency.QuadPart );
       }
       inline void init()
       {
@@ -273,7 +285,19 @@ namespace neko {
         current_ = new_;
         return ( (GameTime)delta / frequency_ );
       }
+      inline uint64_t peekMicroseconds()
+      {
+        LARGE_INTEGER new_;
+        QueryPerformanceCounter( &new_ );
+        auto delta = ( new_.QuadPart - current_.QuadPart );
+        return static_cast<uint64_t>( delta * inverse_ );
+      }
     };
+
+    inline void sleep( uint32_t milliseconds )
+    {
+      ::SleepEx( milliseconds, TRUE );
+    }
 
     //! UTF-8 to wide string conversion.
     inline wstring utf8ToWide( const utf8String& in ) throw()
@@ -509,9 +533,17 @@ namespace neko {
     }
 
     //! Assign a thread name that will be visible in debuggers.
-    inline void setDebuggerThreadName( DWORD threadID, const utf8String& threadName )
+    inline void setDebuggerThreadName( HANDLE thread, const utf8String& threadName )
     {
+      // Prefer SetThreadDescription, but it is only available from Windows 10 version 1607 onwards.
+      /*if ( api::g_calls.pfnSetThreadDescription )
+      {
+        api::g_calls.pfnSetThreadDescription( thread, utf8ToWide( threadName ).c_str() );
+        return;
+      }*/
 #ifdef _DEBUG
+      // Otherwise, back to the ancient trickery.
+      auto threadID = GetThreadId( thread );
 #pragma pack( push, 8 )
       struct threadNamingStruct {
         DWORD type;

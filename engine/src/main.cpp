@@ -42,6 +42,8 @@ inline int runMain()
   MeshGeneratorPtr globalMeshGenerator = make_shared<MeshGenerator>();
   Locator::provideMeshGenerator( globalMeshGenerator );
 
+  platform::performanceInitializeProcess();
+
   platform::Thread consoleWindowThread( c_consoleThreadName,
     []( platform::Event& running, platform::Event& wantStop, void* argument ) -> bool
   {
@@ -57,6 +59,8 @@ inline int runMain()
   }, console.get() );
 
   consoleWindowThread.start();
+
+  platform::performanceInitializeGameThread();
 
   EnginePtr engine = make_shared<Engine>( console );
 
@@ -86,6 +90,10 @@ inline int runMain()
     engine->shutdown();
     engine.reset();
   }
+
+  platform::performanceTeardownCurrentThread();
+
+  platform::performanceTeardownProcess();
 
   Locator::provideConsole( ConsolePtr() );
   console.reset();

@@ -276,16 +276,20 @@ namespace neko {
 
       gfx_->postUpdate( 0.0f, 0.0f );
 
-      Sleep( 10 );
+      platform::sleep( 1 );
     }
   }
 
   bool ThreadedRenderer::threadProc( platform::Event& running, platform::Event& wantStop, void* argument )
   {
+    platform::performanceInitializeRenderThread();
+
     auto gfx = ( (ThreadedRenderer*)argument )->shared_from_this();
     gfx->initialize();
     running.set();
     gfx->run( wantStop );
+
+    platform::performanceTeardownCurrentThread();
     return true;
   }
 

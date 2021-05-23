@@ -61,6 +61,13 @@ namespace neko {
       return (int)NEKO_MATH_FUNC_FLOOR( value );
     }
 
+#ifndef NEKO_MATH_DOUBLE
+    inline int ifloor( double value )
+    {
+      return static_cast<int>( ::floor( value ) );
+    }
+#endif
+
     //! \fn inline Real floor( Real value )
     //! \brief Floors the given value.
     //! \param value The value.

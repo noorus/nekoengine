@@ -6,6 +6,7 @@
 #include "neko_exception.h"
 #include "messaging.h"
 #include "locator.h"
+#include "console.h"
 
 #include <windows.h>
 #include <unknwn.h>
@@ -17,6 +18,9 @@
 #pragma comment( lib, "gdiplus.lib" )
 
 namespace neko {
+
+  NEKO_DECLARE_CONVAR( sys_timeradjust, "Whether to adjust the system timer for better accuracy on startup.", true );
+  NEKO_DECLARE_CONVAR( sys_priorityadjust, "Whether to adjust the thread priorities and classes for more performance.", true );
 
   namespace platform {
 
@@ -32,9 +36,21 @@ namespace neko {
           g_calls.pfnGetDpiForSystem = (fnGetDpiForSystem)GetProcAddress( user32, "GetDpiForSystem" );
           g_calls.pfnSetThreadDpiAwarenessContext = (fnSetThreadDpiAwarenessContext)GetProcAddress( user32, "SetThreadDpiAwarenessContext" );
         }
+        auto kernel = LoadLibraryW( L"kernel32.dll" );
+        if ( kernel )
+        {
+          g_calls.pfnSetThreadDpiAwarenessContext = (fnSetThreadDpiAwarenessContext)GetProcAddress( kernel, "SetThreadDescription" );
+        }
       }
 
     }
+
+#pragma pack( push, 8 )
+    struct TLSThreadData {
+      HANDLE avrtHandle;
+      DWORD avrtTaskIndex;
+    };
+#pragma pack( pop )
 
     HINSTANCE g_instance = nullptr;
 
@@ -42,7 +58,9 @@ namespace neko {
 
     static HMODULE g_richEditLibrary = nullptr;
     static ULONG_PTR g_gdiplusToken = 0;
-    static DWORD g_avrtGameTask = 0;
+    static DWORD g_tls_threadDataIndex = 0;
+    static TIMECAPS g_timeCaps = { 0 };
+    static bool g_timeAdjusted = false;
 
     namespace gdip {
       using namespace Gdiplus;
@@ -77,22 +95,102 @@ namespace neko {
 
     void initialize()
     {
+      g_tls_threadDataIndex = TlsAlloc();
+      if ( g_tls_threadDataIndex == TLS_OUT_OF_INDEXES )
+        NEKO_WINAPI_EXCEPT( "Failed to allocate a TLS index" );
+
+      timeGetDevCaps( &g_timeCaps, sizeof( TIMECAPS ) );
+
       api::initialize();
       initializeGUI();
     }
 
     void prepareProcess()
     {
-      SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX );
+      // There is no GetErrorMode, so this trick is required
+      // to combine our wanted additional flags with whatever
+      // default flags might already be set for the process.
+      UINT wantedModes = SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX;
+      auto originalModes = SetErrorMode( wantedModes );
+      SetErrorMode( originalModes | wantedModes );
+    }
 
-      SetPriorityClass( GetCurrentProcess(), HIGH_PRIORITY_CLASS );
+    void commonThreadSetup( LPCWSTR avProfile, AVRT_PRIORITY avPriority, int threadPriority, bool boostableOnWake )
+    {
+      auto tlsSpace = static_cast<TLSThreadData*>( Locator::memory().alloc( Memory::Sector::Generic, sizeof( TLSThreadData ), 8 ) );
+      if ( !TlsSetValue( g_tls_threadDataIndex, tlsSpace ) )
+        NEKO_WINAPI_EXCEPT( "TlsSetValue failed" );
 
-      AvSetMmThreadCharacteristicsW( L"Games", &g_avrtGameTask );
+      memset( tlsSpace, 0, sizeof( TLSThreadData ) );
+      if ( g_CVar_sys_priorityadjust.as_b() )
+      {
+        tlsSpace->avrtHandle = AvSetMmThreadCharacteristicsW( avProfile, &tlsSpace->avrtTaskIndex );
+        AvSetMmThreadPriority( tlsSpace->avrtHandle, avPriority );
+        auto thread = GetCurrentThread();
+        SetThreadPriority( thread, threadPriority );
+        SetThreadPriorityBoost( thread, boostableOnWake ? FALSE : TRUE );
+      }
+    }
+
+    void commonThreadTeardown()
+    {
+      auto tlsSpace = static_cast<TLSThreadData*>( TlsGetValue( g_tls_threadDataIndex ) );
+      if ( !tlsSpace )
+        NEKO_WINAPI_EXCEPT( "TlsGetValue failed" );
+
+      if ( tlsSpace->avrtHandle )
+      {
+        AvRevertMmThreadCharacteristics( tlsSpace->avrtHandle );
+      }
+
+      Locator::memory().free( Memory::Sector::Generic, tlsSpace );
+    }
+
+    void performanceInitializeProcess()
+    {
+      if ( g_CVar_sys_priorityadjust.as_b() )
+        SetPriorityClass( GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS );
+      if ( g_CVar_sys_timeradjust.as_b() && g_timeCaps.wPeriodMin )
+      {
+        timeBeginPeriod( g_timeCaps.wPeriodMin );
+        g_timeAdjusted = true;
+      }
+    }
+
+    void performanceTeardownProcess()
+    {
+      if ( g_timeAdjusted )
+      {
+        timeEndPeriod( g_timeCaps.wPeriodMin );
+        g_timeAdjusted = false;
+      }
+    }
+
+    void performanceInitializeGameThread()
+    {
+      commonThreadSetup( L"Games", AVRT_PRIORITY_HIGH, THREAD_PRIORITY_HIGHEST, false );
+    }
+
+    void performanceInitializeRenderThread()
+    {
+      commonThreadSetup( L"Games", AVRT_PRIORITY_HIGH, THREAD_PRIORITY_HIGHEST, false );
+    }
+
+    void performanceInitializeLoaderThread()
+    {
+      commonThreadSetup( L"Games", AVRT_PRIORITY_NORMAL, THREAD_PRIORITY_NORMAL, true );
+    }
+
+    void performanceTeardownCurrentThread()
+    {
+      commonThreadTeardown();
     }
 
     void shutdown()
     {
       shutdownGUI();
+      if ( g_tls_threadDataIndex != TLS_OUT_OF_INDEXES )
+        TlsFree( g_tls_threadDataIndex );
     }
 
     // Thread
@@ -115,7 +213,7 @@ namespace neko {
       if ( !thread_ )
         return false;
 
-      setDebuggerThreadName( id_, name_ );
+      setDebuggerThreadName( thread_, name_ );
 
       if ( ResumeThread( thread_ ) == -1 )
         NEKO_EXCEPT( "Thread resume failed" );
