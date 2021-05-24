@@ -27,6 +27,8 @@ namespace neko {
     static const mathShared::Messages c_greaterOrEqualMessages( c_className + utf8String( ".greaterThanOrEqual" ), true );
     static const mathShared::Messages c_lesserMessages( c_className + utf8String( ".lessThan" ), true );
     static const mathShared::Messages c_lesserOrEqualMessages( c_className + utf8String( ".lessThanOrEqual" ), true );
+    static const mathShared::Messages c_addMessages( c_className + utf8String( ".add" ), true );
+    static const mathShared::Messages c_subMessages( c_className + utf8String( ".sub" ), true );
 
     string Math::className( c_className );
     WrappedType Math::internalType = Wrapped_Math;
@@ -63,6 +65,14 @@ namespace neko {
       JS_WRAPPER_SETOBJMEMBER( tpl, Math, lesserOrEqual );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, lesserOrEqual, lessThanOrEqual );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, lesserOrEqual, lte );
+      // Operations - addition
+      JS_WRAPPER_SETOBJMEMBER( tpl, Math, add );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, add, addition );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, add, plus );
+      // Operations - subtraction
+      JS_WRAPPER_SETOBJMEMBER( tpl, Math, sub );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, sub, subtraction );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, sub, minus );
     }
 
     //! \verbatim
@@ -143,6 +153,28 @@ namespace neko {
       bool retval = mathShared::jsmath_lesser( isolate, args[0], args[1], lhsType, true );
 
       args.GetReturnValue().Set( retval );
+    }
+
+    //! \verbatim
+    //! bool Math.add( lhs, rhs )
+    //! \endverbatim
+    void Math::js_add( Isolate* isolate, const V8CallbackArgs& args )
+    {
+      HandleScope handleScope( isolate );
+
+      auto context = getScriptContext( isolate );
+      mathShared::jsmath_add( args, context, c_addMessages, args[0], args[1] );
+    }
+
+    //! \verbatim
+    //! bool Math.sub( lhs, rhs )
+    //! \endverbatim
+    void Math::js_sub( Isolate* isolate, const V8CallbackArgs& args )
+    {
+      HandleScope handleScope( isolate );
+
+      auto context = getScriptContext( isolate );
+      mathShared::jsmath_subtract( args, context, c_addMessages, args[0], args[1] );
     }
 
   }

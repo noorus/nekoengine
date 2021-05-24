@@ -27,14 +27,17 @@ namespace neko {
       void js_lesser( Isolate* isolate, const V8CallbackArgs& args );
       //! JavaScript Math.lesserOrEqual
       void js_lesserOrEqual( Isolate* isolate, const V8CallbackArgs& args );
+      //! JavaScript Math.add
+      void js_add( Isolate* isolate, const V8CallbackArgs& args );
+      //! JavaScript Math.sub
+      void js_sub( Isolate* isolate, const V8CallbackArgs& args );
     public:
       static JSMathPtr create( Isolate* isolate, V8Object global );
     };
 
     //! \class Vector2
     //! \brief Implementation of JavaScript vec2().
-    class Vector2 : public DynamicObjectWrapper<Vector2, neko::vec2>
-    {
+    class Vector2 : public DynamicObjectWrapper<Vector2, neko::vec2> {
     private:
       vec2 v_; //!< Internal vec2.
     protected:
@@ -49,6 +52,9 @@ namespace neko {
       void js_greaterOrEqual( const V8CallbackArgs& args );
       void js_lesser( const V8CallbackArgs& args );
       void js_lesserOrEqual( const V8CallbackArgs& args );
+      //! Operations
+      void js_add( const V8CallbackArgs& args );
+      void js_sub( const V8CallbackArgs& args );
       //! Functions
       void js_toString( const V8CallbackArgs& args );
       void js_length( const V8CallbackArgs& args );
@@ -64,6 +70,7 @@ namespace neko {
       void js_reflect( const V8CallbackArgs& args );
       void js_makeFloor( const V8CallbackArgs& args );
       void js_makeCeil( const V8CallbackArgs& args );
+      void js_inverse( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
@@ -83,8 +90,7 @@ namespace neko {
 
     //! \class Vector3
     //! \brief Implementation of JavaScript vec3().
-    class Vector3 : public DynamicObjectWrapper<Vector3, neko::vec3>
-    {
+    class Vector3 : public DynamicObjectWrapper<Vector3, neko::vec3> {
     private:
       vec3 v_; //!< Internal vec3.
     protected:
@@ -101,6 +107,9 @@ namespace neko {
       void js_greaterOrEqual( const V8CallbackArgs& args );
       void js_lesser( const V8CallbackArgs& args );
       void js_lesserOrEqual( const V8CallbackArgs& args );
+      //! Operations
+      void js_add( const V8CallbackArgs& args );
+      void js_sub( const V8CallbackArgs& args );
       //! Functions
       void js_toString( const V8CallbackArgs& args );
       void js_length( const V8CallbackArgs& args );
@@ -111,8 +120,7 @@ namespace neko {
       void js_angleBetween( const V8CallbackArgs& args );
       void js_makeFloor( const V8CallbackArgs& args );
       void js_makeCeil( const V8CallbackArgs& args );
-      void js_add( const V8CallbackArgs& args );
-
+      void js_inverse( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
@@ -132,6 +140,47 @@ namespace neko {
 
     using Vector3Ptr = shared_ptr<Vector3>;
 
+    class Quaternion: public DynamicObjectWrapper<Quaternion, neko::quaternion> {
+    private:
+      quaternion q_; //!< Internal quaternion.
+    protected:
+      //! Properties
+      void js_getX( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setX( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getY( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setY( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getZ( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setZ( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getW( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setW( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      //! Functions
+      void js_toString( const V8CallbackArgs& args );
+      void js_length( const V8CallbackArgs& args );
+      void js_lerp( const V8CallbackArgs& args );
+      void js_slerp( const V8CallbackArgs& args );
+      void js_dotProduct( const V8CallbackArgs& args );
+      void js_normalise( const V8CallbackArgs& args );
+      void js_normalisedCopy( const V8CallbackArgs& args );
+
+    public:
+      static void jsConstructor( const V8CallbackArgs& info );
+      static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
+
+    public:
+      Quaternion( const quaternion& source ): q_( source ) {}
+      inline void setFrom( const quaternion& other )
+      {
+        q_.x = other.x;
+        q_.y = other.y;
+        q_.z = other.z;
+        q_.w = other.w;
+      }
+      inline quaternion& q() { return q_; } //!< Get the internal quaternion.
+      inline operator quaternion() const { return q_; }
+    };
+
+    using QuaternionPtr = shared_ptr<Quaternion>;
+
     //! Expect and extract a Vector2 object as args[arg],
     //! throw JS exception and return null on failure.
     Vector2Ptr extractVector2( int arg, const V8CallbackArgs& args );
@@ -141,6 +190,10 @@ namespace neko {
     Vector3Ptr extractVector3( int arg, const V8CallbackArgs& args );
 
     Vector3Ptr extractVector3Member( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow );
+
+    //! Expect and extract a Quaternion object as args[arg],
+    //! throw JS exception and return null on failure.
+    QuaternionPtr extractQuaternion( int arg, const V8CallbackArgs& args );
 
     template <class T>
     inline shared_ptr<T> extractWrappedDynamic( V8Context& context, const V8Value& value )

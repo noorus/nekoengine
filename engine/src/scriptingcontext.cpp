@@ -75,6 +75,7 @@ namespace neko {
   {
     vec2Registry_.initialize( isolate_, global );
     vec3Registry_.initialize( isolate_, global );
+    quatRegistry_.initialize( isolate_, global );
     meshRegistry_.initialize( isolate_, global );
     modelRegistry_.initialize( isolate_, global );
   }
@@ -125,6 +126,7 @@ namespace neko {
 
     modelRegistry_.clear();
     meshRegistry_.clear();
+    quatRegistry_.clear();
     vec3Registry_.clear();
     vec2Registry_.clear();
 

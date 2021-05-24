@@ -185,6 +185,7 @@
     <ClCompile Include="src\js_mathutil.cpp" />
     <ClCompile Include="src\js_mesh.cpp" />
     <ClCompile Include="src\js_model.cpp" />
+    <ClCompile Include="src\js_quaternion.cpp" />
     <ClCompile Include="src\js_vector2.cpp" />
     <ClCompile Include="src\js_vector3.cpp" />
     <ClCompile Include="src\loader.cpp" />

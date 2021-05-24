@@ -67,6 +67,7 @@ namespace neko {
     js::JSGamePtr jsGame_;
     js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
     js::DynamicObjectsRegistry<js::Vector3, vec3> vec3Registry_;
+    js::DynamicObjectsRegistry<js::Quaternion, quaternion> quatRegistry_;
     js::DynamicObjectsRegistry<js::Mesh, JSMesh> meshRegistry_;
     js::DynamicObjectsRegistry<js::Model, js::JSModel> modelRegistry_;
   public:
@@ -81,6 +82,7 @@ namespace neko {
     inline v8::Global<v8::Context>& ctx() throw() { return ctx_; }
     inline js::DynamicObjectsRegistry<js::Vector2, vec2>& vec2reg() { return vec2Registry_; }
     inline js::DynamicObjectsRegistry<js::Vector3, vec3>& vec3reg() { return vec3Registry_; }
+    inline js::DynamicObjectsRegistry<js::Quaternion, quaternion>& quatreg() { return quatRegistry_; }
     inline js::DynamicObjectsRegistry<js::Mesh, JSMesh>& meshreg() { return meshRegistry_; }
     inline js::DynamicObjectsRegistry<js::Model, js::JSModel>& modelreg() { return modelRegistry_; }
     inline RenderSyncContext& renderSync() { return director_->renderSync(); }

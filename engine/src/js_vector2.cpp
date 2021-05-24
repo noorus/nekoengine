@@ -17,6 +17,8 @@ namespace neko {
     static const mathShared::Messages c_greaterOrEqualMessages( c_className + utf8String( ".greaterThanOrEqual" ), false );
     static const mathShared::Messages c_lesserMessages( c_className + utf8String( ".lessThan" ), false );
     static const mathShared::Messages c_lesserOrEqualMessages( c_className + utf8String( ".lessThanOrEqual" ), false );
+    static const mathShared::Messages c_addMessages( c_className + utf8String( ".add" ), false );
+    static const mathShared::Messages c_subMessages( c_className + utf8String( ".sub" ), false );
 
     string Vector2::className( c_className );
     WrappedType Vector2::internalType = Wrapped_Vector2;
@@ -26,6 +28,15 @@ namespace neko {
       // Properties
       JS_WRAPPER_SETACCESSOR( tpl, Vector2, x, X );
       JS_WRAPPER_SETACCESSOR( tpl, Vector2, y, Y );
+
+      // Operations
+      JS_WRAPPER_SETMEMBER( tpl, Vector2, add );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, add, addition );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, add, plus );
+      JS_WRAPPER_SETMEMBER( tpl, Vector2, sub );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, sub, subtraction );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, sub, subtract );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, sub, minus );
 
       // Methods
       JS_WRAPPER_SETMEMBER( tpl, Vector2, toString );
@@ -44,6 +55,9 @@ namespace neko {
       JS_WRAPPER_SETMEMBER( tpl, Vector2, reflect );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, makeFloor );
       JS_WRAPPER_SETMEMBER( tpl, Vector2, makeCeil );
+      JS_WRAPPER_SETMEMBER( tpl, Vector2, inverse );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, inverse, invert );
+      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, inverse, inverted );
 
       // Comparisons
       JS_WRAPPER_SETMEMBER( tpl, Vector2, equals );
@@ -173,6 +187,40 @@ namespace neko {
       {
         v_.y = static_cast<Real>( value->NumberValue( context ).ToChecked() );
       }
+    }
+
+    //! \verbatim
+    //! vec2 vec2.add( vec2 )
+    //! \endverbatim
+    void Vector2::js_add( const V8CallbackArgs& args )
+    {
+      auto isolate = args.GetIsolate();
+      HandleScope handleScope( isolate );
+
+      if ( args.Length() != 1 )
+      {
+        util::throwException( isolate, c_addMessages.syntaxErrorText.c_str() );
+        return;
+      }
+
+      mathShared::jsmath_add( args, getScriptContext( isolate ), c_addMessages, args.This(), args[0] );
+    }
+
+    //! \verbatim
+    //! vec2 vec2.sub( vec2 )
+    //! \endverbatim
+    void Vector2::js_sub( const V8CallbackArgs& args )
+    {
+      auto isolate = args.GetIsolate();
+      HandleScope handleScope( isolate );
+
+      if ( args.Length() != 1 )
+      {
+        util::throwException( isolate, c_subMessages.syntaxErrorText.c_str() );
+        return;
+      }
+
+      mathShared::jsmath_subtract( args, getScriptContext( isolate ), c_subMessages, args.This(), args[0] );
     }
 
     //! \verbatim
@@ -461,6 +509,16 @@ namespace neko {
         if ( other->v().y > v_.y )
           v_.y = other->v().y;
       }
+    }
+
+    //! \verbatim
+    //! vec2 vec2.inverse()
+    //! \endverbatim
+    void Vector2::js_inverse( const V8CallbackArgs& args )
+    {
+      auto ctx = getScriptContext( args.GetIsolate() );
+      auto ptr = ctx->vec2reg().createFrom( vec2( -v_.x, -v_.y ) );
+      args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
     }
 
   }

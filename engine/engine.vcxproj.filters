@@ -192,6 +192,9 @@
     <ClCompile Include="src\modelmanager.cpp">
       <Filter>Source Files\gfx\meshes</Filter>
     </ClCompile>
+    <ClCompile Include="src\js_quaternion.cpp">
+      <Filter>Source Files\scripting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">

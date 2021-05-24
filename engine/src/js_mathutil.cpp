@@ -58,6 +58,21 @@ namespace neko {
       return move( Vector3::unwrap( asdasd )->shared_from_this() );
     }
 
+    QuaternionPtr extractQuaternion( int arg, const V8CallbackArgs& args )
+    {
+      if ( args.Length() >= ( arg + 1 ) && args[arg]->IsObject() )
+      {
+        auto context = args.GetIsolate()->GetCurrentContext();
+        auto object = args[arg]->ToObject( context ).ToLocalChecked();
+        if ( util::isWrappedType( context, object, Wrapped_Quaternion ) )
+        {
+          return Quaternion::unwrap( object )->shared_from_this();
+        }
+      }
+      util::throwException( args.GetIsolate(), L"Expected object quaternion as argument %d", arg );
+      return QuaternionPtr();
+    }
+
   }
 
 }
