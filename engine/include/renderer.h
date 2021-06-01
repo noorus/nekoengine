@@ -19,6 +19,8 @@ namespace neko {
     int64_t maxRenderbufferSize; //!< Maximum width/height for GL_RENDERBUFFER
     int64_t maxFramebufferWidth; //!< Maximum width for GL_FRAMEBUFFER
     int64_t maxFramebufferHeight; //!< Maximum height for GL_FRAMEBUFFER
+    int64_t textureBufferAlignment; //!< Minimum alignment for texture buffer sizes and offsets
+    int64_t uniformBufferAlignment; //!< Minimum alignment for uniform buffer sizes and offsets
     GLInformation()
     {
       memset( this, 0, sizeof( GLInformation ) );
@@ -49,7 +51,7 @@ namespace neko {
     ConsolePtr console_;
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
-    ShadersPtr shaders_;
+    shaders::ShadersPtr shaders_;
     MeshManagerPtr meshes_;
     ModelManagerPtr models_;
     platform::RWLock loadLock_;

@@ -1,4 +1,4 @@
-let poop = 1337;
+/*let poop = 1337;
 let asd = ( poop * 3 );
 Console.print(["aint that some shit?!!", asd, poop].join(" "));
 Console.print("let's test the vector thingy");
@@ -22,7 +22,7 @@ Console.print("NEW SHIT");
 const qwe = vec3(1, 2, 3);
 const rty = vec3(5, 6, 7);
 Console.print("addition: " + nm.add(qwe, rty));
-Console.print("subtraction: " + nm.sub(qwe, rty));
+Console.print("subtraction: " + nm.sub(qwe, rty));*/
 
 class Scene
 {

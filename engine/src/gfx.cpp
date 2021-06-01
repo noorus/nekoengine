@@ -41,9 +41,12 @@ namespace neko {
   }
 
   // 131185: Buffer detailed info...
+  // -> Information on buffer object creation, hinting and memory placement
   // 131218: Program/shader state performance warning...
   // 131204: The texture object does not have a defined base level...
   // 131154: Pixel-path performance warning: Pixel transfer is synchronized with 3D rendering.
+  // -> Basically just means that we're not using NV-specific (?) multithreaded texture uploads
+  // -> https://on-demand.gputechconf.com/gtc/2012/presentations/S0356-GTC2012-Texture-Transfers.pdf
   const std::array<GLuint, 4> c_ignoredGlDebugMessages = { 131185, 131218, 131204, 131154 };
 
   void Gfx::openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,

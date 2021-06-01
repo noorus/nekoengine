@@ -38,7 +38,7 @@ namespace neko {
 
   }
 
-  const int64_t c_glVersion[2] = { 4, 5 };
+  const int64_t c_glVersion[2] = { 4, 6 };
 
   static FramebufferPtr g_framebuf;
 
@@ -191,6 +191,10 @@ namespace neko {
       info.maxFramebufferWidth = info.maxTextureSize;
       info.maxFramebufferHeight = info.maxTextureSize;
     }
+
+    // Uniform buffer alignments
+    glvGetI64( GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, info.textureBufferAlignment );
+    glvGetI64( GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, info.uniformBufferAlignment );
   }
 
   void Renderer::clearErrors()
@@ -223,7 +227,7 @@ namespace neko {
   {
     clearErrors();
 
-    shaders_ = make_shared<Shaders>( console_ );
+    shaders_ = make_shared<shaders::Shaders>( console_ );
     shaders_->initialize();
 
     meshes_ = make_shared<MeshManager>( console_ );
@@ -413,9 +417,13 @@ namespace neko {
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    shaders_->setViewProjectionMat( camera->view(), camera->projection() );
+    shaders_->world()->projection = camera->projection();
+    shaders_->world()->view = camera->view();
+
+    auto& pl = shaders_->usePipeline( "default3d" );
 
     // FIXME ridiculously primitive
+    // Also, investigate glMultiDrawArraysIndirect
     if ( models_ )
     {
       for ( auto& modelptr : models_->models() )
@@ -423,8 +431,8 @@ namespace neko {
         if ( !modelptr.second )
           continue;
 
-        auto model = modelptr.second->model();
-        auto mesh = model.mesh_;
+        auto& model = modelptr.second->model();
+        auto mesh = model.mesh_.get();
 
         if ( !mesh || !mesh->mesh().vao_->uploaded_ )
           continue;
@@ -436,7 +444,8 @@ namespace neko {
         mdl = glm::scale( mdl, model.scale_->v() );
         //mdl = glm::rotate( mdl, glm::radians( 45.0f ), vec3( 0.0f, 0.0f, 1.0f ) );
 
-        shaders_->use( "default3d" ).setUniform( "model", mdl );
+        pl.setUniform( "model", mdl );
+        pl.setUniform( "tex", 0 );
 
         if ( !materials_.empty() && materials_[0]->texture_ )
           glBindTextureUnit( 0, materials_[0]->texture_->handle() );
@@ -475,7 +484,7 @@ namespace neko {
     glDisable( GL_LINE_SMOOTH );
     glDisable( GL_POLYGON_SMOOTH );
 
-    // Default to empty VAO, since not having a bound VAO is illegal per 4.5 spec
+    // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
     glBindVertexArray( builtin_.emptyVAO_ );
 
     // Draw the scene inside the framebuffer.
@@ -488,7 +497,7 @@ namespace neko {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
     builtin_.screenQuad_->begin();
-    shaders_->use( "mainframebuf2d" );
+    shaders_->usePipeline( "mainframebuf2d" ).setUniform( "tex", 0 );
     glBindTextureUnit( 0, g_framebuf->texture()->handle() );
     builtin_.screenQuad_->draw();
   }
