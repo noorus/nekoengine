@@ -160,6 +160,7 @@ namespace neko {
       void js_dotProduct( const V8CallbackArgs& args );
       void js_normalise( const V8CallbackArgs& args );
       void js_normalisedCopy( const V8CallbackArgs& args );
+      void js_fromAngleAxis( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );

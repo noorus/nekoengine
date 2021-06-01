@@ -36,6 +36,10 @@ class Scene
   }
 }
 
+let toRadians = (degrees) => {
+  return (degrees * (Math.PI / 180));
+}
+
 class DemoScene extends Scene
 {
   constructor( name )
@@ -57,7 +61,7 @@ class DemoScene extends Scene
       0, 2, 1, 1, 2, 3
     ];
     this._mesh = new mesh(verts, indices);*/
-    this._mesh = new mesh( "plane", vec2( 256 ), vec2( 1 ), vec3( 0, 0, -1 ) );
+    this._mesh = new mesh("plane", vec2(256), vec2(1), vec3(0, 0, -1));
     this._ctr = 0;
     Console.print(this._mesh);
     Console.print("creating model");
@@ -78,7 +82,8 @@ class DemoScene extends Scene
         translate: vec3(640 + 128, 360 + 128, 0)
       })
     ]
-    Console.print("DemoScene.initialize leaving function" );
+    Console.print("DemoScene.initialize leaving function");
+    Console.print(this._models[1].rotate);
   }
   enter()
   {
@@ -95,6 +100,7 @@ class DemoScene extends Scene
     // Console.print("Scalar " + scalar);
     this._models[0].scale.x = scalar;
     this._models[0].scale.y = sceler;
+    this._models[1].rotate.fromAngleAxis(toRadians(time * 50), vec3(0, 0, 1));
     this._models[2].translate.z = Math.sin(time * 2) * 2;
     /*if (this._ctr < 12) {
       Console.print("update " + this._ctr + " - time " + time);

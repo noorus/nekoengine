@@ -9,12 +9,10 @@ namespace neko {
 #pragma warning(push)
 #pragma warning(disable: 4244)
 
-  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makePlane( vec2 dimensions, vec2u segments, vec3 normal )
+  void implAddPlane( vector<Vertex3D>& verts, vector<GLuint>& indices, GLuint& offset, vec2 dimensions, vec2u segments, vec3 normal, vec3 position = vec3( 0.0f ) )
   {
-    vector<Vertex3D> verts;
-    verts.resize( ( segments.x + 1 ) * ( segments.y + 1 ) );
-    vector<GLuint> indices;
-    indices.resize( segments.x * segments.y * 6 );
+    verts.resize( verts.size() + ( ( segments.x + 1 ) * ( segments.y + 1 ) ) );
+    indices.resize( indices.size() + ( segments.x * segments.y * 6 ) );
 
     auto vx = glm::perp( vec3( 1.0f, 0.0f, 0.0f ), normal );
     auto vy = glm::cross( normal, vx );
@@ -22,7 +20,7 @@ namespace neko {
     auto delta1 = vec3( dimensions.x / (Real)segments.x * vx );
     auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
 
-    auto orig = vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
+    auto orig = position + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
     for ( auto i = 0; i <= segments.x; ++i )
       for ( auto j = 0; j <= segments.y; ++j )
       {
@@ -34,7 +32,6 @@ namespace neko {
 
     bool reverse = ( glm::dot( glm::cross( delta1, delta2 ), normal ) > 0.0f );
 
-    GLuint offset = 0;
     for ( auto i = 0; i < segments.x; ++i )
     {
       for ( auto j = 0; j < segments.y; ++j )
@@ -50,6 +47,15 @@ namespace neko {
       }
       offset++;
     }
+  }
+
+  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makePlane( vec2 dimensions, vec2u segments, vec3 normal )
+  {
+    vector<Vertex3D> verts;
+    vector<GLuint> indices;
+    GLuint offset = 0;
+
+    implAddPlane( verts, indices, offset, dimensions, segments, normal );
 
     return make_pair( verts, indices );
   }

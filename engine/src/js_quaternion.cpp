@@ -33,6 +33,7 @@ namespace neko {
       JS_WRAPPER_SETMEMBERNAMED( tpl, Quaternion, normalisedCopy, normalizedCopy );
       JS_WRAPPER_SETMEMBER( tpl, Quaternion, lerp );
       JS_WRAPPER_SETMEMBER( tpl, Quaternion, slerp );
+      JS_WRAPPER_SETMEMBER( tpl, Quaternion, fromAngleAxis );
     }
 
     //! \verbatim
@@ -252,7 +253,7 @@ namespace neko {
       }
       auto context = isolate->GetCurrentContext();
       auto other = extractQuaternion( 0, args );
-      auto interp = math::clamp( (float)args[1]->NumberValue( context ).ToChecked(), 0.0f, 1.0f );
+      auto interp = math::clamp( (Real)args[1]->NumberValue( context ).ToChecked(), 0.0f, 1.0f );
       if ( !other )
       {
         isolate->ThrowException( util::staticStr( isolate, "Expected arguments quaternion, interp" ) );
@@ -277,7 +278,7 @@ namespace neko {
       }
       auto context = isolate->GetCurrentContext();
       auto other = extractQuaternion( 0, args );
-      auto interp = math::clamp( (float)args[1]->NumberValue( context ).ToChecked(), 0.0f, 1.0f );
+      auto interp = math::clamp( (Real)args[1]->NumberValue( context ).ToChecked(), 0.0f, 1.0f );
       if ( !other )
       {
         isolate->ThrowException( util::staticStr( isolate, "Expected arguments quaternion, interp" ) );
@@ -287,6 +288,25 @@ namespace neko {
       auto ctx = getScriptContext( args.GetIsolate() );
       auto ptr = ctx->quatreg().createFrom( resQ );
       args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
+    }
+
+    void Quaternion::js_fromAngleAxis( const V8CallbackArgs& args )
+    {
+      auto isolate = args.GetIsolate();
+      if ( args.Length() != 2 || !args[0]->IsNumber() )
+      {
+        isolate->ThrowException( util::staticStr( isolate, "Expected arguments angle, vec3" ) );
+        return;
+      }
+      auto context = isolate->GetCurrentContext();
+      auto angle = (Real)args[0]->NumberValue( context ).ToChecked();
+      auto axis = extractVector3( 1, args );
+      if ( !axis )
+      {
+        isolate->ThrowException( util::staticStr( isolate, "Expected arguments angle, vec3" ) );
+        return;
+      }
+      q_ = glm::angleAxis( angle, axis->v() );
     }
 
   }

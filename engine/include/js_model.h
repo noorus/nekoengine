@@ -18,27 +18,26 @@ namespace neko {
       MeshPtr mesh_;
       Vector3Ptr scale_;
       Vector3Ptr translate_;
+      QuaternionPtr rotate_;
       JSModel();
     };
 
-    class Model : public DynamicObjectWrapper<Model, JSModel>
-    {
+    class Model: public DynamicObjectWrapper<Model, JSModel> {
     private:
       JSModel local_; //!< Internal model.
-
     protected:
       //! Properties
       void js_getScale( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
       void js_setScale( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
       void js_getTranslate( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
       void js_setTranslate( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getRotate( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setRotate( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
       //! Functions
       void js_toString( const V8CallbackArgs& args );
-
     public:
       static void jsConstructor( const V8CallbackArgs& info );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
-
     public:
       Model( const JSModel& source ): local_( source ) {}
       inline void setFrom( const JSModel& other )

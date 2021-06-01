@@ -442,7 +442,7 @@ namespace neko {
         mat4 mdl( 1.0f );
         mdl = glm::translate( mdl, model.translate_->v() );
         mdl = glm::scale( mdl, model.scale_->v() );
-        //mdl = glm::rotate( mdl, glm::radians( 45.0f ), vec3( 0.0f, 0.0f, 1.0f ) );
+        mdl *= glm::toMat4( model.rotate_->q() );
 
         pl.setUniform( "model", mdl );
         pl.setUniform( "tex", 0 );

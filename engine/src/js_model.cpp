@@ -29,6 +29,7 @@ namespace neko {
       // Properties
       JS_WRAPPER_SETACCESSOR( tpl, Model, scale, Scale );
       JS_WRAPPER_SETACCESSOR( tpl, Model, translate, Translate );
+      JS_WRAPPER_SETACCESSOR( tpl, Model, rotate, Rotate );
 
       // Methods
       JS_WRAPPER_SETMEMBER( tpl, Model, toString );
@@ -45,6 +46,7 @@ namespace neko {
 
       vec3 defaultScale( 1.0f, 1.0f, 1.0f );
       vec3 defaultTranslate( 0.0f, 0.0f, 0.0f );
+      quaternion defaultRotate( glm::quat_identity<Real, glm::defaultp>() );
 
       JSModel model;
 
@@ -58,6 +60,7 @@ namespace neko {
           model.mesh_ = extractMeshMember( isolate, funcName, maybeObj, "mesh", false );
           model.scale_ = extractVector3Member( isolate, funcName, maybeObj, "scale", false );
           model.translate_ = extractVector3Member( isolate, funcName, maybeObj, "translate", false );
+          model.rotate_ = extractQuaternionMember( isolate, funcName, maybeObj, "rotate", false );
         }
       }
 
@@ -73,6 +76,8 @@ namespace neko {
         model.scale_ = ctx->vec3reg().createFrom( defaultScale );
       if ( !model.translate_ )
         model.translate_ = ctx->vec3reg().createFrom( defaultTranslate );
+      if ( !model.rotate_ )
+        model.rotate_ = ctx->quatreg().createFrom( defaultRotate );
 
       if ( args.IsConstructCall() )
       {
@@ -129,6 +134,27 @@ namespace neko {
 
       auto object = value->ToObject( context ).ToLocalChecked();
       local_.translate_ = Vector3::unwrap( object )->shared_from_this();
+    }
+
+    void Model::js_getRotate( V8String prop, const PropertyCallbackInfo<v8::Value>& info )
+    {
+      info.GetReturnValue().Set( local_.rotate_->handle( info.GetIsolate() ) );
+    }
+
+    void Model::js_setRotate( V8String prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info )
+    {
+      auto isolate = info.GetIsolate();
+      auto context = isolate->GetCurrentContext();
+
+      WrappedType argWrapType = Max_WrappedType;
+      if ( !util::getWrappedType( context, value, argWrapType ) || argWrapType != Wrapped_Quaternion )
+      {
+        isolate->ThrowException( util::staticStr( isolate, "Passed argument is not a quaternion" ) );
+        return;
+      }
+
+      auto object = value->ToObject( context ).ToLocalChecked();
+      local_.rotate_ = Quaternion::unwrap( object )->shared_from_this();
     }
 
     void Model::js_toString( const V8CallbackArgs& args )

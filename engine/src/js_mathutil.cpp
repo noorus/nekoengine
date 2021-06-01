@@ -44,18 +44,24 @@ namespace neko {
       if ( maybeObject.IsEmpty() )
       {
         if ( shouldThrow )
-          util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
+          util::throwException( isolate, ( func + ": passed object has no vec3 member \"" + name + "\"" ).c_str() );
         return emptyPtr;
       }
       auto object = maybeObject.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
-      auto asdasd = v8::Local<v8::Object>::Cast( object );
-      if ( object.IsEmpty() || !util::isWrappedType( isolate->GetCurrentContext(), asdasd, Wrapped_Vector3 ) )
+      if ( object.IsEmpty() || !object->IsObject() )
       {
         if ( shouldThrow )
           util::throwException( isolate, ( func + ": passed object has no vec3 member \"" + name + "\"" ).c_str() );
         return emptyPtr;
       }
-      return move( Vector3::unwrap( asdasd )->shared_from_this() );
+      auto local = v8::Local<v8::Object>::Cast( object );
+      if ( !util::isWrappedType( isolate->GetCurrentContext(), local, Wrapped_Vector3 ) )
+      {
+        if ( shouldThrow )
+          util::throwException( isolate, ( func + ": passed object has no vec3 member \"" + name + "\"" ).c_str() );
+        return emptyPtr;
+      }
+      return move( Vector3::unwrap( local )->shared_from_this() );
     }
 
     QuaternionPtr extractQuaternion( int arg, const V8CallbackArgs& args )
@@ -71,6 +77,32 @@ namespace neko {
       }
       util::throwException( args.GetIsolate(), L"Expected object quaternion as argument %d", arg );
       return QuaternionPtr();
+    }
+
+    QuaternionPtr extractQuaternionMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow )
+    {
+      const QuaternionPtr emptyPtr;
+      if ( maybeObject.IsEmpty() )
+      {
+        if ( shouldThrow )
+          util::throwException( isolate, ( func + ": passed object has no quaternion member \"" + name + "\"" ).c_str() );
+        return emptyPtr;
+      }
+      auto object = maybeObject.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
+      if ( object.IsEmpty() || !object->IsObject() )
+      {
+        if ( shouldThrow )
+          util::throwException( isolate, ( func + ": passed object has no quaternion member \"" + name + "\"" ).c_str() );
+        return emptyPtr;
+      }
+      auto local = v8::Local<v8::Object>::Cast( object );
+      if ( !util::isWrappedType( isolate->GetCurrentContext(), local, Wrapped_Quaternion ) )
+      {
+        if ( shouldThrow )
+          util::throwException( isolate, ( func + ": passed object has no quaternion member \"" + name + "\"" ).c_str() );
+        return emptyPtr;
+      }
+      return move( Quaternion::unwrap( local )->shared_from_this() );
     }
 
   }
