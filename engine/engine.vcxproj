@@ -216,6 +216,7 @@
   <ItemGroup>
     <ClInclude Include="..\extern\lodepng\lodepng.h" />
     <ClInclude Include="..\shared\include\neko_algorithm.h" />
+    <ClInclude Include="..\shared\include\neko_compilerdef.h" />
     <ClInclude Include="..\shared\include\neko_config.h" />
     <ClInclude Include="..\shared\include\neko_exception.h" />
     <ClInclude Include="..\shared\include\neko_platform.h" />

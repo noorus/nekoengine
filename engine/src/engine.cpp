@@ -11,12 +11,25 @@
 
 namespace neko {
 
-  GameTime cLogicFPS = 60.0; //!< 60 fps
-  GameTime cLogicStep = ( 1.0 / cLogicFPS ); //!< tick ms
-  uint64_t cLogicMaxFrameMicroseconds = static_cast<uint64_t>( ( cLogicStep * 1000.0 ) * 1000.0 ); //!< max us
+  GameTime c_logicFPS = 60.0; //!< 60 fps
+  GameTime c_logicStep = ( 1.0 / c_logicFPS ); //!< tick ms
+  uint64_t c_logicMaxFrameMicroseconds = static_cast<uint64_t>( ( c_logicStep * 1000.0 ) * 1000.0 ); //!< max us
 
-  Engine::Engine( ConsolePtr console ): console_( move( console ) ), time_( 0.0 )
+  const char* c_engineName = "Nekoengine Alpha";
+  const char* c_engineLogName = "nekoengine";
+  const uint32_t c_engineVersion[3] = { 0, 1, 1 };
+
+  Engine::Engine( ConsolePtr console ): console_( move( console ) ),
+    time_( 0.0 ), signal_( Signal_None )
   {
+    info_.logName = c_engineLogName;
+    info_.engineName = c_engineName;
+    info_.profile = _PROFILE;
+    info_.compiled = __DATE__ " " __TIME__;
+    info_.compiler = _COMPILER;
+    info_.major = c_engineVersion[0];
+    info_.minor = c_engineVersion[1];
+    info_.build = c_engineVersion[2];
   }
 
   Engine::~Engine()
@@ -103,10 +116,10 @@ namespace neko {
     GameTime accumulator = 0.0;
     GameTime delta = 0.0;
 
-    const auto maxSleepytimeMs = math::ifloor( (double)cLogicMaxFrameMicroseconds / 1000.0 );
+    const auto maxSleepytimeMs = math::ifloor( (double)c_logicMaxFrameMicroseconds / 1000.0 );
 
     console_->printf( Console::srcEngine, "Logic: targeting %.02f FPS, logic step %.02fms, max frame time %I64uus, max sleep %ims",
-      (float)cLogicFPS, static_cast<float>( cLogicStep * 1000.0 ), cLogicMaxFrameMicroseconds, maxSleepytimeMs );
+      (float)c_logicFPS, static_cast<float>( c_logicStep * 1000.0 ), c_logicMaxFrameMicroseconds, maxSleepytimeMs );
 
     while ( signal_ != Signal_Stop )
     {
@@ -124,13 +137,13 @@ namespace neko {
       if ( !paused() )
       {
         accumulator += delta;
-        while ( accumulator >= cLogicStep )
+        while ( accumulator >= c_logicStep )
         {
-          scripting_->tick( cLogicStep, time_ );
-          messaging_->tick( cLogicStep, time_ );
+          scripting_->tick( c_logicStep, time_ );
+          messaging_->tick( c_logicStep, time_ );
           //gfx_->tick( cLogicStep, time_ );
-          time_ += cLogicStep;
-          accumulator -= cLogicStep;
+          time_ += c_logicStep;
+          accumulator -= c_logicStep;
         }
       }
 
@@ -142,7 +155,7 @@ namespace neko {
       }
 
       auto us = clock_.peekMicroseconds();
-      if ( us >= cLogicMaxFrameMicroseconds )
+      if ( us >= c_logicMaxFrameMicroseconds )
       {
         console_->printf( Console::srcEngine, "WARNING: Logic frame exceeded max time (%I64uus)", us );
       }

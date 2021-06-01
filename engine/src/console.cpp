@@ -5,11 +5,8 @@
 #include "neko_algorithm.h"
 #include "engine.h"
 
-// Used in the log filename and in the log startup banner.
-#define NEKO_LOGNAME "nekoengine"
-#define NEKO_LOGTITLE "Nekoengine Alpha"
-
 // Don't ask
+// Don't touch
 #pragma warning(disable: 4073)
 #pragma init_seg(lib)
 
@@ -269,7 +266,7 @@ namespace neko {
     if ( !engine )
       return resetEngine();
     engine_ = move( engine );
-    start();
+    start( engine_->info() );
   }
 
   void Console::resetEngine()
@@ -281,7 +278,7 @@ namespace neko {
     }
   }
 
-  void Console::start()
+  void Console::start( const EngineInfo& info )
   {
     DateTime now;
     platform::getDateTime( now );
@@ -289,20 +286,23 @@ namespace neko {
     fileOut_.reset();
 
     char filename[64];
-    sprintf_s( filename, 64, "%04d%02d%02d_" NEKO_LOGNAME "-%02d%02d%02d.log",
-      now.year, now.month, now.day, now.hour, now.minute, now.second );
+    sprintf_s( filename, 64, "%04d%02d%02d_%s-%02d%02d%02d.log",
+      now.year, now.month, now.day, info.logName.c_str(), now.hour, now.minute, now.second );
 
     fileOut_ = make_unique<TextFileWriter>( filename );
 
-    writeStartBanner();
+    writeStartBanner( info );
   }
 
-  void Console::writeStartBanner()
+  void Console::writeStartBanner( const EngineInfo& info )
   {
     DateTime now;
     platform::getDateTime( now );
 
-    printf( srcEngine, NEKO_LOGTITLE " [Debug Log]" );
+    printf( srcEngine, "%s v%d.%d.%d [%s]", info.engineName.c_str(),
+      info.major, info.minor, info.build, info.profile.c_str() );
+    printf( srcEngine, "Build: %s (%s)", info.compiled.c_str(),
+      info.compiler.c_str() );
     printf( srcEngine, "Starting on %04d-%02d-%02d %02d:%02d:%02d",
       now.year, now.month, now.day, now.hour, now.minute, now.second );
   }

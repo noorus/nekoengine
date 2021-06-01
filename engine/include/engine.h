@@ -8,6 +8,18 @@
 
 namespace neko {
 
+  struct EngineInfo
+  {
+    uint32_t major;
+    uint32_t minor;
+    uint32_t build;
+    utf8String profile;
+    utf8String engineName;
+    utf8String logName;
+    utf8String compiled;
+    utf8String compiler;
+  };
+
   //! \class Engine
   //! The main engine class that makes the world go round
   class Engine: public enable_shared_from_this<Engine>, public Listener {
@@ -35,6 +47,7 @@ namespace neko {
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
     DirectorPtr director_;
+    EngineInfo info_;
   protected:
     struct State {
       bool focusLost;
@@ -49,6 +62,7 @@ namespace neko {
     //! Message listener callback.
     void onMessage( const Message& msg ) override;
   public:
+    inline const EngineInfo& info() const throw() { return info_; }
     inline ConsolePtr console() throw() { return console_; }
     //inline GfxPtr gfx() throw() { return gfx_; }
     inline ScriptingPtr scripting() throw() { return scripting_; }

@@ -6,6 +6,8 @@ namespace neko {
   class Subsystem;
   using SubsystemPtr = shared_ptr<Subsystem>;
 
+  struct EngineInfo;
+
   class Engine;
   using EnginePtr = shared_ptr<Engine>;
 

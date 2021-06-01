@@ -335,6 +335,9 @@
     <ClInclude Include="include\modelmanager.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\include\neko_compilerdef.h">
+      <Filter>Header Files\shared</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="manifest\neko.manifest">

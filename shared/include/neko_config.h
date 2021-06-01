@@ -20,3 +20,5 @@
 #ifdef NEKO_NO_SCRIPTING
 # define NEKO_NO_ICU
 #endif
+
+#include "neko_compilerdef.h"
