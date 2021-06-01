@@ -41,6 +41,9 @@ namespace neko {
 
     extern HINSTANCE g_instance;
 
+#pragma warning( push )
+#pragma warning( disable : 26110 )
+
     //! \class RWLock
     //! Reader-writer lock class for easy portability.
     class RWLock: noncopyable {
@@ -53,6 +56,8 @@ namespace neko {
       inline void lockShared() { AcquireSRWLockShared( &lock_ ); }
       inline void unlockShared() { ReleaseSRWLockShared( &lock_ ); }
     };
+
+#pragma warning( pop )
 
     //! \class Event
     //! Native event type abstraction for the current platform.
@@ -91,13 +96,13 @@ namespace neko {
     //! Synchronously wait for one or all of native events to fire, or timeout.
     inline size_t waitForEvents( const EventVector& events, uint32_t milliseconds, bool waitAll = false, size_t timeoutValue = WAIT_TIMEOUT )
     {
-      auto ret = WaitForMultipleObjects( (DWORD)events.size(), events.data(), waitAll, milliseconds );
+      auto ret = static_cast<size_t>( WaitForMultipleObjects( (DWORD)events.size(), events.data(), waitAll, milliseconds ) );
       if ( ret >= WAIT_OBJECT_0 && ret < ( WAIT_OBJECT_0 + events.size() ) )
         return ( ret - WAIT_OBJECT_0 );
       else if ( ret == WAIT_TIMEOUT )
         return timeoutValue;
       else
-        NEKO_EXCEPT( "WaitForMultipleObjects failed" );
+        NEKO_WINAPI_EXCEPT( "WaitForMultipleObjects failed" );
     }
 
     //! \class Thread
@@ -237,7 +242,7 @@ namespace neko {
       LARGE_INTEGER frequency_;
       LARGE_INTEGER time_;
     public:
-      PerformanceTimer()
+      PerformanceTimer(): time_({ 0, 0 }), frequency_({ 0, 0 })
       {
         if ( !QueryPerformanceFrequency( &frequency_ ) )
           NEKO_EXCEPT( "Couldn't query HPC frequency" );
@@ -363,7 +368,7 @@ namespace neko {
       }
       uint64_t readUint64()
       {
-        uint64_t ret;
+        uint64_t ret = 0;
         DWORD read = 0;
         if ( ReadFile( file_, &ret, sizeof( uint64_t ), &read, nullptr ) != TRUE || read < sizeof( uint64_t ) )
           NEKO_EXCEPT( "File read failed or length mismatch" );
@@ -371,7 +376,7 @@ namespace neko {
       }
       uint32_t readUint32()
       {
-        uint32_t ret;
+        uint32_t ret = 0;
         DWORD read = 0;
         if ( ReadFile( file_, &ret, sizeof( uint32_t ), &read, nullptr ) != TRUE || read < sizeof( uint32_t ) )
           NEKO_EXCEPT( "File read failed or length mismatch" );
@@ -379,7 +384,7 @@ namespace neko {
       }
       int readInt()
       {
-        int ret;
+        int ret = 0;
         DWORD read = 0;
         if ( ReadFile( file_, &ret, sizeof( int ), &read, nullptr ) != TRUE || read < sizeof( int ) )
           NEKO_EXCEPT( "File read failed or length mismatch" );
@@ -387,7 +392,7 @@ namespace neko {
       }
       bool readBool()
       {
-        uint8_t ret;
+        uint8_t ret = 0;
         DWORD read = 0;
         if ( ReadFile( file_, &ret, sizeof( uint8_t ), &read, nullptr ) != TRUE || read < sizeof( uint8_t ) )
           NEKO_EXCEPT( "File read failed or length mismatch" );
@@ -395,7 +400,7 @@ namespace neko {
       }
       Real readReal()
       {
-        Real ret;
+        Real ret = 0.0f;
         DWORD read = 0;
         if ( ReadFile( file_, &ret, sizeof( Real ), &read, nullptr ) != TRUE || read < sizeof( Real ) )
           NEKO_EXCEPT( "File read failed or length mismatch" );
@@ -550,7 +555,7 @@ namespace neko {
         LPCSTR name;
         DWORD threadID;
         DWORD flags;
-      } nameSignalStruct;
+      } nameSignalStruct = { 0 };
 #pragma pack( pop )
       nameSignalStruct.type = 0x1000;
       nameSignalStruct.name = threadName.c_str();

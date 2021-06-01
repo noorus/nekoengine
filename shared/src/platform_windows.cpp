@@ -68,7 +68,7 @@ namespace neko {
 
     void initializeGUI()
     {
-      INITCOMMONCONTROLSEX ctrls;
+      INITCOMMONCONTROLSEX ctrls = { 0 };
       ctrls.dwSize = sizeof( INITCOMMONCONTROLSEX );
       ctrls.dwICC = ICC_STANDARD_CLASSES | ICC_NATIVEFNTCTL_CLASS;
 
@@ -118,14 +118,15 @@ namespace neko {
     void commonThreadSetup( LPCWSTR avProfile, AVRT_PRIORITY avPriority, int threadPriority, bool boostableOnWake )
     {
       auto tlsSpace = static_cast<TLSThreadData*>( Locator::memory().alloc( Memory::Sector::Generic, sizeof( TLSThreadData ), 8 ) );
-      if ( !TlsSetValue( g_tls_threadDataIndex, tlsSpace ) )
+      if ( !tlsSpace || !TlsSetValue( g_tls_threadDataIndex, tlsSpace ) )
         NEKO_WINAPI_EXCEPT( "TlsSetValue failed" );
 
       memset( tlsSpace, 0, sizeof( TLSThreadData ) );
       if ( g_CVar_sys_priorityadjust.as_b() )
       {
-        tlsSpace->avrtHandle = AvSetMmThreadCharacteristicsW( avProfile, &tlsSpace->avrtTaskIndex );
-        AvSetMmThreadPriority( tlsSpace->avrtHandle, avPriority );
+        tlsSpace->avrtHandle = move( AvSetMmThreadCharacteristicsW( avProfile, &tlsSpace->avrtTaskIndex ) );
+        if ( tlsSpace->avrtHandle )
+          AvSetMmThreadPriority( tlsSpace->avrtHandle, avPriority );
         auto thread = GetCurrentThread();
         SetThreadPriority( thread, threadPriority );
         SetThreadPriorityBoost( thread, boostableOnWake ? FALSE : TRUE );
@@ -282,7 +283,7 @@ namespace neko {
     {
       auto style = (DWORD)GetWindowLongW( window, GWL_STYLE );
       auto exstyle = (DWORD)GetWindowLongW( window, GWL_EXSTYLE );
-      RECT want;
+      RECT want = { 0 };
       want.left = 100;
       want.right = 100 + (LONG)resolution_.w;
       want.top = 100;

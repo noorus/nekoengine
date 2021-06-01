@@ -78,6 +78,7 @@
       <MinimalRebuild>
       </MinimalRebuild>
       <ShowIncludes>false</ShowIncludes>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\debug\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\debug\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -131,6 +132,7 @@
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerListingLocation>$(SolutionDir)asm\</AssemblerListingLocation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -49,7 +49,7 @@ namespace neko {
 
       auto context = args.GetIsolate()->GetCurrentContext();
 
-      quaternion quat;
+      quaternion quat = glm::quat_identity<Real, glm::defaultp>();
       bool valueParsed = false;
       if ( args.Length() == 0 )
       {

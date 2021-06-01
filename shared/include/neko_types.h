@@ -30,7 +30,11 @@
 #undef min
 #undef max
 
+#pragma warning( push )
+#pragma warning( disable : 28251 )
 #include <moodycamel/readerwriterqueue.h>
+#pragma warning( pop )
+
 #include <gsl/gsl>
 
 // GLM
