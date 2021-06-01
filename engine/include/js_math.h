@@ -37,7 +37,7 @@ namespace neko {
 
     //! \class Vector2
     //! \brief Implementation of JavaScript vec2().
-    class Vector2 : public DynamicObjectWrapper<Vector2, neko::vec2> {
+    class Vector2: public DynamicObjectWrapper<Vector2, neko::vec2> {
     private:
       vec2 v_; //!< Internal vec2.
     protected:
@@ -90,7 +90,7 @@ namespace neko {
 
     //! \class Vector3
     //! \brief Implementation of JavaScript vec3().
-    class Vector3 : public DynamicObjectWrapper<Vector3, neko::vec3> {
+    class Vector3: public DynamicObjectWrapper<Vector3, neko::vec3> {
     private:
       vec3 v_; //!< Internal vec3.
     protected:
@@ -124,7 +124,6 @@ namespace neko {
     public:
       static void jsConstructor( const V8CallbackArgs& info );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
-
     public:
       Vector3( const vec3& source ): v_( source ) {}
       Vector3(): v_( 0.0f, 0.0f, 0.0f ) {}
@@ -161,11 +160,9 @@ namespace neko {
       void js_dotProduct( const V8CallbackArgs& args );
       void js_normalise( const V8CallbackArgs& args );
       void js_normalisedCopy( const V8CallbackArgs& args );
-
     public:
       static void jsConstructor( const V8CallbackArgs& info );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
-
     public:
       Quaternion( const quaternion& source ): q_( source ) {}
       inline void setFrom( const quaternion& other )
@@ -194,6 +191,8 @@ namespace neko {
     //! Expect and extract a Quaternion object as args[arg],
     //! throw JS exception and return null on failure.
     QuaternionPtr extractQuaternion( int arg, const V8CallbackArgs& args );
+
+    QuaternionPtr extractQuaternionMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow );
 
     template <class T>
     inline shared_ptr<T> extractWrappedDynamic( V8Context& context, const V8Value& value )

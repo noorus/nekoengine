@@ -111,8 +111,6 @@ namespace neko {
         obj->js_##x( args ); \
     } ) )
 
-    // ex. js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
-
     template <class T, class Y>
     class DynamicObjectsRegistry {
     public:

@@ -171,14 +171,14 @@ namespace neko {
         return emptyPtr;
       }
       auto object = maybeObject.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
-      auto asdasd = v8::Local<v8::Object>::Cast( object );
-      if ( object.IsEmpty() || !util::isWrappedType( isolate->GetCurrentContext(), asdasd, Wrapped_Mesh ) )
+      auto local = v8::Local<v8::Object>::Cast( object );
+      if ( object.IsEmpty() || !util::isWrappedType( isolate->GetCurrentContext(), local, Wrapped_Mesh ) )
       {
         if ( shouldThrow )
           util::throwException( isolate, ( func + ": passed object has no mesh member \"" + name + "\"" ).c_str() );
         return emptyPtr;
       }
-      return move( Mesh::unwrap( asdasd )->shared_from_this() );
+      return move( Mesh::unwrap( local )->shared_from_this() );
     }
 
   }

@@ -10,18 +10,15 @@ namespace neko {
 
   namespace js {
 
-    class Mesh : public DynamicObjectWrapper<Mesh, JSMesh>
+    class Mesh: public DynamicObjectWrapper<Mesh, JSMesh>
     {
     private:
       JSMesh local_;
-
     protected:
       void js_toString( const V8CallbackArgs& args );
-
     public:
       static void jsConstructor( const V8CallbackArgs& info );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
-
     public:
       Mesh( const JSMesh& source ): local_( source ) {}
       inline void setFrom( const JSMesh& other )
