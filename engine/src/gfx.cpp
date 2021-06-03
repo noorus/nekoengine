@@ -24,9 +24,9 @@ namespace neko {
   NEKO_DECLARE_CONVAR( gl_debuglog,
     "Whether to print OpenGL debug log output.", true );
 
-  Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console )
-      : loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ), messaging_( move( messaging ) ),
-    director_( move( director ) )
+  Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
+    loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ),
+    messaging_( move( messaging ) ), director_( move( director ) )
   {
     assert( loader_ && fonts_ && director_  && messaging_ && console_ );
 
@@ -103,8 +103,8 @@ namespace neko {
     settings.depthBits = 24;
     settings.stencilBits = 8;
     settings.antialiasingLevel = 0;
-    settings.majorVersion = 4;
-    settings.minorVersion = 6;
+    settings.majorVersion = c_glVersion[0];
+    settings.minorVersion = c_glVersion[1];
     settings.attributeFlags = sf::ContextSettings::Attribute::Core | sf::ContextSettings::Attribute::Debug;
 
     window_ = make_unique<sf::Window>( videoMode, cWindowTitle, sf::Style::Default, settings );
@@ -189,6 +189,11 @@ namespace neko {
       {
         messaging_->send( M_Window_GainedFocus );
       }
+      else if ( evt.type == sf::Event::KeyPressed )
+      {
+        if ( evt.key.code == sf::Keyboard::F5 )
+          messaging_->send( M_Debug_ReloadScript );
+      }
     }
   }
 
@@ -238,6 +243,12 @@ namespace neko {
     platform::RenderWindowHandler::free();
   }
 
+  void Gfx::jsRestart()
+  {
+    renderer_->jsRestart();
+    renderer_->prepare( 0.0 );
+  }
+
   void Gfx::restart()
   {
     shutdown();
@@ -252,9 +263,11 @@ namespace neko {
 
   const string c_gfxThreadName = "nekoRenderer";
 
-  ThreadedRenderer::ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console )
-      : loader_( move( loader ) ), fonts_( move( fonts ) ), messaging_( move( messaging ) ), director_( move( director ) ), console_( move( console ) ),
-        thread_( c_gfxThreadName, threadProc, this )
+  ThreadedRenderer::ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts,
+    MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
+    loader_( move( loader ) ), fonts_( move( fonts ) ),
+    messaging_( move( messaging ) ), director_( move( director ) ),
+    console_( move( console ) ), thread_( c_gfxThreadName, threadProc, this )
   {
   }
 
@@ -270,6 +283,16 @@ namespace neko {
     {
       if ( wantStop.check() )
         break;
+
+      if ( restartEvent_.check() )
+      {
+        restartEvent_.reset();
+        console_->printf( Console::srcGfx, "Restarting renderer" );
+        gfx_->jsRestart();
+        console_->printf( Console::srcGfx, "Restart done" );
+        restartedEvent_.set();
+        continue;
+      }
 
       gfx_->processEvents();
 
@@ -287,10 +310,10 @@ namespace neko {
   {
     platform::performanceInitializeRenderThread();
 
-    auto gfx = ( (ThreadedRenderer*)argument )->shared_from_this();
-    gfx->initialize();
+    auto myself = ( (ThreadedRenderer*)argument )->shared_from_this();
+    myself->initialize();
     running.set();
-    gfx->run( wantStop );
+    myself->run( wantStop );
 
     platform::performanceTeardownCurrentThread();
     return true;
@@ -301,6 +324,13 @@ namespace neko {
     thread_.start();
   }
 
+  void ThreadedRenderer::restart()
+  {
+    restartedEvent_.reset();
+    restartEvent_.set();
+    restartedEvent_.wait();
+  }
+
   void ThreadedRenderer::stop()
   {
     thread_.stop();
@@ -309,10 +339,6 @@ namespace neko {
   ThreadedRenderer::~ThreadedRenderer()
   {
     //
-  }
-
-  FrameQueue::FrameQueue()
-  {
   }
 
 }

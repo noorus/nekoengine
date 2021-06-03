@@ -131,6 +131,7 @@ namespace neko {
           baleet->unref();
         });
         ptr->wrapperWrap( handle );
+        ptr->ref();
         pool_.push_back( ptr );
         return ptr;
       }
@@ -214,37 +215,39 @@ namespace neko {
       //! My magic internal type
       static WrappedType internalType;
       //! Myself
-      v8::Persistent<v8::Object> handle_;
+      v8::Persistent<v8::Object> persistent_;
       int refs_;
+      virtual int32_t jsEstimateSize() const = 0;
+      virtual void jsOnDestruct( Isolate* isolate )
+      {
+        delete this;
+      }
     private:
       static void weakCallback( const v8::WeakCallbackInfo<DynamicObjectWrapper>& data )
       {
-        auto wrap = (T*)data.GetParameter();
+        auto wrap = dynamic_cast<T*>( data.GetParameter() );
         if ( !wrap )
           return;
         assert( wrap->refs_ == 0 );
-        wrap->handle_.Reset();
-        delete wrap;
+        wrap->persistent_.Reset();
+        data.GetIsolate()->AdjustAmountOfExternalAllocatedMemory( -( wrap->jsEstimateSize() ) );
+        wrap->jsOnDestruct( data.GetIsolate() );
       }
     protected:
       inline void makeWeak()
       {
-        persistent().SetWeak( this, weakCallback, v8::WeakCallbackType::kParameter );
+        persistent_.SetWeak( this, weakCallback, v8::WeakCallbackType::kParameter );
       }
     protected:
       inline void wrapperWrap( v8::Handle<v8::Object>& handle )
       {
-        assert( persistent().IsEmpty() );
+        assert( persistent_.IsEmpty() );
         assert( handle->InternalFieldCount() == Max_WrapField );
         handle->SetInternalField( WrapField_Type, v8::Uint32::New( handle->GetIsolate(), internalType ) );
         handle->SetAlignedPointerInInternalField( WrapField_Pointer, this );
-        persistent().Reset( v8::Isolate::GetCurrent(), handle );
+        persistent_.Reset( v8::Isolate::GetCurrent(), handle );
+        handle->GetIsolate()->AdjustAmountOfExternalAllocatedMemory( jsEstimateSize() );
         makeWeak();
-        handle->GetIsolate()->AdjustAmountOfExternalAllocatedMemory( sizeof( T ) );
-        // this is a clutch, but as long as wrapperWrap is called ONLY ONCE
-        // when creating a new object, we can safely add that one refcount
-        // here, which will be later subtracted by the shared_ptr deleter.
-        ref();
       }
       static inline V8FunctionTemplate wrapperImplConstructor( Isolate* isolate )
       {
@@ -264,28 +267,29 @@ namespace neko {
       }
       virtual void ref()
       {
-        assert( !persistent().IsEmpty() );
-        persistent().ClearWeak();
+        assert( !persistent_.IsEmpty() );
+        persistent_.ClearWeak();
         refs_++;
       }
       virtual void unref()
       {
-        assert( !persistent().IsEmpty() );
-        assert( !persistent().IsWeak() );
+        assert( !persistent_.IsEmpty() );
+        assert( !persistent_.IsWeak() );
         assert( refs_ > 0 );
         if ( --refs_ == 0 )
           makeWeak();
       }
       void reset()
       {
-        if ( persistent().IsEmpty() )
+        if ( persistent_.IsEmpty() )
           return;
-        persistent().ClearWeak();
-        persistent().Reset();
+        persistent_.ClearWeak();
+        persistent_.Reset();
       }
       virtual ~DynamicObjectWrapper()
       {
-        reset();
+        //OutputDebugStringA( __FUNCTION__ "\r\n" );
+        //reset();
       }
       inline V8Object handle()
       {
@@ -293,11 +297,11 @@ namespace neko {
       }
       inline V8Object handle( v8::Isolate* isolate )
       {
-        return V8Object::New( isolate, persistent() );
+        return V8Object::New( isolate, persistent_ );
       }
       inline v8::Persistent<v8::Object>& persistent()
       {
-        return handle_;
+        return persistent_;
       }
       //! Unwraps the given handle.
       static inline T* unwrap( V8Object handle )

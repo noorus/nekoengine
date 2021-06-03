@@ -48,26 +48,38 @@ namespace neko {
     vaos_.erase( std::remove( vaos_.begin(), vaos_.end(), move( vao ) ), vaos_.end() );
   }
 
-  void MeshManager::addJSMesh( JSMesh& mesh )
+  void MeshManager::addJSMesh( js::Mesh* mesh )
   {
+    auto& inmesh = mesh->mesh();
     assert(
-      ( !mesh.vbo_->uploaded_ ) &&
-      ( !mesh.ebo_->uploaded_ ) &&
-      ( !mesh.vao_ || !mesh.vao_->uploaded_ ) );
+      ( !inmesh.vbo_->uploaded_ ) &&
+      ( !inmesh.ebo_->uploaded_ ) &&
+      ( !inmesh.vao_ || !inmesh.vao_->uploaded_ ) );
 
-    vbos_[mesh.vbo_->type_].push_back( mesh.vbo_ );
-    ebos_.push_back( mesh.ebo_ );
-    mesh.vao_ = move( pushVAO( mesh.vbo_, mesh.ebo_ ) );
+    if ( meshes_.find( mesh->mesh().id_ ) != meshes_.end() )
+    {
+      NEKO_EXCEPT( "Mesh map key already exists" );
+    }
+
+    vbos_[inmesh.vbo_->type_].push_back( inmesh.vbo_ );
+    ebos_.push_back( inmesh.ebo_ );
+    inmesh.vao_ = move( pushVAO( inmesh.vbo_, inmesh.ebo_ ) );
+
+    meshes_[mesh->mesh().id_] = mesh;
   }
 
-  void MeshManager::removeJSMesh( JSMesh& mesh )
+  void MeshManager::removeJSMesh( js::Mesh* mesh )
   {
-    if ( mesh.vao_ )
-      freeVAO( mesh.vao_ );
-    if ( mesh.ebo_ )
-      freeEBO( mesh.ebo_ );
-    if ( mesh.vbo_ )
-      freeVBO( mesh.vbo_ );
+    auto& inmesh = mesh->mesh();
+    if ( inmesh.vao_ )
+      freeVAO( inmesh.vao_ );
+    if ( inmesh.ebo_ )
+      freeEBO( inmesh.ebo_ );
+    if ( inmesh.vbo_ )
+      freeVBO( inmesh.vbo_ );
+
+    meshes_.erase( mesh->mesh().id_ );
+    delete mesh;
   }
 
   void MeshManager::jsUpdate( RenderSyncContext& renderCtx )
@@ -83,12 +95,21 @@ namespace neko {
     }
     for ( auto& newMesh : inMeshes )
     {
-      addJSMesh( newMesh->mesh() );
+      addJSMesh( newMesh );
     }
     for ( auto& deletingMesh : outMeshes )
     {
-      removeJSMesh( deletingMesh->mesh() );
+      removeJSMesh( deletingMesh );
     }
+  }
+
+  void MeshManager::jsReset()
+  {
+    for ( auto& it : meshes_ )
+    {
+      delete it.second;
+    }
+    meshes_.clear();
   }
 
   // MeshManager: VBOs
@@ -367,6 +388,7 @@ namespace neko {
 
   void MeshManager::teardown()
   {
+    jsReset();
     dynamics_.clear();
     statics_.clear();
   }

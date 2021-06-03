@@ -76,6 +76,14 @@ namespace neko {
         pushVertices( other.vt3d() );
     }
 
+    inline uint64_t sizeInBytes() const
+    {
+      const auto typeSize = ( type_ == VBO_2D ? sizeof( Vertex2D )
+        : type_ == VBO_3D ? sizeof( Vertex3D )
+        : sizeof( VertexText3D ) );
+      return ( sizeof( VBO ) + size() * typeSize );
+    }
+
     inline const vector<Vertex2D>& v2d() const
     {
       assert( type_ == VBO_2D );
@@ -97,6 +105,13 @@ namespace neko {
       return ( type_ == VBO_2D ? std::get<vector<Vertex2D>>( store_ ).empty()
         : type_ == VBO_3D ? std::get<vector<Vertex3D>>( store_ ).empty()
         : std::get<vector<VertexText3D>>( store_ ).empty() );
+    }
+
+    inline const bool size() const
+    {
+      return ( type_ == VBO_2D ? std::get<vector<Vertex2D>>( store_ ).size()
+        : type_ == VBO_3D ? std::get<vector<Vertex3D>>( store_ ).size()
+        : std::get<vector<VertexText3D>>( store_ ).size() );
     }
 
     inline void pushVertices( const vector<Vertex2D>& vertices )
@@ -165,6 +180,11 @@ namespace neko {
     }
 
     inline const bool empty() const { return storage_.empty(); }
+
+    inline uint64_t sizeInBytes() const
+    {
+      return ( sizeof( EBO ) + storage_.size() * sizeof( GLuint ) );
+    }
   };
 
   using EBOPtr = shared_ptr<EBO>;
@@ -243,6 +263,7 @@ namespace neko {
 
   class JSMesh {
   public:
+    size_t id_;
     VBOPtr vbo_;
     EBOPtr ebo_;
     VAOPtr vao_;
@@ -251,7 +272,7 @@ namespace neko {
       localVBO_.type_ = other.localVBO_.type_;
       localVBO_.
     }*/
-    JSMesh() {}
+    JSMesh();
   };
 
   class StaticMesh {

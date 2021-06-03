@@ -7,20 +7,12 @@
 
 namespace neko {
 
+  constexpr int32_t c_glVersion[2] = { 4, 6 };
+
   struct Viewport {
     vec2i size_;
     Viewport(): size_( 0, 0 ) {}
     Viewport( size_t width, size_t height ): size_( width, height ) {}
-  };
-
-  struct FrameData {
-    atomic<bool> frameCurrentlyProcessing = false;
-  };
-
-  struct Processor {
-    static constexpr uint32_t maxQueuedFrames = 2;
-    atomic<uint32_t> frameIndex;
-    FrameData frameData[maxQueuedFrames];
   };
 
   class Gfx: public platform::RenderWindowEventRecipient {
@@ -71,25 +63,16 @@ namespace neko {
     void postUpdate( GameTime delta, GameTime tick );
     void shutdown();
     void restart();
+    void jsRestart();
     virtual ~Gfx();
-  };
-
-  //struct FrameData {
-  //};
-
-  class FrameQueue {
-  private:
-    ReaderWriterQueue<FrameData> queue_;
-  public:
-    FrameQueue();
-    ~FrameQueue();
   };
 
   class ThreadedRenderer: public enable_shared_from_this<ThreadedRenderer> {
   private:
     platform::Thread thread_;
     GfxPtr gfx_;
-    ReaderWriterQueue<FrameData> frameQueue_;
+    platform::Event restartEvent_;
+    platform::Event restartedEvent_;
   protected:
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
@@ -103,6 +86,7 @@ namespace neko {
   public:
     ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     void start();
+    void restart();
     void stop();
     ~ThreadedRenderer();
   };

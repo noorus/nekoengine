@@ -21,13 +21,14 @@ namespace neko {
     js::MeshVector totalDeletedMeshes;
     js::ModelVector totalNewModels;
     js::ModelVector totalDeletedModels;
-    void constructed( js::MeshPtr mesh );
-    void destructed( js::MeshPtr mesh );
-    void constructed( js::ModelPtr model );
-    void destructed( js::ModelPtr model );
+    void constructed( js::Mesh* mesh );
+    void destructed( js::Mesh* mesh );
+    void constructed( js::Model* model );
+    void destructed( js::Model* model );
     void syncFromScripting();
     void syncMeshesFromRenderer( js::MeshVector& outCreated, js::MeshVector& outDeleted );
     void syncModelsFromRenderer( js::ModelVector& outCreated, js::ModelVector& outDeleted );
+    void resetFromRenderer();
   };
 
   class Director {

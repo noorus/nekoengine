@@ -8,6 +8,7 @@
 #include "engine.h"
 #include "fontmanager.h"
 #include "lodepng.h"
+#include "gfx.h"
 
 namespace neko {
 
@@ -37,8 +38,6 @@ namespace neko {
     };
 
   }
-
-  const int64_t c_glVersion[2] = { 4, 6 };
 
   static FramebufferPtr g_framebuf;
 
@@ -302,6 +301,14 @@ namespace neko {
     }*/
   }
 
+  void Renderer::jsRestart()
+  {
+    console_->printf( Console::srcGfx, "Renderer::jsRestart()" );
+    director_->renderSync().resetFromRenderer();
+    models_->jsReset();
+    meshes_->jsReset();
+  }
+
   //! Called by Texture::Texture()
   GLuint Renderer::implCreateTexture2D( size_t width, size_t height,
     GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
@@ -404,7 +411,8 @@ namespace neko {
     mat->image_.width_ = (unsigned int)width;
     mat->image_.height_ = (unsigned int)height;
     mat->texture_ = make_shared<Texture>( this,
-      mat->image_.width_, mat->image_.height_, mat->image_.format_, data, wrapping, filtering );
+      mat->image_.width_, mat->image_.height_, mat->image_.format_,
+      data, wrapping, filtering );
     mat->loaded_ = true;
     return move( mat );
   }
@@ -434,7 +442,7 @@ namespace neko {
         auto& model = modelptr.second->model();
         auto mesh = model.mesh_.get();
 
-        if ( !mesh || !mesh->mesh().vao_->uploaded_ )
+        if ( !mesh || !mesh->mesh().vao_ || !mesh->mesh().vao_->uploaded_ )
           continue;
 
         mesh->mesh().vao_->begin();

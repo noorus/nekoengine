@@ -10,14 +10,15 @@ namespace neko {
 
   namespace js {
 
-    class Mesh: public DynamicObjectWrapper<Mesh, JSMesh>
-    {
+    class Mesh: public DynamicObjectWrapper<Mesh, JSMesh> {
     private:
       JSMesh local_;
     protected:
       void js_toString( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
+      virtual int32_t jsEstimateSize() const;
+      virtual void jsOnDestruct( Isolate* isolate );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
     public:
       Mesh( const JSMesh& source ): local_( source ) {}
@@ -41,7 +42,8 @@ namespace neko {
     };
 
     using MeshPtr = shared_ptr<Mesh>;
-    using MeshVector = vector<MeshPtr>;
+    using MeshVector = vector<Mesh*>;
+    using MeshPtrVector = vector<MeshPtr>;
 
     MeshPtr extractMeshMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow );
 

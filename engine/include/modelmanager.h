@@ -10,18 +10,18 @@
 
 namespace neko {
 
-  using ModelMap = map<size_t, js::ModelPtr>;
+  using ModelMap = map<size_t, js::Model*>;
 
-  class ModelManager : public enable_shared_from_this<ModelManager> {
+  class ModelManager: public enable_shared_from_this<ModelManager> {
   private:
     ConsolePtr console_;
     ModelMap models_;
-    void addJSModel( js::ModelPtr& model );
-    void removeJSModel( js::ModelPtr& model );
-
+    void addJSModel( js::Model* model );
+    void removeJSModel( js::Model* model );
   public:
     ModelManager( ConsolePtr console ): console_( move( console ) ) {}
     void jsUpdate( RenderSyncContext& renderCtx );
+    void jsReset();
     void teardown();
     inline ModelMap& models() { return models_; }
   };

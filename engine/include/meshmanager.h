@@ -10,6 +10,8 @@
 
 namespace neko {
 
+  using MeshMap = map<size_t, js::Mesh*>;
+
   class MeshManager: public enable_shared_from_this<MeshManager> {
   private:
     ConsolePtr console_;
@@ -18,9 +20,9 @@ namespace neko {
     vector<VAOPtr> vaos_;
     DynamicMeshVector dynamics_;
     StaticMeshVector statics_;
-    js::MeshVector jsMeshes_;
-    void addJSMesh( JSMesh& mesh );
-    void removeJSMesh( JSMesh& mesh );
+    MeshMap meshes_;
+    void addJSMesh( js::Mesh* mesh );
+    void removeJSMesh( js::Mesh* mesh );
   public:
     MeshManager( ConsolePtr console ): console_( move( console ) ) {}
     void jsUpdate( RenderSyncContext& renderCtx );
@@ -42,6 +44,7 @@ namespace neko {
     DynamicMeshPtr createDynamic( GLenum drawMode, VBOType vertexType );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices );
+    void jsReset();
     void teardown();
   };
 

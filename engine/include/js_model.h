@@ -37,6 +37,8 @@ namespace neko {
       void js_toString( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
+      virtual int32_t jsEstimateSize() const;
+      virtual void jsOnDestruct( Isolate* isolate );
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
     public:
       Model( const JSModel& source ): local_( source ) {}
@@ -59,7 +61,8 @@ namespace neko {
     };
 
     using ModelPtr = shared_ptr<Model>;
-    using ModelVector = vector<ModelPtr>;
+    using ModelVector = vector<Model*>;
+    using ModelPtrVector = vector<ModelPtr>;
 
   }
 

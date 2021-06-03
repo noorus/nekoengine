@@ -64,12 +64,10 @@ namespace neko {
     renderer_->start();
     console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );
 
-#ifndef NEKO_NO_SCRIPTING
     timer.start();
     scripting_ = make_shared<Scripting>( shared_from_this() );
     scripting_->initialize();
     console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
-#endif
 
     scripting_->postInitialize();
   }
@@ -98,6 +96,9 @@ namespace neko {
       case M_Window_Close:
         signal_ = Signal_Stop;
         break;
+      case M_Debug_ReloadScript:
+        signal_ = Signal_Restart;
+        break;
     }
   }
 
@@ -106,6 +107,14 @@ namespace neko {
     if ( state_.focusLost || state_.windowMove )
       return true;
     return false;
+  }
+
+  void Engine::restart()
+  {
+    scripting_->shutdown();
+    renderer_->restart();
+    scripting_->initialize();
+    scripting_->postInitialize();
   }
 
   void Engine::run()
@@ -129,6 +138,16 @@ namespace neko {
 
       //gfx_->processEvents();
       messaging_->processEvents();
+
+      if ( signal_ == Signal_Restart )
+      {
+        signal_ = Signal_None;
+        restart();
+        time_ = 0.0;
+        accumulator = 0.0;
+        clock_.update();
+        continue;
+      }
 
       scripting_->preUpdate( time_ );
       fonts_->prepare( time_ );
@@ -174,6 +193,8 @@ namespace neko {
 
   void Engine::shutdown()
   {
+    scripting_.reset();
+
     if ( renderer_ )
       renderer_->stop();
 
@@ -188,8 +209,6 @@ namespace neko {
     renderer_.reset();
 
     fonts_.reset();
-
-    scripting_.reset();
 
     messaging_.reset();
     Locator::provideMessaging( MessagingPtr() );

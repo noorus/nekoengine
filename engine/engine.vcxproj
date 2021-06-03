@@ -200,6 +200,7 @@
     <ClCompile Include="src\modelmanager.cpp" />
     <ClCompile Include="src\renderbuffer.cpp" />
     <ClCompile Include="src\renderer.cpp" />
+    <ClCompile Include="src\rendersynccontext.cpp" />
     <ClCompile Include="src\script.cpp" />
     <ClCompile Include="src\scripting.cpp" />
     <ClCompile Include="src\scriptingcontext.cpp" />

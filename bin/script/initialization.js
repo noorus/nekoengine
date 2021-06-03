@@ -98,9 +98,14 @@ class DemoScene extends Scene
     const scalar = 1 + Math.sin(time * 2) * 1;
     const sceler = 1 + Math.cos(time * 2) * 1;
     // Console.print("Scalar " + scalar);
+    if (time > 10 && this._models[1]) {
+      Console.print("unsetting this._models[1]");
+      this._models[1] = null;
+    } else if ( this._models[1] ) {
+      this._models[1].rotate.fromAngleAxis(toRadians(time * 50), vec3(0, 0, 1));
+    }
     this._models[0].scale.x = scalar;
     this._models[0].scale.y = sceler;
-    this._models[1].rotate.fromAngleAxis(toRadians(time * 50), vec3(0, 0, 1));
     this._models[2].translate.z = Math.sin(time * 2) * 2;
     /*if (this._ctr < 12) {
       Console.print("update " + this._ctr + " - time " + time);

@@ -106,11 +106,9 @@
 #pragma warning( push )
 #pragma warning( disable: 4251 )
 
-#ifndef NEKO_NO_SCRIPTING
 // V8
-# include <libplatform/libplatform.h>
-# include <v8.h>
-#endif // !NEKO_NO_SCRIPTING
+#include <libplatform/libplatform.h>
+#include <v8.h>
 
 #ifndef NEKO_NO_ICU
 // ICU

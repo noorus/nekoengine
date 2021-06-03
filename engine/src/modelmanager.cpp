@@ -9,7 +9,7 @@ namespace neko {
 
   using namespace gl;
 
-  void ModelManager::addJSModel( js::ModelPtr& model )
+  void ModelManager::addJSModel( js::Model* model )
   {
     if ( models_.find( model->model().id_ ) != models_.end() )
     {
@@ -18,9 +18,10 @@ namespace neko {
     models_[model->model().id_] = model;
   }
 
-  void ModelManager::removeJSModel( js::ModelPtr& model )
+  void ModelManager::removeJSModel( js::Model* model )
   {
     models_.erase( model->model().id_ );
+    delete model;
   }
 
   void ModelManager::jsUpdate( RenderSyncContext& renderCtx )
@@ -44,9 +45,18 @@ namespace neko {
     }
   }
 
+  void ModelManager::jsReset()
+  {
+    for ( auto& it : models_ )
+    {
+      delete it.second;
+    }
+    models_.clear();
+  }
+
   void ModelManager::teardown()
   {
-    //models_.clear();
+    jsReset();
   }
 
 }

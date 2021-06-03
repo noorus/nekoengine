@@ -27,7 +27,8 @@ namespace neko {
     //! Possible signal values interpreted by the engine's gameloop
     enum Signal {
       Signal_None = 0, //!< No signal.
-      Signal_Stop //!< Engine stop signal.
+      Signal_Stop, //!< Engine stop signal.
+      Signal_Restart
     };
     //! Possible fatal errors
     enum FatalError {
@@ -58,6 +59,7 @@ namespace neko {
     GameTime time_;
     volatile Signal signal_;
     bool paused();
+    void restart();
   protected:
     //! Message listener callback.
     void onMessage( const Message& msg ) override;

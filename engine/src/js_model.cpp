@@ -83,13 +83,13 @@ namespace neko {
       {
         auto thisObj = args.This();
         auto ptr = ctx->modelreg().createFromJS( thisObj, model );
-        ctx->renderSync().constructed( ptr );
+        ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
       else
       {
         auto ptr = ctx->modelreg().createFrom( model );
-        ctx->renderSync().constructed( ptr );
+        ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
     }
@@ -162,6 +162,20 @@ namespace neko {
       char result[48];
       sprintf_s<48>( result, "model[todo]" );
       args.GetReturnValue().Set( util::allocString( result, args.GetIsolate() ) );
+    }
+
+    int32_t Model::jsEstimateSize() const
+    {
+      return sizeof( Model );
+    }
+
+    void Model::jsOnDestruct( Isolate* isolate )
+    {
+      if ( !isolate )
+        return;
+      auto ctx = getScriptContext( isolate );
+      if ( ctx )
+        ctx->renderSync().destructed( this );
     }
 
   }

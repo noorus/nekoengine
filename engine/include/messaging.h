@@ -6,12 +6,16 @@
 
 namespace neko {
 
-  enum MessageCode {
+  enum MessageCode
+  {
+    // Window events
     M_Window_LostFocus,
     M_Window_GainedFocus,
     M_Window_EnterMove,
     M_Window_ExitMove,
-    M_Window_Close
+    M_Window_Close,
+    // Debug commands
+    M_Debug_ReloadScript
   };
 
   struct Message {

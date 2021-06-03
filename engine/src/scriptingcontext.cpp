@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#ifndef NEKO_NO_SCRIPTING
 
 #include "neko_types.h"
 #include "forwards.h"
@@ -112,6 +111,12 @@ namespace neko {
 
   ScriptingContext::~ScriptingContext()
   {
+    modelRegistry_.clear();
+    meshRegistry_.clear();
+    quatRegistry_.clear();
+    vec3Registry_.clear();
+    vec2Registry_.clear();
+
     if ( isolate_ )
     {
       isolate_->IdleNotificationDeadline( owner_->platform_->MonotonicallyIncreasingTime() + 1.0 );
@@ -123,12 +128,6 @@ namespace neko {
     jsMath_.reset();
 
     jsConsole_.reset();
-
-    modelRegistry_.clear();
-    meshRegistry_.clear();
-    quatRegistry_.clear();
-    vec3Registry_.clear();
-    vec2Registry_.clear();
 
     ctx_.Reset();
 
@@ -143,5 +142,3 @@ namespace neko {
   }
 
 }
-
-#endif // !NEKO_NO_SCRIPTING

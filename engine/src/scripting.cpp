@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#ifndef NEKO_NO_SCRIPTING
 
 #include "neko_types.h"
 #include "forwards.h"
@@ -25,7 +24,7 @@ namespace neko {
     Subsystem( move( engine ) ),
     v8::ArrayBuffer::Allocator()
   {
-    engine_->console()->printf( Console::Source::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
+    engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
 
     rootDirectory_ = platform::getCurrentDirectory();
     dataDirectory_ = rootDirectory_;
@@ -64,21 +63,6 @@ namespace neko {
     script.execute( global_->ctx() );
   }
 
-  void* Scripting::Allocate( size_t length )
-  {
-    return Locator::memory().allocZeroed( Memory::Sector::Scripting, length );
-  }
-
-  void* Scripting::AllocateUninitialized( size_t length )
-  {
-    return Locator::memory().alloc( Memory::Sector::Scripting, length );
-  }
-
-  void Scripting::Free( void* data, size_t length )
-  {
-    Locator::memory().free( Memory::Sector::Scripting, data );
-  }
-
   void Scripting::shutdown()
   {
     global_.reset();
@@ -108,6 +92,21 @@ namespace neko {
     platform_.reset();
   }
 
-}
+  // V8 Allocator interface implementation
 
-#endif // !NEKO_NO_SCRIPTING
+  void* Scripting::Allocate( size_t length )
+  {
+    return Locator::memory().allocZeroed( Memory::Sector::Scripting, length );
+  }
+
+  void* Scripting::AllocateUninitialized( size_t length )
+  {
+    return Locator::memory().alloc( Memory::Sector::Scripting, length );
+  }
+
+  void Scripting::Free( void* data, size_t length )
+  {
+    Locator::memory().free( Memory::Sector::Scripting, data );
+  }
+
+}

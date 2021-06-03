@@ -73,6 +73,7 @@ namespace neko {
       void js_inverse( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
+      virtual int32_t jsEstimateSize() const { return sizeof( vec2 ); }
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
     public:
       Vector2( const vec2& source ): v_( source ) {}
@@ -123,6 +124,7 @@ namespace neko {
       void js_inverse( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
+      virtual int32_t jsEstimateSize() const { return sizeof( vec3 ); }
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
     public:
       Vector3( const vec3& source ): v_( source ) {}
@@ -163,6 +165,7 @@ namespace neko {
       void js_fromAngleAxis( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
+      virtual int32_t jsEstimateSize() const { return sizeof( quaternion ); }
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
     public:
       Quaternion( const quaternion& source ): q_( source ) {}

@@ -10,6 +10,12 @@
 
 namespace neko {
 
+  JSMesh::JSMesh()
+  {
+    static size_t indexCounter = 0;
+    id_ = indexCounter++;
+  }
+
   namespace js {
 
     static const char* c_className = "mesh";
@@ -140,13 +146,13 @@ namespace neko {
       {
         auto thisObj = args.This();
         auto ptr = ctx->meshreg().createFromJS( thisObj, mesh );
-        ctx->renderSync().constructed( ptr );
+        ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
       else
       {
         auto ptr = ctx->meshreg().createFrom( mesh );
-        ctx->renderSync().constructed( ptr );
+        ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
     }
@@ -159,6 +165,27 @@ namespace neko {
         local_.ebo_->id_, local_.ebo_->storage_.size(),
         ( local_.vao_ ? local_.vao_->id_ : 0 ) );
       args.GetReturnValue().Set( util::allocString( result, args.GetIsolate() ) );
+    }
+
+    int32_t Mesh::jsEstimateSize() const
+    {
+      int64_t result = sizeof( Mesh );
+      if ( local_.ebo_ )
+        result += local_.ebo_->sizeInBytes();
+      if ( local_.vbo_ )
+        result += local_.vbo_->sizeInBytes();
+      if ( local_.vao_ )
+        result += sizeof( VAO );
+      return static_cast<int32_t>( std::min( static_cast<int64_t>( std::numeric_limits<int32_t>::max() ), result ) );
+    }
+
+    void Mesh::jsOnDestruct( Isolate* isolate )
+    {
+      if ( !isolate )
+        return;
+      auto ctx = getScriptContext( isolate );
+      if ( ctx )
+        ctx->renderSync().destructed( this );
     }
 
     MeshPtr extractMeshMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow )

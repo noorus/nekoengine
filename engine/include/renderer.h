@@ -66,6 +66,7 @@ namespace neko {
     MaterialPtr createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
     void prepare( GameTime time );
     void uploadTextures();
+    void jsRestart();
     void draw( CameraPtr camera );
     void reset( size_t width, size_t height );
     ~Renderer();
