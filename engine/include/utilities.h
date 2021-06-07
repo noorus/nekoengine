@@ -34,6 +34,16 @@ namespace neko {
       return move( out );
     }
 
+    inline void toLowercase( string& str )
+    {
+      std::transform( str.begin(), str.end(), str.begin(), ::tolower );
+    }
+
+    inline void toLowercase( wstring& str )
+    {
+      std::transform( str.begin(), str.end(), str.begin(), ::towlower );
+    }
+
     inline size_t utf8_surrogate_len( const char* character )
     {
       size_t result = 0;

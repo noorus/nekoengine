@@ -194,6 +194,12 @@ constexpr auto LCD_FILTERING_OFF = 1;
     FT_Library freeType_;
     platform::RWLock faceLock_;
     EnginePtr engine_;
+    struct FreeTypeVersion {
+      FT_Int major;
+      FT_Int minor;
+      FT_Int patch;
+      FT_TrueTypeEngineType trueTypeSupport;
+    } ftVersion_;
     void uploadFonts();
   public:
     FontManager( EnginePtr engine );
@@ -205,7 +211,7 @@ constexpr auto LCD_FILTERING_OFF = 1;
     void shutdown();
     void prepare( GameTime time );
     inline FontVector& fonts() { return fonts_; }
-    inline FT_Library lib() { return freeType_; }
+    inline FT_Library library() { return freeType_; }
   };
 
 }

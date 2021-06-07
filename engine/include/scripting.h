@@ -34,20 +34,34 @@ namespace neko {
       Status_Unknown,
       Status_Compiled,
       Status_CompileError,
-      Status_RuntimeError
+      Status_RuntimeError,
+      Status_Executed
     };
   private:
     utf8String name_;
     utf8String filename_;
     Status status_;
     v8::Persistent<v8::Script> script_;
-    ScriptingContextPtr globalContext_;
+    ScriptingContext* globalContext_;
+    v8::Persistent<v8::Value> retval_;
   public:
-    Script( ScriptingContextPtr globalCtx, utf8String name );
+    Script( ScriptingContext* globalCtx, const utf8String& name, const utf8String& filepath );
+    inline bool compiled() const { return ( status_ == Status_Compiled ); }
+    inline bool executed() const { return ( status_ == Status_Executed ); }
     bool compile( v8::Global<v8::Context>& context );
     void reportException( const v8::TryCatch& tryCatch );
-    bool execute( v8::Global<v8::Context>& context_ );
+    js::V8Value execute( v8::Global<v8::Context>& context_ );
+    inline js::V8Value getReturn( v8::Isolate* isolate ) const
+    {
+      assert( status_ == Status_Executed );
+      return js::V8Value::New( isolate, retval_ );
+    }
   };
+
+  using ScriptPtr = shared_ptr<Script>;
+  using ScriptMap = map<utf8String, ScriptPtr>;
+
+  using V8FunctionCallback = void(*)( const v8::FunctionCallbackInfo<v8::Value>& args );
 
   class ScriptingContext {
   private:
@@ -56,10 +70,13 @@ namespace neko {
     v8::Global<v8::Context> ctx_;
     Scripting* owner_;
     DirectorPtr director_;
+    ScriptMap scripts_;
     void initialize();
   private:
     void registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global );
     void registerContextGlobals( v8::Global<v8::Context>& globalContext );
+    void js_include( const v8::FunctionCallbackInfo<v8::Value>& args );
+    void js_require( const v8::FunctionCallbackInfo<v8::Value>& args );
   protected:
     js::JSConsolePtr jsConsole_;
     js::JSMathPtr jsMath_;
@@ -73,7 +90,7 @@ namespace neko {
     EnginePtr engine_;
     ConsolePtr console_;
     utf8String scriptDirectory_;
-    ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
+    ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, const utf8String& scriptDirectory, v8::Isolate* isolate = nullptr );
     void tick( GameTime tick, GameTime time );
     void process();
     ~ScriptingContext();
@@ -85,6 +102,8 @@ namespace neko {
     inline js::DynamicObjectsRegistry<js::Mesh, JSMesh>& meshreg() { return meshRegistry_; }
     inline js::DynamicObjectsRegistry<js::Model, js::JSModel>& modelreg() { return modelRegistry_; }
     inline RenderSyncContext& renderSync() { return director_->renderSync(); }
+    js::V8Value addAndRunScript( const utf8String& filename );
+    js::V8Value requireScript( const utf8String& filename );
   };
 
   class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {

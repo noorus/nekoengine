@@ -50,17 +50,14 @@ namespace neko {
 
   void Scripting::initialize()
   {
-    global_ = make_shared<ScriptingContext>( this, this );
-    global_->scriptDirectory_ = rootDirectory_;
-    global_->scriptDirectory_.append( R"(\script\)" );
+    global_ = make_shared<ScriptingContext>( this, this,
+      utf8String( rootDirectory_ ) + R"(\script\)" );
   }
 
   void Scripting::postInitialize()
   {
-    utf8String scriptFile = global_->scriptDirectory_ + "initialization.js";
-    Script script( global_, scriptFile );
-    script.compile( global_->ctx() );
-    script.execute( global_->ctx() );
+    v8::HandleScope handleScope( global_->isolate() );
+    global_->addAndRunScript( "initialization.js" );
   }
 
   void Scripting::shutdown()

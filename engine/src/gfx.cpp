@@ -19,17 +19,16 @@ namespace neko {
 
   NEKO_DECLARE_CONVAR( vid_screenwidth,
     "Screen width. Changes are applied when the renderer is restarted.", 1280 );
-  NEKO_DECLARE_CONVAR( vid_screenheight,
-    "Screen height. Changes are applied when the renderer is restarted.", 720 );
+  NEKO_DECLARE_CONVAR( vid_screenheight, "Screen height. Changes are applied when the renderer is restarted.", 720 );
+  NEKO_DECLARE_CONVAR( vid_vsync, "Whether to print OpenGL debug log output.", true );
   NEKO_DECLARE_CONVAR( gl_debuglog,
-    "Whether to print OpenGL debug log output.", true );
+    "OpenGL debug log output level. 0 = none, 1 = some, 2 = debug context", 2 );
 
   Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
     loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ),
     messaging_( move( messaging ) ), director_( move( director ) )
   {
     assert( loader_ && fonts_ && director_  && messaging_ && console_ );
-
     preInitialize();
   }
 
@@ -105,11 +104,14 @@ namespace neko {
     settings.antialiasingLevel = 0;
     settings.majorVersion = c_glVersion[0];
     settings.minorVersion = c_glVersion[1];
-    settings.attributeFlags = sf::ContextSettings::Attribute::Core | sf::ContextSettings::Attribute::Debug;
+    settings.attributeFlags = sf::ContextSettings::Attribute::Core;
+
+    if ( g_CVar_gl_debuglog.as_i() > 1 )
+      settings.attributeFlags |= sf::ContextSettings::Attribute::Debug;
 
     window_ = make_unique<sf::Window>( videoMode, cWindowTitle, sf::Style::Default, settings );
 
-    window_->setVerticalSyncEnabled( true ); // vsync
+    window_->setVerticalSyncEnabled( g_CVar_vid_vsync.as_b() ); // vsync
     window_->setFramerateLimit( 0 ); // no sleep till Brooklyn
 
     window_->setActive( true );
@@ -140,7 +142,7 @@ namespace neko {
     renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
     renderer_->preInitialize();
 
-    setOpenGLDebugLogging( g_CVar_gl_debuglog.as_b() );
+    setOpenGLDebugLogging( g_CVar_gl_debuglog.as_i() > 0 );
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
     camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, 0.0f ) );

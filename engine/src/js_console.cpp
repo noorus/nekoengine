@@ -24,6 +24,7 @@ namespace neko {
     void Console::registerGlobals( Isolate* isolate, V8FunctionTemplate& tpl )
     {
       JS_WRAPPER_SETOBJMEMBER( tpl, Console, print );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Console, print, log );
       JS_WRAPPER_SETOBJMEMBER( tpl, Console, getVariable );
       JS_WRAPPER_SETOBJMEMBER( tpl, Console, setVariable );
       JS_WRAPPER_SETOBJMEMBER( tpl, Console, execute );

@@ -21,9 +21,10 @@ namespace neko {
   using v8::Global;
 
   ScriptingContext::ScriptingContext( Scripting* owner,
-    v8::ArrayBuffer::Allocator* allocator,
+    v8::ArrayBuffer::Allocator* allocator, const utf8String& scriptDirectory,
     Isolate* isolate ):
-    owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false )
+    owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false ),
+    scriptDirectory_( scriptDirectory )
   {
     assert( owner_ );
 
@@ -70,31 +71,131 @@ namespace neko {
     }
   }
 
-  void ScriptingContext::registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global )
+  #define JS_SET_GLOBAL_FUNCTION( x ) global->Set( \
+      js::util::allocStringConserve( #x, isolate_ ), \
+      v8::FunctionTemplate::New( \
+        isolate_, []( const v8::FunctionCallbackInfo<v8::Value>& args ) { \
+          auto self = static_cast<ScriptingContext*>( args.Data().As<v8::External>()->Value() ); \
+          self->js_##x( args );\
+        }, \
+        v8::External::New( isolate_, static_cast<void*>( this ) ) \
+      ) )
+
+  void ScriptingContext::registerTemplateGlobals( Local<ObjectTemplate>& global )
   {
     vec2Registry_.initialize( isolate_, global );
     vec3Registry_.initialize( isolate_, global );
     quatRegistry_.initialize( isolate_, global );
     meshRegistry_.initialize( isolate_, global );
     modelRegistry_.initialize( isolate_, global );
+
+    JS_SET_GLOBAL_FUNCTION( include );
+    JS_SET_GLOBAL_FUNCTION( require );
   }
 
-  void ScriptingContext::registerContextGlobals( v8::Global<v8::Context>& globalContext )
+  void ScriptingContext::js_include( const v8::FunctionCallbackInfo<v8::Value>& args )
   {
-    v8::HandleScope handleScope( isolate_ );
+    // FIXME: This actually crashes and burns due to some sort of (handle?) heap fuckup
 
-    auto context = v8::Local<v8::Context>::New( isolate_, globalContext );
+    HandleScope handleScope( isolate_ );
+
+    if ( args.Length() != 1 || !args[0]->IsString() )
+    {
+      js::util::throwException( isolate_, "Expected file name as argument" );
+      args.GetReturnValue().Set( false );
+      return;
+    }
+
+    v8::String::Utf8Value filename( isolate_, args[0] );
+    auto retval = addAndRunScript( *filename );
+
+    args.GetReturnValue().Set( retval );
+  }
+
+  void ScriptingContext::js_require( const v8::FunctionCallbackInfo<v8::Value>& args )
+  {
+    // FIXME: This actually crashes and burns due to some sort of (handle?) heap fuckup
+
+    HandleScope handleScope( isolate_ );
+
+    if ( args.Length() != 1 || !args[0]->IsString() )
+    {
+      js::util::throwException( isolate_, "Expected file name as argument" );
+      args.GetReturnValue().Set( false );
+      return;
+    }
+
+    v8::String::Utf8Value filename( isolate_, args[0] );
+    auto retval = requireScript( *filename );
+
+    args.GetReturnValue().Set( retval );
+  }
+
+  void ScriptingContext::registerContextGlobals( Global<Context>& globalContext )
+  {
+    HandleScope handleScope( isolate_ );
+
+    auto context = Local<Context>::New( isolate_, globalContext );
 
     jsConsole_ = js::Console::create( console_, isolate_, context->Global() );
     jsMath_ = js::Math::create( isolate_, context->Global() );
     jsGame_ = js::Game::create( isolate_, context->Global() );
   }
 
+  js::V8Value ScriptingContext::addAndRunScript( const utf8String& filename )
+  {
+    HandleScope handleScope( isolate_ );
+
+    if ( scripts_.find( filename ) == scripts_.end() )
+    {
+      auto filepath = utf8String( scriptDirectory_ ) + filename;
+      if ( !platform::fileExists( filepath ) )
+        NEKO_EXCEPT( "Script file not found" );
+
+      auto script = make_shared<Script>( this, filename, filepath );
+      scripts_[filename] = move( script );
+    }
+
+    auto& script = scripts_[filename];
+
+    if ( !script->compiled() )
+      if ( !script->compile( ctx_ ) )
+        NEKO_EXCEPT( "Script compilation failed" );
+
+    return script->execute( ctx_ );
+  }
+
+  js::V8Value ScriptingContext::requireScript( const utf8String& filename )
+  {
+    HandleScope handleScope( isolate_ );
+
+    if ( scripts_.find( filename ) == scripts_.end() )
+    {
+      auto filepath = utf8String( scriptDirectory_ ) + filename;
+      if ( !platform::fileExists( filepath ) )
+        NEKO_EXCEPT( "Script file not found" );
+
+      auto script = make_shared<Script>( this, filename, filepath );
+      scripts_[filename] = move( script );
+    }
+
+    auto& script = scripts_[filename];
+
+    if ( script->executed() )
+      return script->getReturn( isolate_ );
+
+    if ( !script->compiled() )
+      if ( !script->compile( ctx_ ) )
+        NEKO_EXCEPT( "Script compilation failed" );
+
+    return script->execute( ctx_ );
+  }
+
   void ScriptingContext::tick( GameTime tick, GameTime time )
   {
     isolate_->Enter();
-    v8::HandleScope handleScope( isolate_ );
-    auto context = v8::Local<v8::Context>::New( isolate_, ctx_ );
+    HandleScope handleScope( isolate_ );
+    auto context = Local<Context>::New( isolate_, ctx_ );
     jsGame_->update( context, tick, time );
 
     // FIXME: no idea whether it makes more sense to run this in tick or process()
@@ -106,7 +207,9 @@ namespace neko {
   void ScriptingContext::process()
   {
     isolate_->RunMicrotasks();
-    v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_, v8::platform::MessageLoopBehavior::kDoNotWait );
+
+    v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_,
+      v8::platform::MessageLoopBehavior::kDoNotWait );
   }
 
   ScriptingContext::~ScriptingContext()
@@ -126,7 +229,6 @@ namespace neko {
 
     jsGame_.reset();
     jsMath_.reset();
-
     jsConsole_.reset();
 
     ctx_.Reset();

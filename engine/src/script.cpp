@@ -13,14 +13,16 @@ namespace neko {
   using v8::Context;
   using v8::TryCatch;
   using v8::HandleScope;
+  using v8::EscapableHandleScope;
   using v8::FunctionCallbackInfo;
   using v8::ObjectTemplate;
   using v8::FunctionTemplate;
   using v8::Value;
 
-  Script::Script( ScriptingContextPtr globalCtx, utf8String name ):
-    globalContext_( move( globalCtx ) ),
-    name_( name ), filename_( name )
+  Script::Script( ScriptingContext* globalCtx, const utf8String& name,
+    const utf8String& filepath ):
+    globalContext_( globalCtx ), name_( name ),
+    filename_( filepath ), status_( Status_Unknown )
   {
     //
   }
@@ -93,19 +95,22 @@ namespace neko {
     }
   }
 
-  bool Script::execute( v8::Global<v8::Context>& context_ )
+  js::V8Value Script::execute( v8::Global<v8::Context>& context_ )
   {
     auto isolate = globalContext_->isolate();
     Isolate::Scope isolateScope( isolate );
-    HandleScope handleScope( isolate );
-
-    if ( script_.IsEmpty() )
-      return false;
-
-    globalContext_->console_->printf( Console::srcScripting, "Running %s", name_.c_str() );
+    HandleScope scope( isolate );
+    EscapableHandleScope esc( isolate );
 
     auto context = Local<Context>::New( isolate, context_ );
     Context::Scope contextScope( context );
+
+    retval_.Reset( isolate, v8::Null( isolate ) );
+
+    if ( script_.IsEmpty() )
+      return esc.Escape( js::V8Value::New( isolate, retval_ ) );
+
+    globalContext_->console_->printf( Console::srcScripting, "Executing %s", name_.c_str() );
 
     TryCatch tryCatch( isolate );
 
@@ -115,14 +120,22 @@ namespace neko {
     if ( result.IsEmpty() )
     {
       if ( tryCatch.HasCaught() )
+      {
         reportException( tryCatch );
-      status_ = Status_RuntimeError;
-      return false;
+        status_ = Status_RuntimeError;
+        return esc.Escape( js::V8Value::New( isolate, retval_ ) );
+      }
+    }
+    else
+    {
+      retval_.Reset( isolate, result.ToLocalChecked() );
     }
 
-    globalContext_->console_->printf( Console::srcScripting, "Executed %s fine!", name_.c_str() );
+    status_ = Status_Executed;
 
-    return true;
+    globalContext_->console_->printf( Console::srcScripting, "Executed %s", name_.c_str() );
+
+    return esc.Escape( js::V8Value::New( isolate, retval_ ) );
   }
 
 }

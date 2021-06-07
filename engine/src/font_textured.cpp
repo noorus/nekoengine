@@ -40,7 +40,7 @@ namespace neko {
       data_ = make_unique<utils::DumbBuffer>( Memory::Sector::Graphics, source );
       size_ = pointSize;
 
-      auto ftlib = manager_->lib();
+      auto ftlib = manager_->library();
 
       FT_Open_Args args = { 0 };
       args.flags = FT_OPEN_MEMORY;
@@ -53,7 +53,7 @@ namespace neko {
         NEKO_FREETYPE_EXCEPT( "FreeType font face load failed", err );
       }
 
-      Locator::console().printf( Console::srcEngine,
+      Locator::console().printf( Console::srcFonts,
         "Font: %s, face %d/%d, glyphs: %d, charmaps: %d, scalable? %s",
         face_->family_name,
         0, face_->num_faces,
@@ -64,7 +64,7 @@ namespace neko {
       //forceUCS2Charmap( font->face_ );
       err = FT_Select_Charmap( face_, FT_ENCODING_UNICODE );
       if ( err )
-        NEKO_FREETYPE_EXCEPT( "FreeType font charmap seelection failed", err );
+        NEKO_FREETYPE_EXCEPT( "FreeType font charmap selection failed", err );
 
       auto calcWidth = (signed long)( size_ * c_resolutionMultiplier * HRESf );
       const unsigned int horizRes = ( DPI * HRES );
@@ -153,7 +153,7 @@ namespace neko {
 
     void GraphicalFont::loadGlyph( uint32_t codepoint )
     {
-      auto ftlib = manager_->lib();
+      auto ftlib = manager_->library();
       auto glyphIndex = FT_Get_Char_Index( face_, (FT_ULong)codepoint );
 
       FT_Int32 flags = 0;

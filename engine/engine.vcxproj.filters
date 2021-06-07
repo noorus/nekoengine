@@ -375,5 +375,8 @@
     <None Include="..\bin\data\shaders\default2d.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\bin\script\math.js">
+      <Filter>Scripts</Filter>
+    </None>
   </ItemGroup>
 </Project>

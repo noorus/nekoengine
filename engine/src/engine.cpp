@@ -43,6 +43,10 @@ namespace neko {
 
     platform::PerformanceTimer timer;
 
+    UVersionInfo icuVersion;
+    u_getVersion( icuVersion );
+    console_->printf( Console::srcEngine, "Using ICU version %d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
+
     loader_ = make_shared<ThreadedLoader>();
     loader_->start();
 
@@ -57,7 +61,7 @@ namespace neko {
     timer.start();
     fonts_ = make_shared<FontManager>( shared_from_this() );
     fonts_->initialize();
-    console_->printf( Console::srcEngine, "Font manager init took %dms", (int)timer.stop() );
+    console_->printf( Console::srcFonts, "Font manager init took %dms", (int)timer.stop() );
 
     timer.start();
     renderer_ = make_shared<ThreadedRenderer>( loader_, fonts_, messaging_, director_, console_ );

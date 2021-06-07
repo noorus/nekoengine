@@ -8,22 +8,11 @@
 
 namespace neko {
 
-  static void* ftMemoryAllocate( FT_Memory memory, long size )
-  {
-    return Locator::memory().alloc( Memory::Sector::Graphics, size );
-  }
+  void* ftMemoryAllocate( FT_Memory memory, long size );
+  void* ftMemoryReallocate( FT_Memory memory, long currentSize, long newSize, void* block );
+  void ftMemoryFree( FT_Memory memory, void* block );
 
-  static void* ftMemoryReallocate( FT_Memory memory, long currentSize, long newSize, void* block )
-  {
-    return Locator::memory().realloc( Memory::Sector::Graphics, block, newSize );
-  }
-
-  void ftMemoryFree( FT_Memory memory, void* block )
-  {
-    Locator::memory().free( Memory::Sector::Graphics, block );
-  }
-
-  FontManager::FontManager( EnginePtr engine ): engine_( move( engine ) ), freeType_( nullptr )
+  FontManager::FontManager( EnginePtr engine ): engine_( move( engine ) ), freeType_( nullptr ), ftVersion_({ 0 })
   {
     ftMemAllocator_.user = nullptr;
     ftMemAllocator_.alloc = ftMemoryAllocate;
@@ -39,6 +28,16 @@ namespace neko {
       NEKO_EXCEPT( "FreeType library creation failed" );
 
     FT_Add_Default_Modules( freeType_ );
+
+    FT_Library_Version( freeType_, &ftVersion_.major, &ftVersion_.minor, &ftVersion_.patch );
+    engine_->console()->printf( Console::srcFonts, "FreeType version %i.%i.%i", ftVersion_.major, ftVersion_.minor, ftVersion_.patch );
+
+    ftVersion_.trueTypeSupport = FT_Get_TrueType_Engine_Type( freeType_ );
+    engine_->console()->printf( Console::srcFonts, "TrueType engine support: %s",
+      ftVersion_.trueTypeSupport == FT_TRUETYPE_ENGINE_TYPE_PATENTED ? "full"
+      : ftVersion_.trueTypeSupport == FT_TRUETYPE_ENGINE_TYPE_UNPATENTED ? "partial"
+      : "none" );
+
     // FT_Set_Default_Properties( freeType_ ); // TODO this uses an env variable? wtf, replace
   }
 
@@ -47,7 +46,7 @@ namespace neko {
     FontVector fonts;
     engine_->loader()->getFinishedFonts( fonts );
     if ( !fonts.empty() )
-      engine_->console()->printf( Console::srcGfx, "FontManager::uploadFonts got %d new fonts", fonts.size() );
+      engine_->console()->printf( Console::srcFonts, "FontManager::uploadFonts got %d new fonts", fonts.size() );
     for ( auto& font : fonts )
     {
       if ( !font->loaded_ )
@@ -116,6 +115,23 @@ namespace neko {
   FontManager::~FontManager()
   {
     shutdown();
+  }
+
+  // FreeType allocator interface implementation
+
+  void* ftMemoryAllocate( FT_Memory memory, long size )
+  {
+    return Locator::memory().alloc( Memory::Sector::Graphics, size );
+  }
+
+  void* ftMemoryReallocate( FT_Memory memory, long currentSize, long newSize, void* block )
+  {
+    return Locator::memory().realloc( Memory::Sector::Graphics, block, newSize );
+  }
+
+  void ftMemoryFree( FT_Memory memory, void* block )
+  {
+    Locator::memory().free( Memory::Sector::Graphics, block );
   }
 
 }

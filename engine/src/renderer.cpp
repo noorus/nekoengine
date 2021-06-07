@@ -303,7 +303,6 @@ namespace neko {
 
   void Renderer::jsRestart()
   {
-    console_->printf( Console::srcGfx, "Renderer::jsRestart()" );
     director_->renderSync().resetFromRenderer();
     models_->jsReset();
     meshes_->jsReset();

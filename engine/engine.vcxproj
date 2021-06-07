@@ -276,6 +276,7 @@
     <None Include="..\bin\data\shaders\text3d.frag" />
     <None Include="..\bin\data\shaders\text3d.vert" />
     <None Include="..\bin\script\initialization.js" />
+    <None Include="..\bin\script\math.js" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

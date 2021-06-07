@@ -114,7 +114,7 @@ namespace neko {
       srcEngine,      //!< Message from the engine
       srcGfx,         //!< Message from the graphics subsystem
       srcSound,       //!< Message from the sound subsystem
-      srcPhysics,     //!< Message from the physics subsystem
+      srcFonts,       //!< Message from the font subsystem
       srcScripting,   //!< Message from the scripting subsystem
       srcInput,       //!< Message from the input subsystem
       srcGame,        //!< Message from the game logic

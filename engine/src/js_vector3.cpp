@@ -83,7 +83,7 @@ namespace neko {
       auto isolate = args.GetIsolate();
       HandleScope handleScope( isolate );
 
-      auto context = args.GetIsolate()->GetCurrentContext();
+      auto context = isolate->GetCurrentContext();
 
       vec3 vec( 0.0f, 0.0f, 0.0f );
       bool valueParsed = false;
