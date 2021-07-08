@@ -71,10 +71,10 @@ namespace neko {
           auto arr = v8::Local<v8::Array>::Cast( args[0] );
           if ( arr->Length() == 4 )
           {
-            quat.x = static_cast<Real>( arr->Get( 0 )->NumberValue( context ).FromMaybe( 0.0 ) );
-            quat.y = static_cast<Real>( arr->Get( 1 )->NumberValue( context ).FromMaybe( 0.0 ) );
-            quat.z = static_cast<Real>( arr->Get( 2 )->NumberValue( context ).FromMaybe( 0.0 ) );
-            quat.w = static_cast<Real>( arr->Get( 3 )->NumberValue( context ).FromMaybe( 0.0 ) );
+            quat.x = static_cast<Real>( arr->Get( context, 0 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+            quat.y = static_cast<Real>( arr->Get( context, 1 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+            quat.z = static_cast<Real>( arr->Get( context, 2 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+            quat.w = static_cast<Real>( arr->Get( context, 3 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
             valueParsed = true;
           }
         }

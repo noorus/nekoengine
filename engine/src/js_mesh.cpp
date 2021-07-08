@@ -39,11 +39,11 @@ namespace neko {
       verts.resize( arr.Length() );
       for ( uint32_t i = 0; i < arr.Length(); ++i )
       {
-        auto arrayValue = v8::Local<v8::Array>::Cast( arr.Get( i ) );
-        verts[i].x = static_cast<Real>( arrayValue->Get( 0 )->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].y = static_cast<Real>( arrayValue->Get( 1 )->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].s = static_cast<Real>( arrayValue->Get( 2 )->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].t = static_cast<Real>( arrayValue->Get( 3 )->NumberValue( context ).FromMaybe( 0.0 ) );
+        auto arrayValue = v8::Local<v8::Array>::Cast( arr.Get( context, i ).ToLocalChecked() );
+        verts[i].x = static_cast<Real>( arrayValue->Get( context, 0 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].y = static_cast<Real>( arrayValue->Get( context, 1 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].s = static_cast<Real>( arrayValue->Get( context, 2 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].t = static_cast<Real>( arrayValue->Get( context, 3 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
       }
       vbo->pushVertices( move( verts ) );
     }
@@ -54,13 +54,13 @@ namespace neko {
       verts.resize( arr.Length() );
       for ( uint32_t i = 0; i < arr.Length(); ++i )
       {
-        auto arrayValue = v8::Local<v8::Array>::Cast( arr.Get( i ) );
-        verts[i].position.x = static_cast<Real>( arrayValue->Get( 0 )->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].position.y = static_cast<Real>( arrayValue->Get( 1 )->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].position.z = static_cast<Real>( arrayValue->Get( 2 )->NumberValue( context ).FromMaybe( 0.0 ) );
+        auto arrayValue = v8::Local<v8::Array>::Cast( arr.Get( context, i ).ToLocalChecked() );
+        verts[i].position.x = static_cast<Real>( arrayValue->Get( context, 0 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].position.y = static_cast<Real>( arrayValue->Get( context, 1 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].position.z = static_cast<Real>( arrayValue->Get( context, 2 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
         verts[i].normal = vec3( 0.0f );
-        verts[i].texcoord.x = static_cast<Real>( arrayValue->Get( 3 )->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].texcoord.y = static_cast<Real>( arrayValue->Get( 4 )->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].texcoord.x = static_cast<Real>( arrayValue->Get( context, 3 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].texcoord.y = static_cast<Real>( arrayValue->Get( context, 4 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
       }
       vbo->pushVertices( move( verts ) );
     }
@@ -71,7 +71,7 @@ namespace neko {
       indices.reserve( arr.Length() );
       for ( uint32_t i = 0; i < arr.Length(); ++i )
       {
-        auto value = arr.Get( i )->NumberValue( context ).FromMaybe( 0.0 );
+        auto value = arr.Get( context, i ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 );
         indices.push_back( static_cast<GLuint>( value ) );
       }
       ebo->storage_.insert( ebo->storage_.end(), indices.begin(), indices.end() );
@@ -197,12 +197,18 @@ namespace neko {
           util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
         return emptyPtr;
       }
-      auto object = maybeObject.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
-      auto local = v8::Local<v8::Object>::Cast( object );
-      if ( object.IsEmpty() || !util::isWrappedType( isolate->GetCurrentContext(), local, Wrapped_Mesh ) )
+      auto object = maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
+      if ( object.IsEmpty() )
       {
         if ( shouldThrow )
           util::throwException( isolate, ( func + ": passed object has no mesh member \"" + name + "\"" ).c_str() );
+        return emptyPtr;
+      }
+      auto local = v8::Local<v8::Object>::Cast( object.ToLocalChecked() );
+      if ( !util::isWrappedType( isolate->GetCurrentContext(), local, Wrapped_Mesh ) )
+      {
+        if ( shouldThrow )
+          util::throwException( isolate, ( func + ": passed object's member is not a mesh \"" + name + "\"" ).c_str() );
         return emptyPtr;
       }
       return move( Mesh::unwrap( local )->shared_from_this() );

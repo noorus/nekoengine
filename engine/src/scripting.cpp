@@ -33,8 +33,7 @@ namespace neko {
     if ( !v8::V8::InitializeICU( ( dataDirectory_ + "icudtl.dat" ).c_str() ) )
       NEKO_EXCEPT( "V8 ICU initialization failed" );
 
-    v8::V8::InitializeExternalStartupData(
-      ( dataDirectory_ + "natives_blob.bin" ).c_str(),
+    v8::V8::InitializeExternalStartupDataFromFile(
       ( dataDirectory_ + "snapshot_blob.bin" ).c_str()
     );
 

@@ -98,10 +98,10 @@ namespace neko {
       {
         if ( obj.IsEmpty() )
           return defval;
-        auto val = obj.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
-        if ( val.IsEmpty() || !val->IsNumber() )
+        auto val = obj.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
+        if ( val.IsEmpty() || !val.ToLocalChecked()->IsNumber() )
           return defval;
-        return static_cast<Real>( val->NumberValue( isolate->GetCurrentContext() ).FromMaybe( static_cast<double>( defval ) ) );
+        return static_cast<Real>( val.ToLocalChecked()->NumberValue( isolate->GetCurrentContext() ).FromMaybe( static_cast<double>( defval ) ) );
       }
 
       inline utf8String extractStringMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name )
@@ -112,13 +112,13 @@ namespace neko {
           util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
           return emptyString;
         }
-        auto object = maybeObject.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
-        if ( object.IsEmpty() || !object->IsString() )
+        auto object = maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
+        if ( object.IsEmpty() || !object.ToLocalChecked()->IsString() )
         {
           util::throwException( isolate, ( func + ": passed object has no string member \"" + name + "\"" ).c_str() );
           return emptyString;
         }
-        v8::String::Utf8Value value( isolate, object );
+        v8::String::Utf8Value value( isolate, object.ToLocalChecked() );
         return ( *value ? *value : emptyString );
       }
 
@@ -130,13 +130,13 @@ namespace neko {
           util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
           return emptyFunc;
         }
-        auto object = maybeObject.ToLocalChecked()->Get( util::allocStringConserve( name, isolate ) );
-        if ( object.IsEmpty() || !object->IsFunction() )
+        auto object = maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
+        if ( object.IsEmpty() || !object.ToLocalChecked()->IsFunction() )
         {
           util::throwException( isolate, ( func + ": passed object has no function member \"" + name + "\"" ).c_str() );
           return emptyFunc;
         }
-        return move( V8Function::New( isolate, V8Function::Cast( object ) ) );
+        return move( V8Function::New( isolate, V8Function::Cast( object.ToLocalChecked() ) ) );
       }
 
     }

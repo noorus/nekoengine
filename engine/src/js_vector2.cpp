@@ -115,8 +115,8 @@ namespace neko {
           auto arr = v8::Local<v8::Array>::Cast( args[0] );
           if ( arr->Length() == 2 )
           {
-            vec.x = static_cast<Real>( arr->Get( 0 )->NumberValue( context ).FromMaybe( 0.0 ) );
-            vec.y = static_cast<Real>( arr->Get( 1 )->NumberValue( context ).FromMaybe( 0.0 ) );
+            vec.x = static_cast<Real>( arr->Get( context, 0 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+            vec.y = static_cast<Real>( arr->Get( context, 1 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
             valueParsed = true;
           }
         }

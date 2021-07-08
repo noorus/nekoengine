@@ -206,7 +206,7 @@ namespace neko {
 
   void ScriptingContext::process()
   {
-    isolate_->RunMicrotasks();
+    isolate_->PerformMicrotaskCheckpoint();
 
     v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_,
       v8::platform::MessageLoopBehavior::kDoNotWait );
