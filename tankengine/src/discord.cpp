@@ -26,7 +26,7 @@ namespace tank {
     core_->SetLogHook( discord::LogLevel::Debug,
     [=]( discord::LogLevel level, const char* message )
     {
-      host_->logPrint( message );
+      host_->onDiscordDebugPrint( message );
     });
 
     core_->UserManager().OnCurrentUserUpdate.Connect( [&]()
@@ -111,15 +111,15 @@ namespace tank {
     {
       if ( state_.updated_.bits.self )
       {
-        sprintf_s( asd, 1024, "discord: self: %s#%s (%I64u)", state_.localUser_.name_.c_str(), state_.localUser_.discriminator_.c_str(), state_.localUser_.id_ );
-        host_->logPrint( asd );
+        sprintf_s( asd, 1024, "self: %s#%s (%I64u)", state_.localUser_.name_.c_str(), state_.localUser_.discriminator_.c_str(), state_.localUser_.id_ );
+        host_->onDiscordDebugPrint( asd );
       }
       if ( state_.updated_.bits.friends )
       {
         for ( auto& frnd : state_.friends_ )
         {
-          sprintf_s( asd, 1024, "discord: friend: %s#%s (%I64u)", frnd.second.name_.c_str(), frnd.second.discriminator_.c_str(), frnd.second.id_ );
-          host_->logPrint( asd );
+          sprintf_s( asd, 1024, "friend: %s#%s (%I64u)", frnd.second.name_.c_str(), frnd.second.discriminator_.c_str(), frnd.second.id_ );
+          host_->onDiscordDebugPrint( asd );
         }
       }
       state_.updated_.field = 0;

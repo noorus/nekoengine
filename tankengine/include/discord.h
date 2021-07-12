@@ -32,9 +32,11 @@ namespace tank {
     int64_t clientID_;
     int64_t appID_;
     DiscordState state_;
+    GameInstallationState installation_;
   public:
     Discord( int64_t clientID, int64_t applicationID, uint32_t steamAppID, TankHost* host );
     void initialize();
+    inline const GameInstallationState& installation() throw() { return installation_; }
     void update();
     void shutdown();
     ~Discord();

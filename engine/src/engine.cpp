@@ -142,9 +142,19 @@ namespace neko {
     }
   }
 
-  void Engine::logPrint( const utf8String& message )
+  void Engine::onDiscordDebugPrint( const utf8String& message )
   {
     console_->printf( Console::srcEngine, "Discord: %s", message.c_str() );
+  }
+
+  void Engine::onSteamDebugPrint( const utf8String& message )
+  {
+    console_->printf( Console::srcEngine, "Steam: %s", message.c_str() );
+  }
+
+  void Engine::onSteamOverlayToggle( bool enabled )
+  {
+    console_->printf( Console::srcEngine, "Steam: Overlay toggle %s", enabled ? "true" : "false" );
   }
 
   bool Engine::paused()
@@ -176,6 +186,8 @@ namespace neko {
       (float)c_logicFPS, static_cast<float>( c_logicStep * 1000.0 ), c_logicMaxFrameMicroseconds, maxSleepytimeMs );
 
     tanklib_.engine_->update();
+
+    auto& inst = tanklib_.engine_->steamInstallation();
 
     while ( signal_ != Signal_Stop )
     {

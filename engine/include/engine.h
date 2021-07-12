@@ -76,7 +76,9 @@ namespace neko {
     //! Message listener callback.
     void onMessage( const Message& msg ) override;
     //! TankEngine log callback.
-    void logPrint( const utf8String& message ) override;
+    virtual void onDiscordDebugPrint( const utf8String& message );
+    virtual void onSteamDebugPrint( const utf8String& message );
+    virtual void onSteamOverlayToggle( bool enabled );
   public:
     inline const EngineInfo& info() const throw() { return info_; }
     inline ConsolePtr console() throw() { return console_; }

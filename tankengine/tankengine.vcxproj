@@ -60,7 +60,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NEKO_SIDELIBRARY_BUILD;_DEBUG;TANKENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NEKO_SIDELIBRARY_BUILD;_CRT_SECURE_NO_WARNINGS;_DEBUG;TANKENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
@@ -68,14 +68,14 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\icu\common\;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\icu\common\;$(ProjectDir)include;$(SolutionDir)extern\steamworks\sdk\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)..\SDK\v8\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>discord_game_sdk.dll.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)extern\steamworks\sdk\redistributable_bin\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>discord_game_sdk.dll.lib;steam_api64.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(SolutionDir)lib\$(TargetName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
@@ -85,7 +85,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NEKO_SIDELIBRARY_BUILD;NDEBUG;TANKENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NEKO_SIDELIBRARY_BUILD;_CRT_SECURE_NO_WARNINGS;NDEBUG;TANKENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
@@ -93,7 +93,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\icu\common\;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\icu\common\;$(ProjectDir)include;$(SolutionDir)extern\steamworks\sdk\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -101,8 +101,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)..\SDK\v8\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>discord_game_sdk.dll.lib;icui18n.dll.lib;icuuc.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)extern\steamworks\sdk\redistributable_bin\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>discord_game_sdk.dll.lib;steam_api64.lib;icui18n.dll.lib;icuuc.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(SolutionDir)lib\$(TargetName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
@@ -124,10 +124,56 @@
     <ClInclude Include="..\extern\discord\cpp\types.h" />
     <ClInclude Include="..\extern\discord\cpp\user_manager.h" />
     <ClInclude Include="..\extern\discord\cpp\voice_manager.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamapplist.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamapps.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamappticket.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamclient.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamcontroller.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamfriends.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgamecoordinator.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgameserver.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgameserverstats.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamhtmlsurface.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamhttp.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteaminput.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteaminventory.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammasterserverupdater.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammatchmaking.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammusic.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammusicremote.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworking.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingmessages.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingsockets.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingutils.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamparentalsettings.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamps3overlayrenderer.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamremoteplay.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamremotestorage.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamscreenshots.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamugc.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamuser.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamuserstats.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamutils.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamvideo.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\matchmakingtypes.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamclientpublic.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamdatagram_tickets.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamencryptedappticket.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamhttpenums.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamnetworkingtypes.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamps3params.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamtypes.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamuniverse.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_common.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_flat.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_internal.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_gameserver.h" />
     <ClInclude Include="..\shared\include\tankengine.h" />
     <ClInclude Include="include\framework.h" />
     <ClInclude Include="include\discord.h" />
     <ClInclude Include="include\stdafx.h" />
+    <ClInclude Include="include\steam.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\extern\discord\cpp\achievement_manager.cpp">
@@ -194,6 +240,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\discord.cpp" />
+    <ClCompile Include="src\steam.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
