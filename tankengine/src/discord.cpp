@@ -105,21 +105,21 @@ namespace tank {
     if ( result != discord::Result::Ok )
       NEKO_EXCEPT( "Discord callbacks run failed" );
 
-    char asd[1024];
+    // char asd[1024];
 
     if ( state_.updated_.field )
     {
       if ( state_.updated_.bits.self )
       {
-        sprintf_s( asd, 1024, "self: %s#%s (%I64u)", state_.localUser_.name_.c_str(), state_.localUser_.discriminator_.c_str(), state_.localUser_.id_ );
-        host_->onDiscordDebugPrint( asd );
+        // sprintf_s( asd, 1024, "self: %s#%s (%I64u)", state_.localUser_.name_.c_str(), state_.localUser_.discriminator_.c_str(), state_.localUser_.id_ );
+        // host_->onDiscordDebugPrint( asd );
       }
       if ( state_.updated_.bits.friends )
       {
         for ( auto& frnd : state_.friends_ )
         {
-          sprintf_s( asd, 1024, "friend: %s#%s (%I64u)", frnd.second.name_.c_str(), frnd.second.discriminator_.c_str(), frnd.second.id_ );
-          host_->onDiscordDebugPrint( asd );
+          // sprintf_s( asd, 1024, "friend: %s#%s (%I64u)", frnd.second.name_.c_str(), frnd.second.discriminator_.c_str(), frnd.second.id_ );
+          // host_->onDiscordDebugPrint( asd );
         }
       }
       state_.updated_.field = 0;

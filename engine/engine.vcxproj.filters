@@ -64,6 +64,12 @@
     <Filter Include="Scripts">
       <UniqueIdentifier>{4672329b-8d04-4d51-914d-0517bfbe0195}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\input">
+      <UniqueIdentifier>{dbf34eb9-c76b-43da-a55c-248a31b783fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\input">
+      <UniqueIdentifier>{55fc5b6b-79c5-435f-8d92-572fda3e9c73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -197,6 +203,9 @@
     </ClCompile>
     <ClCompile Include="src\rendersynccontext.cpp">
       <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input.cpp">
+      <Filter>Source Files\input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -343,6 +352,9 @@
     </ClInclude>
     <ClInclude Include="..\shared\include\tankengine.h">
       <Filter>Header Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="include\input.h">
+      <Filter>Header Files\input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

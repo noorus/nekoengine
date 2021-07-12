@@ -61,7 +61,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)..\SDK\packages\freetype_x64-windows\include\;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\include\;$(SolutionDir)extern\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)..\SDK\packages\freetype_x64-windows\include\;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\include\;$(SolutionDir)extern\;$(SolutionDir)nil\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_TRACE_MAPS;V8_ENABLE_ALLOCATION_TIMEOUT;V8_ENABLE_FORCE_SLOW_PATH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_SNAPSHOT_NATIVE_CODE_COUNTERS;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_CHECK_MICROTASKS_SCOPES_CONSISTENCY;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_ENABLE_CHECKS;V8_TARGET_ARCH_X64;V8_COMPRESS_POINTERS;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;U_STATIC_IMPLEMENTATION;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_HANDLE_ZAPPING;ENABLE_DISASSEMBLER;ENABLE_MINOR_MC;OBJECT_PRINT;VERIFY_HEAP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -82,7 +82,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\FBX\FBX SDK\2020.2\lib\vs2019\x64\$(Configuration);$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>tankengine_d.lib;opengl32.lib;glbindingd.lib;glbinding-auxd.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;v8_d.dll.lib;v8_libbase_d.dll.lib;v8_libplatform_d.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;zlibstaticd.lib;libbz2d.lib;freetyped.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tankengine_d.lib;nil64_d.lib;opengl32.lib;glbindingd.lib;glbinding-auxd.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;v8_d.dll.lib;v8_libbase_d.dll.lib;v8_libplatform_d.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;zlibstaticd.lib;libbz2d.lib;freetyped.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
@@ -111,7 +111,7 @@
       <SDLCheck>
       </SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)..\SDK\packages\freetype_x64-windows\include\;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\include\;$(SolutionDir)extern\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)..\SDK\packages\freetype_x64-windows\include\;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\include\;$(SolutionDir)extern\;$(SolutionDir)nil\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_I18N_SUPPORT;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_TARGET_ARCH_X64;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_MINOR_MC;OBJECT_PRINT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -138,7 +138,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\FBX\FBX SDK\2020.2\lib\vs2019\x64\$(Configuration);$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>tankengine.lib;legacy_stdio_definitions.lib;sfml-main.lib;sfml-system.lib;sfml-window.lib;glbinding.lib;opengl32.lib;icui18n.dll.lib;icuuc.dll.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;zlibstatic.lib;libbz2.lib;freetype.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tankengine.lib;nil64.lib;legacy_stdio_definitions.lib;sfml-main.lib;sfml-system.lib;sfml-window.lib;glbinding.lib;opengl32.lib;icui18n.dll.lib;icuuc.dll.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;zlibstatic.lib;libbz2.lib;freetype.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <SubSystem>Windows</SubSystem>
@@ -181,6 +181,7 @@
     <ClCompile Include="src\font_textured.cpp" />
     <ClCompile Include="src\framebuffer.cpp" />
     <ClCompile Include="src\gfx.cpp" />
+    <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\js_console.cpp" />
     <ClCompile Include="src\js_game.cpp" />
     <ClCompile Include="src\js_math.cpp" />
@@ -237,6 +238,7 @@
     <ClInclude Include="include\framebuffer.h" />
     <ClInclude Include="include\gfx.h" />
     <ClInclude Include="include\gfx_types.h" />
+    <ClInclude Include="include\input.h" />
     <ClInclude Include="include\js_console.h" />
     <ClInclude Include="include\js_game.h" />
     <ClInclude Include="include\js_math.h" />

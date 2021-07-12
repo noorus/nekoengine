@@ -213,6 +213,7 @@ namespace neko {
       SnapshotPainter snapshotPainter_;
     public:
       RenderWindowHandler();
+      inline HWND getWindow() const throw() { return window_; }
       void changeTargetResolution( const size2i targetResolution );
       void setWindow( RenderWindowEventRecipient* callback, HWND window );
     private:

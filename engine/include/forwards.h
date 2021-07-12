@@ -20,6 +20,9 @@ namespace neko {
   class Scripting;
   using ScriptingPtr = shared_ptr<Scripting>;
 
+  class Input;
+  using InputPtr = shared_ptr<Input>;
+
   class Memory;
   using MemoryPtr = shared_ptr<Memory>;
 

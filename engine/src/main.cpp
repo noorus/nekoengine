@@ -105,11 +105,11 @@ inline int runMain()
 
 #ifdef NEKO_PLATFORM_WINDOWS
 
-int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow )
+int APIENTRY wWinMain( HINSTANCE instance, HINSTANCE previous, LPWSTR cmdline, int show )
 {
-  UNREFERENCED_PARAMETER( hPrevInstance );
-  UNREFERENCED_PARAMETER( lpCmdLine );
-  UNREFERENCED_PARAMETER( nCmdShow );
+  UNREFERENCED_PARAMETER( previous );
+  UNREFERENCED_PARAMETER( cmdline );
+  UNREFERENCED_PARAMETER( show );
 
   // Enable leak checking in debug builds
 #if defined( _DEBUG ) || defined( DEBUG )
@@ -119,7 +119,7 @@ int APIENTRY wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCm
   // CRT memory allocation breakpoints can be set here
   // _CrtSetBreakAlloc( x );
 
-  platform::g_instance = hInstance;
+  platform::g_instance = instance;
 
   // Initialize & provide the (ideally pooled) memory service.
   neko::MemoryPtr memoryService = make_shared<Memory>();

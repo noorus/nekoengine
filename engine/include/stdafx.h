@@ -142,6 +142,9 @@
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
 
+// Nil
+#include <nil.h>
+
 // Local types
 #include "neko_types.h"
 #include "nekomath.h"

@@ -59,6 +59,7 @@ namespace neko {
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
     DirectorPtr director_;
+    InputPtr input_;
     EngineInfo info_;
     TankLibrary tanklib_;
   protected:
@@ -83,6 +84,7 @@ namespace neko {
     inline const EngineInfo& info() const throw() { return info_; }
     inline ConsolePtr console() throw() { return console_; }
     //inline GfxPtr gfx() throw() { return gfx_; }
+    inline InputPtr input() throw() { return input_; }
     inline ScriptingPtr scripting() throw() { return scripting_; }
     inline GameTime time() const throw() { return time_; }
     inline ThreadedLoaderPtr loader() throw() { return loader_; }
