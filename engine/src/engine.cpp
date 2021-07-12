@@ -19,8 +19,17 @@ namespace neko {
   const char* c_engineLogName = "nekoengine";
   const uint32_t c_engineVersion[3] = { 0, 1, 1 };
 
-  Engine::Engine( ConsolePtr console ): console_( move( console ) ),
-    time_( 0.0 ), signal_( Signal_None )
+  const int64_t c_discordAppId = 862843623824556052;
+  const uint32_t c_steamAppId = 1692910;
+
+#ifdef _DEBUG
+  const wchar_t* c_tankLibraryName = L"tankengine_d.dll";
+#else
+  const wchar_t* c_tankLibraryName = L"tankengine.dll";
+#endif
+
+  Engine::Engine( ConsolePtr console ):
+  console_( move( console ) ), time_( 0.0 ), signal_( Signal_None )
   {
     info_.logName = c_engineLogName;
     info_.engineName = c_engineName;
@@ -37,6 +46,28 @@ namespace neko {
     shutdown();
   }
 
+  void TankLibrary::load( tank::TankHost* host )
+  {
+    module_ = LoadLibraryW( c_tankLibraryName );
+    if ( !module_ )
+      NEKO_EXCEPT( "TankEngine load failed" );
+    pfnTankInitialize = reinterpret_cast<tank::fnTankInitialize>( GetProcAddress( module_, "tankInitialize" ) );
+    pfnTankShutdown = reinterpret_cast<tank::fnTankShutdown>( GetProcAddress( module_, "tankShutdown" ) );
+    if ( !pfnTankInitialize || !pfnTankShutdown )
+      NEKO_EXCEPT( "TankEngine export resolution failed" );
+    engine_ = pfnTankInitialize( 1, host );
+    if ( !engine_ )
+      NEKO_EXCEPT( "TankEngine init failed" );
+  }
+
+  void TankLibrary::unload()
+  {
+    if ( engine_ && pfnTankShutdown )
+      pfnTankShutdown( engine_ );
+    // if ( module_ )
+    //   FreeLibrary( module_ );
+  }
+
   void Engine::initialize( const Options& options )
   {
     console_->setEngine( shared_from_this() );
@@ -46,6 +77,9 @@ namespace neko {
     UVersionInfo icuVersion;
     u_getVersion( icuVersion );
     console_->printf( Console::srcEngine, "Using ICU version %d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
+
+    tanklib_.load( this );
+    tanklib_.engine_->initialize( c_discordAppId, c_steamAppId );
 
     loader_ = make_shared<ThreadedLoader>();
     loader_->start();
@@ -74,6 +108,8 @@ namespace neko {
     console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
 
     scripting_->postInitialize();
+
+    tanklib_.engine_->update();
   }
 
   void Engine::triggerFatalError( FatalError error )
@@ -106,6 +142,11 @@ namespace neko {
     }
   }
 
+  void Engine::logPrint( const utf8String& message )
+  {
+    console_->printf( Console::srcEngine, "Discord: %s", message.c_str() );
+  }
+
   bool Engine::paused()
   {
     if ( state_.focusLost || state_.windowMove )
@@ -133,6 +174,8 @@ namespace neko {
 
     console_->printf( Console::srcEngine, "Logic: targeting %.02f FPS, logic step %.02fms, max frame time %I64uus, max sleep %ims",
       (float)c_logicFPS, static_cast<float>( c_logicStep * 1000.0 ), c_logicMaxFrameMicroseconds, maxSleepytimeMs );
+
+    tanklib_.engine_->update();
 
     while ( signal_ != Signal_Stop )
     {
@@ -169,6 +212,8 @@ namespace neko {
           accumulator -= c_logicStep;
         }
       }
+
+      tanklib_.engine_->update();
 
       scripting_->postUpdate( delta, time_ );
 
@@ -216,6 +261,8 @@ namespace neko {
 
     messaging_.reset();
     Locator::provideMessaging( MessagingPtr() );
+
+    tanklib_.unload();
 
     console_->resetEngine();
   }

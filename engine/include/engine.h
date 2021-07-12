@@ -5,6 +5,7 @@
 #include "console.h"
 #include "messaging.h"
 #include "director.h"
+#include "tankengine.h"
 
 namespace neko {
 
@@ -20,9 +21,19 @@ namespace neko {
     utf8String compiler;
   };
 
+  struct TankLibrary {
+  public:
+    HMODULE module_;
+    tank::TankEngine* engine_;
+    tank::fnTankInitialize pfnTankInitialize;
+    tank::fnTankShutdown pfnTankShutdown;
+    void load( tank::TankHost* host );
+    void unload();
+  };
+
   //! \class Engine
   //! The main engine class that makes the world go round
-  class Engine: public enable_shared_from_this<Engine>, public Listener {
+  class Engine: public enable_shared_from_this<Engine>, public Listener, public tank::TankHost {
   public:
     //! Possible signal values interpreted by the engine's gameloop
     enum Signal {
@@ -49,6 +60,7 @@ namespace neko {
     MessagingPtr messaging_;
     DirectorPtr director_;
     EngineInfo info_;
+    TankLibrary tanklib_;
   protected:
     struct State {
       bool focusLost;
@@ -63,6 +75,8 @@ namespace neko {
   protected:
     //! Message listener callback.
     void onMessage( const Message& msg ) override;
+    //! TankEngine log callback.
+    void logPrint( const utf8String& message ) override;
   public:
     inline const EngineInfo& info() const throw() { return info_; }
     inline ConsolePtr console() throw() { return console_; }

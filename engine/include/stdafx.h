@@ -14,13 +14,9 @@
 # define _SCL_SECURE_NO_WARNINGS
 #endif
 
-#ifdef NEKO_TEST_WINVISTACOMPAT
-# define NTDDI_VERSION NTDDI_VISTASP4
-# define _WIN32_WINNT _WIN32_WINNT_VISTA
-#else
-# define NTDDI_VERSION NTDDI_WIN10
-# define _WIN32_WINNT _WIN32_WINNT_WIN10
-#endif
+#define NTDDI_VERSION NTDDI_WIN10
+#define _WIN32_WINNT _WIN32_WINNT_WIN10
+
 #include <sdkddkver.h>
 
 #include <windows.h>          // Windows

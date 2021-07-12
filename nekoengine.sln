@@ -1,9 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31410.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "engine", "engine\engine.vcxproj", "{93CF8D66-C645-45B8-BE37-3227439C6455}"
+	ProjectSection(ProjectDependencies) = postProject
+		{81900D20-E35B-48FB-8F6D-F9521559462B} = {81900D20-E35B-48FB-8F6D-F9521559462B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tankengine", "tankengine\tankengine.vcxproj", "{81900D20-E35B-48FB-8F6D-F9521559462B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,10 @@ Global
 		{93CF8D66-C645-45B8-BE37-3227439C6455}.Debug|x64.Build.0 = Debug|x64
 		{93CF8D66-C645-45B8-BE37-3227439C6455}.Release|x64.ActiveCfg = Release|x64
 		{93CF8D66-C645-45B8-BE37-3227439C6455}.Release|x64.Build.0 = Release|x64
+		{81900D20-E35B-48FB-8F6D-F9521559462B}.Debug|x64.ActiveCfg = Debug|x64
+		{81900D20-E35B-48FB-8F6D-F9521559462B}.Debug|x64.Build.0 = Debug|x64
+		{81900D20-E35B-48FB-8F6D-F9521559462B}.Release|x64.ActiveCfg = Release|x64
+		{81900D20-E35B-48FB-8F6D-F9521559462B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
