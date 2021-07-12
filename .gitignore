@@ -85,8 +85,6 @@ StyleCopReport.xml
 *.scc
 *.bsc
 *.map
-*.exe
-*.dll
 
 # Chutzpah Test files
 _Chutzpah*
@@ -335,3 +333,5 @@ ASALocalRun/
 bin/*.exp
 bin/*.lib
 bin/*.pdb
+bin/*.dll
+bin/*.exe
