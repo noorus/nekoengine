@@ -23,6 +23,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 /asm/
+bin/junk/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -335,3 +336,9 @@ bin/*.lib
 bin/*.pdb
 bin/*.dll
 bin/*.exe
+
+lib/*.exp
+lib/*.lib
+lib/*.pdb
+lib/*.dll
+lib/*.exe
