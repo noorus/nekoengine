@@ -146,7 +146,7 @@
 #include <nil.h>
 
 // MyGUI
-#include <MYGUI/MyGUI.h>
+//#include <MYGUI/MyGUI.h>
 
 // Local types
 #include "neko_types.h"

@@ -51,7 +51,7 @@ namespace neko {
     {
       font_ = fontmgr->createFont();
       loader->addLoadTask( { LoadTask( font_, R"(data\fonts\LuckiestGuy.ttf)", 32.0f ) } );
-      mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_Text );
+      mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_Text, true, false );
     }
     inline bool fontLoaded()
     {
@@ -115,6 +115,7 @@ namespace neko {
     {
       glBindTextureUnit( 0, material_->texture_->handle() );
       mesh_->draw();
+      glBindTextureUnit( 0, 0 );
     }
     ~DynamicText()
     {
@@ -123,8 +124,6 @@ namespace neko {
   };
 
   using DynamicTextPtr = shared_ptr<DynamicText>;
-
-  // static DynamicTextPtr g_testText;
 
   void glStartupFetchAndCheck( GLInformation& info )
   {
@@ -136,7 +135,7 @@ namespace neko {
       return utf8String( std::to_string( (unsigned int)e ) );
 #endif
     };
-    auto glvGetI32NoThrow = []( GLenum e  ) -> int32_t
+    auto glvGetI32NoThrow = []( GLenum e ) -> int32_t
     {
       GLint data = 0;
       glGetIntegerv( e, &data );
@@ -272,6 +271,7 @@ namespace neko {
   }
 
   static bool g_textAdded = false;
+  static shared_ptr<DynamicText> g_testText;
 
   void Renderer::prepare( GameTime time )
   {
@@ -279,6 +279,9 @@ namespace neko {
     uploadTextures();
 
     meshes_->jsUpdate( director_->renderSync() );
+
+    // Delete all handles for which our buffer objects were already destroyed
+    meshes_->destroyFreed();
 
     // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point at which we try to create the VAO.
     // Thus uploading the VAOs should always come last.
@@ -288,7 +291,7 @@ namespace neko {
 
     models_->jsUpdate( director_->renderSync() );
 
-    /*if ( !g_testText )
+    if ( !g_testText )
     {
       g_testText = make_shared<DynamicText>( loader_, meshes_, fonts_ );
     }
@@ -298,7 +301,7 @@ namespace neko {
       g_textAdded = true;
       g_testText->addText( "nekoengine", vec2( 256.0f, 720.0f - 256.0f + 32.0f ) );
       g_testText->updateTexture( this );
-    }*/
+    }
   }
 
   void Renderer::jsRestart()
@@ -459,21 +462,22 @@ namespace neko {
         else
           glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
 
-        auto indices = mesh->mesh().ebo_->storage_.size();
-        mesh->mesh().vao_->draw( GL_TRIANGLES, (GLsizei)indices );
+        mesh->mesh().vao_->draw( GL_TRIANGLES );
       }
     }
 
-    /*if ( g_testText && g_textAdded )
+    if ( g_testText && g_textAdded )
     {
       g_testText->begin();
       mat4 model( 1.0f );
       model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
       model = glm::translate( model, vec3( 1.0f, 1.0f, 0.0f ) );
 
-      shaders_->use( "text3d" ).setUniform( "model", model );
+      auto& pipeline = shaders_->usePipeline( "text3d" );
+      pipeline.setUniform( "model", model );
+      pipeline.setUniform( "tex", 0 );
       g_testText->draw();
-    }*/
+    }
   }
 
   void Renderer::draw( CameraPtr camera )
@@ -507,16 +511,24 @@ namespace neko {
     shaders_->usePipeline( "mainframebuf2d" ).setUniform( "tex", 0 );
     glBindTextureUnit( 0, g_framebuf->texture()->handle() );
     builtin_.screenQuad_->draw();
+
+    glBindTextureUnit( 0, 0 );
+    glBindVertexArray( builtin_.emptyVAO_ );
   }
 
   Renderer::~Renderer()
   {
-    // g_testText.reset();
+    glBindTextureUnit( 0, 0 );
+    glBindVertexArray( builtin_.emptyVAO_ );
+
+    g_testText.reset();
 
     g_framebuf.reset();
 
     models_->teardown();
     meshes_->teardown();
+
+    meshes_->destroyFreed();
 
     shaders_->shutdown();
     shaders_.reset();
