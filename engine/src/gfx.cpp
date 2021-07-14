@@ -56,7 +56,11 @@ namespace neko {
 
     auto gfx = static_cast<Gfx*>( const_cast<void*>( userParam ) );
 
-    if ( id == 1281 || id == 1285 || id == 0 )
+    if ( id == 0
+      || id == 1281
+      || id == 1285
+      // || id == 131076
+      )
       DebugBreak();
 
     if ( !gfx )
@@ -168,7 +172,7 @@ namespace neko {
     button->setCaption( "exit" );*/
   }
 
-  /*void* Gfx::loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename )
+  void* Gfx::loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename )
   {
     vector<uint8_t> input, output;
     unsigned int wo, ho;
@@ -188,7 +192,7 @@ namespace neko {
   void Gfx::saveImage( int width, int height, MyGUI::PixelFormat format, void* texture, const utf8String& filename )
   {
     //
-  }*/
+  }
 
   void Gfx::preUpdate( GameTime time )
   {
@@ -257,7 +261,7 @@ namespace neko {
       window_->setActive( true );
     }
 
-    renderer_->draw( camera_ ); // , guiPlatform_.get() );
+    renderer_->draw( camera_, guiPlatform_.get() );
 
     window_->display();
   }

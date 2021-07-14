@@ -152,7 +152,8 @@ namespace neko {
       if ( ( !buf->uploaded_ || buf->dirty_ ) && !buf->empty() )
         dirties.push_back( buf.get() );
 
-    auto resolveFlags = []( VBO* vbo ) -> gl::BufferStorageMask {
+    auto resolveFlags = []( VBO* vbo ) -> gl::BufferStorageMask
+    {
       auto mapflags = ( gl::GL_MAP_WRITE_BIT | gl::GL_MAP_READ_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT );
       auto storeflags = ( mapflags | gl::GL_DYNAMIC_STORAGE_BIT );
       return ( vbo->mappable_ ? ( storeflags | mapflags ) : storeflags );
@@ -173,22 +174,35 @@ namespace neko {
           {
             case VBO_2D: {
               auto& store = dirties[i]->v2d();
-              glNamedBufferStorage( dirties[i]->id_, store.size() * sizeof( Vertex2D ), store.data(), resolveFlags( dirties[i] ) );
-            }
-            break;
-            case VBO_3D: {
+              glNamedBufferStorage( dirties[i]->id_,
+                store.size() * sizeof( Vertex2D ),
+                store.data(),
+                resolveFlags( dirties[i] ) );
+            } break;
+            case VBO_3D:
+            {
               auto& store = dirties[i]->v3d();
-              glNamedBufferStorage( dirties[i]->id_, store.size() * sizeof( Vertex3D ), store.data(), resolveFlags( dirties[i] ) );
-            }
-            break;
-            case VBO_Text: {
+              glNamedBufferStorage( dirties[i]->id_,
+                store.size() * sizeof( Vertex3D ),
+                store.data(),
+                resolveFlags( dirties[i] ) );
+            } break;
+            case VBO_Text:
+            {
               auto& store = dirties[i]->vt3d();
-              glNamedBufferStorage( dirties[i]->id_, store.size() * sizeof( VertexText3D ), store.data(), resolveFlags( dirties[i] ) );
+              glNamedBufferStorage( dirties[i]->id_,
+                store.size() * sizeof( VertexText3D ),
+                store.data(),
+                resolveFlags( dirties[i] ) );
             }
             break;
-            case VBO_MyGUI: {
+            case VBO_MyGUI:
+            {
               auto& store = dirties[i]->guiv();
-              glNamedBufferStorage( dirties[i]->id_, store.size() * sizeof( MyGUI::Vertex ), store.data(), resolveFlags( dirties[i] ) );
+              glNamedBufferStorage( dirties[i]->id_,
+                store.size() * sizeof( MyGUI::Vertex ),
+                store.data(),
+                resolveFlags( dirties[i] ) );
             }
             break;
           }

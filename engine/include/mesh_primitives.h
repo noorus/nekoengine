@@ -5,15 +5,7 @@
 #include "utilities.h"
 #include "neko_pooledtypes.h"
 
-namespace MyGUI {
-
-  struct Vertex {
-    float x, y, z;
-    uint8_t colors[4];
-    float s, t;
-    Vertex() { memset( this, 0, sizeof( Vertex ) ); }
-  };
-}
+#include <MyGUI/MyGUI_VertexData.h>
 
 namespace neko {
 

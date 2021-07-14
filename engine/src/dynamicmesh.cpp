@@ -7,9 +7,8 @@
 
 namespace neko {
 
-  DynamicMesh::DynamicMesh( MeshManagerPtr manager, VBOType vertexType,
-  GLenum drawMode, bool useIndices, bool mappable ):
-  manager_( move( manager ) ), drawMode_( drawMode ), flags_{ useIndices, mappable }
+  DynamicMesh::DynamicMesh( MeshManagerPtr manager, VBOType vertexType, GLenum drawMode, bool useIndices, bool mappable ):
+    manager_( move( manager ) ), drawMode_( drawMode ), flags_{ useIndices, mappable }
   {
     vbo_ = move( manager_->createVBO( vertexType, mappable ) );
     if ( flags_.indices )

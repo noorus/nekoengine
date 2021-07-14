@@ -480,7 +480,7 @@ namespace neko {
     }
   }
 
-  void Renderer::draw( CameraPtr camera )
+  void Renderer::draw( CameraPtr camera, MyGUI::NekoPlatform* gui )
   {
     if ( !g_framebuf->available() )
       return;
@@ -511,6 +511,9 @@ namespace neko {
     shaders_->usePipeline( "mainframebuf2d" ).setUniform( "tex", 0 );
     glBindTextureUnit( 0, g_framebuf->texture()->handle() );
     builtin_.screenQuad_->draw();
+
+    // if ( gui )
+    //   gui->getRenderManagerPtr()->drawOneFrame( shaders_.get() );
 
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
