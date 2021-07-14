@@ -313,8 +313,8 @@ namespace neko {
 
   //! Called by Texture::Texture()
   GLuint Renderer::implCreateTexture2D( size_t width, size_t height,
-    GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
-    const void* data, GLWrapMode wrap, Texture::Filtering filtering )
+  GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
+  const void* data, GLWrapMode wrap, Texture::Filtering filtering )
   {
     assert( width <= (size_t)info_.maxTextureSize && height <= (size_t)info_.maxTextureSize );
 
@@ -406,7 +406,7 @@ namespace neko {
   }
 
   MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, PixelFormat format,
-    const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
+  const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
     MaterialPtr mat = make_shared<Material>();
     mat->image_.format_ = format;
@@ -508,12 +508,29 @@ namespace neko {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
     builtin_.screenQuad_->begin();
-    shaders_->usePipeline( "mainframebuf2d" ).setUniform( "tex", 0 );
+    auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
+
+    /*pipeline.setUniform( "tex", 0 );
+    auto pgm = pipeline.getProgramStage( shaders::Shader_Fragment );
+    auto pal = gl::glGetUniformLocation( pgm, "palette" );
+    vec3 vals[8] = {
+      { 1.0f, 0.0f, 0.0f },
+      { 0.0f, 1.0f, 0.0f },
+      { 0.0f, 0.0f, 1.0f },
+      { 1.0f, 1.0f, 0.0f },
+      { 0.0f, 1.0f, 1.0f },
+      { 1.0f, 0.0f, 1.0f },
+      { 0.0f, 0.0f, 0.0f },
+      { 0.5f, 0.5f, 0.5f }
+    };
+    gl::glProgramUniform3fv( pgm, pal, 8, (GLfloat*)vals );
+    pipeline.setUniform( "paletteSize", 8 );*/
+
     glBindTextureUnit( 0, g_framebuf->texture()->handle() );
     builtin_.screenQuad_->draw();
 
-    // if ( gui )
-    //   gui->getRenderManagerPtr()->drawOneFrame( shaders_.get() );
+    if ( gui )
+      gui->getRenderManagerPtr()->drawOneFrame( shaders_.get() );
 
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );

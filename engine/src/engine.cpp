@@ -103,10 +103,10 @@ namespace neko {
     renderer_->start();
     console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );
 
-    timer.start();
+    /*timer.start();
     input_ = make_shared<Input>( shared_from_this() );
     input_->initialize();
-    console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );
+    console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );*/
 
     timer.start();
     scripting_ = make_shared<Scripting>( shared_from_this() );
@@ -115,7 +115,7 @@ namespace neko {
 
     //tanklib_.engine_->update();
 
-    input_->postInitialize();
+    //input_->postInitialize();
 
     scripting_->postInitialize();
   }
@@ -175,10 +175,10 @@ namespace neko {
   void Engine::restart()
   {
     scripting_->shutdown();
-    input_->shutdown();
+    //input_->shutdown();
     renderer_->restart();
-    input_->initialize();
-    input_->postInitialize();
+    //input_->initialize();
+    //input_->postInitialize();
     scripting_->initialize();
     scripting_->postInitialize();
   }
@@ -219,7 +219,7 @@ namespace neko {
         continue;
       }
 
-      input_->preUpdate( time_ );
+      //input_->preUpdate( time_ );
       scripting_->preUpdate( time_ );
       fonts_->prepare( time_ );
       //gfx_->preUpdate( time_ );
@@ -236,6 +236,8 @@ namespace neko {
           accumulator -= c_logicStep;
         }
       }
+
+      //input_->postUpdate( delta, time_ );
 
       //tanklib_.engine_->update();
 
@@ -268,8 +270,8 @@ namespace neko {
   {
     scripting_.reset();
 
-    if ( input_ )
-      input_->shutdown();
+    //if ( input_ )
+    //  input_->shutdown();
 
     if ( renderer_ )
       renderer_->stop();
@@ -282,7 +284,7 @@ namespace neko {
     if ( fonts_ )
       fonts_->shutdown();
 
-    input_.reset();
+    //input_.reset();
 
     renderer_.reset();
 

@@ -8,35 +8,6 @@ namespace neko {
 
   namespace shaders {
 
-    template <typename T>
-    class PersistentBuffer
-    {
-    protected:
-      GLuint id_;
-      size_t size_;
-      span<T> buffer_;
-
-    public:
-      PersistentBuffer( size_t count = 1 ): id_( 0 )
-      {
-        assert( count > 0 );
-        size_ = ( count * sizeof( T ) );
-        gl::glCreateBuffers( 1, &id_ );
-        auto mapflags = ( gl::GL_MAP_WRITE_BIT | gl::GL_MAP_READ_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT );
-        auto storeflags = ( mapflags | gl::GL_DYNAMIC_STORAGE_BIT );
-        gl::glNamedBufferStorage( id_, size_, nullptr, storeflags );
-        auto buf = reinterpret_cast<T*>( gl::glMapNamedBufferRange( id_, 0, size_, mapflags ) );
-        buffer_ = span<T>( buf, size_ );
-      }
-      inline GLuint id() const { return id_; }
-      inline span<T>& buffer() { return buffer_; }
-      ~PersistentBuffer()
-      {
-        gl::glUnmapNamedBuffer( id_ );
-        gl::glDeleteBuffers( 1, &id_ );
-      }
-    };
-
     // FIXME This alignment isn't guaranteed to work.
     // Should query the requirement from the driver, it could be as bad as 256
     __declspec(align(16)) struct World
@@ -164,6 +135,11 @@ namespace neko {
       Pipeline( const utf8String& name );
       inline GLuint id() const { return id_; }
       void setProgramStage( Type stage, GLuint id );
+      inline GLuint getProgramStage( Type stage )
+      {
+        assert( stages_[stage] );
+        return stages_[stage]->id();
+      }
       inline bool ready() { return ( gl::glIsProgramPipeline( id_ ) && !stages_.empty() ); }
       template <typename T>
       inline void setUniform( const char* name, T const& value )

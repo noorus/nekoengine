@@ -8,7 +8,14 @@
 
 namespace neko {
 
-  class Input: public Subsystem, public nil::SystemListener, public nil::MouseListener, public nil::KeyboardListener {
+  class GfxInput: public nil::SystemListener, public nil::MouseListener, public nil::KeyboardListener {
+  private:
+    HWND window_;
+    bool moved_;
+    POINT mousePosition_;
+    int mouseZ_;
+    ConsolePtr console_;
+    vec2i windowSize_;
   protected:
     unique_ptr<nil::System> system_;
     // nil::SystemListener events
@@ -30,14 +37,12 @@ namespace neko {
     void onKeyRepeat( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode ) override;
     void onKeyReleased( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode ) override;
   public:
-    Input( EnginePtr engine );
-    void initialize();
-    void postInitialize();
+    GfxInput( ConsolePtr console );
+    void initialize( HWND window );
+    void setWindowSize( vec2i size );
     void shutdown();
-    void preUpdate( GameTime time ) override;
-    void tick( GameTime tick, GameTime time ) override;
-    void postUpdate( GameTime delta, GameTime tick ) override;
-    virtual ~Input();
+    void update();
+    virtual ~GfxInput();
   };
 
 }

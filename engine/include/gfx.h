@@ -4,6 +4,7 @@
 #include "neko_types.h"
 #include "neko_platform.h"
 #include "messaging.h"
+#include "input.h"
 
 #include <MyGUI_NekoPlatform.h>
 
@@ -37,6 +38,7 @@ namespace neko {
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
     DirectorPtr director_;
+    GfxInputPtr input_;
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;

@@ -12,14 +12,12 @@ namespace MyGUI {
   const size_t c_vertexBufferReallocStep = ( 5 * VertexQuad::VertexCount );
 
   NekoVertexBuffer::NekoVertexBuffer( neko::Renderer* renderer ):
-  renderer_( renderer ), needVertexCount_( 0 )
+  renderer_( renderer ), needVertexCount_( 0 ), vao_( 0 )
   {
-    mesh_ = move( renderer_->meshes().createDynamic( GLenum::GL_TRIANGLES, neko::VBO_MyGUI, false, true ) );
   }
 
   NekoVertexBuffer::~NekoVertexBuffer()
   {
-    mesh_.reset();
   }
 
   void NekoVertexBuffer::setVertexCount( size_t count )
@@ -34,31 +32,51 @@ namespace MyGUI {
 
   Vertex* NekoVertexBuffer::lock()
   {
-    if ( needVertexCount_ > mesh_->vertsCount() || mesh_->vertsCount() == 0 )
+    if ( needVertexCount_ > vertexCount_ || vertexCount_ == 0 )
       resize();
-
-    return mesh_->vbo_->lock<MyGUI::Vertex>();
+    buffer_->lock();
+    return buffer_->buffer().data();
   }
 
   void NekoVertexBuffer::unlock()
   {
-    assert( mesh_ );
-    mesh_->vbo_->unlock();
+    assert( buffer_ );
+    buffer_->unlock();
   }
 
   void NekoVertexBuffer::draw( int count )
   {
-    mesh_->begin();
-
+    glBindVertexArray( vao_ );
     auto& pipeline = renderer_->shaders().usePipeline( "mygui3d" );
     pipeline.setUniform( "tex", 0 );
     pipeline.setUniform( "yscale", 1.0f );
-    mesh_->draw( count );
+    glDrawArrays( GL_TRIANGLES, 0, count );
+    glBindVertexArray( 0 );
+  }
+
+  void NekoVertexBuffer::create()
+  {
+    buffer_ = make_unique<neko::SmarterBuffer<MyGUI::Vertex>>( vertexCount_ );
+    glCreateVertexArrays( 1, &vao_ );
+    neko::AttribWriter attribs;
+    attribs.add( GL_FLOAT, 3 ); // vec3 position
+    attribs.add( GL_UNSIGNED_BYTE, 4, true ); // b4 color
+    attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
+    attribs.write( vao_ );
+    glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
+  }
+
+  void NekoVertexBuffer::destroy()
+  {
+    glDeleteVertexArrays( 1, &vao_ );
+    buffer_.reset();
   }
 
   void NekoVertexBuffer::resize()
   {
-    mesh_->resize( needVertexCount_ + c_vertexBufferReallocStep );
+    vertexCount_ = ( needVertexCount_ + c_vertexBufferReallocStep );
+    destroy();
+    create();
   }
 
 }

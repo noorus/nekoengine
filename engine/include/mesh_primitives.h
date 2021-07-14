@@ -9,6 +9,114 @@
 
 namespace neko {
 
+  template <typename T>
+  class PersistentBuffer {
+  protected:
+    GLuint id_;
+    size_t size_;
+    span<T> buffer_;
+  public:
+    PersistentBuffer( size_t count = 1 ): id_( 0 )
+    {
+      assert( count > 0 );
+      size_ = ( count * sizeof( T ) );
+      gl::glCreateBuffers( 1, &id_ );
+      auto mapflags = ( gl::GL_MAP_WRITE_BIT | gl::GL_MAP_READ_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT );
+      auto storeflags = ( mapflags | gl::GL_DYNAMIC_STORAGE_BIT );
+      gl::glNamedBufferStorage( id_, size_, nullptr, storeflags );
+      auto buf = reinterpret_cast<T*>( gl::glMapNamedBufferRange( id_, 0, size_, mapflags ) );
+      buffer_ = span<T>( buf, size_ );
+    }
+    inline GLuint id() const { return id_; }
+    inline span<T>& buffer() { return buffer_; }
+    ~PersistentBuffer()
+    {
+      gl::glUnmapNamedBuffer( id_ );
+      gl::glDeleteBuffers( 1, &id_ );
+    }
+  };
+
+  template <typename T>
+  class SmarterBuffer
+  {
+  protected:
+    GLuint id_;
+    size_t size_;
+    span<T> buffer_;
+
+  public:
+    SmarterBuffer( size_t count = 1 ): id_( 0 )
+    {
+      assert( count > 0 );
+      size_ = ( count * sizeof( T ) );
+      gl::glCreateBuffers( 1, &id_ );
+      /*auto mapflags = ( gl::GL_MAP_WRITE_BIT | gl::GL_MAP_READ_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT );
+      auto storeflags = ( mapflags | gl::GL_DYNAMIC_STORAGE_BIT );
+      gl::glNamedBufferStorage( id_, size_, nullptr, storeflags );*/
+      gl::glNamedBufferData( id_, size_, nullptr, gl::GL_STREAM_DRAW );
+    }
+    inline void lock()
+    {
+      gl::glNamedBufferData( id_, size_, nullptr, gl::GL_STREAM_DRAW );
+      auto buf = reinterpret_cast<T*>( gl::glMapNamedBuffer( id_, gl::GL_WRITE_ONLY ) );
+      buffer_ = span<T>( buf, size_ );
+    }
+    inline void unlock()
+    {
+      gl::glUnmapNamedBuffer( id_ );
+    }
+    inline GLuint id() const { return id_; }
+    inline span<T>& buffer() { return buffer_; }
+    ~SmarterBuffer()
+    {
+      // FIXME - Access violation. what the fuck?
+      // gl::glDeleteBuffers( 1, &id_ );
+    }
+  };
+
+  class AttribWriter {
+  private:
+    struct Record {
+      GLenum type_;
+      GLsizei count_;
+      size_t size_;
+      bool normalize_;
+      Record( GLenum type, GLsizei count, size_t size, bool normalize = false ):
+      type_( type ), count_( count ), size_( size ), normalize_( normalize )
+      {
+      }
+    };
+    vector<Record> recs_;
+    GLsizei stride_;
+  public:
+    AttribWriter(): stride_( 0 ) {}
+    inline GLsizei stride() const { return stride_; }
+    void add( GLenum type, GLsizei count, bool normalize = false )
+    {
+      GLsizei size = 0;
+      if ( type == gl::GL_FLOAT )
+        size = ( count * sizeof( float ) );
+      else if ( type == gl::GL_UNSIGNED_BYTE )
+        size = ( count * sizeof( uint8_t ) );
+      else
+        NEKO_EXCEPT( "Unsupported vertex attribute type in writer" );
+
+      recs_.emplace_back( type, count, size, normalize );
+      stride_ += size;
+    }
+    void write( GLuint handle )
+    {
+      GLuint ptr = 0;
+      for ( GLuint i = 0; i < recs_.size(); ++i )
+      {
+        gl::glEnableVertexArrayAttrib( handle, i );
+        gl::glVertexArrayAttribBinding( handle, i, 0 );
+        gl::glVertexArrayAttribFormat( handle, i, recs_[i].count_, recs_[i].type_, recs_[i].normalize_ ? gl::GL_TRUE : gl::GL_FALSE, ptr );
+        ptr += (GLuint)recs_[i].size_;
+      }
+    }
+  };
+
   enum VBOType {
     VBO_3D, //!< 0: pos[3], 1: texcoord[2]
     VBO_2D, //!< 0: pos[2], 1: texcoord[2]

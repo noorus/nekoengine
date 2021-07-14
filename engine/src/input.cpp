@@ -11,125 +11,143 @@
 
 namespace neko {
 
-  Input::Input( EnginePtr engine ): Subsystem( move( engine ) )
+  GfxInput::GfxInput( ConsolePtr console ): console_( console )
   {
   }
 
-  void Input::initialize()
+  void GfxInput::initialize( HWND window )
   {
+    window_ = window;
+
     system_ = make_unique<nil::System>(
       platform::g_instance,
-      platform::RenderWindowHandler::get().getWindow(),
-      nil::Cooperation::Background,
+      window,
+      nil::Cooperation::Foreground,
       this );
-  }
 
-  void Input::onDeviceConnected( nil::Device* device )
-  {
-    engine_->console()->printf( Console::srcInput, "Device connected: %s", device->getName().c_str() );
-    if ( device->getType() != nil::Device::Device_Controller )
-      device->enable();
-  }
-
-  void Input::onDeviceDisconnected( nil::Device* device )
-  {
-    engine_->console()->printf( Console::srcInput, "Device disconnected: %s", device->getName().c_str() );
-  }
-
-  void Input::onMouseEnabled( nil::Device* device, nil::Mouse* instance )
-  {
-    engine_->console()->printf( Console::srcInput, "Mouse enabled: %s", device->getName().c_str() );
-    instance->addListener( this );
-  }
-
-  void Input::onMouseDisabled( nil::Device* device, nil::Mouse* instance )
-  {
-    engine_->console()->printf( Console::srcInput, "Mouse disabled: %s", device->getName().c_str() );
-  }
-
-  void Input::onKeyboardEnabled( nil::Device* device, nil::Keyboard* instance )
-  {
-    engine_->console()->printf( Console::srcInput, "Keyboard enabled: %s", device->getName().c_str() );
-    instance->addListener( this );
-  }
-
-  void Input::onKeyboardDisabled( nil::Device* device, nil::Keyboard* instance )
-  {
-    engine_->console()->printf( Console::srcInput, "Keyboard disabled: %s", device->getName().c_str() );
-  }
-
-  void Input::onControllerEnabled( nil::Device* device, nil::Controller* instance )
-  {
-  }
-
-  void Input::onControllerDisabled( nil::Device* device, nil::Controller* instance )
-  {
-  }
-
-  void Input::postInitialize()
-  {
     for ( auto device : system_->getDevices() )
       if ( device->getType() != nil::Device::Device_Controller )
         device->enable();
   }
 
-  void Input::shutdown()
+  void GfxInput::onDeviceConnected( nil::Device* device )
+  {
+    console_->printf( Console::srcInput, "Device connected: %s", device->getName().c_str() );
+    if ( device->getType() != nil::Device::Device_Controller )
+      device->enable();
+  }
+
+  void GfxInput::onDeviceDisconnected( nil::Device* device )
+  {
+    console_->printf( Console::srcInput, "Device disconnected: %s", device->getName().c_str() );
+  }
+
+  void GfxInput::onMouseEnabled( nil::Device* device, nil::Mouse* instance )
+  {
+    console_->printf( Console::srcInput, "Mouse enabled: %s", device->getName().c_str() );
+    instance->addListener( this );
+  }
+
+  void GfxInput::onMouseDisabled( nil::Device* device, nil::Mouse* instance )
+  {
+    console_->printf( Console::srcInput, "Mouse disabled: %s", device->getName().c_str() );
+  }
+
+  void GfxInput::onKeyboardEnabled( nil::Device* device, nil::Keyboard* instance )
+  {
+    console_->printf( Console::srcInput, "Keyboard enabled: %s", device->getName().c_str() );
+    instance->addListener( this );
+  }
+
+  void GfxInput::onKeyboardDisabled( nil::Device* device, nil::Keyboard* instance )
+  {
+    console_->printf( Console::srcInput, "Keyboard disabled: %s", device->getName().c_str() );
+  }
+
+  void GfxInput::onControllerEnabled( nil::Device* device, nil::Controller* instance )
+  {
+  }
+
+  void GfxInput::onControllerDisabled( nil::Device* device, nil::Controller* instance )
+  {
+  }
+
+  void GfxInput::onMouseMoved( nil::Mouse* mouse, const nil::MouseState& state )
+  {
+    moved_ = true;
+  }
+
+  void GfxInput::onMouseButtonPressed( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
+  {
+    platform::getCursorPosition( window_, mousePosition_ );
+    MyGUI::InputManager::getInstance().injectMousePress(
+      (int)mousePosition_.x, (int)mousePosition_.y,
+      MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) );
+  }
+
+  void GfxInput::onMouseButtonReleased( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
+  {
+    platform::getCursorPosition( window_, mousePosition_ );
+    MyGUI::InputManager::getInstance().
+    MyGUI::InputManager::getInstance().injectMouseRelease(
+      (int)mousePosition_.x, (int)mousePosition_.y,
+      MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) );
+  }
+
+  void GfxInput::onMouseWheelMoved( nil::Mouse* mouse, const nil::MouseState& state )
+  {
+    moved_ = true;
+    mouseZ_ += state.wheel.relative;
+  }
+
+  void GfxInput::onKeyPressed( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
+  {
+    MyGUI::InputManager::getInstance().injectKeyPress( MyGUI::KeyCode( (MyGUI::KeyCode::Enum)keycode ) );
+  }
+
+  void GfxInput::onKeyRepeat( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
+  {
+    //
+  }
+
+  void GfxInput::onKeyReleased( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
+  {
+    MyGUI::InputManager::getInstance().injectKeyRelease( MyGUI::KeyCode( (MyGUI::KeyCode::Enum)keycode ) );
+  }
+
+  void GfxInput::setWindowSize( vec2i size )
+  {
+    windowSize_ = size;
+  }
+
+  void GfxInput::update()
+  {
+    moved_ = false;
+    mouseZ_ = 0;
+    system_->update();
+    if ( moved_ )
+    {
+      platform::getCursorPosition( window_, mousePosition_ );
+      if ( mousePosition_.x < 0 )
+        mousePosition_.x = 0;
+      else if ( mousePosition_.x >= windowSize_.x )
+        mousePosition_.x = (LONG)windowSize_.x - 1;
+      if ( mousePosition_.y < 0 )
+        mousePosition_.y = 0;
+      else if ( mousePosition_.y >= windowSize_.y )
+        mousePosition_.y = (LONG)windowSize_.y - 1;
+      MyGUI::InputManager::getInstance().injectMouseMove(
+        (int)mousePosition_.x, (int)mousePosition_.y, mouseZ_ );
+      moved_ = false;
+    }
+  }
+
+  void GfxInput::shutdown()
   {
     system_.reset();
   }
 
-  void Input::onMouseMoved( nil::Mouse* mouse, const nil::MouseState& state )
-  {
-    //
-  }
-
-  void Input::onMouseButtonPressed( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
-  {
-    //
-  }
-
-  void Input::onMouseButtonReleased( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
-  {
-    //
-  }
-
-  void Input::onMouseWheelMoved( nil::Mouse* mouse, const nil::MouseState& state )
-  {
-    //
-  }
-
-  void Input::onKeyPressed( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
-  {
-    //
-  }
-
-  void Input::onKeyRepeat( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
-  {
-    //
-  }
-
-  void Input::onKeyReleased( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
-  {
-    //
-  }
-
-
-  void Input::preUpdate( GameTime time )
-  {
-    system_->update();
-  }
-
-  void Input::tick( GameTime tick, GameTime time )
-  {
-    //
-  }
-
-  void Input::postUpdate( GameTime delta, GameTime tick )
-  {
-    //
-  }
-
-  Input::~Input()
+  GfxInput::~GfxInput()
   {
     //
   }

@@ -29,6 +29,7 @@ namespace neko {
   {
     assert( loader_ && fonts_ && director_ && messaging_ && console_ );
     preInitialize();
+    input_ = make_shared<GfxInput>( console_ );
   }
 
   void Gfx::printInfo()
@@ -154,7 +155,7 @@ namespace neko {
 
     renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
 
-    /*guiPlatform_ = make_unique<MyGUI::NekoPlatform>();
+    guiPlatform_ = make_unique<MyGUI::NekoPlatform>();
 
     guiPlatform_->getDataManagerPtr()->setDataPath( "data\\gui" );
 
@@ -163,13 +164,14 @@ namespace neko {
     gui_ = make_unique<MyGUI::Gui>();
     gui_->initialise( "MyGUI_Core.xml" );
 
-    MyGUI::RenderManager::getInstance().setViewSize( window_->getSize().x, window_->getSize().y );
+    guiPlatform_->getRenderManagerPtr()->setViewSize( window_->getSize().x, window_->getSize().y );
 
     MyGUI::PointerManager::getInstance().setVisible( true );
-    MyGUI::InputManager::getInstance().injectMouseMove( 100, 100, 0 );
 
     MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
-    button->setCaption( "exit" );*/
+    button->setCaption( "exit" );
+
+    input_->initialize( window_->getSystemHandle() );
   }
 
   void* Gfx::loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename )
@@ -202,6 +204,7 @@ namespace neko {
   void Gfx::resize( size_t width, size_t height )
   {
     viewport_.size_ = vec2i( width, height );
+    input_->setWindowSize( viewport_.size_ );
 
     console_->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
 
@@ -210,12 +213,14 @@ namespace neko {
 
     glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
 
-    // if ( guiPlatform_ )
-    //   MyGUI::RenderManager::getInstance().setViewSize( (int)width, (int)height );
+    if ( guiPlatform_ )
+      guiPlatform_->getRenderManagerPtr()->setViewSize( (int)width, (int)height );
   }
 
   void Gfx::processEvents()
   {
+    input_->update();
+
     sf::Event evt;
     while ( window_->pollEvent( evt ) )
     {
@@ -280,7 +285,9 @@ namespace neko {
 
   void Gfx::shutdown()
   {
-    /*if ( gui_ )
+    input_->shutdown();
+
+    if ( gui_ )
     {
       gui_->shutdown();
       gui_.reset();
@@ -290,7 +297,7 @@ namespace neko {
     {
       guiPlatform_->shutdown();
       guiPlatform_.reset();
-    }*/
+    }
 
     camera_.reset();
 
@@ -318,6 +325,7 @@ namespace neko {
   Gfx::~Gfx()
   {
     shutdown();
+    input_.reset();
   }
 
   const string c_gfxThreadName = "nekoRenderer";

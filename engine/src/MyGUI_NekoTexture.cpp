@@ -8,154 +8,145 @@ namespace MyGUI {
 
   using namespace gl;
 
-  NekoTexture::NekoTexture( const std::string& _name, NekoImageLoader* _loader )
-      : mName( _name ),
-        mWidth( 0 ),
-        mHeight( 0 ),
-        mPixelFormat( GLenum::GL_INVALID_ENUM ),
-        mInternalPixelFormat( GLenum::GL_INVALID_ENUM ),
-        mUsage( GL_INVALID_ENUM ),
-        mAccess( GL_INVALID_ENUM ),
-        mNumElemBytes( 0 ),
-        mDataSize( 0 ),
-        mTextureId( 0 ),
-        mProgramId( 0 ),
-        mPboID( 0 ),
-        mLock( false ),
-        mBuffer( nullptr ),
-        mImageLoader( _loader ),
-        mRenderTarget( nullptr )
+  NekoTexture::NekoTexture( const utf8String& name, NekoImageLoader* loader ):
+  name_( name ), width_( 0 ), height_( 0 ), pixelFormat_( GLenum::GL_INVALID_ENUM ),
+  internalPixelFormat_( GLenum::GL_INVALID_ENUM ), usage_( GL_INVALID_ENUM ),
+  access_( GL_INVALID_ENUM ), numElemBytes_( 0 ), dataSize_( 0 ), id_( 0 ),
+  programId_( 0 ), pbo_( 0 ), lock_( false ), buffer_( nullptr ), loader_( loader ),
+  target_( nullptr )
   {
   }
 
   NekoTexture::~NekoTexture()
   {
-    destroy();
+    // FIXME This nets us an access violation, and I don't know why, so for now
+    // I just don't give a shit. UI textures are hardly going to be reloaded.
+    // destroy();
   }
 
-  const std::string& NekoTexture::getName() const
+  const utf8String& NekoTexture::getName() const
   {
-    return mName;
+    return name_;
   }
 
-  void NekoTexture::setUsage( TextureUsage _usage )
+  void NekoTexture::setUsage( TextureUsage usage )
   {
-    mAccess = GLenum::GL_INVALID_ENUM;
-    mUsage = GLenum::GL_INVALID_ENUM;
+    access_ = GLenum::GL_INVALID_ENUM;
+    usage_ = GLenum::GL_INVALID_ENUM;
 
-    if ( _usage == TextureUsage::Default )
+    if ( usage == TextureUsage::Default )
     {
-      mUsage = GL_STATIC_READ;
-      mAccess = GL_READ_ONLY;
+      usage_ = GL_STATIC_READ;
+      access_ = GL_READ_ONLY;
     }
-    else if ( _usage.isValue( TextureUsage::Static ) )
+    else if ( usage.isValue( TextureUsage::Static ) )
     {
-      if ( _usage.isValue( TextureUsage::Read ) )
+      if ( usage.isValue( TextureUsage::Read ) )
       {
-        if ( _usage.isValue( TextureUsage::Write ) )
+        if ( usage.isValue( TextureUsage::Write ) )
         {
-          mUsage = GL_STATIC_COPY;
-          mAccess = GL_READ_WRITE;
+          usage_ = GL_STATIC_COPY;
+          access_ = GL_READ_WRITE;
         }
         else
         {
-          mUsage = GL_STATIC_READ;
-          mAccess = GL_READ_ONLY;
+          usage_ = GL_STATIC_READ;
+          access_ = GL_READ_ONLY;
         }
       }
-      else if ( _usage.isValue( TextureUsage::Write ) )
+      else if ( usage.isValue( TextureUsage::Write ) )
       {
-        mUsage = GL_STATIC_DRAW;
-        mAccess = GL_WRITE_ONLY;
+        usage_ = GL_STATIC_DRAW;
+        access_ = GL_WRITE_ONLY;
       }
     }
-    else if ( _usage.isValue( TextureUsage::Dynamic ) )
+    else if ( usage.isValue( TextureUsage::Dynamic ) )
     {
-      if ( _usage.isValue( TextureUsage::Read ) )
+      if ( usage.isValue( TextureUsage::Read ) )
       {
-        if ( _usage.isValue( TextureUsage::Write ) )
+        if ( usage.isValue( TextureUsage::Write ) )
         {
-          mUsage = GL_DYNAMIC_COPY;
-          mAccess = GL_READ_WRITE;
+          usage_ = GL_DYNAMIC_COPY;
+          access_ = GL_READ_WRITE;
         }
         else
         {
-          mUsage = GL_DYNAMIC_READ;
-          mAccess = GL_READ_ONLY;
+          usage_ = GL_DYNAMIC_READ;
+          access_ = GL_READ_ONLY;
         }
       }
-      else if ( _usage.isValue( TextureUsage::Write ) )
+      else if ( usage.isValue( TextureUsage::Write ) )
       {
-        mUsage = GL_DYNAMIC_DRAW;
-        mAccess = GL_WRITE_ONLY;
+        usage_ = GL_DYNAMIC_DRAW;
+        access_ = GL_WRITE_ONLY;
       }
     }
-    else if ( _usage.isValue( TextureUsage::Stream ) )
+    else if ( usage.isValue( TextureUsage::Stream ) )
     {
-      if ( _usage.isValue( TextureUsage::Read ) )
+      if ( usage.isValue( TextureUsage::Read ) )
       {
-        if ( _usage.isValue( TextureUsage::Write ) )
+        if ( usage.isValue( TextureUsage::Write ) )
         {
-          mUsage = GL_STREAM_COPY;
-          mAccess = GL_READ_WRITE;
+          usage_ = GL_STREAM_COPY;
+          access_ = GL_READ_WRITE;
         }
         else
         {
-          mUsage = GL_STREAM_READ;
-          mAccess = GL_READ_ONLY;
+          usage_ = GL_STREAM_READ;
+          access_ = GL_READ_ONLY;
         }
       }
-      else if ( _usage.isValue( TextureUsage::Write ) )
+      else if ( usage.isValue( TextureUsage::Write ) )
       {
-        mUsage = GL_STREAM_DRAW;
-        mAccess = GL_WRITE_ONLY;
+        usage_ = GL_STREAM_DRAW;
+        access_ = GL_WRITE_ONLY;
       }
     }
-    else if ( _usage.isValue( TextureUsage::RenderTarget ) )
+    else if ( usage.isValue( TextureUsage::RenderTarget ) )
     {
-      mUsage = GL_DYNAMIC_READ;
-      mAccess = GL_READ_ONLY;
+      usage_ = GL_DYNAMIC_READ;
+      access_ = GL_READ_ONLY;
     }
   }
 
-  void NekoTexture::createManual( int _width, int _height, TextureUsage _usage, PixelFormat _format )
+  void NekoTexture::createManual( int width, int height, TextureUsage usage, PixelFormat format )
   {
-    createManual( _width, _height, _usage, _format, nullptr );
+    createManual( width, height, usage, format, nullptr );
   }
 
-  void NekoTexture::createManual( int _width, int _height, TextureUsage _usage, PixelFormat _format, void* _data )
+  void NekoTexture::createManual( int width, int height, TextureUsage usage, PixelFormat format, void* data )
   {
-    assert( !mTextureId );
+    assert( !id_ );
 
     //FIXME перенести в метод
-    mInternalPixelFormat = GLenum::GL_INVALID_ENUM;
-    mPixelFormat = GLenum::GL_INVALID_ENUM;
-    mNumElemBytes = 0;
-    if ( _format == PixelFormat::R8G8B8 )
+    internalPixelFormat_ = GLenum::GL_INVALID_ENUM;
+    pixelFormat_ = GLenum::GL_INVALID_ENUM;
+    numElemBytes_ = 0;
+    if ( format == PixelFormat::R8G8B8 )
     {
-      mInternalPixelFormat = GL_RGB8;
-      mPixelFormat = GL_BGR;
-      mNumElemBytes = 3;
+      internalPixelFormat_ = GL_RGB8;
+      pixelFormat_ = GL_BGR;
+      numElemBytes_ = 3;
     }
-    else if ( _format == PixelFormat::R8G8B8A8 )
+    else if ( format == PixelFormat::R8G8B8A8 )
     {
-      mInternalPixelFormat = GL_RGBA8;
-      mPixelFormat = GL_BGRA;
-      mNumElemBytes = 4;
+      internalPixelFormat_ = GL_RGBA8;
+      pixelFormat_ = GL_BGRA;
+      numElemBytes_ = 4;
     }
     else
     {
       NEKO_EXCEPT( "format not support" );
     }
 
-    mWidth = _width;
-    mHeight = _height;
-    mDataSize = _width * _height * mNumElemBytes;
-    setUsage( _usage );
+    width_ = width;
+    height_ = height;
+    dataSize_ = width * height * numElemBytes_;
+    setUsage( usage );
     //MYGUI_PLATFORM_ASSERT(mUsage, "usage format not support");
 
-    mOriginalFormat = _format;
-    mOriginalUsage = _usage;
+    originalFormat_ = format;
+    originalUsage_ = usage;
 
     // Set unpack alignment to one byte
     int alignment = 0;
@@ -163,92 +154,83 @@ namespace MyGUI {
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
     // создаем тукстуру
-    glGenTextures( 1, &mTextureId );
-    glBindTexture( GL_TEXTURE_2D, mTextureId );
+    glGenTextures( 1, &id_ );
+    glBindTexture( GL_TEXTURE_2D, id_ );
     // Set texture parameters
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-    glTexImage2D(
-      GL_TEXTURE_2D,
-      0,
-      mInternalPixelFormat,
-      mWidth,
-      mHeight,
-      0,
-      mPixelFormat,
-      GL_UNSIGNED_BYTE,
-      (GLvoid*)_data );
+    glTexImage2D( GL_TEXTURE_2D, 0, internalPixelFormat_, width_, height_, 0, pixelFormat_, GL_UNSIGNED_BYTE, (GLvoid*)data );
     glBindTexture( GL_TEXTURE_2D, 0 );
 
     // Restore old unpack alignment
     glPixelStorei( GL_UNPACK_ALIGNMENT, alignment );
 
-    if ( !_data )
+    if ( !data )
     {
       //создаем текстурнный буфер
-      glGenBuffers( 1, &mPboID );
-      glBindBuffer( GL_PIXEL_UNPACK_BUFFER, mPboID );
-      glBufferData( GL_PIXEL_UNPACK_BUFFER, mDataSize, nullptr, mUsage );
+      glGenBuffers( 1, &pbo_ );
+      glBindBuffer( GL_PIXEL_UNPACK_BUFFER, pbo_ );
+      glBufferData( GL_PIXEL_UNPACK_BUFFER, dataSize_, nullptr, usage_ );
       glBindBuffer( GL_PIXEL_UNPACK_BUFFER, 0 );
     }
   }
 
   void NekoTexture::destroy()
   {
-    if ( mRenderTarget != nullptr )
+    if ( target_ != nullptr )
     {
-      delete mRenderTarget;
-      mRenderTarget = nullptr;
+      delete target_;
+      target_ = nullptr;
     }
 
-    if ( mTextureId != 0 )
+    if ( id_ != 0 )
     {
-      glDeleteTextures( 1, &mTextureId );
-      mTextureId = 0;
+      glDeleteTextures( 1, &id_ );
+      id_ = 0;
     }
-    if ( mPboID != 0 )
+    if ( pbo_ != 0 )
     {
-      glDeleteBuffers( 1, &mPboID );
-      mPboID = 0;
+      glDeleteBuffers( 1, &pbo_ );
+      pbo_ = 0;
     }
 
-    mWidth = 0;
-    mHeight = 0;
-    mLock = false;
-    mPixelFormat = GLenum::GL_INVALID_ENUM;
-    mDataSize = 0;
-    mUsage = GLenum::GL_INVALID_ENUM;
-    mBuffer = nullptr;
-    mInternalPixelFormat = GLenum::GL_INVALID_ENUM;
-    mAccess = GLenum::GL_INVALID_ENUM;
-    mNumElemBytes = 0;
-    mOriginalFormat = PixelFormat::Unknow;
-    mOriginalUsage = TextureUsage::Default;
+    width_ = 0;
+    height_ = 0;
+    lock_ = false;
+    pixelFormat_ = GLenum::GL_INVALID_ENUM;
+    dataSize_ = 0;
+    usage_ = GLenum::GL_INVALID_ENUM;
+    buffer_ = nullptr;
+    internalPixelFormat_ = GLenum::GL_INVALID_ENUM;
+    access_ = GLenum::GL_INVALID_ENUM;
+    numElemBytes_ = 0;
+    originalFormat_ = PixelFormat::Unknow;
+    originalUsage_ = TextureUsage::Default;
   }
 
-  void* NekoTexture::lock( TextureUsage _access )
+  void* NekoTexture::lock( TextureUsage access )
   {
-    assert( mTextureId );
+    assert( id_ );
 
-    if ( _access == TextureUsage::Read )
+    if ( access == TextureUsage::Read )
     {
-      glBindTexture( GL_TEXTURE_2D, mTextureId );
+      glBindTexture( GL_TEXTURE_2D, id_ );
 
-      mBuffer = new unsigned char[mDataSize];
-      glGetTexImage( GL_TEXTURE_2D, 0, mPixelFormat, GL_UNSIGNED_BYTE, mBuffer );
+      buffer_ = new unsigned char[dataSize_];
+      glGetTexImage( GL_TEXTURE_2D, 0, pixelFormat_, GL_UNSIGNED_BYTE, buffer_ );
 
-      mLock = false;
+      lock_ = false;
 
-      return mBuffer;
+      return buffer_;
     }
 
     // bind the texture
-    glBindTexture( GL_TEXTURE_2D, mTextureId );
+    glBindTexture( GL_TEXTURE_2D, id_ );
 
     // bind the PBO
-    glBindBuffer( GL_PIXEL_UNPACK_BUFFER, mPboID );
+    glBindBuffer( GL_PIXEL_UNPACK_BUFFER, pbo_ );
 
     // Note that glMapBuffer() causes sync issue.
     // If GPU is working with this buffer, glMapBuffer() will wait(stall)
@@ -257,63 +239,63 @@ namespace MyGUI {
     // If you do that, the previous data in PBO will be discarded and
     // glMapBuffer() returns a new allocated pointer immediately
     // even if GPU is still working with the previous data.
-    glBufferData( GL_PIXEL_UNPACK_BUFFER, mDataSize, nullptr, mUsage );
+    glBufferData( GL_PIXEL_UNPACK_BUFFER, dataSize_, nullptr, usage_ );
 
     // map the buffer object into client's memory
-    mBuffer = (GLubyte*)glMapBuffer( GL_PIXEL_UNPACK_BUFFER, mAccess );
-    if ( !mBuffer )
+    buffer_ = (GLubyte*)glMapBuffer( GL_PIXEL_UNPACK_BUFFER, access_ );
+    if ( !buffer_ )
     {
       glBindBuffer( GL_PIXEL_UNPACK_BUFFER, 0 );
       glBindTexture( GL_TEXTURE_2D, 0 );
       NEKO_EXCEPT( "Error texture lock" );
     }
 
-    mLock = true;
+    lock_ = true;
 
-    return mBuffer;
+    return buffer_;
   }
 
   void NekoTexture::unlock()
   {
-    if ( !mLock && mBuffer )
+    if ( !lock_ && buffer_ )
     {
-      delete[]( char* ) mBuffer;
-      mBuffer = nullptr;
+      delete[]( char* ) buffer_;
+      buffer_ = nullptr;
 
       glBindTexture( GL_TEXTURE_2D, 0 );
 
       return;
     }
 
-    assert( mLock );
+    assert( lock_ );
 
     // release the mapped buffer
     glUnmapBuffer( GL_PIXEL_UNPACK_BUFFER );
 
     // copy pixels from PBO to texture object
     // Use offset instead of ponter.
-    glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, mWidth, mHeight, mPixelFormat, GL_UNSIGNED_BYTE, nullptr );
+    glTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, width_, height_, pixelFormat_, GL_UNSIGNED_BYTE, nullptr );
 
     // it is good idea to release PBOs with ID 0 after use.
     // Once bound with 0, all pixel operations are back to normal ways.
     glBindBuffer( GL_PIXEL_UNPACK_BUFFER, 0 );
 
     glBindTexture( GL_TEXTURE_2D, 0 );
-    mBuffer = nullptr;
-    mLock = false;
+    buffer_ = nullptr;
+    lock_ = false;
   }
 
-  void NekoTexture::loadFromFile( const std::string& _filename )
+  void NekoTexture::loadFromFile( const std::string& filename )
   {
     destroy();
 
-    if ( mImageLoader )
+    if ( loader_ )
     {
       int width = 0;
       int height = 0;
       PixelFormat format = PixelFormat::Unknow;
 
-      void* data = mImageLoader->loadImage( width, height, format, _filename );
+      void* data = loader_->loadImage( width, height, format, filename );
       if ( data )
       {
         createManual( width, height, TextureUsage::Static | TextureUsage::Write, format, data );
@@ -324,66 +306,66 @@ namespace MyGUI {
 
   void NekoTexture::saveToFile( const std::string& _filename )
   {
-    if ( mImageLoader )
+    if ( loader_ )
     {
       void* data = lock( TextureUsage::Read );
-      mImageLoader->saveImage( mWidth, mHeight, mOriginalFormat, data, _filename );
+      loader_->saveImage( width_, height_, originalFormat_, data, _filename );
       unlock();
     }
   }
 
-  void NekoTexture::setShader( const std::string& _shaderName )
+  void NekoTexture::setShader( const std::string& shaderName )
   {
     NEKO_EXCEPT( "Mygui called setShader" );
-    mProgramId = 0; // NekoRenderManager::getInstance().getShaderProgramId( _shaderName );
+    programId_ = 0; // NekoRenderManager::getInstance().getShaderProgramId( _shaderName );
   }
 
   IRenderTarget* NekoTexture::getRenderTarget()
   {
-    if ( mRenderTarget == nullptr )
-      mRenderTarget = new NekoRTTexture( mTextureId );
+    if ( target_ == nullptr )
+      target_ = new NekoRTTexture( id_ );
 
-    return mRenderTarget;
+    return target_;
   }
 
   unsigned int NekoTexture::getTextureId() const
   {
-    return mTextureId;
+    return id_;
   }
 
   unsigned int NekoTexture::getShaderId() const
   {
-    return mProgramId;
+    return programId_;
   }
 
   int NekoTexture::getWidth() const
   {
-    return mWidth;
+    return width_;
   }
 
   int NekoTexture::getHeight() const
   {
-    return mHeight;
+    return height_;
   }
 
   bool NekoTexture::isLocked() const
   {
-    return mLock;
+    return lock_;
   }
 
   PixelFormat NekoTexture::getFormat() const
   {
-    return mOriginalFormat;
+    return originalFormat_;
   }
 
   TextureUsage NekoTexture::getUsage() const
   {
-    return mOriginalUsage;
+    return originalUsage_;
   }
 
   size_t NekoTexture::getNumElemBytes() const
   {
-    return mNumElemBytes;
+    return numElemBytes_;
   }
 
 }

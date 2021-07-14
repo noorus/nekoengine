@@ -305,6 +305,15 @@ namespace neko {
       ::SleepEx( milliseconds, TRUE );
     }
 
+    inline bool getCursorPosition( const HWND window, POINT& position )
+    {
+      if ( !GetCursorPos( &position ) )
+        return false;
+      if ( !ScreenToClient( window, &position ) )
+        return false;
+      return true;
+    }
+
     //! UTF-8 to wide string conversion.
     inline wstring utf8ToWide( const utf8String& in ) throw()
     {

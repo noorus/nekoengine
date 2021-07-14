@@ -146,7 +146,10 @@
 #include <nil.h>
 
 // MyGUI
+#pragma warning( push )
+#pragma warning( disable: 4275 )
 #include <MYGUI/MyGUI.h>
+#pragma warning( pop )
 
 // Local types
 #include "neko_types.h"

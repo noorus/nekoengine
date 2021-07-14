@@ -184,6 +184,8 @@ namespace neko {
       program.uniforms_["model"] = glGetUniformLocation( program.id(), "model" );
       program.uniforms_["tex"] = glGetUniformLocation( program.id(), "tex" );
       program.uniforms_["yscale"] = glGetUniformLocation( program.id(), "yscale" );
+      //program.uniforms_["palette"] = glGetUniformLocation( program.id(), "palette" );
+      //program.uniforms_["paletteSize"] = glGetUniformLocation( program.id(), "paletteSize" );
     }
 
     utf8String Shaders::loadSource( const utf8String& filename )

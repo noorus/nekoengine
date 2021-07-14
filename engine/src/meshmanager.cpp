@@ -235,51 +235,6 @@ namespace neko {
     return move( ptr );
   }
 
-  class AttribWriter {
-  private:
-    struct Record {
-      GLenum type_;
-      GLsizei count_;
-      size_t size_;
-      bool normalize_;
-      Record( GLenum type, GLsizei count, size_t size, bool normalize = false )
-          : type_( type ), count_( count ), size_( size ), normalize_( normalize )
-      {
-      }
-    };
-    vector<Record> recs_;
-    GLsizei stride_;
-
-  public:
-    AttribWriter()
-        : stride_( 0 ) {}
-    inline GLsizei stride() const { return stride_; }
-    void add( GLenum type, GLsizei count, bool normalize = false )
-    {
-      GLsizei size = 0;
-      if ( type == GL_FLOAT )
-        size = ( count * sizeof( float ) );
-      else if ( type == GL_UNSIGNED_BYTE )
-        size = ( count * sizeof( uint8_t ) );
-      else
-        NEKO_EXCEPT( "Unsupported vertex attribute type in writer" );
-
-      recs_.emplace_back( type, count, size, normalize );
-      stride_ += size;
-    }
-    void write( GLuint handle )
-    {
-      GLuint ptr = 0;
-      for ( GLuint i = 0; i < recs_.size(); ++i )
-      {
-        glEnableVertexArrayAttrib( handle, i );
-        glVertexArrayAttribBinding( handle, i, 0 );
-        glVertexArrayAttribFormat( handle, i, recs_[i].count_, recs_[i].type_, recs_[i].normalize_ ? GL_TRUE : GL_FALSE, ptr );
-        ptr += (GLuint)recs_[i].size_;
-      }
-    }
-  };
-
   DynamicMeshPtr MeshManager::createDynamic( GLenum drawMode, VBOType vertexType, bool useIndices, bool mappable )
   {
     auto mesh = make_shared<DynamicMesh>( shared_from_this(), vertexType, drawMode, useIndices, mappable );

@@ -20,8 +20,8 @@ namespace neko {
   class Scripting;
   using ScriptingPtr = shared_ptr<Scripting>;
 
-  class Input;
-  using InputPtr = shared_ptr<Input>;
+  class GfxInput;
+  using GfxInputPtr = shared_ptr<GfxInput>;
 
   class Memory;
   using MemoryPtr = shared_ptr<Memory>;

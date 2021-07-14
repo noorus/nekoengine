@@ -67,24 +67,24 @@ namespace MyGUI {
     void _create();
 
   private:
-    std::string mName;
-    int mWidth;
-    int mHeight;
-    gl::GLenum mPixelFormat;
-    gl::GLenum mInternalPixelFormat;
-    gl::GLenum mUsage;
-    gl::GLenum mAccess;
-    size_t mNumElemBytes;
-    size_t mDataSize;
-    unsigned int mTextureId;
-    unsigned int mProgramId;
-    unsigned int mPboID;
-    bool mLock;
-    void* mBuffer;
-    PixelFormat mOriginalFormat;
-    TextureUsage mOriginalUsage;
-    NekoImageLoader* mImageLoader;
-    NekoRTTexture* mRenderTarget;
+    std::string name_;
+    int width_;
+    int height_;
+    gl::GLenum pixelFormat_;
+    gl::GLenum internalPixelFormat_;
+    gl::GLenum usage_;
+    gl::GLenum access_;
+    size_t numElemBytes_;
+    size_t dataSize_;
+    unsigned int id_;
+    unsigned int programId_;
+    unsigned int pbo_;
+    bool lock_;
+    void* buffer_;
+    PixelFormat originalFormat_;
+    TextureUsage originalUsage_;
+    NekoImageLoader* loader_;
+    NekoRTTexture* target_;
   };
 
   class NekoVertexBuffer : public IVertexBuffer
@@ -102,11 +102,15 @@ namespace MyGUI {
 
   private:
     void resize();
+    void create();
+    void destroy();
 
   private:
     neko::Renderer* renderer_;
-    neko::DynamicMeshPtr mesh_;
+    unique_ptr<neko::SmarterBuffer<MyGUI::Vertex>> buffer_;
     size_t needVertexCount_;
+    size_t vertexCount_;
+    gl::GLuint vao_;
   };
 
   class NekoRenderManager : public RenderManager, public IRenderTarget {
