@@ -70,6 +70,12 @@
     <Filter Include="Source Files\input">
       <UniqueIdentifier>{55fc5b6b-79c5-435f-8d92-572fda3e9c73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gfx\gui">
+      <UniqueIdentifier>{1e570fc3-0704-4d46-8ab2-8fbe35b5deec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gfx\gui">
+      <UniqueIdentifier>{e6ff7844-2725-477a-9973-e5fd4fc0718e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -206,6 +212,24 @@
     </ClCompile>
     <ClCompile Include="src\input.cpp">
       <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoDataManager.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoPlatform.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoRenderManager.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoRTTexture.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoTexture.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoVertexBuffer.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -356,6 +380,12 @@
     <ClInclude Include="include\input.h">
       <Filter>Header Files\input</Filter>
     </ClInclude>
+    <ClInclude Include="include\MyGUI_NekoPlatform.h">
+      <Filter>Header Files\gfx\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MyGUI_NekoRTTexture.h">
+      <Filter>Header Files\gfx\gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="manifest\neko.manifest">
@@ -392,6 +422,12 @@
     </None>
     <None Include="..\bin\script\math.js">
       <Filter>Scripts</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\mygui3d.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\mygui3d.vert">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

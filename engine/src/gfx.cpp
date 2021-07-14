@@ -8,6 +8,7 @@
 #include "fontmanager.h"
 #include "console.h"
 #include "messaging.h"
+#include "lodepng.h"
 
 namespace neko {
 
@@ -57,7 +58,11 @@ namespace neko {
 
     auto gfx = static_cast<Gfx*>( const_cast<void*>( userParam ) );
 
-    if ( id == 1281 || id == 1285 || id == 0 )
+    if ( id == 0
+      || id == 1281
+      || id == 1285
+      // || id == 131076
+      )
       DebugBreak();
 
     if ( !gfx )
@@ -150,6 +155,45 @@ namespace neko {
     resize( window_->getSize().x, window_->getSize().y );
 
     renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
+
+    guiPlatform_ = make_unique<MyGUI::NekoPlatform>();
+
+    guiPlatform_->getDataManagerPtr()->setDataPath( "data\\gui" );
+
+    guiPlatform_->initialise( this, "mygui.log" );
+
+    gui_ = make_unique<MyGUI::Gui>();
+    gui_->initialise( "MyGUI_Core.xml" );
+
+    MyGUI::RenderManager::getInstance().setViewSize( window_->getSize().x, window_->getSize().y );
+
+    MyGUI::PointerManager::getInstance().setVisible( true );
+    MyGUI::InputManager::getInstance().injectMouseMove( 100, 100, 0 );
+
+    MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
+    button->setCaption( "exit" );
+  }
+
+  void* Gfx::loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename )
+  {
+    vector<uint8_t> input, output;
+    unsigned int wo, ho;
+    platform::FileReader( "data\\gui\\" + filename ).readFullVector( input );
+
+    if ( lodepng::decode( output, wo, ho, input.data(), input.size(), LCT_RGBA, 8 ) != 0 )
+      NEKO_EXCEPT( "Lodepng image load failed" );
+
+    width = wo;
+    height = ho;
+    format = MyGUI::PixelFormat::R8G8B8A8;
+    auto outbuf = new uint8_t[output.size()];
+    memcpy( outbuf, output.data(), output.size() );
+    return outbuf;
+  }
+
+  void Gfx::saveImage( int width, int height, MyGUI::PixelFormat format, void* texture, const utf8String& filename )
+  {
+    //
   }
 
   void Gfx::preUpdate( GameTime time )
@@ -167,6 +211,9 @@ namespace neko {
     camera_->setViewport( realResolution );
 
     glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
+
+    if ( guiPlatform_ )
+      MyGUI::RenderManager::getInstance().setViewSize( (int)width, (int)height );
   }
 
   void Gfx::processEvents()
@@ -216,7 +263,7 @@ namespace neko {
       window_->setActive( true );
     }
 
-    renderer_->draw( camera_ );
+    renderer_->draw( camera_, guiPlatform_.get() );
 
     window_->display();
   }
@@ -235,9 +282,23 @@ namespace neko {
 
   void Gfx::shutdown()
   {
+    if ( gui_ )
+    {
+      gui_->shutdown();
+      gui_.reset();
+    }
+
+    if ( guiPlatform_ )
+    {
+      guiPlatform_->shutdown();
+      guiPlatform_.reset();
+    }
+
     camera_.reset();
 
     platform::RenderWindowHandler::get().setWindow( nullptr, nullptr );
+
+    renderer_.reset();
 
     window_->close();
     window_.reset();

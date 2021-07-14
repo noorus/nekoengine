@@ -31,7 +31,7 @@ namespace neko {
   {
     if ( !vao_->uploaded_ )
       return;
-    vao_->draw( drawMode_, size_ );
+    vao_->draw( drawMode_ );
   }
 
   StaticMesh::~StaticMesh()

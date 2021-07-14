@@ -5,6 +5,8 @@
 #include "neko_platform.h"
 #include "messaging.h"
 
+#include <MyGUI_NekoPlatform.h>
+
 namespace neko {
 
   constexpr int32_t c_glVersion[2] = { 4, 6 };
@@ -15,7 +17,7 @@ namespace neko {
     Viewport( size_t width, size_t height ): size_( width, height ) {}
   };
 
-  class Gfx: public platform::RenderWindowEventRecipient {
+  class Gfx: public platform::RenderWindowEventRecipient, public MyGUI::NekoImageLoader {
   public:
     struct Info {
       string renderer_;
@@ -42,6 +44,8 @@ namespace neko {
     RendererPtr renderer_;
     Viewport viewport_;
     Image lastCapture_;
+    unique_ptr<MyGUI::NekoPlatform> guiPlatform_;
+    unique_ptr<MyGUI::Gui> gui_;
     void preInitialize();
     void printInfo();
     void resize( size_t width, size_t height );
@@ -53,6 +57,9 @@ namespace neko {
     static void openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity,
       GLsizei length, const GLchar* message, const void* userParam );
     void setOpenGLDebugLogging( const bool enable );
+    // MyGUI::OpenGL3ImageLoader implementation
+    void* loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename ) override;
+    void saveImage( int width, int height, MyGUI::PixelFormat format, void* texture, const utf8String& filename ) override;
   public:
     void postInitialize();
     Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
@@ -61,6 +68,7 @@ namespace neko {
     void preUpdate( GameTime time );
     void tick( GameTime tick, GameTime time );
     void postUpdate( GameTime delta, GameTime tick );
+    inline Renderer& renderer() throw() { return *( renderer_.get() ); }
     void shutdown();
     void restart();
     void jsRestart();

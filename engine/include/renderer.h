@@ -9,6 +9,11 @@
 #include "meshmanager.h"
 #include "modelmanager.h"
 #include "scripting.h"
+#include "shaders.h"
+
+namespace MyGUI {
+  class NekoPlatform;
+}
 
 namespace neko {
 
@@ -64,10 +69,12 @@ namespace neko {
     void preInitialize();
     void initialize( size_t width, size_t height );
     MaterialPtr createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
+    inline MeshManager& meshes() throw() { return *( meshes_.get() ); }
     void prepare( GameTime time );
     void uploadTextures();
     void jsRestart();
-    void draw( CameraPtr camera );
+    inline shaders::Shaders& shaders() throw() { return *( shaders_.get() ); }
+    void draw( CameraPtr camera, MyGUI::NekoPlatform* gui );
     void reset( size_t width, size_t height );
     ~Renderer();
   };
