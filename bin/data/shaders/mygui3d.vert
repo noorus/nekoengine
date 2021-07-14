@@ -5,8 +5,8 @@ out gl_PerVertex{
 };
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec2 vboTexcoord;
-layout(location = 2) in vec4 vboColor;
+layout(location = 1) in vec4 vboColor;
+layout(location = 2) in vec2 vboTexcoord;
 
 layout (std140, binding = 0) buffer World
 {
@@ -14,15 +14,16 @@ layout (std140, binding = 0) buffer World
   mat4 view;
 } world;
 
-uniform mat4 model;
+uniform float yscale;
 
-out vec2 texcoord;
 out vec4 color;
+out vec2 texcoord;
 
 void main()
 {
-  mat4 modelViewProjection = world.projection * world.view * model;
-  gl_Position = modelViewProjection * vec4(position, 1.0);
   texcoord = vboTexcoord;
   color = vboColor;
+  vec4 vpos = vec4(position, 1.0);
+  vpos.y *= yscale;
+  gl_Position = vpos;
 }

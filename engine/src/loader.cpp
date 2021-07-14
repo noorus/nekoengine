@@ -115,7 +115,7 @@ namespace neko {
         }
         else
         {
-          NEKO_EXCEPT( "Unsupport/unimplemented image format in load teture task" );
+          NEKO_EXCEPT( "Unsupport image format in load texture task" );
         }
       }
       else if ( task.type_ == LoadTask::Load_Fontface )

@@ -145,6 +145,9 @@
 // Nil
 #include <nil.h>
 
+// MyGUI
+#include <MYGUI/MyGUI.h>
+
 // Local types
 #include "neko_types.h"
 #include "nekomath.h"

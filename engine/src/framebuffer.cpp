@@ -72,14 +72,21 @@ namespace neko {
   void Framebuffer::begin()
   {
     const GLfloat clearDepth = 0.0f;
+
+    glGetIntegerv( GL_VIEWPORT, savedViewport_ );
+
     glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
     glClearNamedFramebufferfv( handle_, GL_COLOR, 0, glm::value_ptr( clearColor_ ) );
     glClearNamedFramebufferfv( handle_, GL_DEPTH, 0, &clearDepth );
+
+    glViewport( 0, 0, (GLsizei)width_, (GLsizei)height_ );
   }
 
   void Framebuffer::end()
   {
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+
+    glViewport( savedViewport_[0], savedViewport_[1], savedViewport_[2], savedViewport_[3] );
   }
 
   Framebuffer::~Framebuffer()

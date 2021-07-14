@@ -79,8 +79,8 @@ namespace neko {
     u_getVersion( icuVersion );
     console_->printf( Console::srcEngine, "Using ICU version %d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
 
-    tanklib_.load( this );
-    tanklib_.engine_->initialize( c_discordAppId, c_steamAppId );
+    //tanklib_.load( this );
+    //tanklib_.engine_->initialize( c_discordAppId, c_steamAppId );
 
     loader_ = make_shared<ThreadedLoader>();
     loader_->start();
@@ -113,7 +113,7 @@ namespace neko {
     scripting_->initialize();
     console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
 
-    tanklib_.engine_->update();
+    //tanklib_.engine_->update();
 
     input_->postInitialize();
 
@@ -196,9 +196,9 @@ namespace neko {
     console_->printf( Console::srcEngine, "Logic: targeting %.02f FPS, logic step %.02fms, max frame time %I64uus, max sleep %ims",
       (float)c_logicFPS, static_cast<float>( c_logicStep * 1000.0 ), c_logicMaxFrameMicroseconds, maxSleepytimeMs );
 
-    tanklib_.engine_->update();
+    // tanklib_.engine_->update();
 
-    auto& inst = tanklib_.engine_->steamInstallation();
+    // auto& inst = tanklib_.engine_->steamInstallation();
 
     while ( signal_ != Signal_Stop )
     {
@@ -237,7 +237,7 @@ namespace neko {
         }
       }
 
-      tanklib_.engine_->update();
+      //tanklib_.engine_->update();
 
       scripting_->postUpdate( delta, time_ );
 
@@ -291,7 +291,7 @@ namespace neko {
     messaging_.reset();
     Locator::provideMessaging( MessagingPtr() );
 
-    tanklib_.unload();
+    // tanklib_.unload();
 
     console_->resetEngine();
   }

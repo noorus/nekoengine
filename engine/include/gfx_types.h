@@ -38,6 +38,7 @@ namespace neko {
     vec3 position;
     vec2 texcoord;
     vec4 color;
+    VertexText3D(): position( 0.0f, 0.0f, 0.0f ), texcoord( 0.0f, 0.0f ), color( 0.0f, 0.0f, 0.0f, 0.0f ) {}
     VertexText3D( float x_, float y_, float z_, float s_, float t_, float r_, float g_, float b_, float a_ ):
       position( x_, y_, z_ ), texcoord( s_, t_ ), color( r_, g_, b_, a_ ) {}
     VertexText3D( vec3 pos, vec2 texc, vec4 clr ): position( move( pos ) ), texcoord( move( texc ) ), color( move( clr ) ) {}

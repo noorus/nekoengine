@@ -52,7 +52,8 @@ namespace neko {
       //createSimplePipeline( "default2d", "default2d.vert", "default2d.frag" );
       createSimplePipeline( "default3d", "default3d.vert", "default3d.frag" );
       createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag" );
-      //createSimplePipeline( "text3d", "text3d.vert", "text3d.frag" );
+      createSimplePipeline( "text3d", "text3d.vert", "text3d.frag" );
+      createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag" );
     }
 
     // Shader
@@ -182,6 +183,7 @@ namespace neko {
 
       program.uniforms_["model"] = glGetUniformLocation( program.id(), "model" );
       program.uniforms_["tex"] = glGetUniformLocation( program.id(), "tex" );
+      program.uniforms_["yscale"] = glGetUniformLocation( program.id(), "yscale" );
     }
 
     utf8String Shaders::loadSource( const utf8String& filename )

@@ -288,8 +288,8 @@ namespace neko {
       }
       virtual ~DynamicObjectWrapper()
       {
-        //OutputDebugStringA( __FUNCTION__ "\r\n" );
-        //reset();
+        // OutputDebugStringA( __FUNCTION__ "\r\n" );
+        // reset();
       }
       inline V8Object handle()
       {

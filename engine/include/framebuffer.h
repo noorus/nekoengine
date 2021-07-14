@@ -23,6 +23,7 @@ namespace neko {
     TexturePtr colorBuffer_;
     RenderbufferPtr depthBuffer_;
     vec4 clearColor_;
+    int savedViewport_[4];
     mutable bool available_;
   public:
     Framebuffer() = delete;

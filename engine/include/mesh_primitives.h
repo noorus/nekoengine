@@ -4,6 +4,7 @@
 #include "gfx_types.h"
 #include "utilities.h"
 #include "neko_pooledtypes.h"
+#include <MYGUI/MyGUI_VertexData.h>
 
 namespace neko {
 
@@ -11,6 +12,7 @@ namespace neko {
     VBO_3D, //!< 0: pos[3], 1: texcoord[2]
     VBO_2D, //!< 0: pos[2], 1: texcoord[2]
     VBO_Text, //!< 0: pos[3], 1: texcoord[2], 2: color[4]
+    VBO_MyGUI, //!< 0: pos[3], 1: color[4], 1: texcoord[2]
     Max_VBOType
   };
 
@@ -31,22 +33,29 @@ namespace neko {
   //! A buffer of raw vertex data (of only one type), referenceable by an ID.
   class VBO {
   private:
-    std::variant<vector<Vertex2D>, vector<Vertex3D>, vector<VertexText3D>> store_;
+    std::variant<
+      vector<Vertex2D>,
+      vector<Vertex3D>,
+      vector<VertexText3D>,
+      vector<MyGUI::Vertex>
+    > store_;
   public:
     VBOType type_; //!< Vertex format
     GLuint id_; //!< GL name for this vbo
     bool uploaded_; //!< Has this been uploaded yet?
     bool dirty_; //!< Whether to just sub-update data
+    bool mappable_;
     MeshDataModifyHint hint_; //!< What usage hint to use
 
-    explicit VBO( const VBOType type ):
-      type_( type ), id_( 0 ), uploaded_( false ), dirty_( false ), hint_( MeshDataModifyHint::ModifyHint_Often )
+    explicit VBO( const VBOType type, bool mappable ):
+      type_( type ), id_( 0 ), uploaded_( false ), dirty_( false ), hint_( MeshDataModifyHint::ModifyHint_Often ), mappable_( mappable )
     {
       switch ( type_ )
       {
         case VBO_2D: store_ = vector<Vertex2D>(); break;
         case VBO_3D: store_ = vector<Vertex3D>(); break;
         case VBO_Text: store_ = vector<VertexText3D>(); break;
+        case VBO_MyGUI: store_ = vector<MyGUI::Vertex>(); break;
         default: NEKO_EXCEPT( "Bad VBO type" ); break;
       }
     }
@@ -61,7 +70,7 @@ namespace neko {
       store_ = move( other.store_ );
     }
 
-    inline void copy( const VBO& other )
+    inline void copy( VBO& other )
     {
       type_ = other.type_;
       id_ = other.id_;
@@ -74,44 +83,54 @@ namespace neko {
         pushVertices( other.v3d() );
       else if ( type_ == VBO_Text )
         pushVertices( other.vt3d() );
+      else if ( type_ == VBO_MyGUI )
+        pushVertices( other.guiv() );
     }
 
     inline uint64_t sizeInBytes() const
     {
       const auto typeSize = ( type_ == VBO_2D ? sizeof( Vertex2D )
         : type_ == VBO_3D ? sizeof( Vertex3D )
-        : sizeof( VertexText3D ) );
+        : type_ == VBO_Text ? sizeof( VertexText3D )
+        : sizeof( MyGUI::Vertex ) );
       return ( sizeof( VBO ) + size() * typeSize );
     }
 
-    inline const vector<Vertex2D>& v2d() const
+    inline vector<Vertex2D>& v2d()
     {
       assert( type_ == VBO_2D );
       return std::get<vector<Vertex2D>>( store_ );
     }
-    inline const vector<Vertex3D>& v3d() const
+    inline vector<Vertex3D>& v3d()
     {
       assert( type_ == VBO_3D );
       return std::get<vector<Vertex3D>>( store_ );
     }
-    inline const vector<VertexText3D>& vt3d() const
+    inline vector<VertexText3D>& vt3d()
     {
       assert( type_ == VBO_Text );
       return std::get<vector<VertexText3D>>( store_ );
+    }
+    inline vector<MyGUI::Vertex>& guiv()
+    {
+      assert( type_ == VBO_MyGUI );
+      return std::get<vector<MyGUI::Vertex>>( store_ );
     }
 
     inline const bool empty() const
     {
       return ( type_ == VBO_2D ? std::get<vector<Vertex2D>>( store_ ).empty()
         : type_ == VBO_3D ? std::get<vector<Vertex3D>>( store_ ).empty()
-        : std::get<vector<VertexText3D>>( store_ ).empty() );
+        : type_ == VBO_Text ? std::get<vector<VertexText3D>>( store_ ).empty()
+        : std::get<vector<MyGUI::Vertex>>( store_ ).empty() );
     }
 
     inline const bool size() const
     {
       return ( type_ == VBO_2D ? std::get<vector<Vertex2D>>( store_ ).size()
         : type_ == VBO_3D ? std::get<vector<Vertex3D>>( store_ ).size()
-        : std::get<vector<VertexText3D>>( store_ ).size() );
+        : type_ == VBO_Text ? std::get<vector<VertexText3D>>( store_ ).size()
+        : std::get<vector<MyGUI::Vertex>>( store_ ).size() );
     }
 
     inline void pushVertices( const vector<Vertex2D>& vertices )
@@ -138,11 +157,45 @@ namespace neko {
       dirty_ = true;
     }
 
+    inline void pushVertices( const vector<MyGUI::Vertex>& vertices )
+    {
+      assert( type_ == VBO_MyGUI );
+      auto& store = std::get<vector<MyGUI::Vertex>>( store_ );
+      store.insert( store.end(), vertices.begin(), vertices.end() );
+      dirty_ = true;
+    }
+
+    template <typename T>
+    inline T* lock()
+    {
+      auto& store = std::get<vector<T>>( store_ );
+      return (T*)store.data();
+    }
+
+    void unlock()
+    {
+      dirty_ = true;
+    }
+
+    inline void resize( size_t newSize )
+    {
+      if ( type_ == VBO_2D )
+        v2d().resize( newSize );
+      else if ( type_ == VBO_3D )
+        v3d().resize( newSize );
+      else if ( type_ == VBO_Text )
+        vt3d().resize( newSize );
+      else if ( type_ == VBO_MyGUI )
+        guiv().resize( newSize );
+      dirty_ = true;
+    }
+
     inline const size_t vertexCount() const
     {
       return ( type_ == VBO_2D ? std::get<vector<Vertex2D>>( store_ ).size()
         : type_ == VBO_3D ? std::get<vector<Vertex3D>>( store_ ).size()
-        : std::get<vector<VertexText3D>>( store_ ).size() );
+        : type_ == VBO_Text ? std::get<vector<VertexText3D>>( store_ ).size()
+        : std::get<vector<MyGUI::Vertex>>( store_ ).size() );
     }
   };
 
@@ -154,7 +207,7 @@ namespace neko {
   class EBO {
   public:
     vector<GLuint> storage_; //!< Contents of this ebo
-    GLuint id_; //!< GL"name for this ebo
+    GLuint id_; //!< GL name for this ebo
     bool uploaded_; //!< Has this been uploaded yet?
     bool dirty_; //!< Whether to just sub-update data
     MeshDataModifyHint hint_; //!< What usage hint to use
@@ -208,7 +261,7 @@ namespace neko {
     }
 
     void begin();
-    void draw( GLenum mode, GLsizei size );
+    void draw( GLenum mode, int count = 0 );
     bool valid() const
     {
       if ( !vbo_ || !vbo_->uploaded_ || vbo_->dirty_ )
@@ -229,12 +282,17 @@ namespace neko {
     EBOPtr ebo_;
     VAOPtr vao_;
     GLenum drawMode_;
+    struct Flags {
+      bool indices : 1;
+      bool mappable_ : 1;
+    } flags_;
   public:
-    DynamicMesh( MeshManagerPtr manager, VBOType vertexType, GLenum drawMode );
+    DynamicMesh( MeshManagerPtr manager, VBOType vertexType, GLenum drawMode, bool useIndices, bool mappable );
     ~DynamicMesh();
     void pushVertices( const vector<Vertex2D>& vertices );
     void pushVertices( const vector<Vertex3D>& vertices );
     void pushVertices( const vector<VertexText3D>& vertices );
+    void pushVertices( const vector<MyGUI::Vertex>& vertices );
     void pushIndices( const vector<GLuint>& indices );
     inline const size_t vertsCount() const
     {
@@ -247,15 +305,17 @@ namespace neko {
       return ebo_->storage_.size();
     }
     void begin();
-    void draw();
+    void draw( int count = 0 );
     template <typename T>
     inline void append( const vector<T>& vertices, vector<GLuint> indices )
     {
+      assert( vbo_ && ebo_ );
       auto base = (GLuint)vertsCount();
       pushVertices( vertices );
       std::for_each( indices.begin(), indices.end(), [base]( GLuint& n ) { n += base; } );
       pushIndices( indices );
     }
+    void resize( size_t newSize );
   };
 
   using DynamicMeshPtr = shared_ptr<DynamicMesh>;

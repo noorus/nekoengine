@@ -86,7 +86,7 @@ namespace neko {
       auto context = args.GetIsolate()->GetCurrentContext();
 
       JSMesh mesh;
-      mesh.vbo_ = make_shared<VBO>( VBOType::VBO_3D );
+      mesh.vbo_ = make_shared<VBO>( VBOType::VBO_3D, false );
       mesh.ebo_ = make_shared<EBO>();
       mesh.vao_.reset();
 
