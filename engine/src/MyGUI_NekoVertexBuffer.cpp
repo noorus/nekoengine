@@ -12,7 +12,7 @@ namespace MyGUI {
   const size_t c_vertexBufferReallocStep = ( 5 * VertexQuad::VertexCount );
 
   NekoVertexBuffer::NekoVertexBuffer( neko::Renderer* renderer ):
-  renderer_( renderer ), needVertexCount_( 0 ), vao_( 0 )
+  renderer_( renderer ), needVertexCount_( 0 ), vao_( 0 ), vertexCount_( 0 )
   {
   }
 

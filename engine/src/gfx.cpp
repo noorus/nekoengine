@@ -162,16 +162,19 @@ namespace neko {
     guiPlatform_->initialise( this, "mygui.log" );
 
     gui_ = make_unique<MyGUI::Gui>();
-    gui_->initialise( "MyGUI_Core.xml" );
+    gui_->initialise( "gui_core.xml" );
 
     guiPlatform_->getRenderManagerPtr()->setViewSize( window_->getSize().x, window_->getSize().y );
 
     MyGUI::PointerManager::getInstance().setVisible( true );
 
-    MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
-    button->setCaption( "exit" );
+    auto root = MyGUI::LayoutManager::getInstance().loadLayout( "login.layout" );
+    // MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
+    // button->setCaption( "exit" );
 
     input_->initialize( window_->getSystemHandle() );
+
+    window_->setMouseCursorVisible( false );
   }
 
   void* Gfx::loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename )

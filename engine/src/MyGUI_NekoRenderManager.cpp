@@ -31,7 +31,7 @@ namespace MyGUI {
 
   void NekoRenderManager::initialise( neko::Renderer* renderer, NekoImageLoader* imageloader )
   {
-    vertexFormat_ = VertexColourType::ColourABGR;
+    vertexFormat_ = VertexColourType::ColourARGB;
 
     update_ = false;
 

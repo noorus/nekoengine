@@ -13,10 +13,6 @@ namespace MyGUI {
   {
     utf8String filepath = dataPath_ + "\\" + name;
 
-    char asd[512];
-    sprintf_s( asd, 512, "NekoDataManager::getData: %s\r\n", filepath.c_str() );
-    OutputDebugStringA( asd );
-
     std::ifstream* stream = new std::ifstream();
     stream->open( filepath.c_str(), std::ios_base::binary );
 
