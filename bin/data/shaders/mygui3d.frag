@@ -9,5 +9,6 @@ out vec4 frag_colour;
 
 void main()
 {
-  frag_colour = texture2D(tex, texcoord) * color;
+  vec4 smpl = texture(tex, texcoord);
+  frag_colour = vec4(smpl.b, smpl.g, smpl.r, smpl.a) * color;
 }

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Resource" version="1.1">
+	<Resource type="ResourceImageSet" name="ArrowPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="128 128">
+			<Index name="Pointer" rate="0.1">
+				<Frame point="0 0" count="50"/>
+				<Frame point="128 0"/>
+				<Frame point="256 0"/>
+				<Frame point="384 0"/>
+				<Frame point="512 0"/>
+				<Frame point="640 0"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="DoorPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="128 128">
+			<Index name="Pointer" rate="0.1">
+				<Frame point="0 128" count="10"/>
+				<Frame point="128 128"/>
+				<Frame point="256 128"/>
+				<Frame point="384 128"/>
+				<Frame point="512 128" count="5"/>
+				<Frame point="384 128"/>
+				<Frame point="256 128"/>
+				<Frame point="128 128"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="HandPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="128 128">
+			<Index name="Pointer" rate="0.2">
+				<Frame point="0 256"/>
+				<Frame point="128 256"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="GrabPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="128 128">
+			<Index name="Pointer" rate="0.2">
+				<Frame point="0 384"/>
+				<Frame point="128 384"/>
+				<Frame point="256 384"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="TargetPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="128 128">
+			<Index name="Pointer">
+				<Frame point="0 512"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="RotatePointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="128 128">
+			<Index name="Pointer">
+				<Frame point="128 512"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="SwordPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="128 128">
+			<Index name="Pointer">
+				<Frame point="256 512"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="CannotPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="128 128">
+			<Index name="Pointer">
+				<Frame point="384 512"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="BeamPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="32 32">
+			<Index name="Pointer">
+				<Frame point="45 8"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="SizeLeftPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="32 32">
+			<Index name="Pointer">
+				<Frame point="122 48"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="SizeRightPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="32 32">
+			<Index name="Pointer">
+				<Frame point="160 48"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="SizeHorzPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="32 32">
+			<Index name="Pointer">
+				<Frame point="123 87"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="SizeVertPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="32 32">
+			<Index name="Pointer">
+				<Frame point="164 90"/>
+			</Index>
+		</Group>
+	</Resource>
+	<Resource type="ResourceImageSet" name="LinkPointerImage">
+		<Group name="Pointer" texture="gui_pointers.png" size="32 32">
+			<Index name="Pointer">
+				<Frame point="91 11"/>
+			</Index>
+		</Group>
+	</Resource>
+</MyGUI>

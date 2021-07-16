@@ -8,12 +8,6 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec4 vboColor;
 layout(location = 2) in vec2 vboTexcoord;
 
-layout (std140, binding = 0) buffer World
-{
-  mat4 projection;
-  mat4 view;
-} world;
-
 uniform float yscale;
 
 out vec4 color;
