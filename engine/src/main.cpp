@@ -2,6 +2,7 @@
 #include "neko_platform.h"
 #include "console.h"
 #include "consolewindow.h"
+#include "mesh_primitives.h"
 #include "engine.h"
 #include "locator.h"
 #include "memory.h"
@@ -131,6 +132,13 @@ int APIENTRY wWinMain( HINSTANCE instance, HINSTANCE previous, LPWSTR cmdline, i
   try
 #endif
   {
+    int argCount;
+    auto arguments = CommandLineToArgvW( cmdline, &argCount );
+    if ( !arguments )
+      return EXIT_FAILURE;
+
+    LocalFree( arguments );
+
     retval = runMain();
   }
 #ifndef _DEBUG

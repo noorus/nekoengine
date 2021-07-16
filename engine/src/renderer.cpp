@@ -229,7 +229,9 @@ namespace neko {
     shaders_->initialize();
 
     meshes_ = make_shared<MeshManager>( console_ );
+#ifndef NEKO_NO_SCRIPTING
     models_ = make_shared<ModelManager>( console_ );
+#endif
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
     builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
@@ -278,7 +280,9 @@ namespace neko {
     // Upload any new textures. Could this be parallellized?
     uploadTextures();
 
+#ifndef NEKO_NO_SCRIPTING
     meshes_->jsUpdate( director_->renderSync() );
+#endif
 
     // Delete all handles for which our buffer objects were already destroyed
     meshes_->destroyFreed();
@@ -289,7 +293,9 @@ namespace neko {
     meshes_->uploadEBOs();
     meshes_->uploadVAOs();
 
+#ifndef NEKO_NO_SCRIPTING
     models_->jsUpdate( director_->renderSync() );
+#endif
 
     if ( !g_testText )
     {
@@ -306,9 +312,11 @@ namespace neko {
 
   void Renderer::jsRestart()
   {
+#ifndef NEKO_NO_SCRIPTING
     director_->renderSync().resetFromRenderer();
     models_->jsReset();
     meshes_->jsReset();
+#endif
   }
 
   //! Called by Texture::Texture()
@@ -434,6 +442,7 @@ namespace neko {
 
     // FIXME ridiculously primitive
     // Also, investigate glMultiDrawArraysIndirect
+#ifndef NEKO_NO_SCRIPTING
     if ( models_ )
     {
       for ( auto& modelptr : models_->models() )
@@ -465,6 +474,7 @@ namespace neko {
         mesh->mesh().vao_->draw( GL_TRIANGLES );
       }
     }
+#endif
 
     if ( g_testText && g_textAdded )
     {
@@ -545,7 +555,10 @@ namespace neko {
 
     g_framebuf.reset();
 
+#ifndef NEKO_NO_SCRIPTING
     models_->teardown();
+#endif
+
     meshes_->teardown();
 
     meshes_->destroyFreed();

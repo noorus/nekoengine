@@ -3,6 +3,7 @@
 #include "gfx_types.h"
 #include "forwards.h"
 #include "neko_exception.h"
+#include "mesh_primitives.h"
 
 namespace neko {
 

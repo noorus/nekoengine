@@ -54,7 +54,9 @@ namespace neko {
     ConsolePtr console_;
     //GfxPtr gfx_;
     ThreadedRendererPtr renderer_;
+#ifndef NEKO_NO_SCRIPTING
     ScriptingPtr scripting_;
+#endif
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
@@ -85,7 +87,9 @@ namespace neko {
     inline ConsolePtr console() throw() { return console_; }
     //inline GfxPtr gfx() throw() { return gfx_; }
     //inline InputPtr input() throw() { return input_; }
+#ifndef NEKO_NO_SCRIPTING
     inline ScriptingPtr scripting() throw() { return scripting_; }
+#endif
     inline GameTime time() const throw() { return time_; }
     inline ThreadedLoaderPtr loader() throw() { return loader_; }
     inline FontManagerPtr fonts() throw() { return fonts_; }

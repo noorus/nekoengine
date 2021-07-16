@@ -7,10 +7,13 @@
 #include "mesh_primitives.h"
 #include "js_mesh.h"
 #include "scripting.h"
+#include "director.h"
 
 namespace neko {
 
+#ifndef NEKO_NO_SCRIPTING
   using MeshMap = map<size_t, js::Mesh*>;
+#endif
 
   class MeshManager: public enable_shared_from_this<MeshManager> {
   private:
@@ -22,12 +25,17 @@ namespace neko {
     vector<GLuint> freeBuffers_;
     DynamicMeshVector dynamics_;
     StaticMeshVector statics_;
+#ifndef NEKO_NO_SCRIPTING
     MeshMap meshes_;
     void addJSMesh( js::Mesh* mesh );
     void removeJSMesh( js::Mesh* mesh );
+#endif
   public:
     MeshManager( ConsolePtr console ): console_( move( console ) ) {}
+#ifndef NEKO_NO_SCRIPTING
     void jsUpdate( RenderSyncContext& renderCtx );
+    void jsReset();
+#endif
     VBOPtr pushVBO( const vector<Vertex3D>& vertices );
     VBOPtr pushVBO( const vector<Vertex2D>& vertices );
     VBOPtr pushVBO( const vector<VertexText3D>& vertices );
@@ -48,7 +56,6 @@ namespace neko {
     DynamicMeshPtr createDynamic( GLenum drawMode, VBOType vertexType, bool useIndices, bool mappable );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices );
-    void jsReset();
     void teardown();
   };
 

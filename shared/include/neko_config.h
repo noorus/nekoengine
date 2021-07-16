@@ -14,3 +14,6 @@
 
 // Set this to use doubles for all math primitives. Otherwise using floats.
 #undef NEKO_MATH_DOUBLE
+
+// Set this to disable V8 entirely.
+#define NEKO_NO_SCRIPTING

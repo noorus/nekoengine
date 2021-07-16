@@ -58,7 +58,9 @@ namespace neko {
     FontManagerPtr fonts_;
     shaders::ShadersPtr shaders_;
     MeshManagerPtr meshes_;
+#ifndef NEKO_NO_SCRIPTING
     ModelManagerPtr models_;
+#endif
     platform::RWLock loadLock_;
     MaterialVector materials_;
     DirectorPtr director_;

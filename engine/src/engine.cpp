@@ -108,16 +108,20 @@ namespace neko {
     input_->initialize();
     console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );*/
 
+#ifndef NEKO_NO_SCRIPTING
     timer.start();
     scripting_ = make_shared<Scripting>( shared_from_this() );
     scripting_->initialize();
     console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
+#endif
 
     //tanklib_.engine_->update();
 
     //input_->postInitialize();
 
+#ifndef NEKO_NO_SCRIPTING
     scripting_->postInitialize();
+#endif
   }
 
   void Engine::triggerFatalError( FatalError error )
@@ -174,13 +178,17 @@ namespace neko {
 
   void Engine::restart()
   {
+#ifndef NEKO_NO_SCRIPTING
     scripting_->shutdown();
+#endif
     //input_->shutdown();
     renderer_->restart();
     //input_->initialize();
     //input_->postInitialize();
+#ifndef NEKO_NO_SCRIPTING
     scripting_->initialize();
     scripting_->postInitialize();
+#endif
   }
 
   void Engine::run()
@@ -220,7 +228,9 @@ namespace neko {
       }
 
       //input_->preUpdate( time_ );
+#ifndef NEKO_NO_SCRIPTING
       scripting_->preUpdate( time_ );
+#endif
       fonts_->prepare( time_ );
       //gfx_->preUpdate( time_ );
 
@@ -229,7 +239,9 @@ namespace neko {
         accumulator += delta;
         while ( accumulator >= c_logicStep )
         {
+#ifndef NEKO_NO_SCRIPTING
           scripting_->tick( c_logicStep, time_ );
+#endif
           messaging_->tick( c_logicStep, time_ );
           //gfx_->tick( cLogicStep, time_ );
           time_ += c_logicStep;
@@ -241,7 +253,9 @@ namespace neko {
 
       //tanklib_.engine_->update();
 
+#ifndef NEKO_NO_SCRIPTING
       scripting_->postUpdate( delta, time_ );
+#endif
 
       if ( delta > 0.0 && signal_ != Signal_Stop )
       {
@@ -268,7 +282,9 @@ namespace neko {
 
   void Engine::shutdown()
   {
+#ifndef NEKO_NO_SCRIPTING
     scripting_.reset();
+#endif
 
     //if ( input_ )
     //  input_->shutdown();

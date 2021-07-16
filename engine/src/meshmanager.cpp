@@ -51,6 +51,8 @@ namespace neko {
     vaos_.erase( std::remove( vaos_.begin(), vaos_.end(), move( vao ) ), vaos_.end() );
   }
 
+#ifndef NEKO_NO_SCRIPTING
+
   void MeshManager::addJSMesh( js::Mesh* mesh )
   {
     auto& inmesh = mesh->mesh();
@@ -114,6 +116,8 @@ namespace neko {
     }
     meshes_.clear();
   }
+
+#endif
 
   // MeshManager: VBOs
 
@@ -393,7 +397,9 @@ namespace neko {
 
   void MeshManager::teardown()
   {
+#ifndef NEKO_NO_SCRIPTING
     jsReset();
+#endif
     dynamics_.clear();
     statics_.clear();
   }

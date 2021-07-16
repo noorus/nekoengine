@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#ifndef NEKO_NO_SCRIPTING
+
 #include "gfx_types.h"
 #include "modelmanager.h"
 #include "renderer.h"
@@ -60,3 +62,5 @@ namespace neko {
   }
 
 }
+
+#endif

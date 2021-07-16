@@ -1,4 +1,6 @@
 #pragma once
+#ifndef NEKO_NO_SCRIPTING
+
 #include "subsystem.h"
 #include "forwards.h"
 #include "gfx_types.h"
@@ -29,3 +31,5 @@ namespace neko {
   using ModelManagerPtr = shared_ptr<ModelManager>;
 
 }
+
+#endif

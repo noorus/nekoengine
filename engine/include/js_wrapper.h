@@ -1,4 +1,6 @@
 #pragma once
+#ifndef NEKO_NO_SCRIPTING
+
 #include "neko_types.h"
 #include "neko_exception.h"
 #include "forwards.h"
@@ -317,3 +319,5 @@ namespace neko {
   }
 
 }
+
+#endif
