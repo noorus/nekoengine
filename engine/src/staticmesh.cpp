@@ -6,14 +6,29 @@
 namespace neko {
 
   StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts ):
-    manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)verts.size() )
+  manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)verts.size() )
   {
     vbo_ = move( manager_->pushVBO( move( verts ) ) );
     vao_ = manager_->pushVAO( vbo_ );
   }
 
   StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices ):
-    manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)indices.size() )
+  manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)indices.size() )
+  {
+    vbo_ = move( manager_->pushVBO( move( verts ) ) );
+    ebo_ = move( manager_->pushEBO( move( indices ) ) );
+    vao_ = manager_->pushVAO( vbo_, ebo_ );
+  }
+
+  StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex3D> verts ):
+  manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)verts.size() )
+  {
+    vbo_ = move( manager_->pushVBO( move( verts ) ) );
+    vao_ = manager_->pushVAO( vbo_ );
+  }
+
+  StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex3D> verts, vector<GLuint> indices ):
+  manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)indices.size() )
   {
     vbo_ = move( manager_->pushVBO( move( verts ) ) );
     ebo_ = move( manager_->pushEBO( move( indices ) ) );

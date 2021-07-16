@@ -260,6 +260,20 @@ namespace neko {
     return move( mesh );
   }
 
+  StaticMeshPtr MeshManager::createStatic( GLenum drawMode, vector<Vertex3D> verts )
+  {
+    auto mesh = make_shared<StaticMesh>( shared_from_this(), drawMode, move( verts ) );
+    statics_.push_back( mesh );
+    return move( mesh );
+  }
+
+  StaticMeshPtr MeshManager::createStatic( GLenum drawMode, vector<Vertex3D> verts, vector<GLuint> indices )
+  {
+    auto mesh = make_shared<StaticMesh>( shared_from_this(), drawMode, move( verts ), move( indices ) );
+    statics_.push_back( mesh );
+    return move( mesh );
+  }
+
   void MeshManager::destroyFreed()
   {
     glDeleteVertexArrays( (GLsizei)freeVaos_.size(), freeVaos_.data() );

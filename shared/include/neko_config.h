@@ -16,4 +16,4 @@
 #undef NEKO_MATH_DOUBLE
 
 // Set this to disable V8 entirely.
-#define NEKO_NO_SCRIPTING
+#undef NEKO_NO_SCRIPTING

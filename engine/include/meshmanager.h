@@ -56,6 +56,8 @@ namespace neko {
     DynamicMeshPtr createDynamic( GLenum drawMode, VBOType vertexType, bool useIndices, bool mappable );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices );
+    StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex3D> verts );
+    StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex3D> verts, vector<GLuint> indices );
     void teardown();
   };
 

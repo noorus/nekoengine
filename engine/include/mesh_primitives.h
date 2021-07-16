@@ -455,6 +455,8 @@ namespace neko {
   public:
     StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts );
     StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices );
+    StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex3D> verts );
+    StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex3D> verts, vector<GLuint> indices );
     ~StaticMesh();
     void begin();
     void draw();
