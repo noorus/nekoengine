@@ -6,8 +6,12 @@
 #ifdef NEKO_PLATFORM_WINDOWS
 
 #if !defined( _DEBUG ) && !defined( NEKO_VERBOSE_COMPILE )
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
+#ifndef _SCL_SECURE_NO_WARNINGS
 #define _SCL_SECURE_NO_WARNINGS
+#endif
 #endif
 
 #define NTDDI_VERSION NTDDI_WIN10
@@ -30,15 +34,15 @@
 # error Unknown platform!
 #endif
 
-#include <stdio.h>
+#include <cstdio>
 #include <malloc.h>
 #include <memory.h>
-#include <wchar.h>
+#include <cwchar>
 #define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #include <eh.h>
+#include <cassert>
 #include <intrin.h>
-#include <assert.h>
 
 #undef min
 #undef max
