@@ -67,9 +67,7 @@ namespace neko {
     Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     const Image& renderWindowReadPixels() override;
     void processEvents(); //!< Process vital window events and such.
-    void preUpdate( GameTime time );
-    void tick( GameTime tick, GameTime time );
-    void postUpdate( GameTime delta, GameTime tick );
+    void update( GameTime time );
     inline Renderer& renderer() throw() { return *( renderer_.get() ); }
     void shutdown();
     void restart();
@@ -84,6 +82,7 @@ namespace neko {
     platform::Event restartEvent_;
     platform::Event restartedEvent_;
   protected:
+    EnginePtr engine_;
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
@@ -94,7 +93,7 @@ namespace neko {
     void initialize();
     void run( platform::Event& wantStop );
   public:
-    ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
+    ThreadedRenderer( EnginePtr engine, ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     void start();
     void restart();
     void stop();

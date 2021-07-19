@@ -18,14 +18,14 @@ namespace neko {
 
   const char cWindowTitle[] = "nekoengine//render";
 
-  NEKO_DECLARE_CONVAR( vid_screenwidth, "Screen width. Changes are applied when the renderer is restarted.", 1280 );
-  NEKO_DECLARE_CONVAR( vid_screenheight, "Screen height. Changes are applied when the renderer is restarted.", 720 );
+  NEKO_DECLARE_CONVAR( vid_screenwidth, "Screen width. Changes are applied when the renderer is restarted.", 1920 );
+  NEKO_DECLARE_CONVAR( vid_screenheight, "Screen height. Changes are applied when the renderer is restarted.", 1080 );
   NEKO_DECLARE_CONVAR( vid_vsync, "Whether to print OpenGL debug log output.", true );
   NEKO_DECLARE_CONVAR( gl_debuglog, "OpenGL debug log output level. 0 = none, 1 = some, 2 = debug context", 2 );
 
   Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
-    loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ),
-    messaging_( move( messaging ) ), director_( move( director ) )
+  loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ),
+  messaging_( move( messaging ) ), director_( move( director ) )
   {
     assert( loader_ && fonts_ && director_ && messaging_ && console_ );
     preInitialize();
@@ -59,6 +59,7 @@ namespace neko {
 
     if ( id == 0
       || id == 1281
+      || id == 1282
       || id == 1285
       // || id == 131076
       )
@@ -149,7 +150,7 @@ namespace neko {
     setOpenGLDebugLogging( g_CVar_gl_debuglog.as_i() > 0 );
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
-    camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, 0.0f ) );
+    camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, -1.0f ) );
 
     resize( window_->getSize().x, window_->getSize().y );
 
@@ -197,11 +198,6 @@ namespace neko {
   void Gfx::saveImage( int width, int height, MyGUI::PixelFormat format, void* texture, const utf8String& filename )
   {
     //
-  }
-
-  void Gfx::preUpdate( GameTime time )
-  {
-    renderer_->prepare( time );
   }
 
   void Gfx::resize( size_t width, size_t height )
@@ -252,13 +248,11 @@ namespace neko {
     }
   }
 
-  void Gfx::tick( GameTime tick, GameTime time )
+  void Gfx::update( GameTime time )
   {
-    camera_->update( tick, time );
-  }
+    renderer_->prepare( time );
+    camera_->update( time );
 
-  void Gfx::postUpdate( GameTime delta, GameTime time )
-  {
     // activate as current context
     window_->setActive( true );
 
@@ -269,7 +263,7 @@ namespace neko {
       window_->setActive( true );
     }
 
-    renderer_->draw( camera_, guiPlatform_.get() );
+    renderer_->draw( time, *camera_.get(), guiPlatform_.get() );
 
     window_->display();
   }
@@ -333,11 +327,11 @@ namespace neko {
 
   const string c_gfxThreadName = "nekoRenderer";
 
-  ThreadedRenderer::ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts,
-    MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
-    loader_( move( loader ) ), fonts_( move( fonts ) ),
-    messaging_( move( messaging ) ), director_( move( director ) ),
-    console_( move( console ) ), thread_( c_gfxThreadName, threadProc, this )
+  ThreadedRenderer::ThreadedRenderer( EnginePtr engine, ThreadedLoaderPtr loader,
+  FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
+  engine_( move( engine ) ), loader_( move( loader ) ), fonts_( move( fonts ) ),
+  messaging_( move( messaging ) ), director_( move( director ) ),
+  console_( move( console ) ), thread_( c_gfxThreadName, threadProc, this )
   {
   }
 
@@ -366,11 +360,8 @@ namespace neko {
 
       gfx_->processEvents();
 
-      gfx_->preUpdate( 0.0f );
-
-      gfx_->tick( 0.0f, 0.0f );
-
-      gfx_->postUpdate( 0.0f, 0.0f );
+      auto time = engine_->renderTime().load();
+      gfx_->update( time );
 
       platform::sleep( 1 );
     }
