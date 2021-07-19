@@ -41,7 +41,7 @@ class DemoScene extends Scene
       0, 2, 1, 1, 2, 3
     ];
     this._mesh = new mesh(verts, indices);*/
-    this._mesh = new mesh("plane", vec2(256), vec2(1), vec3(0, 0, -1));
+    this._mesh = new mesh("plane", vec2(10), vec2(10), vec3(0, 1, 0));
     this._ctr = 0;
     Console.print(this._mesh);
     Console.print("creating model");
@@ -49,21 +49,9 @@ class DemoScene extends Scene
       new model({
         mesh: this._mesh,
         scale: vec3(1, 1, 1),
-        translate: vec3(640 - 128, 360 - 128, 1)
-      }),
-      new model({
-        mesh: this._mesh,
-        scale: vec3(1, 1, 1),
-        translate: vec3(640, 360, 0)
-      }),
-      new model({
-        mesh: this._mesh,
-        scale: vec3(1, 1, 1),
-        translate: vec3(640 + 128, 360 + 128, 0)
+        translate: vec3(0, -1.5, 0)
       })
     ]
-    Console.print("DemoScene.initialize leaving function");
-    Console.print(this._models[1].rotate);
   }
   enter()
   {
@@ -75,18 +63,8 @@ class DemoScene extends Scene
   }
   update( time, delta )
   {
-    const scalar = 1 + Math.sin(time * 2) * 1;
-    const sceler = 1 + Math.cos(time * 2) * 1;
-    // Console.print("Scalar " + scalar);
-    if (time > 10 && this._models[1]) {
-      Console.print("unsetting this._models[1]");
-      this._models[1] = null;
-    } else if ( this._models[1] ) {
-      this._models[1].rotate.fromAngleAxis(toRadians(time * 50), vec3(0, 0, 1));
-    }
-    this._models[0].scale.x = scalar;
-    this._models[0].scale.y = sceler;
-    this._models[2].translate.z = Math.sin(time * 2) * 2;
+    //this._models[1].rotate.fromAngleAxis(toRadians(time * 50), vec3(0, 0, 1));
+    //this._models[2].translate.z = Math.sin(time * 2) * 2;
     /*if (this._ctr < 12) {
       Console.print("update " + this._ctr + " - time " + time);
       Console.print(this._mesh);

@@ -73,6 +73,7 @@ namespace neko {
     platform::PerformanceClock clock_;
     GameTime time_;
     volatile Signal signal_;
+    atomic<GameTime> rendererTime_;
     bool paused();
     void restart();
   protected:
@@ -95,6 +96,7 @@ namespace neko {
     inline FontManagerPtr fonts() throw() { return fonts_; }
     inline MessagingPtr msgs() throw() { return messaging_; }
     inline DirectorPtr director() throw() { return director_; }
+    inline atomic<GameTime>& renderTime() throw() { return rendererTime_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console );

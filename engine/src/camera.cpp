@@ -13,12 +13,15 @@ namespace neko {
 
   void Camera::setViewport( vec2 resolution )
   {
-    projection_ = glm::ortho( 0.0f, resolution.x, 0.0f, resolution.y );
+    projection_ = glm::ortho( 0.0f, resolution.x, resolution.y, 0.0f, 0.1f, 1000.0f );
+    projection_ = glm::perspective( glm::radians( 45.0f ), resolution.x / resolution.y, 0.1f, 100.0f );
   }
 
-  void Camera::update( GameTime delta, GameTime time )
+  void Camera::update( GameTime time )
   {
-    view_ = glm::translate( position_ ); // glm::translate( vec3( -position_.x, -position_.y, position_.z ) );
+    position_ = vec3( math::sin( time ) * 6.0f, 6.0f, math::cos( time ) * 6.0f );
+    view_ = glm::lookAt( position_, vec3( 0.0f, 0.0f, 0.0f ), vec3( 0.0f, 1.0f, 0.0f ) );
+    //view_ = glm::translate( position_ ); // glm::translate( vec3( -position_.x, -position_.y, position_.z ) );
   }
 
 }

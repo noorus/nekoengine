@@ -82,6 +82,8 @@ namespace neko {
     //tanklib_.load( this );
     //tanklib_.engine_->initialize( c_discordAppId, c_steamAppId );
 
+    rendererTime_.store( 0.0f );
+
     loader_ = make_shared<ThreadedLoader>();
     loader_->start();
 
@@ -99,7 +101,7 @@ namespace neko {
     console_->printf( Console::srcFonts, "Font manager init took %dms", (int)timer.stop() );
 
     timer.start();
-    renderer_ = make_shared<ThreadedRenderer>( loader_, fonts_, messaging_, director_, console_ );
+    renderer_ = make_shared<ThreadedRenderer>( shared_from_this(), loader_, fonts_, messaging_, director_, console_ );
     renderer_->start();
     console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );
 
@@ -243,11 +245,13 @@ namespace neko {
           scripting_->tick( c_logicStep, time_ );
 #endif
           messaging_->tick( c_logicStep, time_ );
-          //gfx_->tick( cLogicStep, time_ );
+          // gfx_->tick( c_logicStep, time_ );
           time_ += c_logicStep;
           accumulator -= c_logicStep;
         }
       }
+
+      rendererTime_.store( time_ );
 
       //input_->postUpdate( delta, time_ );
 
