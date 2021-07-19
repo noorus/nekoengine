@@ -21,8 +21,8 @@ namespace neko {
       Shader_Vertex,
       Shader_Fragment,
       Shader_Geometry,
-      Shader_TesselationControl,
-      Shader_TesselationEvaluation,
+      Shader_TessellationControl,
+      Shader_TessellationEvaluation,
       Shader_Compute,
       Shader_Mesh,
       Shader_Task,
@@ -169,11 +169,13 @@ namespace neko {
       void compileShader( Shader& shader, const string_view source );
       void linkSingleProgram( Program& program, Shader& shader );
       utf8String loadSource( const utf8String& filename );
+      void buildSeparableProgram( const utf8String& name, const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program );
     public:
       Shaders( ConsolePtr console );
       inline World* world() { return world_->buffer().data(); }
       void initialize();
       void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename );
+      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename );
       Pipeline& usePipeline( const utf8String& name );
       void shutdown();
       ~Shaders();

@@ -5,9 +5,9 @@ uniform sampler2D tex;
 in vec3 normal;
 in vec2 texcoord;
 
-out vec4 frag_colour;
+out vec4 out_color;
 
 void main()
 {
-  frag_colour = (texture(tex, texcoord) + vec4(normal,1)) / 2.0;
+  out_color = texture(tex, texcoord);
 }

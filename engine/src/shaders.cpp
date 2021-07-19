@@ -25,8 +25,8 @@ namespace neko {
       { Shader_Vertex, GL_VERTEX_SHADER, GL_VERTEX_SHADER_BIT, "vertex" },
       { Shader_Fragment, GL_FRAGMENT_SHADER, GL_FRAGMENT_SHADER_BIT, "fragment" },
       { Shader_Geometry, GL_GEOMETRY_SHADER, GL_GEOMETRY_SHADER_BIT, "geometry" },
-      { Shader_TesselationControl, GL_TESS_CONTROL_SHADER, GL_TESS_CONTROL_SHADER_BIT, "tess_ctrl" },
-      { Shader_TesselationEvaluation, GL_TESS_EVALUATION_SHADER, GL_TESS_EVALUATION_SHADER_BIT, "tess_eval" },
+      { Shader_TessellationControl, GL_TESS_CONTROL_SHADER, GL_TESS_CONTROL_SHADER_BIT, "tess_ctrl" },
+      { Shader_TessellationEvaluation, GL_TESS_EVALUATION_SHADER, GL_TESS_EVALUATION_SHADER_BIT, "tess_eval" },
       { Shader_Compute, GL_COMPUTE_SHADER, GL_COMPUTE_SHADER_BIT, "compute" },
       { Shader_Mesh, GL_MESH_SHADER_NV, GL_MESH_SHADER_BIT_NV, "mesh" },
       { Shader_Task, GL_TASK_SHADER_NV, GL_TASK_SHADER_BIT_NV, "task" }
@@ -54,6 +54,7 @@ namespace neko {
       createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag" );
       createSimplePipeline( "text3d", "text3d.vert", "text3d.frag" );
       createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag" );
+      createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag" );
     }
 
     // Shader
@@ -198,29 +199,28 @@ namespace neko {
       return move( source );
     }
 
+    void Shaders::buildSeparableProgram( const utf8String& name,
+    const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program )
+    {
+      auto source = loadSource( filename );
+
+      console_->printf( Console::srcGfx, "Compiling %s shader: %s", cShaderTypes[type].name.c_str(), name.c_str() );
+
+      shader = make_unique<Shader>( type );
+      compileShader( *shader, source );
+      program = make_shared<Program>();
+      linkSingleProgram( *program, *shader );
+    }
+
     void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename )
     {
       assert( pipelines_.find( name ) == pipelines_.end() );
 
-      auto vertexSource = loadSource( vp_filename );
+      ShaderPtr vs, fs;
+      ProgramPtr vp, fp;
 
-      console_->printf( Console::srcGfx, "Compiling %s shader: %s",
-        cShaderTypes[Type::Shader_Vertex].name.c_str(), name.c_str() );
-
-      auto vs = make_unique<Shader>( Type::Shader_Vertex );
-      compileShader( *vs, vertexSource );
-      auto vp = make_shared<Program>();
-      linkSingleProgram( *vp, *vs );
-
-      auto fragmentSource = loadSource( fp_filename );
-
-      console_->printf( Console::srcGfx, "Compiling %s shader: %s",
-        cShaderTypes[Type::Shader_Fragment].name.c_str(), name.c_str() );
-
-      auto fs = make_unique<Shader>( Type::Shader_Fragment );
-      compileShader( *fs, fragmentSource );
-      auto fp = make_shared<Program>();
-      linkSingleProgram( *fp, *fs );
+      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp );
+      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp );
 
       auto pipeline = make_unique<Pipeline>( name );
       glUseProgramStages( pipeline->id(), cShaderTypes[vs->type()].maskBit, vp->id() );
@@ -232,6 +232,35 @@ namespace neko {
       shaders_.push_back( move( vs ) );
       shaders_.push_back( move( fs ) );
       programs_.push_back( move( vp ) );
+      programs_.push_back( move( fp ) );
+      pipelines_[name] = move( pipeline );
+    }
+
+    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename )
+    {
+      assert( pipelines_.find( name ) == pipelines_.end() );
+
+      ShaderPtr vs, gs, fs;
+      ProgramPtr vp, gp, fp;
+
+      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp );
+      buildSeparableProgram( name, gp_filename, Type::Shader_Geometry, gs, gp );
+      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp );
+
+      auto pipeline = make_unique<Pipeline>( name );
+      glUseProgramStages( pipeline->id(), cShaderTypes[vs->type()].maskBit, vp->id() );
+      glUseProgramStages( pipeline->id(), cShaderTypes[gs->type()].maskBit, gp->id() );
+      glUseProgramStages( pipeline->id(), cShaderTypes[fs->type()].maskBit, fp->id() );
+
+      pipeline->stages_[Type::Shader_Vertex] = vp;
+      pipeline->stages_[Type::Shader_Geometry] = gp;
+      pipeline->stages_[Type::Shader_Fragment] = fp;
+
+      shaders_.push_back( move( vs ) );
+      shaders_.push_back( move( gs ) );
+      shaders_.push_back( move( fs ) );
+      programs_.push_back( move( vp ) );
+      programs_.push_back( move( gp ) );
       programs_.push_back( move( fp ) );
       pipelines_[name] = move( pipeline );
     }

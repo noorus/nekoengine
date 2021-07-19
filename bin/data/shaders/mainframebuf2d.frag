@@ -7,7 +7,7 @@ uniform sampler2D screenTexture;
 
 in vec2 texcoord;
 
-out vec4 frag_colour;
+out vec4 out_color;
 
 /*const float lightnessSteps = 4.0;
 
@@ -135,5 +135,5 @@ void main()
 {
   //vec4 clr = texture( screenTexture, texcoord );
   //frag_colour = vec4( dither( clr.rgb ), clr.a );
-  frag_colour = texture( screenTexture, texcoord );
+  out_color = texture( screenTexture, texcoord );
 }

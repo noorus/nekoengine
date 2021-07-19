@@ -278,6 +278,9 @@
     <Manifest Include="manifest\neko.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\data\shaders\dbg_showvertexnormals.frag" />
+    <None Include="..\bin\data\shaders\dbg_showvertexnormals.geom" />
+    <None Include="..\bin\data\shaders\dbg_showvertexnormals.vert" />
     <None Include="..\bin\data\shaders\default2d.frag" />
     <None Include="..\bin\data\shaders\default2d.vert" />
     <None Include="..\bin\data\shaders\default3d.frag" />

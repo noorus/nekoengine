@@ -164,6 +164,17 @@ namespace neko {
       return ( value < low ? low : ( value > high ? high : value ) );
     }
 
+    //! \fn inline int clamp( int value, int low, int high )
+    //! \brief Clamps the given value between a high bound and a low bound.
+    //! \param value The value.
+    //! \param low   The low.
+    //! \param high  The high.
+    //! \return Clamped value.
+    constexpr int clamp( int value, int low, int high )
+    {
+      return ( value < low ? low : ( value > high ? high : value ) );
+    }
+
     //! \fn inline T manhattan( T x1, T y1, T x2, T y2 )
     //! \brief 2D Manhattan distance with coordinates of any type supported by abs().
     //! \param x1 The first x value.

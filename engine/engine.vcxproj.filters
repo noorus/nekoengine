@@ -429,5 +429,14 @@
     <None Include="..\bin\data\shaders\mygui3d.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\bin\data\shaders\dbg_showvertexnormals.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\dbg_showvertexnormals.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\dbg_showvertexnormals.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

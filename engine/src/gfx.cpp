@@ -169,7 +169,7 @@ namespace neko {
 
     MyGUI::PointerManager::getInstance().setVisible( true );
 
-    auto root = MyGUI::LayoutManager::getInstance().loadLayout( "login.layout" );
+    // auto root = MyGUI::LayoutManager::getInstance().loadLayout( "login.layout" );
     // MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
     // button->setCaption( "exit" );
 
