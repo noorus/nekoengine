@@ -5,7 +5,7 @@ out gl_PerVertex{
 };
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normal;
+layout(location = 1) in vec3 vboNormal;
 layout(location = 2) in vec2 vboTexcoord;
 
 layout (std140, binding = 0) buffer World
@@ -16,11 +16,13 @@ layout (std140, binding = 0) buffer World
 
 uniform mat4 model;
 
+out vec3 normal;
 out vec2 texcoord;
 
 void main()
 {
   mat4 modelViewProjection = world.projection * world.view * model;
   gl_Position = modelViewProjection * vec4(position, 1.0);
+  normal = vboNormal;
   texcoord = vboTexcoord;
 }
