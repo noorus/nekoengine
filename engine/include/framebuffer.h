@@ -22,17 +22,19 @@ namespace neko {
     Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
     TexturePtr colorBuffer_;
     RenderbufferPtr depthBuffer_;
+    int multisamples_;
     vec4 clearColor_;
     int savedViewport_[4];
     mutable bool available_;
   public:
     Framebuffer() = delete;
-    Framebuffer( Renderer* renderer );
+    Framebuffer( Renderer* renderer, int multisamples = 1 );
     void recreate( size_t width, size_t height );
     void destroy();
     bool validate() const;
     void begin();
     void end();
+    void blitColorTo( Framebuffer& target );
     inline TexturePtr texture() { return colorBuffer_; }
     bool available() const;
     ~Framebuffer();

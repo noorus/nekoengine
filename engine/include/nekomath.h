@@ -33,6 +33,9 @@ namespace neko {
 
   namespace math {
 
+    using std::min;
+    using std::max;
+
     //! \fn inline Real round( Real value )
     //! \brief Rounds to the nearest non-decimal value.
     //! \param value The value.

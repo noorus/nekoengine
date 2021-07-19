@@ -41,9 +41,11 @@ namespace neko {
     };
   protected:
     Type type_; //!< Texture type.
+    int multisamples_;
   public:
     Texture() = delete;
-    Texture( Renderer* renderer, size_t width, size_t height, PixelFormat format, const void* data, const Wrapping wrapping, const Filtering filtering );
+    Texture( Renderer* renderer, size_t width, size_t height, PixelFormat format, const void* data,
+      const Wrapping wrapping, const Filtering filtering, int multisamples = 1 );
     ~Texture();
   };
 

@@ -26,6 +26,7 @@ namespace neko {
     int64_t maxFramebufferHeight; //!< Maximum height for GL_FRAMEBUFFER
     int64_t textureBufferAlignment; //!< Minimum alignment for texture buffer sizes and offsets
     int64_t uniformBufferAlignment; //!< Minimum alignment for uniform buffer sizes and offsets
+    float maxAnisotropy; //!< Maximum anisotropy level, usually 16.0
     GLInformation()
     {
       memset( this, 0, sizeof( GLInformation ) );
@@ -41,13 +42,17 @@ namespace neko {
       MaterialPtr placeholderTexture_;
       StaticMeshPtr screenQuad_;
       GLuint emptyVAO_;
+      StaticMeshPtr cube_;
       StaticData(): emptyVAO_( 0 ) {}
     } builtin_;
     GLuint implCreateTexture2D( size_t width, size_t height,
-      GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
-      const void* data, GLWrapMode wrap = GLenum::GL_CLAMP_TO_EDGE, Texture::Filtering filtering = Texture::Linear );
+      GLGraphicsFormat format, GLGraphicsFormat internalFormat,
+      GLGraphicsFormat internalType, const void* data,
+      GLWrapMode wrap = GLenum::GL_CLAMP_TO_EDGE,
+      Texture::Filtering filtering = Texture::Linear,
+      int samples = 1 );
     void implDeleteTexture( GLuint handle );
-    GLuint implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format );
+    GLuint implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format, int samples = 1 );
     void implDeleteRenderbuffer( GLuint handle );
     GLuint implCreateFramebuffer( size_t width, size_t height );
     void implDeleteFramebuffer( GLuint handle );
@@ -64,8 +69,11 @@ namespace neko {
     platform::RWLock loadLock_;
     MaterialVector materials_;
     DirectorPtr director_;
-    void sceneDraw( CameraPtr camera );
+    void sceneDraw( Camera& camera );
     void clearErrors();
+  protected:
+    FramebufferPtr mainbuffer_; //!< Multisampled primary scene render buffer
+    FramebufferPtr intermediate_; //!< Intermediate non-multisampled buffer for postprocessing
   public:
     Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
     void preInitialize();
@@ -76,7 +84,7 @@ namespace neko {
     void uploadTextures();
     void jsRestart();
     inline shaders::Shaders& shaders() throw() { return *( shaders_.get() ); }
-    void draw( CameraPtr camera, MyGUI::NekoPlatform* gui );
+    void draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui );
     void reset( size_t width, size_t height );
     ~Renderer();
   };

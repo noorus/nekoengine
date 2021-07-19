@@ -25,7 +25,7 @@ namespace neko {
     };
 
     const vector<Vertex2D> screenQuad2D =
-    {   // x      y     s     t
+    {  // x      y     s     t
       { -1.0f,  1.0f, 0.0f, 1.0f },
       { -1.0f, -1.0f, 0.0f, 0.0f },
       {  1.0f, -1.0f, 1.0f, 0.0f },
@@ -37,9 +37,50 @@ namespace neko {
       0, 1, 2, 0, 2, 3
     };
 
-  }
+    const vector<Vertex3D> worldUnitCube3D =
+    {  // x      y      z      nx    ny    nz     s     t
+      { -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f },
+      {  0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f },
+      {  0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f },
+      { -0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f },
 
-  static FramebufferPtr g_framebuf;
+      { -0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f },
+      {  0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f },
+      {  0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f },
+      { -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f },
+
+      { -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f },
+      { -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f },
+      { -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f },
+      { -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f },
+
+      {  0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  1.0f, 0.0f },
+      {  0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  1.0f, 1.0f },
+      {  0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 1.0f },
+      {  0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f },
+
+      { -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,  0.0f, 1.0f },
+      {  0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 1.0f,  1.0f, 1.0f },
+      {  0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  1.0f, 0.0f },
+      { -0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 1.0f,  0.0f, 0.0f },
+
+      { -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f },
+      {  0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f },
+      {  0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  1.0f, 0.0f },
+      { -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.0f,  0.0f, 0.0f }
+    };
+
+    const vector<GLuint> cubeIndices =
+    {
+      0,  1,  2,  2,  3,  0,
+      4,  5,  6,  6,  7,  4,
+      8,  9,  10, 10, 11, 8,
+      12, 13, 14, 14, 15, 12,
+      16, 17, 18, 18, 19, 16,
+      20, 21, 22, 22, 23, 20
+    };
+
+  }
 
   class DynamicText {
   public:
@@ -155,6 +196,20 @@ namespace neko {
       target = (int64_t)data;
       return true;
     };
+    auto glvGetFloat = [glbAuxStr]( GLenum e, float& target, bool doNotThrow = false ) -> bool
+    {
+      GLfloat data = 0.0f;
+      glGetFloatv( e, &data );
+      auto error = glGetError();
+      if ( error != GL_NO_ERROR )
+      {
+        if ( !doNotThrow )
+          NEKO_OPENGL_EXCEPT( "glGetFloatv failed for " + glbAuxStr( e ), error );
+        return false;
+      }
+      target = (float)data;
+      return true;
+    };
 
     // OpenGL version
     info.versionMajor = glvGetI32NoThrow( GL_MAJOR_VERSION );
@@ -190,6 +245,10 @@ namespace neko {
       info.maxFramebufferHeight = info.maxTextureSize;
     }
 
+    // Maximum anistropic filtering level
+    if ( !glvGetFloat( GL_MAX_TEXTURE_MAX_ANISOTROPY, info.maxAnisotropy, true ) )
+      info.maxAnisotropy = 1.0f;
+
     // Uniform buffer alignments
     glvGetI64( GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, info.textureBufferAlignment );
     glvGetI64( GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, info.uniformBufferAlignment );
@@ -219,6 +278,12 @@ namespace neko {
 
     clearErrors();
     glStartupFetchAndCheck( info_ );
+
+    console_->printf( Console::srcGfx, "Buffer alignments are %i/texture %i/uniform",
+      info_.textureBufferAlignment, info_.uniformBufferAlignment );
+    console_->printf( Console::srcGfx, "Maximums are %i/texture %i/renderbuffer %ix%i/framebuffer",
+      info_.maxTextureSize, info_.maxRenderbufferSize, info_.maxFramebufferWidth, info_.maxFramebufferHeight );
+    console_->printf( Console::srcGfx, "Maximum anisotropy is %.1f", info_.maxAnisotropy );
   }
 
   void Renderer::preInitialize()
@@ -237,6 +302,7 @@ namespace neko {
     builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
       (const void*)BuiltinData::placeholderImage2x2.data() );
     builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
+    builtin_.cube_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
   }
 
   void Renderer::initialize( size_t width, size_t height )
@@ -245,15 +311,17 @@ namespace neko {
     materials_.push_back( myMat );
     loader_->addLoadTask( { LoadTask( myMat, R"(data\textures\test.png)" ) } );
 
-    g_framebuf = make_shared<Framebuffer>( this );
+    mainbuffer_ = make_shared<Framebuffer>( this, 4 );
+    intermediate_ = make_shared<Framebuffer>( this, 1 );
 
     reset( width, height );
   }
 
   void Renderer::reset( size_t width, size_t height )
   {
-    assert( g_framebuf );
-    g_framebuf->recreate( width, height );
+    assert( mainbuffer_ && intermediate_ );
+    mainbuffer_->recreate( width, height );
+    intermediate_->recreate( width, height );
   }
 
   void Renderer::uploadTextures()
@@ -322,40 +390,56 @@ namespace neko {
   //! Called by Texture::Texture()
   GLuint Renderer::implCreateTexture2D( size_t width, size_t height,
   GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
-  const void* data, GLWrapMode wrap, Texture::Filtering filtering )
+  const void* data, GLWrapMode wrap, Texture::Filtering filtering, int samples )
   {
     assert( width <= (size_t)info_.maxTextureSize && height <= (size_t)info_.maxTextureSize );
 
     GLuint handle = 0;
-    glCreateTextures( GL_TEXTURE_2D, 1, &handle );
+    glCreateTextures( samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D, 1, &handle );
     assert( handle != 0 );
 
-    // Wrapping (repeat, edge, border)
-    glTextureParameteri( handle, GL_TEXTURE_WRAP_S, wrap );
-    glTextureParameteri( handle, GL_TEXTURE_WRAP_T, wrap );
+    if ( samples < 2 )
+    {
+      // Wrapping (repeat, edge, border)
+      glTextureParameteri( handle, GL_TEXTURE_WRAP_S, wrap );
+      glTextureParameteri( handle, GL_TEXTURE_WRAP_T, wrap );
 
-    // Filtering
-    if ( filtering == Texture::Nearest )
-    {
-      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-      glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    }
-    else if ( filtering == Texture::Linear )
-    {
-      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-      glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    }
-    else
-    {
-      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-      glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+      if ( wrap == GL_CLAMP_TO_BORDER )
+      {
+        // Set border color (to transparent)
+        float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        glTextureParameterfv( handle, GL_TEXTURE_BORDER_COLOR, color );
+      }
+
+      // Filtering
+      if ( filtering == Texture::Nearest )
+      {
+        glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+      }
+      else if ( filtering == Texture::Linear )
+      {
+        glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+      }
+      else
+      {
+        glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+        glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+      }
+
+      if ( info_.maxAnisotropy > 1.0f )
+        glTextureParameterf( handle, GL_TEXTURE_MAX_ANISOTROPY, math::min( info_.maxAnisotropy, 16.0f ) );
     }
 
     // 1 byte alignment - i.e. unaligned.
     // Could boost performance to use aligned memory in the future.
     glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
-    glTextureStorage2D( handle, 1, internalFormat, (GLsizei)width, (GLsizei)height );
+    if ( samples > 1 )
+      glTextureStorage2DMultisample( handle, samples, internalFormat, (GLsizei)width, (GLsizei)height, true );
+    else
+      glTextureStorage2D( handle, 1, internalFormat, (GLsizei)width, (GLsizei)height );
 
     if ( data )
       glTextureSubImage2D( handle, 0, 0, 0, (GLsizei)width, (GLsizei)height, format, internalType, data );
@@ -374,7 +458,7 @@ namespace neko {
   }
 
   //! Called by Renderbuffer::Renderbuffer()
-  GLuint Renderer::implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format )
+  GLuint Renderer::implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format, int samples )
   {
     assert( width <= (size_t)info_.maxRenderbufferSize && height <= (size_t)info_.maxRenderbufferSize );
 
@@ -382,7 +466,10 @@ namespace neko {
     glCreateRenderbuffers( 1, &handle );
     assert( handle != 0 );
 
-    glNamedRenderbufferStorage( handle, format, (GLsizei)width, (GLsizei)height );
+    if ( samples > 1 )
+      glNamedRenderbufferStorageMultisample( handle, samples, format, (GLsizei)width, (GLsizei)height );
+    else
+      glNamedRenderbufferStorage( handle, format, (GLsizei)width, (GLsizei)height );
 
     return handle;
   }
@@ -427,16 +514,25 @@ namespace neko {
     return move( mat );
   }
 
-  void Renderer::sceneDraw( CameraPtr camera )
+  void Renderer::sceneDraw( Camera& camera )
   {
-    glDisable( GL_DEPTH_TEST );
-    glDepthMask( 0 );
+    glEnable( GL_DEPTH_TEST );
+    glDepthFunc( GL_LESS );
+    glDepthMask( GL_TRUE );
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    shaders_->world()->projection = camera->projection();
-    shaders_->world()->view = camera->view();
+    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_POLYGON_SMOOTH );
+
+    glEnable( GL_MULTISAMPLE );
+
+    shaders_->world()->projection = camera.projection();
+    shaders_->world()->view = camera.view();
 
     auto& pl = shaders_->usePipeline( "default3d" );
 
@@ -476,6 +572,17 @@ namespace neko {
     }
 #endif
 
+    builtin_.cube_->begin();
+    mat4 mdl( 1.0f );
+    mdl = glm::scale( mdl, vec3( 3.0, 3.0f, 3.0f ) );
+    pl.setUniform( "model", mdl );
+    pl.setUniform( "tex", 0 );
+    if ( !materials_.empty() && materials_[0]->texture_ )
+      glBindTextureUnit( 0, materials_[0]->texture_->handle() );
+    else
+      glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
+    builtin_.cube_->draw();
+
     if ( g_testText && g_textAdded )
     {
       g_testText->begin();
@@ -490,9 +597,9 @@ namespace neko {
     }
   }
 
-  void Renderer::draw( CameraPtr camera, MyGUI::NekoPlatform* gui )
+  void Renderer::draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui )
   {
-    if ( !g_framebuf->available() )
+    if ( !mainbuffer_->available() || !intermediate_->available() )
       return;
 
     glDisable( GL_DEPTH_TEST );
@@ -509,9 +616,11 @@ namespace neko {
     glBindVertexArray( builtin_.emptyVAO_ );
 
     // Draw the scene inside the framebuffer.
-    g_framebuf->begin();
+    mainbuffer_->begin();
     sceneDraw( camera );
-    g_framebuf->end();
+    mainbuffer_->end();
+
+    mainbuffer_->blitColorTo( *intermediate_.get() );
 
     // Framebuffer has been unbound, now draw to the default context, the window.
     glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );
@@ -536,7 +645,7 @@ namespace neko {
     gl::glProgramUniform3fv( pgm, pal, 8, (GLfloat*)vals );
     pipeline.setUniform( "paletteSize", 8 );*/
 
-    glBindTextureUnit( 0, g_framebuf->texture()->handle() );
+    glBindTextureUnit( 0, intermediate_->texture()->handle() );
     builtin_.screenQuad_->draw();
 
     if ( gui )
@@ -553,7 +662,8 @@ namespace neko {
 
     g_testText.reset();
 
-    g_framebuf.reset();
+    intermediate_.reset();
+    mainbuffer_.reset();
 
 #ifndef NEKO_NO_SCRIPTING
     models_->teardown();

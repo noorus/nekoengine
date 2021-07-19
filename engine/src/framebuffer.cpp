@@ -7,8 +7,9 @@ namespace neko {
 
   using namespace gl;
 
-  Framebuffer::Framebuffer( Renderer* renderer ):
-    renderer_( renderer ), width_( 0 ), height_( 0 ), handle_( 0 ), available_( false )
+  Framebuffer::Framebuffer( Renderer* renderer, int multisamples ):
+    renderer_( renderer ), width_( 0 ), height_( 0 ), handle_( 0 ),
+    available_( false ), multisamples_( multisamples ), savedViewport_{ 0 }
   {
     assert( renderer_ );
     clearColor_ = vec4( 30.0f / 255.0f, 30.0f / 255.0f, 35.0f / 255.0f, 1.0f );
@@ -27,8 +28,8 @@ namespace neko {
 
     // currently using a static framebuffer format:
     // 8-bit RGB color, 32-bit float depth
-    colorBuffer_ = make_shared<Texture>( renderer_, width_, height_, PixFmtColorRGB8, nullptr, Texture::ClampEdge, Texture::Nearest );
-    depthBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepth32f );
+    colorBuffer_ = make_shared<Texture>( renderer_, width_, height_, PixFmtColorRGB8, nullptr, Texture::ClampEdge, Texture::Nearest, multisamples_ );
+    depthBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepth32f, multisamples_ );
 
     array<GLenum, 32> drawBuffers;
     auto colorHandle = colorBuffer_->handle();
@@ -41,6 +42,14 @@ namespace neko {
 
     glNamedFramebufferTexture( handle_, GL_COLOR_ATTACHMENT0, colorBuffer_->handle(), 0 );
     glNamedFramebufferRenderbuffer( handle_, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_->handle() );
+  }
+
+  void Framebuffer::blitColorTo( Framebuffer& target )
+  {
+    glBlitNamedFramebuffer( handle_, target.handle_,
+      0, 0, (GLint)width_, (GLint)height_,
+      0, 0, (GLint)target.width_, (GLint)target.height_,
+      GL_COLOR_BUFFER_BIT, GL_NEAREST );
   }
 
   void Framebuffer::destroy()
