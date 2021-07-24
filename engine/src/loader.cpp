@@ -199,8 +199,8 @@ namespace neko {
           auto scene = FbxScene::Create( fbxmgr_, "loaderScene" );
           importer->Import( scene );
           auto root = scene->GetRootNode();
-          if ( root )
-            PrintNode( root );
+          //if ( root )
+          //  PrintNode( root );
         }
         importer->Destroy( true );
       }
