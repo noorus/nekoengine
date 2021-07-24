@@ -8,21 +8,25 @@ namespace neko {
   struct LoadTask {
     enum LoadType {
       Load_Texture,
-      Load_Fontface
+      Load_Fontface,
+      Load_Model
     } type_;
     struct TextureLoad {
       MaterialPtr material_;
-      utf8String path_;
+      vector<utf8String> paths_;
     } textureLoad;
     struct FontfaceLoad {
       FontPtr font_;
       Font::Specs specs_;
       utf8String path_;
     } fontfaceLoad;
-    LoadTask( MaterialPtr material, const string& path ): type_( Load_Texture )
+    struct ModelLoad {
+      utf8String path_;
+    } modelLoad;
+    LoadTask( MaterialPtr material, vector<utf8String> paths ): type_( Load_Texture )
     {
       textureLoad.material_ = move( material );
-      textureLoad.path_ = path;
+      textureLoad.paths_.swap( paths );
     }
     LoadTask( FontPtr font, const utf8String& path, Real pointSize ): type_( Load_Fontface )
     {
@@ -30,6 +34,10 @@ namespace neko {
       fontfaceLoad.specs_.atlasSize_ = vec2i( 1024, 1024 );
       fontfaceLoad.specs_.pointSize_ = pointSize;
       fontfaceLoad.path_ = path;
+    }
+    LoadTask( const utf8String& path ): type_( Load_Model )
+    {
+      modelLoad.path_ = path;
     }
   };
 
@@ -43,6 +51,8 @@ namespace neko {
     platform::Event finishedMaterialsEvent_;
     platform::Event finishedFontsEvent_;
     platform::RWLock finishedTasksLock_;
+    FbxManager* fbxmgr_;
+    FbxIOSettings* fbxio_;
     LoadTaskVector newTasks_;
     MaterialVector finishedMaterials_;
     FontVector finishedFonts_;

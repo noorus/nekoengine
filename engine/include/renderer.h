@@ -56,6 +56,7 @@ namespace neko {
     void implDeleteRenderbuffer( GLuint handle );
     GLuint implCreateFramebuffer( size_t width, size_t height );
     void implDeleteFramebuffer( GLuint handle );
+    void useMaterial( size_t index );
   protected:
     GLInformation info_;
     ConsolePtr console_;

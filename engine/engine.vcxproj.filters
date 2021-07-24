@@ -168,9 +168,6 @@
     <ClCompile Include="src\font_textured.cpp">
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
-    <ClCompile Include="src\fontmanager.cpp">
-      <Filter>Source Files\gfx\fonts</Filter>
-    </ClCompile>
     <ClCompile Include="src\staticmesh.cpp">
       <Filter>Source Files\gfx\meshes</Filter>
     </ClCompile>
@@ -230,6 +227,9 @@
     </ClCompile>
     <ClCompile Include="src\MyGUI_NekoVertexBuffer.cpp">
       <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fontmanager.cpp">
+      <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

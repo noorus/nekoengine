@@ -156,7 +156,7 @@ namespace neko {
     }
     void draw()
     {
-      glBindTextureUnit( 0, material_->texture_->handle() );
+      glBindTextureUnit( 0, material_->layers_[0].texture_->handle() );
       mesh_->draw();
       glBindTextureUnit( 0, 0 );
     }
@@ -309,9 +309,16 @@ namespace neko {
 
   void Renderer::initialize( size_t width, size_t height )
   {
-    MaterialPtr myMat = make_shared<Material>();
-    materials_.push_back( myMat );
-    loader_->addLoadTask( { LoadTask( myMat, R"(data\textures\test.png)" ) } );
+    materials_.push_back( make_shared<Material>( Material::UnlitSimple ) );
+    materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
+    loader_->addLoadTask( { LoadTask( materials_[0], { R"(data\textures\test.png)" } ) } );
+    loader_->addLoadTask( { LoadTask( materials_[1], {
+      R"(data\textures\SGT_Ground_1_AlbedoSmoothness.png)",
+      R"(data\textures\SGT_Ground_1_Height.png)",
+      R"(data\textures\SGT_Ground_1_MetallicSmoothness.png)",
+      R"(data\textures\SGT_Ground_1_Normal.png)"
+    } ) } );
+    loader_->addLoadTask( { LoadTask( R"(data\meshes\Tank_Tiger.FBX)" ) } );
 
     mainbuffer_ = make_shared<Framebuffer>( this, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
     intermediate_ = make_shared<Framebuffer>( this, 1 );
@@ -336,9 +343,12 @@ namespace neko {
     {
       if ( !mat->loaded_ )
         continue;
-      mat->texture_ = make_shared<Texture>( this,
-        mat->image_.width_, mat->image_.height_, mat->image_.format_, mat->image_.data_.data(),
-        Texture::ClampEdge, Texture::Mipmapped );
+      for ( auto& layer : mat->layers_ )
+      {
+        layer.texture_ = make_shared<Texture>( this,
+          layer.image_.width_, layer.image_.height_, layer.image_.format_,
+          layer.image_.data_.data(), Texture::ClampEdge, Texture::Mipmapped );
+      }
     }
   }
 
@@ -505,15 +515,49 @@ namespace neko {
   MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, PixelFormat format,
   const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
-    MaterialPtr mat = make_shared<Material>();
-    mat->image_.format_ = format;
-    mat->image_.width_ = (unsigned int)width;
-    mat->image_.height_ = (unsigned int)height;
-    mat->texture_ = make_shared<Texture>( this,
-      mat->image_.width_, mat->image_.height_, mat->image_.format_,
+    MaterialPtr mat = make_shared<Material>( Material::UnlitSimple );
+    MaterialLayer layer;
+    layer.image_.format_ = format;
+    layer.image_.width_ = (unsigned int)width;
+    layer.image_.height_ = (unsigned int)height;
+    layer.texture_ = make_shared<Texture>( this,
+      layer.image_.width_, layer.image_.height_, layer.image_.format_,
       data, wrapping, filtering );
+    mat->layers_.push_back( move( layer ) );
     mat->loaded_ = true;
     return move( mat );
+  }
+
+  void Renderer::useMaterial( size_t index )
+  {
+    GLuint empties[4] = { 0, 0, 0, 0 };
+    static bool inited = false;
+    if ( !inited )
+    {
+      for ( auto i = 0; i < 4; i++ )
+        empties[i] = builtin_.placeholderTexture_->layers_[0].texture_->handle();
+      inited = true;
+    }
+    if ( index >= materials_.size() || !materials_[index]->uploaded() )
+    {
+      glBindTextures( 0, 4, empties );
+      return;
+    }
+    const auto& mat = materials_[index];
+    if ( mat->type_ == Material::UnlitSimple )
+    {
+      glBindTextureUnit( 0, mat->layers_[0].texture_->handle() );
+    }
+    else if ( mat->type_ == Material::WorldPBR )
+    {
+      GLuint units[4] = {
+        mat->layers_[0].texture_->handle(),
+        mat->layers_[1].texture_->handle(),
+        mat->layers_[2].texture_->handle(),
+        mat->layers_[3].texture_->handle()
+      };
+      glBindTextures( 0, 4, units );
+    }
   }
 
   void Renderer::sceneDraw( Camera& camera )
@@ -564,10 +608,7 @@ namespace neko {
         pl.setUniform( "model", mdl );
         pl.setUniform( "tex", 0 );
 
-        if ( !materials_.empty() && materials_[0]->texture_ )
-          glBindTextureUnit( 0, materials_[0]->texture_->handle() );
-        else
-          glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
+        useMaterial( 0 );
 
         mesh->mesh().vao_->draw( GL_TRIANGLES );
       }
@@ -579,10 +620,7 @@ namespace neko {
     mdl = glm::scale( mdl, vec3( 3.0f, 3.0f, 3.0f ) );
     pl.setUniform( "model", mdl );
     pl.setUniform( "tex", 0 );
-    if ( !materials_.empty() && materials_[0]->texture_ )
-      glBindTextureUnit( 0, materials_[0]->texture_->handle() );
-    else
-      glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
+    useMaterial( 1 );
     builtin_.cube_->draw();
 
     shaders_->usePipeline( "dbg_showvertexnormals" ).setUniform( "model", mdl );

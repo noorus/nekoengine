@@ -42,15 +42,15 @@
 # error Unknown platform!
 #endif
 
-#include <stdio.h>
+#include <cstdio>
 #include <malloc.h>
 #include <memory.h>
-#include <wchar.h>
+#include <cwchar>
 #define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #include <eh.h>
 #include <intrin.h>
-#include <assert.h>
+#include <cassert>
 
 #undef min
 #undef max
@@ -152,6 +152,21 @@
 #pragma warning( disable: 4275 )
 #include <MYGUI/MyGUI.h>
 #pragma warning( pop )
+
+// FBX
+#include <fbxsdk.h>
+
+// OZZ
+#include <ozz/animation/runtime/animation.h>
+#include <ozz/animation/runtime/local_to_model_job.h>
+#include <ozz/animation/runtime/sampling_job.h>
+#include <ozz/animation/runtime/skeleton.h>
+#include <ozz/base/log.h>
+#include <ozz/base/maths/math_ex.h>
+#include <ozz/base/maths/simd_math.h>
+#include <ozz/base/maths/soa_transform.h>
+#include <ozz/base/maths/vec_float.h>
+#include <ozz/options/options.h>
 
 // Local types
 #include "neko_types.h"

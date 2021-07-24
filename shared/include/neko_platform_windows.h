@@ -96,7 +96,7 @@ namespace neko {
     //! Synchronously wait for one or all of native events to fire, or timeout.
     inline size_t waitForEvents( const EventVector& events, uint32_t milliseconds, bool waitAll = false, size_t timeoutValue = WAIT_TIMEOUT )
     {
-      auto ret = static_cast<size_t>( WaitForMultipleObjects( (DWORD)events.size(), events.data(), waitAll, milliseconds ) );
+      auto ret = static_cast<size_t>( WaitForMultipleObjects( (DWORD)events.size(), events.data(), waitAll, milliseconds > 0 ? milliseconds : INFINITE ) );
       if ( ret >= WAIT_OBJECT_0 && ret < ( WAIT_OBJECT_0 + events.size() ) )
         return ( ret - WAIT_OBJECT_0 );
       else if ( ret == WAIT_TIMEOUT )
