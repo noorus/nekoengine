@@ -528,7 +528,7 @@ namespace neko {
     return move( mat );
   }
 
-  void Renderer::useMaterial( size_t index )
+  shaders::Pipeline& Renderer::useMaterial( size_t index )
   {
     GLuint empties[4] = { 0, 0, 0, 0 };
     static bool inited = false;
@@ -541,12 +541,15 @@ namespace neko {
     if ( index >= materials_.size() || !materials_[index]->uploaded() )
     {
       glBindTextures( 0, 4, empties );
-      return;
+      return shaders_->usePipeline( "default3d" );
     }
     const auto& mat = materials_[index];
     if ( mat->type_ == Material::UnlitSimple )
     {
       glBindTextureUnit( 0, mat->layers_[0].texture_->handle() );
+      auto& pipeline = shaders_->usePipeline( "default3d" );
+      pipeline.setUniform( "tex", 0 );
+      return pipeline;
     }
     else if ( mat->type_ == Material::WorldPBR )
     {
@@ -557,7 +560,14 @@ namespace neko {
         mat->layers_[3].texture_->handle()
       };
       glBindTextures( 0, 4, units );
+      auto& pipeline = shaders_->usePipeline( "mat_worldpbr" );
+      pipeline.setUniform( "texAlbedo", 0 );
+      pipeline.setUniform( "texHeight", 1 );
+      pipeline.setUniform( "texMetallic", 2 );
+      pipeline.setUniform( "texNormal", 3 );
+      return pipeline;
     }
+    return shaders_->usePipeline( "default3d" );
   }
 
   void Renderer::sceneDraw( Camera& camera )
@@ -605,10 +615,7 @@ namespace neko {
         mdl = glm::scale( mdl, model.scale_->v() );
         mdl *= glm::toMat4( model.rotate_->q() );
 
-        pl.setUniform( "model", mdl );
-        pl.setUniform( "tex", 0 );
-
-        useMaterial( 0 );
+        useMaterial( 0 ).setUniform( "model", mdl );
 
         mesh->mesh().vao_->draw( GL_TRIANGLES );
       }
@@ -618,9 +625,7 @@ namespace neko {
     builtin_.cube_->begin();
     mat4 mdl( 1.0f );
     mdl = glm::scale( mdl, vec3( 3.0f, 3.0f, 3.0f ) );
-    pl.setUniform( "model", mdl );
-    pl.setUniform( "tex", 0 );
-    useMaterial( 1 );
+    useMaterial( 1 ).setUniform( "model", mdl );
     builtin_.cube_->draw();
 
     shaders_->usePipeline( "dbg_showvertexnormals" ).setUniform( "model", mdl );
@@ -674,9 +679,9 @@ namespace neko {
 
     builtin_.screenQuad_->begin();
     auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
+    pipeline.setUniform( "screenTexture", 0 );
 
-    /*pipeline.setUniform( "tex", 0 );
-    auto pgm = pipeline.getProgramStage( shaders::Shader_Fragment );
+    /*auto pgm = pipeline.getProgramStage( shaders::Shader_Fragment );
     auto pal = gl::glGetUniformLocation( pgm, "palette" );
     vec3 vals[8] = {
       { 1.0f, 0.0f, 0.0f },

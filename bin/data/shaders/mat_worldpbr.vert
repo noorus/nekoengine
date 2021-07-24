@@ -6,6 +6,7 @@ out gl_PerVertex {
 
 out VertexData {
   vec3 normal;
+  vec2 texcoord;
 } vs_out;
 
 layout(location = 0) in vec3 vbo_position;
@@ -22,7 +23,8 @@ uniform mat4 model;
 
 void main()
 {
-  mat3 normalMatrix = mat3(transpose(inverse(world.view * model)));
-  vs_out.normal = vec3(vec4(normalMatrix * vbo_normal, 0.0));
-  gl_Position = world.view * model * vec4(vbo_position, 1.0);
+  mat4 modelViewProjection = world.projection * world.view * model;
+  gl_Position = modelViewProjection * vec4(vbo_position, 1.0);
+  vs_out.normal = vbo_normal;
+  vs_out.texcoord = vbo_texcoord;
 }

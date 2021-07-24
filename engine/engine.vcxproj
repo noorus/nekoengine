@@ -287,6 +287,8 @@
     <None Include="..\bin\data\shaders\default3d.vert" />
     <None Include="..\bin\data\shaders\mainframebuf2d.frag" />
     <None Include="..\bin\data\shaders\mainframebuf2d.vert" />
+    <None Include="..\bin\data\shaders\mat_worldpbr.frag" />
+    <None Include="..\bin\data\shaders\mat_worldpbr.vert" />
     <None Include="..\bin\data\shaders\mygui3d.frag" />
     <None Include="..\bin\data\shaders\mygui3d.vert" />
     <None Include="..\bin\data\shaders\text3d.frag" />

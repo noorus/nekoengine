@@ -50,11 +50,12 @@ namespace neko {
       world_ = make_unique<PersistentBuffer<World>>();
 
       //createSimplePipeline( "default2d", "default2d.vert", "default2d.frag" );
-      createSimplePipeline( "default3d", "default3d.vert", "default3d.frag" );
-      createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag" );
-      createSimplePipeline( "text3d", "text3d.vert", "text3d.frag" );
-      createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag" );
-      createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag" );
+      createSimplePipeline( "default3d", "default3d.vert", "default3d.frag", { "model", "tex" } );
+      createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag", { "screenTexture" } );
+      createSimplePipeline( "text3d", "text3d.vert", "text3d.frag", { "model", "tex" } );
+      createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag", { "yscale", "tex" } );
+      createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
+      createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "texAlbedo", "texHeight", "texMetallic", "texNormal" } );
     }
 
     // Shader
@@ -161,7 +162,7 @@ namespace neko {
       }
     }
 
-    void Shaders::linkSingleProgram( Program& program, Shader& shader )
+    void Shaders::linkSingleProgram( Program& program, Shader& shader, const vector<utf8String>& uniforms )
     {
       if ( !shader.ready() )
         NEKO_EXCEPT( "Passed shader is not ready" );
@@ -182,9 +183,12 @@ namespace neko {
         NEKO_EXCEPT( "GL program linking failed" );
       }
 
-      program.uniforms_["model"] = glGetUniformLocation( program.id(), "model" );
-      program.uniforms_["tex"] = glGetUniformLocation( program.id(), "tex" );
-      program.uniforms_["yscale"] = glGetUniformLocation( program.id(), "yscale" );
+      for ( const auto& uni : uniforms )
+        program.uniforms_[uni.c_str()] = glGetUniformLocation( program.id(), uni.c_str() );
+
+      //program.uniforms_["model"] = glGetUniformLocation( program.id(), "model" );
+      //program.uniforms_["tex"] = glGetUniformLocation( program.id(), "tex" );
+      //program.uniforms_["yscale"] = glGetUniformLocation( program.id(), "yscale" );
       //program.uniforms_["palette"] = glGetUniformLocation( program.id(), "palette" );
       //program.uniforms_["paletteSize"] = glGetUniformLocation( program.id(), "paletteSize" );
     }
@@ -200,7 +204,7 @@ namespace neko {
     }
 
     void Shaders::buildSeparableProgram( const utf8String& name,
-    const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program )
+    const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program, const vector<utf8String>& uniforms )
     {
       auto source = loadSource( filename );
 
@@ -209,18 +213,18 @@ namespace neko {
       shader = make_unique<Shader>( type );
       compileShader( *shader, source );
       program = make_shared<Program>();
-      linkSingleProgram( *program, *shader );
+      linkSingleProgram( *program, *shader, uniforms );
     }
 
-    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename )
+    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms )
     {
       assert( pipelines_.find( name ) == pipelines_.end() );
 
       ShaderPtr vs, fs;
       ProgramPtr vp, fp;
 
-      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp );
-      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp );
+      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp, uniforms );
+      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
 
       auto pipeline = make_unique<Pipeline>( name );
       glUseProgramStages( pipeline->id(), cShaderTypes[vs->type()].maskBit, vp->id() );
@@ -236,16 +240,16 @@ namespace neko {
       pipelines_[name] = move( pipeline );
     }
 
-    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename )
+    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms )
     {
       assert( pipelines_.find( name ) == pipelines_.end() );
 
       ShaderPtr vs, gs, fs;
       ProgramPtr vp, gp, fp;
 
-      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp );
-      buildSeparableProgram( name, gp_filename, Type::Shader_Geometry, gs, gp );
-      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp );
+      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp, uniforms );
+      buildSeparableProgram( name, gp_filename, Type::Shader_Geometry, gs, gp, uniforms );
+      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
 
       auto pipeline = make_unique<Pipeline>( name );
       glUseProgramStages( pipeline->id(), cShaderTypes[vs->type()].maskBit, vp->id() );

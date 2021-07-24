@@ -167,15 +167,15 @@ namespace neko {
       unique_ptr<PersistentBuffer<World>> world_;
       void dumpLog( const GLuint& target, const bool isProgram );
       void compileShader( Shader& shader, const string_view source );
-      void linkSingleProgram( Program& program, Shader& shader );
+      void linkSingleProgram( Program& program, Shader& shader, const vector<utf8String>& uniforms );
       utf8String loadSource( const utf8String& filename );
-      void buildSeparableProgram( const utf8String& name, const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program );
+      void buildSeparableProgram( const utf8String& name, const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program, const vector<utf8String>& uniforms );
     public:
       Shaders( ConsolePtr console );
       inline World* world() { return world_->buffer().data(); }
       void initialize();
-      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename );
-      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename );
+      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );
+      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );
       Pipeline& usePipeline( const utf8String& name );
       void shutdown();
       ~Shaders();
