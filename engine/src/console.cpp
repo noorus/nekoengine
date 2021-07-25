@@ -146,7 +146,7 @@ namespace neko {
     registerSource( "engine", rgbToVec3( 60, 64, 76 ) );
     registerSource( "gfx", rgbToVec3( 79, 115, 44 ) );
     registerSource( "sound", rgbToVec3( 181, 80, 10 ) );
-    registerSource( "fonts", rgbToVec3( 78, 29, 153 ) );
+    registerSource( "loader", rgbToVec3( 78, 29, 153 ) );
     registerSource( "scripts", rgbToVec3( 34, 70, 197 ) );
     registerSource( "input", rgbToVec3( 219, 38, 122 ) );
     registerSource( "game", rgbToVec3( 4, 127, 77 ) );

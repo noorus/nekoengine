@@ -88,6 +88,33 @@ namespace neko {
     finishedFontsEvent_.reset();
   }
 
+  void ThreadedLoader::getFinishedModels( vector<ModelLoadOutput>& models )
+  {
+    if ( !finishedModelsEvent_.check() )
+      return;
+
+    finishedTasksLock_.lock();
+    models.swap( finishedModels_ );
+    finishedTasksLock_.unlock();
+
+    finishedModels_.clear();
+    finishedModelsEvent_.reset();
+  }
+
+  inline vec2 tov2( const fbxsdk::FbxVector2& v2 )
+  {
+    return vec2( (float)v2.mData[0], (float)v2.mData[1] );
+  };
+
+  inline vec3 tov3( const fbxsdk::FbxVector4& v4 )
+  {
+    return vec3( (float)v4.mData[0], (float)v4.mData[1], (float)v4.mData[2] );
+  };
+  inline vec3 tov3( const FbxDouble3& v4 )
+  {
+    return vec3( (float)v4[0], (float)v4[1], (float)v4[2] );
+  };
+
   FbxString GetAttributeTypeName( FbxNodeAttribute::EType type )
   {
     switch ( type )
@@ -116,33 +143,127 @@ namespace neko {
     }
   }
 
-  void PrintAttribute( FbxNodeAttribute* pAttribute )
+  void PrintAttribute( FbxNodeAttribute* attribute )
   {
-    if ( !pAttribute )
+    if ( !attribute || attribute->GetAttributeType() == FbxNodeAttribute::eNull )
       return;
-    FbxString typeName = GetAttributeTypeName( pAttribute->GetAttributeType() );
-    FbxString attrName = pAttribute->GetName();
-    Locator::console().printf( Console::srcEngine, "<attribute type='%s' name='%s'/>", typeName.Buffer(), attrName.Buffer() );
+    FbxString typeName = GetAttributeTypeName( attribute->GetAttributeType() );
+    FbxString attrName = attribute->GetName();
+    Locator::console().printf( Console::srcLoader, "<attribute type='%s' name='%s'/>", typeName.Buffer(), attrName.Buffer() );
   }
 
-  void PrintNode( FbxNode* pNode )
+  struct SceneNode {
+    vec3 translate_;
+    quaternion rotate_;
+    vec3 scale_;
+  };
+
+  void parseFBXNode( FbxNode* node, vector<ModelLoadOutput>& out_models )
   {
-    const char* nodeName = pNode->GetName();
-    FbxDouble3 translation = pNode->LclTranslation.Get();
-    FbxDouble3 rotation = pNode->LclRotation.Get();
-    FbxDouble3 scaling = pNode->LclScaling.Get();
-    Locator::console().printf( Console::srcEngine,
+    const char* nodeName = node->GetName();
+
+    SceneNode out;
+    out.translate_ = tov3( node->LclTranslation.Get() );
+    out.scale_ = tov3( node->LclScaling.Get() );
+    FbxDouble3 rotation = node->LclRotation.Get();
+    FbxDouble3 scaling = node->LclScaling.Get();
+
+    /*Locator::console().printf( Console::srcLoader,
       "<node name='%s' translation='(%f, %f, %f)' rotation='(%f, %f, %f)' scaling='(%f, %f, %f)'>",
       nodeName,
       translation[0], translation[1], translation[2],
       rotation[0], rotation[1], rotation[2],
       scaling[0], scaling[1], scaling[2]
-    );
-    for ( int i = 0; i < pNode->GetNodeAttributeCount(); i++ )
-      PrintAttribute( pNode->GetNodeAttributeByIndex( i ) );
-    for ( int j = 0; j < pNode->GetChildCount(); j++ )
-      PrintNode( pNode->GetChild( j ) );
-    Locator::console().printf( Console::srcEngine, "</node>" );
+    );*/
+
+    for ( int i = 0; i < node->GetNodeAttributeCount(); i++ )
+    {
+      auto attribute = node->GetNodeAttributeByIndex( i );
+      PrintAttribute( attribute );
+      if ( attribute->GetAttributeType() == FbxNodeAttribute::eMesh )
+      {
+        ModelLoadOutput model;
+        auto mesh = static_cast<fbxsdk::FbxMesh*>( attribute );
+        GLuint index_counter = 0;
+        auto e_verts = mesh->GetControlPoints();
+        auto polycount = mesh->GetPolygonCount();
+        auto uvcount = mesh->GetElementUVCount();
+        auto normalcount = mesh->GetElementNormalCount();
+        auto tangentcount = mesh->GetElementTangentCount();
+        Locator::console().printf( Console::srcLoader, "Mesh has %i polygons, %i UV elements, %i normals, %i tangents", polycount, uvcount, normalcount, tangentcount );
+        assert( uvcount == 1 && normalcount == 1 );
+        for ( int j = 0; j < polycount; j++ )
+        {
+          auto polysize = mesh->GetPolygonSize( j );
+          assert( polysize == 3 || polysize == 4 );
+          model.indices.push_back( index_counter + 0 );
+          model.indices.push_back( index_counter + 1 );
+          model.indices.push_back( index_counter + 2 );
+          if ( polysize == 4 )
+          {
+            model.indices.push_back( index_counter + 2 );
+            model.indices.push_back( index_counter + 3 );
+            model.indices.push_back( index_counter + 0 );
+          }
+          index_counter += (GLuint)polysize;
+          for ( int k = 0; k < polysize; k++ )
+          {
+            auto idx = mesh->GetPolygonVertex( j, k );
+            Vertex3D out;
+            out.position = tov3( e_verts[idx] );
+            for ( int l = 0; l < uvcount; l++ )
+            {
+              auto e_uvs = mesh->GetElementUV( l );
+              int index = -1;
+              if ( e_uvs->GetMappingMode() == FbxGeometryElement::eByControlPoint )
+              {
+                if ( e_uvs->GetReferenceMode() == FbxGeometryElement::eDirect )
+                  index = idx;
+                else if ( e_uvs->GetReferenceMode() == FbxGeometryElement::eIndexToDirect )
+                  index = e_uvs->GetIndexArray().GetAt( idx );
+              } else if ( e_uvs->GetMappingMode() == FbxGeometryElement::eByPolygonVertex && e_uvs->GetReferenceMode() == FbxGeometryElement::eIndexToDirect )
+                index = mesh->GetTextureUVIndex( j, k );
+              assert( index >= 0 );
+              out.texcoord = tov2( e_uvs->GetDirectArray().GetAt( index ) );
+            }
+            for ( int l = 0; l < normalcount; l++ )
+            {
+              auto e_normals = mesh->GetElementNormal( l );
+              int index = -1;
+              assert( e_normals->GetMappingMode() == FbxGeometryElement::eByPolygonVertex );
+              if ( e_normals->GetReferenceMode() == FbxGeometryElement::eDirect )
+                index = idx;
+              else if ( e_normals->GetReferenceMode() == FbxGeometryElement::eIndexToDirect )
+                index = e_normals->GetIndexArray().GetAt( idx );
+              assert( index >= 0 );
+              out.normal = tov3( e_normals->GetDirectArray().GetAt( index ) );
+            }
+            for ( int l = 0; l < tangentcount; l++ )
+            {
+              auto e_tangents = mesh->GetElementTangent( l );
+              int index = -1;
+              assert( e_tangents->GetMappingMode() == FbxGeometryElement::eByPolygonVertex );
+              if ( e_tangents->GetReferenceMode() == FbxGeometryElement::eDirect )
+                index = idx;
+              else if ( e_tangents->GetReferenceMode() == FbxGeometryElement::eIndexToDirect )
+                index = e_tangents->GetIndexArray().GetAt( idx );
+              assert( index >= 0 );
+              out.tangent = tov3( e_tangents->GetDirectArray().GetAt( index ) );
+            }
+            model.vertices.push_back( move( out ) );
+            // Locator::console().printf( Console::srcEngine, "Vertex: pos %.2f %.2f %.2f normal %.2f %.2f %.2f uv %.2f %.2f tangent %.2f %.2f %.2f bitangent %.2f %.2f %.2f",
+            //   out.position.x, out.position.y, out.position.z,
+            //   out.normal.x, out.normal.y, out.normal.z,
+            //   out.texcoord.x, out.texcoord.y,
+            //   out.tangent.x, out.tangent.y, out.tangent.z,
+            //   out.bitangent.x, out.bitangent.y, out.bitangent.z );
+          }
+        }
+        out_models.push_back( move( model ) );
+      }
+    }
+    for ( int j = 0; j < node->GetChildCount(); j++ )
+      parseFBXNode( node->GetChild( j ), out_models );
   }
 
   // Context: Worker thread
@@ -199,8 +320,12 @@ namespace neko {
           auto scene = FbxScene::Create( fbxmgr_, "loaderScene" );
           importer->Import( scene );
           auto root = scene->GetRootNode();
-          //if ( root )
-          //  PrintNode( root );
+          assert( root );
+          vector<ModelLoadOutput> out;
+          parseFBXNode( root, out );
+          finishedTasksLock_.lock();
+          finishedModels_.insert( finishedModels_.end(), out.begin(), out.end() );
+          finishedTasksLock_.unlock();
         }
         importer->Destroy( true );
       }
@@ -211,6 +336,9 @@ namespace neko {
 
     if ( !finishedFonts_.empty() )
       finishedFontsEvent_.set();
+
+    if ( !finishedModels_.empty() )
+      finishedModelsEvent_.set();
   }
 
   ThreadedLoader::~ThreadedLoader()

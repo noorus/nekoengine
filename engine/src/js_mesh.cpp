@@ -63,6 +63,7 @@ namespace neko {
         verts[i].normal = vec3( 0.0f );
         verts[i].texcoord.x = static_cast<Real>( arrayValue->Get( context, 3 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
         verts[i].texcoord.y = static_cast<Real>( arrayValue->Get( context, 4 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
       }
       vbo->pushVertices( move( verts ) );
     }

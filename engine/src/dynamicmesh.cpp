@@ -38,12 +38,6 @@ namespace neko {
     vbo_->pushVertices( vertices );
   }
 
-  void DynamicMesh::pushVertices( const vector<VertexText3D>& vertices )
-  {
-    assert( vbo_->type_ == VBO_Text );
-    vbo_->pushVertices( vertices );
-  }
-
   void DynamicMesh::pushVertices( const vector<MyGUI::Vertex>& vertices )
   {
     assert( vbo_->type_ == VBO_MyGUI );

@@ -98,7 +98,7 @@ namespace neko {
     timer.start();
     fonts_ = make_shared<FontManager>( shared_from_this() );
     fonts_->initialize();
-    console_->printf( Console::srcFonts, "Font manager init took %dms", (int)timer.stop() );
+    console_->printf( Console::srcGfx, "Font manager init took %dms", (int)timer.stop() );
 
     timer.start();
     renderer_ = make_shared<ThreadedRenderer>( shared_from_this(), loader_, fonts_, messaging_, director_, console_ );

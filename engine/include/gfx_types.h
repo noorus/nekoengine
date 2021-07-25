@@ -20,17 +20,6 @@ namespace neko {
 
   //! Packed structs we use with OpenGL
 #pragma pack( push, 1 )
-  struct Vertex3D {
-    static const size_t element_count = 8;
-    vec3 position; //!< Vertex coordinates
-    vec3 normal; //!< Vertex normal
-    vec2 texcoord; //!< Texture coordinates
-    Vertex3D(): position( 0.0f, 0.0f, 0.0f ), normal( 0.0f, 0.0f, 0.0f ), texcoord( 0.0f, 0.0f ) {}
-    Vertex3D( float x_, float y_, float z_, float nx_, float ny_, float nz_, float s_, float t_ ):
-      position( x_, y_, z_ ), normal( nx_, ny_, nz_ ), texcoord( s_, t_ ) {}
-    Vertex3D( vec3 pos, vec3 normal_, vec2 texc ):
-      position( move( pos ) ), normal( move( normal_ ) ), texcoord( move( texc ) ) {}
-  };
   struct Vertex2D {
     static const size_t element_count = 4;
     float x, y; //!< Vertex coordinates
@@ -38,15 +27,19 @@ namespace neko {
     Vertex2D(): x( 0.0f ), y( 0.0f ), s( 0.0f ), t( 0.0f ) {}
     Vertex2D( float x_, float y_, float s_, float t_ ): x( x_ ), y( y_ ), s( s_ ), t( t_ ) {}
   };
-  struct VertexText3D {
-    static const size_t element_count = 9;
-    vec3 position;
-    vec2 texcoord;
-    vec4 color;
-    VertexText3D(): position( 0.0f, 0.0f, 0.0f ), texcoord( 0.0f, 0.0f ), color( 0.0f, 0.0f, 0.0f, 0.0f ) {}
-    VertexText3D( float x_, float y_, float z_, float s_, float t_, float r_, float g_, float b_, float a_ ):
-      position( x_, y_, z_ ), texcoord( s_, t_ ), color( r_, g_, b_, a_ ) {}
-    VertexText3D( vec3 pos, vec2 texc, vec4 clr ): position( move( pos ) ), texcoord( move( texc ) ), color( move( clr ) ) {}
+  struct Vertex3D {
+    static const size_t element_count = 18;
+    vec3 position; //!< 0: Vertex coordinates
+    vec3 normal; //!< 1: Vertex normal
+    vec2 texcoord; //!< 2: UV coordinates
+    vec4 color; //!< 3: Vertex color
+    vec3 tangent; //!< 4: Tangent
+    vec3 bitangent; //!< 5: Bitangent
+    Vertex3D(): position{ 0.0f }, normal{ 0.0f }, texcoord{ 0.0f }, tangent{ 0.0f }, bitangent{ 0.0f }, color{ 0.0f } {}
+    Vertex3D( float x_, float y_, float z_, float nx_, float ny_, float nz_, float s_, float t_, float r_, float g_, float b_, float a_ ):
+      position( x_, y_, z_ ), normal( nx_, ny_, nz_ ), texcoord( s_, t_ ), color( r_, g_, b_, a_ ), tangent{ 0.0f }, bitangent{ 0.0f } {}
+    Vertex3D( vec3 position_, vec3 normal_, vec2 texcoord_, vec4 color_ ):
+      position( move( position_ ) ), normal( move( normal_ ) ), texcoord( move( texcoord_ ) ), color( move( color_ ) ), tangent{ 0.0f }, bitangent{ 0.0f } {}
   };
   struct PixelRGBA {
     uint8_t r, g, b, a;

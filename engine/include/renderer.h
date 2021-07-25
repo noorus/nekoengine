@@ -83,6 +83,7 @@ namespace neko {
     inline MeshManager& meshes() throw() { return *( meshes_.get() ); }
     void prepare( GameTime time );
     void uploadTextures();
+    void uploadModels();
     void jsRestart();
     inline shaders::Shaders& shaders() throw() { return *( shaders_.get() ); }
     void draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui );

@@ -38,7 +38,6 @@ namespace neko {
 #endif
     VBOPtr pushVBO( const vector<Vertex3D>& vertices );
     VBOPtr pushVBO( const vector<Vertex2D>& vertices );
-    VBOPtr pushVBO( const vector<VertexText3D>& vertices );
     VBOPtr pushVBO( const vector<MyGUI::Vertex>& vertices );
     void uploadVBOs();
     VAOPtr pushVAO( VBOPtr verticesVBO );

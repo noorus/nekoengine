@@ -135,13 +135,6 @@ namespace neko {
     return move( vbo );
   }
 
-  VBOPtr MeshManager::pushVBO( const vector<VertexText3D>& vertices )
-  {
-    auto vbo = createVBO( VBO_Text, false );
-    vbo->pushVertices( vertices );
-    return move( vbo );
-  }
-
   VBOPtr MeshManager::pushVBO( const vector<MyGUI::Vertex>& vertices )
   {
     auto vbo = createVBO( VBO_MyGUI, false );
@@ -191,14 +184,6 @@ namespace neko {
                 store.data(),
                 resolveFlags( dirties[i] ) );
             } break;
-            case VBO_Text:
-            {
-              auto& store = dirties[i]->vt3d();
-              glNamedBufferStorage( dirties[i]->id_,
-                store.size() * sizeof( VertexText3D ),
-                store.data(),
-                resolveFlags( dirties[i] ) );
-            }
             break;
             case VBO_MyGUI:
             {
@@ -308,16 +293,7 @@ namespace neko {
         glVertexArrayElementBuffer( ids[i], dirties[i]->ebo_->id_ );
       }
 
-      if ( vbo->type_ == VBO_3D )
-      {
-        AttribWriter attribs;
-        attribs.add( GL_FLOAT, 3 ); // vec3 position
-        attribs.add( GL_FLOAT, 3 ); // vec3 normal
-        attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
-        attribs.write( ids[i] );
-        glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
-      }
-      else if ( vbo->type_ == VBO_2D )
+      if ( vbo->type_ == VBO_2D )
       {
         AttribWriter attribs;
         attribs.add( GL_FLOAT, 2 ); // vec2 position
@@ -325,12 +301,15 @@ namespace neko {
         attribs.write( ids[i] );
         glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
       }
-      else if ( dirties[i]->vbo_->type_ == VBO_Text )
+      else if ( vbo->type_ == VBO_3D )
       {
         AttribWriter attribs;
         attribs.add( GL_FLOAT, 3 ); // vec3 position
+        attribs.add( GL_FLOAT, 3 ); // vec3 normal
         attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
         attribs.add( GL_FLOAT, 4 ); // vec4 color
+        attribs.add( GL_FLOAT, 3 ); // vec3 tangent
+        attribs.add( GL_FLOAT, 3 ); // vec3 bitangent
         attribs.write( ids[i] );
         glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
       }

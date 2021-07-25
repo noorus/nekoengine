@@ -5,6 +5,12 @@
 
 namespace neko {
 
+  struct ModelLoadOutput
+  {
+    vector<Vertex3D> vertices;
+    vector<GLuint> indices;
+  };
+
   struct LoadTask {
     enum LoadType {
       Load_Texture,
@@ -22,6 +28,8 @@ namespace neko {
     } fontfaceLoad;
     struct ModelLoad {
       utf8String path_;
+      vector<Vertex3D> vertices_;
+      vector<GLuint> indices_;
     } modelLoad;
     LoadTask( MaterialPtr material, vector<utf8String> paths ): type_( Load_Texture )
     {
@@ -50,11 +58,13 @@ namespace neko {
     platform::RWLock addTaskLock_;
     platform::Event finishedMaterialsEvent_;
     platform::Event finishedFontsEvent_;
+    platform::Event finishedModelsEvent_;
     platform::RWLock finishedTasksLock_;
     FbxManager* fbxmgr_;
     FbxIOSettings* fbxio_;
     LoadTaskVector newTasks_;
     MaterialVector finishedMaterials_;
+    vector<ModelLoadOutput> finishedModels_;
     FontVector finishedFonts_;
     void handleNewTasks();
   private:
@@ -65,6 +75,7 @@ namespace neko {
     void stop();
     void getFinishedMaterials( MaterialVector& materials );
     void getFinishedFonts( FontVector& fonts );
+    void getFinishedModels( vector<ModelLoadOutput>& models );
     void addLoadTask( const LoadTaskVector& resources );
     ~ThreadedLoader();
   };

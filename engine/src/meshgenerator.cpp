@@ -20,13 +20,17 @@ namespace neko {
     auto delta1 = vec3( dimensions.x / (Real)segments.x * vx );
     auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
 
+    // World is a bleak place
+    auto color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+
     auto orig = position + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
     for ( auto i = 0; i <= segments.x; ++i )
       for ( auto j = 0; j <= segments.y; ++j )
       {
         auto v = Vertex3D{
           orig + (Real)i * delta1 + (Real)j * delta2, normal,
-          vec2( i / (Real)segments.x, j / (Real)segments.y ) };
+          vec2( i / (Real)segments.x, j / (Real)segments.y ),
+          color };
         verts[i * ( segments.y + 1 ) + j] = move( v );
       }
 
