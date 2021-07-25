@@ -88,6 +88,49 @@ namespace neko {
 
   }
 
+#pragma pack( push, 1 )
+  struct VertexPointRender {
+    vec3 pos;
+    vec4 color;
+  };
+#pragma pack( pop )
+
+  class PointRenderBuffer {
+  protected:
+    const GLuint c_maxVertices = 32;
+    unique_ptr<SmarterBuffer<VertexPointRender>> buffer_;
+    GLuint vao_;
+  public:
+    PointRenderBuffer()
+    {
+      buffer_ = make_unique<SmarterBuffer<VertexPointRender>>( c_maxVertices );
+      glCreateVertexArrays( 1, &vao_ );
+      neko::AttribWriter attribs;
+      attribs.add( GL_FLOAT, 3 ); // vec3 position
+      attribs.add( GL_FLOAT, 4 ); // vec4 color
+      attribs.write( vao_ );
+      glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
+    }
+    inline SmarterBuffer<VertexPointRender>& buffer() { return *buffer_.get(); }
+    void draw( shaders::Shaders& shaders, GLsizei count, GLint base = 0 )
+    {
+      glBindVertexArray( vao_ );
+      auto& pipeline = shaders.usePipeline( "pointlight" );
+      mat4 mdl( 1.0f );
+      pipeline.setUniform( "model", mdl );
+      // glEnable( GL_PROGRAM_POINT_SIZE );
+      glDrawArrays( GL_POINTS, base, count );
+      glBindVertexArray( 0 );
+    }
+    ~PointRenderBuffer()
+    {
+      glDeleteVertexArrays( 1, &vao_ );
+      buffer_.reset();
+    }
+  };
+
+  static unique_ptr<PointRenderBuffer> g_pointrender;
+
   class DynamicText {
   public:
     DynamicMeshPtr mesh_;
@@ -327,6 +370,8 @@ namespace neko {
 
     mainbuffer_ = make_shared<Framebuffer>( this, 2, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
     intermediate_ = make_shared<Framebuffer>( this, 2, 1 );
+
+    g_pointrender = make_unique<PointRenderBuffer>();
 
     reset( width, height );
   }
@@ -611,11 +656,16 @@ namespace neko {
       shaders_->world()->pointLights[i].dummy = vec4( 0.0f );
     }
 
-    shaders_->world()->pointLights[0].position = vec4( math::sin( (Real)time * 1.2f ) * 6.0f, 6.0f, math::cos( (Real)time * 1.2f ) * 6.0f, 1.0f );
+    vec3 lightpos[2] = {
+      vec3( math::sin( (Real)time * 0.25f * 1.2f ) * 5.0f, 4.0f, math::cos( (Real)time * 0.25f * 1.2f ) * 5.0f ),
+      vec3( math::cos( (Real)time * 0.25f * 1.6f ) * 4.0f, math::sin( (Real)time * 0.25f * 1.6f ) * 2.0f, math::sin( (Real)time * 0.25f + 2.0f * 1.6f ) * 4.0f )
+    };
+
+    shaders_->world()->pointLights[0].position = vec4( lightpos[0], 1.0f );
     shaders_->world()->pointLights[0].color = vec4( 250.0f, 250.0f, 250.0f, 1.0f );
     shaders_->world()->pointLights[0].dummy = vec4( 1.0f );
 
-    shaders_->world()->pointLights[1].position = vec4( math::cos( (Real)time * 1.6f ) * 6.0f, math::sin( (Real)time * 1.6f ) * 2.0f, math::sin( (Real)time + 2.0f * 1.6f ) * 6.0f, 1.0f );
+    shaders_->world()->pointLights[1].position = vec4( lightpos[1], 1.0f );
     shaders_->world()->pointLights[1].color = vec4( math::sin( (Real)time * 2.0f ) * 50.0f + 50.0f, 0.0f, math::cos( (Real)time * 2.0f ) * 50.0f + 50.0f, 1.0f );
     shaders_->world()->pointLights[1].dummy = vec4( 1.0f );
 
@@ -665,6 +715,16 @@ namespace neko {
       glLineWidth( 2.0f );
       builtin_.cube_->draw();
     }
+
+    g_pointrender->buffer().lock();
+    auto lightpoints = g_pointrender->buffer().buffer().data();
+    lightpoints[0].pos = lightpos[0];
+    lightpoints[0].color = shaders_->world()->pointLights[0].color;
+    lightpoints[1].pos = lightpos[1];
+    lightpoints[1].color = shaders_->world()->pointLights[1].color;
+    g_pointrender->buffer().unlock();
+
+    g_pointrender->draw( *shaders_.get(), 2, 0 );
 
     /*if ( g_testText && g_textAdded )
     {
@@ -751,6 +811,7 @@ namespace neko {
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
 
+    g_pointrender.reset();
     g_testText.reset();
 
     intermediate_.reset();

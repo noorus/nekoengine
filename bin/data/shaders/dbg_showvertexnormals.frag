@@ -2,8 +2,8 @@
 
 in vec3 normal;
 
-layout (location = 0) out vec4 out_color;
-layout (location = 1) out vec4 out_gbuffer;
+layout ( location = 0 ) out vec4 out_color;
+layout ( location = 1 ) out vec4 out_gbuffer;
 
 void main()
 {

@@ -444,5 +444,14 @@
     <None Include="..\bin\data\shaders\inc.colorutils.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\bin\data\shaders\pointlight.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\pointlight.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\pointlight.geom">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
