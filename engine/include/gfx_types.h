@@ -56,6 +56,8 @@ namespace neko {
   enum PixelFormat {
     PixFmtColorRGB8,
     PixFmtColorRGBA8,
+    PixFmtColorRGBA16f,
+    PixFmtColorRGBA32f,
     PixFmtDepth32f,
     PixFmtColorR8
   };

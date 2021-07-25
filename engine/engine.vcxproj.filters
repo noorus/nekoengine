@@ -399,9 +399,6 @@
     <None Include="..\bin\data\shaders\default3d.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\default2d.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\bin\data\shaders\mainframebuf2d.vert">
       <Filter>Shaders</Filter>
     </None>
@@ -415,9 +412,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\data\shaders\default3d.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\default2d.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\script\math.js">
@@ -442,6 +436,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\data\shaders\mat_worldpbr.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\inc.buffers.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\inc.colorutils.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

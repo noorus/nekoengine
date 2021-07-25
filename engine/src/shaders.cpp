@@ -47,15 +47,40 @@ namespace neko {
       rootFilePath_ = platform::getCurrentDirectory();
       rootFilePath_.append( R"(\data\shaders\)" );
 
-      world_ = make_unique<PersistentBuffer<World>>();
+      world_ = make_unique<PersistentBuffer<neko::uniforms::World>>();
+      processing_ = make_unique<PersistentBuffer<neko::uniforms::Processing>>();
 
-      //createSimplePipeline( "default2d", "default2d.vert", "default2d.frag" );
+      // generate the gaussian blur kernel
+      {
+        auto& buf = processing_->buffer();
+        const float sigma = 15.0f;
+        auto normpdf = []( float x, float sigma ) -> float
+        {
+          return 0.39894f * exp( -0.5f * x * x / ( sigma * sigma ) ) / sigma;
+        };
+        const int ksize = ( ( neko::uniforms::c_gaussianBlurSamples - 1 ) / 2 );
+        for ( int i = 0; i <= ksize; ++i )
+        {
+          buf.data()->gaussianKernel[ksize + i]
+            = buf.data()->gaussianKernel[ksize - i]
+            = normpdf( (float)i, sigma );
+        }
+        float z = 0.0f;
+        for ( int i = 0; i < neko::uniforms::c_gaussianBlurSamples; ++i )
+          z += buf.data()->gaussianKernel[i];
+        buf.data()->gaussianZ = z;
+      }
+
+      // includes
+      loadInclude( "inc.buffers.glsl" );
+      loadInclude( "inc.colorutils.glsl" );
+
       createSimplePipeline( "default3d", "default3d.vert", "default3d.frag", { "model", "tex" } );
-      createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag", { "screenTexture" } );
+      createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag", { "texMain", "texGBuffer", "hdr", "exposure", "gamma" } );
       createSimplePipeline( "text3d", "text3d.vert", "text3d.frag", { "model", "tex" } );
       createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag", { "yscale", "tex" } );
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
-      createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "texAlbedo", "texHeight", "texMetallic", "texNormal" } );
+      createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "camera", "texAlbedo", "texHeight", "texMetallic", "texNormal" } );
     }
 
     // Shader
@@ -140,6 +165,8 @@ namespace neko {
       }
     }
 
+    static const char* const c_includeSearchPath = "/";
+
     void Shaders::compileShader( Shader& shader, const string_view source )
     {
       if ( shader.type() >= Max_Shader_Type )
@@ -150,7 +177,8 @@ namespace neko {
 
       auto src = (const GLchar*)source.data();
       glShaderSource( shader.id(), 1, &src, nullptr );
-      glCompileShader( shader.id() );
+      glCompileShaderIncludeARB( shader.id(), 1, &c_includeSearchPath, nullptr );
+      // glCompileShader( shader.id() );
 
       GLint compiled = 0;
       glGetShaderiv( shader.id(), GL_COMPILE_STATUS, &compiled );
@@ -201,6 +229,15 @@ namespace neko {
       file.read( &source[0], (uint32_t)file.size() );
       source[file.size()] = '\0';
       return move( source );
+    }
+
+    void Shaders::loadInclude( utf8String filename )
+    {
+      // https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_shading_language_include.txt
+      auto source = loadSource( filename );
+      filename = "/" + filename;
+      source[source.length() - 1] = '\n';
+      glNamedStringARB( gl::GL_SHADER_INCLUDE_ARB, (GLint)filename.length(), filename.c_str(), (GLint)source.length(), source.c_str() );
     }
 
     void Shaders::buildSeparableProgram( const utf8String& name,
@@ -275,6 +312,7 @@ namespace neko {
       auto& pipeline = ( *pipelines_[name] );
       glBindProgramPipeline( pipeline.id_ );
       glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 0, world_->id() );
+      glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 1, processing_->id() );
 
       return pipeline;
     }

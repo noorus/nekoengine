@@ -15,7 +15,8 @@ namespace neko {
     M_Window_ExitMove,
     M_Window_Close,
     // Debug commands
-    M_Debug_ReloadScript
+    M_Debug_ReloadScript,
+    M_Debug_ReloadShaders
   };
 
   struct Message {

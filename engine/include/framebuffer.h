@@ -20,22 +20,25 @@ namespace neko {
     size_t height_; //!< Height in pixels.
     GLuint handle_; //!< Internal GL handle.
     Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
-    TexturePtr colorBuffer_;
+    vector<TexturePtr> colorBuffers_;
     RenderbufferPtr depthBuffer_;
+    size_t colorbufcount_;
     int multisamples_;
     vec4 clearColor_;
     int savedViewport_[4];
     mutable bool available_;
   public:
     Framebuffer() = delete;
-    Framebuffer( Renderer* renderer, int multisamples = 1 );
+    Framebuffer( Renderer* renderer, size_t colorBufferCount, int multisamples );
     void recreate( size_t width, size_t height );
     void destroy();
     bool validate() const;
     void begin();
     void end();
-    void blitColorTo( Framebuffer& target );
-    inline TexturePtr texture() { return colorBuffer_; }
+    void prepare( size_t colorReadIndex, vector<size_t> colorWriteIndexes );
+    void blitColorTo( size_t sourceIndex, size_t destIndex, Framebuffer& target );
+    inline vector<TexturePtr>& textures() { return colorBuffers_; }
+    inline TexturePtr texture( size_t index ) { return colorBuffers_[index]; }
     bool available() const;
     ~Framebuffer();
   };

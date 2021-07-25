@@ -70,7 +70,7 @@ namespace neko {
     platform::RWLock loadLock_;
     MaterialVector materials_;
     DirectorPtr director_;
-    void sceneDraw( Camera& camera );
+    void sceneDraw( GameTime time, Camera& camera );
     void clearErrors();
   protected:
     FramebufferPtr mainbuffer_; //!< Multisampled primary scene render buffer

@@ -19,7 +19,7 @@ namespace neko {
 
   void Camera::update( GameTime time )
   {
-    position_ = vec3( math::sin( time ) * 6.0f, 6.0f, math::cos( time ) * 6.0f );
+    position_ = vec3( math::sin( (Real)time * 0.5f ) * 6.0f, 6.0f, math::cos( (Real)time * 0.5f ) * 6.0f );
     view_ = glm::lookAt( position_, vec3( 0.0f, 0.0f, 0.0f ), vec3( 0.0f, 1.0f, 0.0f ) );
     //view_ = glm::translate( position_ ); // glm::translate( vec3( -position_.x, -position_.y, position_.z ) );
   }

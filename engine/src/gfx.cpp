@@ -244,12 +244,24 @@ namespace neko {
       {
         if ( evt.key.code == sf::Keyboard::F5 )
           messaging_->send( M_Debug_ReloadScript );
+        if ( evt.key.code == sf::Keyboard::F6 )
+        {
+          messaging_->send( M_Debug_ReloadShaders );
+          flags_.reloadShaders = true;
+        }
       }
     }
   }
 
   void Gfx::update( GameTime time )
   {
+    if ( flags_.reloadShaders )
+    {
+      renderer_->shaders().shutdown();
+      renderer_->shaders().initialize();
+      flags_.reloadShaders = false;
+    }
+
     renderer_->prepare( time );
     camera_->update( time );
 

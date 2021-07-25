@@ -15,6 +15,10 @@ namespace neko {
   using namespace gl;
 
   NEKO_DECLARE_CONVAR( vid_msaa, "Main buffer multisample antialiasing multiplier.", 8 );
+  NEKO_DECLARE_CONVAR( dbg_shownormals, "Whether to visualize vertex normals with lines.", true );
+  NEKO_DECLARE_CONVAR( vid_hdr, "Toggle HDR processing.", true );
+  NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 2.2f );
+  NEKO_DECLARE_CONVAR( vid_exposure, "Testing.", 1.0f );
 
   namespace BuiltinData {
 
@@ -320,8 +324,8 @@ namespace neko {
     } ) } );
     loader_->addLoadTask( { LoadTask( R"(data\meshes\Tank_Tiger.FBX)" ) } );
 
-    mainbuffer_ = make_shared<Framebuffer>( this, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
-    intermediate_ = make_shared<Framebuffer>( this, 1 );
+    mainbuffer_ = make_shared<Framebuffer>( this, 2, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
+    intermediate_ = make_shared<Framebuffer>( this, 2, 1 );
 
     reset( width, height );
   }
@@ -570,7 +574,7 @@ namespace neko {
     return shaders_->usePipeline( "default3d" );
   }
 
-  void Renderer::sceneDraw( Camera& camera )
+  void Renderer::sceneDraw( GameTime time, Camera& camera )
   {
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LESS );
@@ -589,8 +593,22 @@ namespace neko {
 
     shaders_->world()->projection = camera.projection();
     shaders_->world()->view = camera.view();
+    shaders_->world()->time = (float)time;
 
-    auto& pl = shaders_->usePipeline( "default3d" );
+    for (int i = 0; i < neko::uniforms::c_pointLightCount; i++ )
+    {
+      shaders_->world()->pointLights[i].dummy = vec4( 0.0f );
+    }
+
+    shaders_->world()->pointLights[0].position = vec4( math::sin( (Real)time * 1.2f ) * 6.0f, 6.0f, math::cos( (Real)time * 1.2f ) * 6.0f, 1.0f );
+    shaders_->world()->pointLights[0].color = vec4( 250.0f, 250.0f, 250.0f, 1.0f );
+    shaders_->world()->pointLights[0].dummy = vec4( 1.0f );
+
+    shaders_->world()->pointLights[1].position = vec4( math::cos( (Real)time * 1.6f ) * 6.0f, math::sin( (Real)time * 1.6f ) * 2.0f, math::sin( (Real)time + 2.0f * 1.6f ) * 6.0f, 1.0f );
+    shaders_->world()->pointLights[1].color = vec4( math::sin( (Real)time * 2.0f ) * 50.0f + 50.0f, 0.0f, math::cos( (Real)time * 2.0f ) * 50.0f + 50.0f, 1.0f );
+    shaders_->world()->pointLights[1].dummy = vec4( 1.0f );
+
+    shaders_->processing()->ambient = vec4( 0.05f, 0.05f, 0.05f, 1.0f );
 
     // FIXME ridiculously primitive
     // Also, investigate glMultiDrawArraysIndirect
@@ -625,16 +643,19 @@ namespace neko {
     builtin_.cube_->begin();
     mat4 mdl( 1.0f );
     mdl = glm::scale( mdl, vec3( 3.0f, 3.0f, 3.0f ) );
-    useMaterial( 1 ).setUniform( "model", mdl );
+    useMaterial( 1 ).setUniform( "model", mdl ).setUniform( "camera", camera.position() );
     builtin_.cube_->draw();
 
-    shaders_->usePipeline( "dbg_showvertexnormals" ).setUniform( "model", mdl );
-    builtin_.cube_->begin();
-    glEnable( GL_LINE_SMOOTH );
-    glLineWidth( 2.0f );
-    builtin_.cube_->draw();
+    if ( g_CVar_dbg_shownormals.as_b() )
+    {
+      shaders_->usePipeline( "dbg_showvertexnormals" ).setUniform( "model", mdl );
+      builtin_.cube_->begin();
+      glEnable( GL_LINE_SMOOTH );
+      glLineWidth( 2.0f );
+      builtin_.cube_->draw();
+    }
 
-    if ( g_testText && g_textAdded )
+    /*if ( g_testText && g_textAdded )
     {
       g_testText->begin();
       mat4 model( 1.0f );
@@ -645,7 +666,7 @@ namespace neko {
       pipeline.setUniform( "model", model );
       pipeline.setUniform( "tex", 0 );
       g_testText->draw();
-    }
+    }*/
   }
 
   void Renderer::draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui )
@@ -667,19 +688,25 @@ namespace neko {
     glBindVertexArray( builtin_.emptyVAO_ );
 
     // Draw the scene inside the framebuffer.
+    mainbuffer_->prepare( 0, { 0, 1 } );
     mainbuffer_->begin();
-    sceneDraw( camera );
+    sceneDraw( time, camera );
     mainbuffer_->end();
 
-    mainbuffer_->blitColorTo( *intermediate_.get() );
+    mainbuffer_->blitColorTo( 0, 0, *intermediate_.get() );
+    mainbuffer_->blitColorTo( 1, 1, *intermediate_.get() );
 
     // Framebuffer has been unbound, now draw to the default context, the window.
-    glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );
+    glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
     builtin_.screenQuad_->begin();
     auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
-    pipeline.setUniform( "screenTexture", 0 );
+    pipeline.setUniform( "texMain", 0 );
+    pipeline.setUniform( "texGBuffer", 1 );
+    pipeline.setUniform( "hdr", g_CVar_vid_hdr.as_b() );
+    pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+    pipeline.setUniform( "exposure", g_CVar_vid_exposure.as_f() );
 
     /*auto pgm = pipeline.getProgramStage( shaders::Shader_Fragment );
     auto pal = gl::glGetUniformLocation( pgm, "palette" );
@@ -696,13 +723,15 @@ namespace neko {
     gl::glProgramUniform3fv( pgm, pal, 8, (GLfloat*)vals );
     pipeline.setUniform( "paletteSize", 8 );*/
 
-    glBindTextureUnit( 0, intermediate_->texture()->handle() );
+    glBindTextureUnit( 0, intermediate_->texture( 0 )->handle() );
+    glBindTextureUnit( 1, intermediate_->texture( 1 )->handle() );
     builtin_.screenQuad_->draw();
 
     if ( gui )
       gui->getRenderManagerPtr()->drawOneFrame( shaders_.get() );
 
     glBindTextureUnit( 0, 0 );
+    glBindTextureUnit( 1, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
   }
 

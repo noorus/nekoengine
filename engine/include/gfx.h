@@ -53,7 +53,8 @@ namespace neko {
     void resize( size_t width, size_t height );
     struct Flags {
       bool resized;
-      Flags(): resized( false ) {}
+      bool reloadShaders;
+      Flags(): resized( false ), reloadShaders( false ) {}
     } flags_;
   private:
     static void openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity,

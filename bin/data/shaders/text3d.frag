@@ -5,11 +5,12 @@ uniform sampler2D tex;
 in vec2 texcoord;
 in vec4 color;
 
-out vec4 frag_colour;
+layout (location = 0) out vec4 out_color;
+layout (location = 1) out vec4 out_gbuffer;
 
 void main()
 {
   vec4 texsmpl = texture(tex, texcoord);
   float alpha = color.a * texsmpl.r;
-  frag_colour = vec4(color.rgb, alpha);
+  out_color = vec4(color.rgb, alpha);
 }

@@ -4,18 +4,11 @@
 #include "forwards.h"
 #include "neko_exception.h"
 #include "mesh_primitives.h"
+#include "inc.buffers.glsl"
 
 namespace neko {
 
   namespace shaders {
-
-    // FIXME This alignment isn't guaranteed to work.
-    // Should query the requirement from the driver, it could be as bad as 256
-    __declspec(align(16)) struct World
-    {
-      mat4 projection;
-      mat4 view;
-    };
 
     enum Type {
       Shader_Vertex,
@@ -143,12 +136,13 @@ namespace neko {
       }
       inline bool ready() { return ( gl::glIsProgramPipeline( id_ ) && !stages_.empty() ); }
       template <typename T>
-      inline void setUniform( const char* name, T const& value )
+      inline Pipeline& setUniform( const char* name, T const& value )
       {
         for ( auto& stage : stages_ )
         {
           stage.second->setUniform( name, value );
         }
+        return ( *this );
       }
       ~Pipeline();
     };
@@ -164,15 +158,18 @@ namespace neko {
       ShaderVector shaders_;
       ProgramVector programs_;
       PipelineMap pipelines_;
-      unique_ptr<PersistentBuffer<World>> world_;
+      unique_ptr<PersistentBuffer<neko::uniforms::World>> world_;
+      unique_ptr<PersistentBuffer<neko::uniforms::Processing>> processing_;
       void dumpLog( const GLuint& target, const bool isProgram );
+      void loadInclude( utf8String filename );
       void compileShader( Shader& shader, const string_view source );
       void linkSingleProgram( Program& program, Shader& shader, const vector<utf8String>& uniforms );
       utf8String loadSource( const utf8String& filename );
       void buildSeparableProgram( const utf8String& name, const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program, const vector<utf8String>& uniforms );
     public:
       Shaders( ConsolePtr console );
-      inline World* world() { return world_->buffer().data(); }
+      inline neko::uniforms::World* world() { return world_->buffer().data(); }
+      inline neko::uniforms::Processing* processing() { return processing_->buffer().data(); }
       void initialize();
       void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );
       void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );

@@ -16,6 +16,7 @@ namespace neko {
     void update( GameTime time );
     inline const mat4& view() const throw() { return view_; }
     inline const mat4& projection() const throw() { return projection_; }
+    inline const vec3& position() const throw() { return position_; }
   };
 
 }

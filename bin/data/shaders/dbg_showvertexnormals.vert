@@ -1,7 +1,7 @@
 #version 450 core
 #extension GL_ARB_shading_language_include : require
 
-#include "inc.world.glsl"
+#include "inc.buffers.glsl"
 
 out gl_PerVertex {
   vec4 gl_Position;

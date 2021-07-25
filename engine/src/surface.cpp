@@ -23,6 +23,18 @@ namespace neko {
       internalFormat_ = GL_RGBA8;
       internalType_ = GL_UNSIGNED_BYTE;
     }
+    else if ( format_ == PixFmtColorRGBA16f )
+    {
+      glFormat_ = GL_RGBA;
+      internalFormat_ = GL_RGBA16F;
+      internalType_ = GL_FLOAT;
+    }
+    else if ( format_ == PixFmtColorRGBA32f )
+    {
+      glFormat_ = GL_RGBA;
+      internalFormat_ = GL_RGBA32F;
+      internalType_ = GL_FLOAT;
+    }
     else if ( format_ == PixFmtDepth32f )
     {
       glFormat_ = GL_DEPTH_COMPONENT;
