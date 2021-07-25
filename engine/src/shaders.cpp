@@ -50,7 +50,7 @@ namespace neko {
       world_ = make_unique<PersistentBuffer<neko::uniforms::World>>();
       processing_ = make_unique<PersistentBuffer<neko::uniforms::Processing>>();
 
-      // generate the gaussian blur kernel
+      // Generate the gaussian blur kernel
       {
         auto& buf = processing_->buffer();
         const float sigma = 15.0f;
@@ -71,11 +71,12 @@ namespace neko {
         buf.data()->gaussianZ = z;
       }
 
-      // includes
+      // Includes
       loadInclude( "inc.buffers.glsl" );
       loadInclude( "inc.colorutils.glsl" );
 
-      createSimplePipeline( "default3d", "default3d.vert", "default3d.frag", { "model", "tex" } );
+      // Default pipelines
+      createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "tex" } );
       createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag", { "texMain", "texGBuffer", "hdr", "exposure", "gamma" } );
       createSimplePipeline( "text3d", "text3d.vert", "text3d.frag", { "model", "tex" } );
       createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag", { "yscale", "tex" } );
@@ -213,12 +214,6 @@ namespace neko {
 
       for ( const auto& uni : uniforms )
         program.uniforms_[uni.c_str()] = glGetUniformLocation( program.id(), uni.c_str() );
-
-      //program.uniforms_["model"] = glGetUniformLocation( program.id(), "model" );
-      //program.uniforms_["tex"] = glGetUniformLocation( program.id(), "tex" );
-      //program.uniforms_["yscale"] = glGetUniformLocation( program.id(), "yscale" );
-      //program.uniforms_["palette"] = glGetUniformLocation( program.id(), "palette" );
-      //program.uniforms_["paletteSize"] = glGetUniformLocation( program.id(), "paletteSize" );
     }
 
     utf8String Shaders::loadSource( const utf8String& filename )

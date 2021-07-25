@@ -545,13 +545,13 @@ namespace neko {
     if ( index >= materials_.size() || !materials_[index]->uploaded() )
     {
       glBindTextures( 0, 4, empties );
-      return shaders_->usePipeline( "default3d" );
+      return shaders_->usePipeline( "mat_unlit" );
     }
     const auto& mat = materials_[index];
     if ( mat->type_ == Material::UnlitSimple )
     {
       glBindTextureUnit( 0, mat->layers_[0].texture_->handle() );
-      auto& pipeline = shaders_->usePipeline( "default3d" );
+      auto& pipeline = shaders_->usePipeline( "mat_unlit" );
       pipeline.setUniform( "tex", 0 );
       return pipeline;
     }
@@ -571,7 +571,7 @@ namespace neko {
       pipeline.setUniform( "texNormal", 3 );
       return pipeline;
     }
-    return shaders_->usePipeline( "default3d" );
+    return shaders_->usePipeline( "mat_unlit" );
   }
 
   void Renderer::sceneDraw( GameTime time, Camera& camera )

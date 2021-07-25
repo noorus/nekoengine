@@ -396,7 +396,7 @@
     <None Include="..\bin\script\initialization.js">
       <Filter>Scripts</Filter>
     </None>
-    <None Include="..\bin\data\shaders\default3d.vert">
+    <None Include="..\bin\data\shaders\mat_unlitdefault.vert">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\data\shaders\mainframebuf2d.vert">
@@ -411,7 +411,7 @@
     <None Include="..\bin\data\shaders\mainframebuf2d.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\default3d.frag">
+    <None Include="..\bin\data\shaders\mat_unlitdefault.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\script\math.js">
