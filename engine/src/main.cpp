@@ -30,7 +30,7 @@ auto g_exceptionReporter = []( string_view description )
   platform::errorBox( description, c_errorTitle );
 };
 
-inline int runMain()
+inline int runMain( const std::vector<std::wstring>& arguments )
 {
   bool failure = false;
 
@@ -64,6 +64,33 @@ inline int runMain()
   platform::performanceInitializeGameThread();
 
   EnginePtr engine = make_shared<Engine>( console );
+
+  size_t i = 0;
+  while ( i < arguments.size() )
+  {
+    if ( !arguments[i].empty() && arguments[i].c_str()[0] == L'+' )
+    {
+      i++;
+      if ( i < arguments.size() )
+      {
+        auto varname = platform::wideToUtf8( arguments[i - 1].substr( 1 ) );
+        auto var = console->getVariable( varname );
+        if ( !var )
+          console->printf( Console::srcEngine, R"(Command line "%S": Variable %s not found)", arguments[i - 1].c_str(), varname.c_str() );
+        else
+          var->set( platform::wideToUtf8( arguments[i] ) );
+      }
+    }
+    else if ( arguments[i] == L"-exec" )
+    {
+      i++;
+      if ( i < arguments.size() )
+        console->execute( platform::wideToUtf8( arguments[i] ) );
+    }
+    else
+      console->printf( Console::srcEngine, R"(Unknown command line "%S")", arguments[i].c_str() );
+    i++;
+  }
 
 #ifndef _DEBUG
   try
@@ -137,9 +164,15 @@ int APIENTRY wWinMain( HINSTANCE instance, HINSTANCE previous, LPWSTR cmdline, i
     if ( !arguments )
       return EXIT_FAILURE;
 
+    std::vector<std::wstring> args;
+    for ( int i = 0; i < argCount; i++ )
+      args.emplace_back( arguments[i] );
+
+    neko::parseCommandLine( argCount, arguments );
+
     LocalFree( arguments );
 
-    retval = runMain();
+    retval = runMain( args );
   }
 #ifndef _DEBUG
   catch ( neko::Exception& e )
