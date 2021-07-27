@@ -79,19 +79,23 @@ namespace neko {
 
   void GfxInput::onMouseButtonPressed( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
   {
+    #ifndef NEKO_NO_GUI
     platform::getCursorPosition( window_, mousePosition_ );
     MyGUI::InputManager::getInstance().injectMousePress(
       (int)mousePosition_.x, (int)mousePosition_.y,
       MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) );
+    #endif
   }
 
   void GfxInput::onMouseButtonReleased( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
   {
+#ifndef NEKO_NO_GUI
     platform::getCursorPosition( window_, mousePosition_ );
     MyGUI::InputManager::getInstance().
     MyGUI::InputManager::getInstance().injectMouseRelease(
       (int)mousePosition_.x, (int)mousePosition_.y,
       MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) );
+#endif
   }
 
   void GfxInput::onMouseWheelMoved( nil::Mouse* mouse, const nil::MouseState& state )
@@ -102,7 +106,9 @@ namespace neko {
 
   void GfxInput::onKeyPressed( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
   {
+#ifndef NEKO_NO_GUI
     MyGUI::InputManager::getInstance().injectKeyPress( MyGUI::KeyCode( (MyGUI::KeyCode::Enum)keycode ) );
+#endif
   }
 
   void GfxInput::onKeyRepeat( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
@@ -112,7 +118,9 @@ namespace neko {
 
   void GfxInput::onKeyReleased( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
   {
+#ifndef NEKO_NO_GUI
     MyGUI::InputManager::getInstance().injectKeyRelease( MyGUI::KeyCode( (MyGUI::KeyCode::Enum)keycode ) );
+#endif
   }
 
   void GfxInput::setWindowSize( vec2i size )
@@ -136,8 +144,10 @@ namespace neko {
         mousePosition_.y = 0;
       else if ( mousePosition_.y >= windowSize_.y )
         mousePosition_.y = (LONG)windowSize_.y - 1;
+#ifndef NEKO_NO_GUI
       MyGUI::InputManager::getInstance().injectMouseMove(
         (int)mousePosition_.x, (int)mousePosition_.y, mouseZ_ );
+#endif
       moved_ = false;
     }
   }

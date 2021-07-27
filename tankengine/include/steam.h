@@ -2,10 +2,13 @@
 
 #include "tankengine.h"
 
+#pragma warning( push )
+#pragma warning( disable : 4819 )
 #include "steam/steam_api_common.h"
 #include "steam/isteamapps.h"
 #include "steam/isteamfriends.h"
 #include "steam/isteamuser.h"
+#pragma warning( pop )
 
 namespace tank {
 

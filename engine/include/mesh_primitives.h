@@ -5,7 +5,15 @@
 #include "utilities.h"
 #include "neko_pooledtypes.h"
 
+#ifndef NEKO_NO_GUI
 #include <MyGUI/MyGUI_VertexData.h>
+#else
+namespace MyGUI {
+  struct Vertex {
+    int dummy = 0;
+  };
+}
+#endif
 
 namespace neko {
 

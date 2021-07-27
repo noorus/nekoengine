@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#ifndef NEKO_NO_GUI
+
 #include "MyGUI_NekoPlatform.h"
 
 #include "MyGUI/MyGUI_VertexData.h"
@@ -215,3 +217,5 @@ namespace MyGUI {
   }
 
 }
+
+#endif

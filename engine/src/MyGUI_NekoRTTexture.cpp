@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#ifndef NEKO_NO_GUI
+
 #include "MyGUI_NekoPlatform.h"
 
 #include "MyGUI_NekoRTTexture.h"
@@ -95,3 +97,5 @@ namespace MyGUI {
   }
 
 }
+
+#endif

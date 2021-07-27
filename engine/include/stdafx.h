@@ -93,11 +93,13 @@
 #include <SFML/Window.hpp>
 
 // FMOD
-#include <fmod.hpp>
-#include <fmod_errors.h>
-#include <fmod_studio.hpp>
-#include <fsbank.h>
-#include <fsbank_errors.h>
+#ifndef NEKO_NO_AUDIO
+# include <fmod.hpp>
+# include <fmod_errors.h>
+# include <fmod_studio.hpp>
+# include <fsbank.h>
+# include <fsbank_errors.h>
+#endif
 
 #pragma warning( push )
 #pragma warning( disable: 4251 )
@@ -148,16 +150,18 @@
 #include <nil.h>
 
 // MyGUI
+#ifndef NEKO_NO_GUI
 #pragma warning( push )
 #pragma warning( disable: 4275 )
 #include <MYGUI/MyGUI.h>
 #pragma warning( pop )
+#endif
 
 // FBX
 #include <fbxsdk.h>
 
 // OZZ
-#include <ozz/animation/runtime/animation.h>
+/*#include <ozz/animation/runtime/animation.h>
 #include <ozz/animation/runtime/local_to_model_job.h>
 #include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/animation/runtime/skeleton.h>
@@ -166,7 +170,7 @@
 #include <ozz/base/maths/simd_math.h>
 #include <ozz/base/maths/soa_transform.h>
 #include <ozz/base/maths/vec_float.h>
-#include <ozz/options/options.h>
+#include <ozz/options/options.h>*/
 
 // Local types
 #include "neko_types.h"
