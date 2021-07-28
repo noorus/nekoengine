@@ -144,7 +144,7 @@ namespace neko {
 
   //! \class ScopedRWLock
   //! Automation for scoped acquisition and release of an RWLock.
-  class ScopedRWLock: noncopyable {
+  class ScopedRWLock {
   protected:
     platform::RWLock* lock_;
     bool exclusive_;

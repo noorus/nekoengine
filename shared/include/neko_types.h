@@ -25,7 +25,7 @@
 #include <any>
 #include <optional>
 #include <atomic>
-#include <boost/math/constants/constants.hpp>
+#include <numbers>
 
 #undef min
 #undef max
@@ -120,12 +120,9 @@ namespace neko {
 
   using std::numeric_limits;
 
-  using boost::noncopyable;
-
 #ifdef NEKO_MATH_DOUBLE
   using Real = double;
   namespace numbers {
-    using namespace boost::math::double_constants;
     constexpr Real zero = 0.0;
     constexpr Real one = 1.0;
     constexpr Real two = 2.0;
@@ -133,6 +130,7 @@ namespace neko {
     constexpr Real six = 6.0;
     constexpr Real ten = 10.0;
     constexpr Real fifteen = 15.0;
+    constexpr Real pi = std::numbers::pi_v<double>;
   }
   using vec2 = glm::dvec2;
   using vec3 = glm::dvec3;
@@ -144,7 +142,6 @@ namespace neko {
 #else
   using Real = float;
   namespace numbers {
-    using namespace boost::math::float_constants;
     constexpr Real zero = 0.0f;
     constexpr Real one = 1.0f;
     constexpr Real two = 2.0f;
@@ -152,6 +149,7 @@ namespace neko {
     constexpr Real six = 6.0f;
     constexpr Real ten = 10.0f;
     constexpr Real fifteen = 15.0f;
+    constexpr Real pi = std::numbers::pi_v<float>;
   }
   using vec2 = glm::fvec2;
   using vec3 = glm::fvec3;

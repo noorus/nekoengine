@@ -46,7 +46,7 @@ namespace neko {
 
     //! \class RWLock
     //! Reader-writer lock class for easy portability.
-    class RWLock: noncopyable {
+    class RWLock {
     protected:
       SRWLOCK lock_;
     public:

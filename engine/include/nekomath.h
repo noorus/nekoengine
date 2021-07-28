@@ -1,7 +1,6 @@
 #pragma once
 #include "neko_types.h"
 #include <algorithm>
-#include <boost/math/constants/constants.hpp>
 
 #ifdef NEKO_MATH_DOUBLE
 # define NEKO_MATH_FUNC_ROUND ::round
@@ -38,6 +37,7 @@ namespace neko {
     using glm::normalize;
     using glm::dot;
     using glm::length;
+    using glm::cross;
 
     //! \fn inline Real round( Real value )
     //! \brief Rounds to the nearest non-decimal value.
@@ -190,6 +190,29 @@ namespace neko {
     {
       return ( abs( x2 - x1 ) + abs( y2 - y1 ) );
     }
+
+    //! \fn inline T projection( T v, T normal )
+    //! \brief Vector projection.
+    //! \param a The vector.
+    //! \param b The normal.
+    //! \return Vector projection.
+    template <typename T>
+    constexpr T projection( T v, T normal )
+    {
+      return ( glm::proj( v, normal ) );
+    }
+
+    //! \fn inline T rejection( T v, T normal )
+    //! \brief Vector rejection.
+    //! \param a The vector.
+    //! \param b The normal.
+    //! \return Vector rejection ( v - projection( v, normal ) ).
+    template <typename T>
+    constexpr T rejection( T v, T normal )
+    {
+      return ( v - projection( v, normal ) );
+    }
+
     //! \fn inline T interpolateLinear( const T& v1, const T& v2, const Real interp )
     //! Linear interpolation between v1..v2 at interp[0..1]
     template <typename T>
