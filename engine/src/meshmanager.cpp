@@ -308,7 +308,7 @@ namespace neko {
         attribs.add( GL_FLOAT, 3 ); // vec3 normal
         attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
         attribs.add( GL_FLOAT, 4 ); // vec4 color
-        attribs.add( GL_FLOAT, 3 ); // vec3 tangent
+        attribs.add( GL_FLOAT, 4 ); // vec4 tangent
         attribs.add( GL_FLOAT, 3 ); // vec3 bitangent
         attribs.write( ids[i] );
         glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );

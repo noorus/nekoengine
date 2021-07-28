@@ -168,8 +168,6 @@ int APIENTRY wWinMain( HINSTANCE instance, HINSTANCE previous, LPWSTR cmdline, i
     for ( int i = 0; i < argCount; i++ )
       args.emplace_back( arguments[i] );
 
-    neko::parseCommandLine( argCount, arguments );
-
     LocalFree( arguments );
 
     retval = runMain( args );

@@ -101,6 +101,47 @@ namespace neko {
     finishedModelsEvent_.reset();
   }
 
+  void generateTangents( vector<Vertex3D>& verts, const vector<GLuint>& indices )
+  {
+    GLuint inconsistentUvs = 0;
+    for ( GLuint l = 0; l < indices.size(); ++l )
+      verts[indices[l]].tangent = vec4( 0.0f );
+    for ( GLuint l = 0; l < indices.size(); ++l )
+    {
+      GLuint i = indices[l];
+      GLuint j = indices[( l + 1 ) % 3 + l / 3 * 3];
+      GLuint k = indices[( l + 2 ) % 3 + l / 3 * 3];
+      vec3 n = verts[i].normal;
+      vec3 v1 = verts[j].position - verts[i].position, v2 = verts[k].position - verts[i].position;
+      vec2 t1 = verts[j].texcoord - verts[i].texcoord, t2 = verts[k].texcoord - verts[i].texcoord;
+
+      // Is the texture flipped?
+      float uv2xArea = t1.x * t2.y - t1.y * t2.x;
+      if ( math::abs( uv2xArea ) < 0x1p-20 )
+        continue; // Smaller than 1/2 pixel at 1024x1024
+      float flip = uv2xArea > 0 ? 1 : -1;
+      // 'flip' or '-flip'; depends on the handedness of the space.
+      if ( verts[i].tangent.w != 0 && verts[i].tangent.w != -flip )
+        ++inconsistentUvs;
+      verts[i].tangent.w = -flip;
+
+      // Project triangle onto tangent plane
+      v1 -= n * math::dot( v1, n );
+      v2 -= n * math::dot( v2, n );
+      // Tangent is object space direction of texture coordinates
+      vec3 s = math::normalize( ( t2.y * v1 - t1.y * v2 ) * flip );
+
+      // Use angle between projected v1 and v2 as weight
+      float angle = math::acos( math::dot( v1, v2 ) / ( math::length( v1 ) * math::length( v2 ) ) );
+      verts[i].tangent += vec4( s * angle, 0 );
+    }
+    for ( GLuint l = 0; l < indices.size(); ++l )
+    {
+      vec4& t = verts[indices[l]].tangent;
+      t = vec4( normalize( vec3( t.x, t.y, t.z ) ), t.w );
+    }
+  }
+
   inline vec2 tov2( const fbxsdk::FbxVector2& v2 )
   {
     return vec2( (float)v2.mData[0], (float)v2.mData[1] );
@@ -110,6 +151,7 @@ namespace neko {
   {
     return vec3( (float)v4.mData[0], (float)v4.mData[1], (float)v4.mData[2] );
   };
+
   inline vec3 tov3( const FbxDouble3& v4 )
   {
     return vec3( (float)v4[0], (float)v4[1], (float)v4[2] );
@@ -248,17 +290,21 @@ namespace neko {
               else if ( e_tangents->GetReferenceMode() == FbxGeometryElement::eIndexToDirect )
                 index = e_tangents->GetIndexArray().GetAt( idx );
               assert( index >= 0 );
-              out.tangent = tov3( e_tangents->GetDirectArray().GetAt( index ) );
+              out.tangent = vec4( tov3( e_tangents->GetDirectArray().GetAt( index ) ), 1.0f );
             }
             model.vertices.push_back( move( out ) );
-            // Locator::console().printf( Console::srcEngine, "Vertex: pos %.2f %.2f %.2f normal %.2f %.2f %.2f uv %.2f %.2f tangent %.2f %.2f %.2f bitangent %.2f %.2f %.2f",
-            //   out.position.x, out.position.y, out.position.z,
-            //   out.normal.x, out.normal.y, out.normal.z,
-            //   out.texcoord.x, out.texcoord.y,
-            //   out.tangent.x, out.tangent.y, out.tangent.z,
-            //   out.bitangent.x, out.bitangent.y, out.bitangent.z );
           }
         }
+        generateTangents( model.vertices, model.indices );
+        /*for ( auto& vert : model.vertices )
+        {
+          Locator::console().printf( Console::srcEngine, "Vertex: pos %.2f %.2f %.2f normal %.2f %.2f %.2f uv %.2f %.2f tangent %.2f %.2f %.2f bitangent %.2f %.2f %.2f",
+            vert.position.x, vert.position.y, vert.position.z,
+            vert.normal.x, vert.normal.y, vert.normal.z,
+            vert.texcoord.x, vert.texcoord.y,
+            vert.tangent.x, vert.tangent.y, vert.tangent.z,
+            vert.bitangent.x, vert.bitangent.y, vert.bitangent.z );
+        }*/
         out_models.push_back( move( model ) );
       }
     }

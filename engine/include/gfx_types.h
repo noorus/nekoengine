@@ -28,12 +28,12 @@ namespace neko {
     Vertex2D( float x_, float y_, float s_, float t_ ): x( x_ ), y( y_ ), s( s_ ), t( t_ ) {}
   };
   struct Vertex3D {
-    static const size_t element_count = 18;
+    static const size_t element_count = 19;
     vec3 position; //!< 0: Vertex coordinates
     vec3 normal; //!< 1: Vertex normal
     vec2 texcoord; //!< 2: UV coordinates
     vec4 color; //!< 3: Vertex color
-    vec3 tangent; //!< 4: Tangent
+    vec4 tangent; //!< 4: Tangent
     vec3 bitangent; //!< 5: Bitangent
     Vertex3D(): position{ 0.0f }, normal{ 0.0f }, texcoord{ 0.0f }, tangent{ 0.0f }, bitangent{ 0.0f }, color{ 0.0f } {}
     Vertex3D( float x_, float y_, float z_, float nx_, float ny_, float nz_, float s_, float t_, float r_, float g_, float b_, float a_ ):

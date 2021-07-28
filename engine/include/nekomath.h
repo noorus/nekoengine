@@ -35,6 +35,9 @@ namespace neko {
 
     using std::min;
     using std::max;
+    using glm::normalize;
+    using glm::dot;
+    using glm::length;
 
     //! \fn inline Real round( Real value )
     //! \brief Rounds to the nearest non-decimal value.
