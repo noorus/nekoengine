@@ -102,11 +102,12 @@ namespace neko {
     finishedModelsEvent_.reset();
   }
 
-  void generateTangents( vector<Vertex3D>& verts, const vector<GLuint>& indices )
+  /*void generateTangents( vector<Vertex3D>& verts, const vector<GLuint>& indices )
   {
-    GLuint inconsistentUvs = 0;
     for ( GLuint l = 0; l < indices.size(); ++l )
       verts[indices[l]].tangent = vec4( 0.0f );
+
+    int inconsistents = 0;
     for ( GLuint l = 0; l < indices.size(); ++l )
     {
       GLuint i = indices[l];
@@ -123,7 +124,7 @@ namespace neko {
       float flip = uv2xArea > 0 ? 1 : -1;
       // 'flip' or '-flip'; depends on the handedness of the space.
       if ( verts[i].tangent.w != 0 && verts[i].tangent.w != -flip )
-        ++inconsistentUvs;
+        inconsistents++;
       verts[i].tangent.w = -flip;
 
       // Project triangle onto tangent plane
@@ -136,12 +137,13 @@ namespace neko {
       float angle = math::acos( math::dot( v1, v2 ) / ( math::length( v1 ) * math::length( v2 ) ) );
       verts[i].tangent += vec4( s * angle, 0 );
     }
+
     for ( GLuint l = 0; l < indices.size(); ++l )
     {
       vec4& t = verts[indices[l]].tangent;
       t = vec4( normalize( vec3( t.x, t.y, t.z ) ), t.w );
     }
-  }
+  }*/
 
   inline vec2 tov2( const fbxsdk::FbxVector2& v2 )
   {
@@ -211,13 +213,13 @@ namespace neko {
     FbxDouble3 rotation = node->LclRotation.Get();
     FbxDouble3 scaling = node->LclScaling.Get();
 
-    /*Locator::console().printf( Console::srcLoader,
+    Locator::console().printf( Console::srcLoader,
       "<node name='%s' translation='(%f, %f, %f)' rotation='(%f, %f, %f)' scaling='(%f, %f, %f)'>",
       nodeName,
-      translation[0], translation[1], translation[2],
+      out.translate_[0], out.translate_[1], out.translate_[2],
       rotation[0], rotation[1], rotation[2],
-      scaling[0], scaling[1], scaling[2]
-    );*/
+      out.scale_[0], out.scale_[1], out.scale_[2]
+    );
 
     for ( int i = 0; i < node->GetNodeAttributeCount(); i++ )
     {
@@ -296,7 +298,7 @@ namespace neko {
             model.vertices.push_back( move( out ) );
           }
         }
-        generateTangents( model.vertices, model.indices );
+        util::generateTangentsAndBitangents( model.vertices, model.indices );
         /*for ( auto& vert : model.vertices )
         {
           Locator::console().printf( Console::srcEngine, "Vertex: pos %.2f %.2f %.2f normal %.2f %.2f %.2f uv %.2f %.2f tangent %.2f %.2f %.2f bitangent %.2f %.2f %.2f",

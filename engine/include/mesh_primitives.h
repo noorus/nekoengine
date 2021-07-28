@@ -17,6 +17,12 @@ namespace MyGUI {
 
 namespace neko {
 
+  namespace util {
+
+    void generateTangentsAndBitangents( vector<Vertex3D>& verts, const vector<GLuint>& indices );
+
+  }
+
   template <typename T>
   class PersistentBuffer {
   protected:

@@ -9,6 +9,55 @@ namespace neko {
 #pragma warning(push)
 #pragma warning(disable: 4244)
 
+  namespace util {
+
+  void generateTangentsAndBitangents( vector<Vertex3D>& verts, const vector<GLuint>& indices )
+  {
+    for ( auto& vert : verts )
+    {
+      vert.tangent = vec4( 0.0f );
+      vert.bitangent = vec3( 0.0f );
+    }
+
+    int i = 0;
+    while ( i < indices.size() )
+    {
+      auto& v0 = verts[indices[i]];
+      auto& v1 = verts[indices[i + 1]];
+      auto& v2 = verts[indices[i + 2]];
+
+      vec3 e1 = v1.position - v0.position, e2 = v2.position - v0.position;
+      float x1 = v1.texcoord.x - v0.texcoord.x, x2 = v2.texcoord.x - v0.texcoord.x;
+      float y1 = v1.texcoord.y - v0.texcoord.y, y2 = v2.texcoord.y - v0.texcoord.y;
+      float r = 1.0f / ( x1 * y2 - x2 * y1 );
+      vec3 t = ( e1 * y2 - e2 * y1 ) * r;
+      vec3 b = ( e2 * x1 - e1 * x2 ) * r;
+
+      for ( int j = 0; j < 3; j++ )
+      {
+        if ( i + j >= verts.size() )
+          break;
+        verts[i + j].tangent += vec4( t, 0.0f );
+        verts[i + j].bitangent += b;
+      }
+
+      i += 3;
+    }
+
+    for ( auto& vert : verts )
+    {
+      auto n = vec3( vert.normal );
+      auto t = vec3( vert.tangent );
+      auto b = vec3( vert.bitangent );
+      auto xyz = math::normalize( math::rejection( t, n ) );
+      auto w = ( math::dot( math::cross( t, b ), n ) > 0.0f ) ? 1.0f : -1.0f;
+      vert.tangent = vec4( xyz, w );
+      vert.bitangent = math::cross( n, xyz ) * w;
+    }
+  }
+
+  }
+
   void implAddPlane( vector<Vertex3D>& verts, vector<GLuint>& indices, GLuint& offset, vec2 dimensions, vec2u segments, vec3 normal, vec3 position = vec3( 0.0f ) )
   {
     verts.resize( verts.size() + ( ( segments.x + 1 ) * ( segments.y + 1 ) ) );

@@ -279,6 +279,9 @@
     <None Include="..\bin\data\shaders\dbg_showvertexnormals.frag" />
     <None Include="..\bin\data\shaders\dbg_showvertexnormals.geom" />
     <None Include="..\bin\data\shaders\dbg_showvertexnormals.vert" />
+    <None Include="..\bin\data\shaders\dbg_showvertextangents.frag" />
+    <None Include="..\bin\data\shaders\dbg_showvertextangents.geom" />
+    <None Include="..\bin\data\shaders\dbg_showvertextangents.vert" />
     <None Include="..\bin\data\shaders\mat_unlitdefault.frag" />
     <None Include="..\bin\data\shaders\mat_unlitdefault.vert" />
     <None Include="..\bin\data\shaders\inc.colorutils.glsl" />

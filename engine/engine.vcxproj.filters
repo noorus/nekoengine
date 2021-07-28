@@ -453,5 +453,14 @@
     <None Include="..\bin\data\shaders\pointlight.geom">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\bin\data\shaders\dbg_showvertextangents.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\dbg_showvertextangents.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\shaders\dbg_showvertextangents.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

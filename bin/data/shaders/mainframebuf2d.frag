@@ -39,13 +39,12 @@ vec3 gaussianBlurredSample( sampler2D txtr, vec2 coord )
 void main()
 {
   vec3 hdrcolor = texture( texMain, texcoord ).rgb;
-  vec3 bloomcolor = gaussianBlurredSample( texGBuffer, texcoord );
-
-  hdrcolor += bloomcolor;
 
   vec3 result = vec3( 0.0 );
   if ( hdr )
   {
+    vec3 bloomcolor = gaussianBlurredSample( texGBuffer, texcoord );
+    hdrcolor += bloomcolor;
     result = tonemap_linear( hdrcolor );
   }
   else

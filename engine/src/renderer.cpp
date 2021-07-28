@@ -16,6 +16,7 @@ namespace neko {
 
   NEKO_DECLARE_CONVAR( vid_msaa, "Main buffer multisample antialiasing multiplier.", 8 );
   NEKO_DECLARE_CONVAR( dbg_shownormals, "Whether to visualize vertex normals with lines.", true );
+  NEKO_DECLARE_CONVAR( dbg_showtangents, "Whether to visualize vertex tangents with lines.", true );
   NEKO_DECLARE_CONVAR( vid_hdr, "Toggle HDR processing.", true );
   NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 2.2f );
   NEKO_DECLARE_CONVAR( vid_exposure, "Testing.", 1.0f );
@@ -43,7 +44,7 @@ namespace neko {
       0, 1, 2, 0, 2, 3
     };
 
-    const vector<Vertex3D> worldUnitCube3D =
+    static vector<Vertex3D> worldUnitCube3D =
     {  // x      y      z      nx     ny     nz     s     t
       { -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
       {  0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
@@ -352,6 +353,7 @@ namespace neko {
     builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
       (const void*)BuiltinData::placeholderImage2x2.data() );
     builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
+    util::generateTangentsAndBitangents( BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
     builtin_.cube_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
   }
 
@@ -712,7 +714,14 @@ namespace neko {
       shaders_->usePipeline( "dbg_showvertexnormals" ).setUniform( "model", mdl );
       builtin_.cube_->begin();
       glEnable( GL_LINE_SMOOTH );
-      glLineWidth( 2.0f );
+      builtin_.cube_->draw();
+    }
+
+    if ( g_CVar_dbg_showtangents.as_b() )
+    {
+      shaders_->usePipeline( "dbg_showvertextangents" ).setUniform( "model", mdl );
+      builtin_.cube_->begin();
+      glEnable( GL_LINE_SMOOTH );
       builtin_.cube_->draw();
     }
 

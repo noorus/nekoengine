@@ -81,6 +81,7 @@ namespace neko {
       createSimplePipeline( "text3d", "text3d.vert", "text3d.frag", { "model", "tex" } );
       createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag", { "yscale", "tex" } );
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
+      createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
       createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "camera", "texAlbedo", "texHeight", "texMetallic", "texNormal" } );
       createSimplePipeline( "pointlight", "pointlight.vert", "pointlight.geom", "pointlight.frag", { "model" } );
     }
