@@ -156,6 +156,8 @@ namespace neko {
 
     renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
 
+#ifndef NEKO_NO_GUI
+
     guiPlatform_ = make_unique<MyGUI::NekoPlatform>();
 
     guiPlatform_->getDataManagerPtr()->setDataPath( "data\\gui" );
@@ -173,10 +175,14 @@ namespace neko {
     // MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
     // button->setCaption( "exit" );
 
-    input_->initialize( window_->getSystemHandle() );
-
     window_->setMouseCursorVisible( false );
+
+#endif
+
+    input_->initialize( window_->getSystemHandle() );
   }
+
+#ifndef NEKO_NO_GUI
 
   void* Gfx::loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename )
   {
@@ -200,6 +206,8 @@ namespace neko {
     //
   }
 
+#endif
+
   void Gfx::resize( size_t width, size_t height )
   {
     viewport_.size_ = vec2i( width, height );
@@ -212,8 +220,10 @@ namespace neko {
 
     glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
 
+#ifndef NEKO_NO_GUI
     if ( guiPlatform_ )
       guiPlatform_->getRenderManagerPtr()->setViewSize( (int)width, (int)height );
+#endif
   }
 
   void Gfx::processEvents()
@@ -275,7 +285,11 @@ namespace neko {
       window_->setActive( true );
     }
 
+#ifndef NEKO_NO_GUI
     renderer_->draw( time, *camera_.get(), guiPlatform_.get() );
+#else
+    renderer_->draw( time, *camera_.get(), nullptr );
+#endif
 
     window_->display();
   }
@@ -296,6 +310,8 @@ namespace neko {
   {
     input_->shutdown();
 
+#ifndef NEKO_NO_GUI
+
     if ( gui_ )
     {
       gui_->shutdown();
@@ -307,6 +323,8 @@ namespace neko {
       guiPlatform_->shutdown();
       guiPlatform_.reset();
     }
+
+#endif
 
     camera_.reset();
 

@@ -18,7 +18,12 @@ namespace neko {
     Viewport( size_t width, size_t height ): size_( width, height ) {}
   };
 
-  class Gfx: public platform::RenderWindowEventRecipient, public MyGUI::NekoImageLoader {
+  class Gfx:
+    public platform::RenderWindowEventRecipient
+#ifndef NEKO_NO_GUI
+    , public MyGUI::NekoImageLoader
+#endif
+  {
   public:
     struct Info {
       string renderer_;
@@ -46,8 +51,10 @@ namespace neko {
     RendererPtr renderer_;
     Viewport viewport_;
     Image lastCapture_;
+#ifndef NEKO_NO_GUI
     unique_ptr<MyGUI::NekoPlatform> guiPlatform_;
     unique_ptr<MyGUI::Gui> gui_;
+#endif
     void preInitialize();
     void printInfo();
     void resize( size_t width, size_t height );
@@ -60,9 +67,11 @@ namespace neko {
     static void openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity,
       GLsizei length, const GLchar* message, const void* userParam );
     void setOpenGLDebugLogging( const bool enable );
+#ifndef NEKO_NO_GUI
     // MyGUI::OpenGL3ImageLoader implementation
     void* loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename ) override;
     void saveImage( int width, int height, MyGUI::PixelFormat format, void* texture, const utf8String& filename ) override;
+#endif
   public:
     void postInitialize();
     Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );

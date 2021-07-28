@@ -12,7 +12,14 @@
 #include "shaders.h"
 
 namespace MyGUI {
+#ifndef NEKO_NO_GUI
   class NekoPlatform;
+#else
+  class NekoPlatform
+  {
+    int dummy;
+  };
+#endif
 }
 
 namespace neko {

@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#ifndef NEKO_NO_GUI
+
 #include "MyGUI/MyGUI_DataFileStream.h"
 #include "FileSystemInfo.h"
 
@@ -64,3 +66,5 @@ namespace MyGUI {
   }
 
 }
+
+#endif

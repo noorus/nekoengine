@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef NEKO_NO_GUI
+
 #include "MyGUI/MyGUI_Prerequest.h"
 #include "MyGUI/MyGUI_LogManager.h"
 #include "MyGUI/MyGUI_RenderFormat.h"
@@ -208,3 +210,5 @@ namespace MyGUI {
   };
 
 }
+
+#endif

@@ -3,6 +3,7 @@
 #include "utilities.h"
 #include "lodepng.h"
 #include "renderer.h"
+#include "console.h"
 
 namespace neko {
 

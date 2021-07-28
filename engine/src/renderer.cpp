@@ -798,8 +798,10 @@ namespace neko {
     glBindTextureUnit( 1, intermediate_->texture( 1 )->handle() );
     builtin_.screenQuad_->draw();
 
+#ifndef NEKO_NO_GUI
     if ( gui )
       gui->getRenderManagerPtr()->drawOneFrame( shaders_.get() );
+#endif
 
     glBindTextureUnit( 0, 0 );
     glBindTextureUnit( 1, 0 );
