@@ -61,6 +61,7 @@
 #include <glm/gtx/projection.hpp>
 #include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 #ifndef NEKO_NO_ICU
 # include <unicode/ustring.h>

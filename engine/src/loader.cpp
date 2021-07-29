@@ -148,17 +148,22 @@ namespace neko {
   inline vec2 tov2( const fbxsdk::FbxVector2& v2 )
   {
     return vec2( (float)v2.mData[0], (float)v2.mData[1] );
-  };
+  }
 
   inline vec3 tov3( const fbxsdk::FbxVector4& v4 )
   {
     return vec3( (float)v4.mData[0], (float)v4.mData[1], (float)v4.mData[2] );
-  };
+  }
 
   inline vec3 tov3( const FbxDouble3& v4 )
   {
     return vec3( (float)v4[0], (float)v4[1], (float)v4[2] );
-  };
+  }
+
+  inline quaternion toq( const FbxDouble3& eul )
+  {
+    return math::quaternionFrom( (Real)eul[0], (Real)eul[1], (Real)eul[2] );
+  }
 
   FbxString GetAttributeTypeName( FbxNodeAttribute::EType type )
   {
@@ -201,25 +206,16 @@ namespace neko {
     vec3 translate_;
     quaternion rotate_;
     vec3 scale_;
+    utf8String name_;
   };
 
   void parseFBXNode( FbxNode* node, vector<ModelLoadOutput>& out_models )
   {
-    const char* nodeName = node->GetName();
-
     SceneNode out;
     out.translate_ = tov3( node->LclTranslation.Get() );
     out.scale_ = tov3( node->LclScaling.Get() );
-    FbxDouble3 rotation = node->LclRotation.Get();
-    FbxDouble3 scaling = node->LclScaling.Get();
-
-    Locator::console().printf( Console::srcLoader,
-      "<node name='%s' translation='(%f, %f, %f)' rotation='(%f, %f, %f)' scaling='(%f, %f, %f)'>",
-      nodeName,
-      out.translate_[0], out.translate_[1], out.translate_[2],
-      rotation[0], rotation[1], rotation[2],
-      out.scale_[0], out.scale_[1], out.scale_[2]
-    );
+    out.rotate_ = toq( node->LclRotation.Get() );
+    out.name_ = node->GetName();
 
     for ( int i = 0; i < node->GetNodeAttributeCount(); i++ )
     {
