@@ -7,8 +7,8 @@ namespace neko {
   using namespace gl;
 
   Surface::Surface( Renderer* renderer, size_t width, size_t height, PixelFormat format ):
-    width_( width ), height_( height ), format_( format ), handle_( 0 ),
-    renderer_( renderer )
+  width_( width ), height_( height ), format_( format ), handle_( 0 ),
+  renderer_( renderer )
   {
     assert( renderer && width > 0 && height > 0 );
     if ( format_ == PixFmtColorRGB8 )

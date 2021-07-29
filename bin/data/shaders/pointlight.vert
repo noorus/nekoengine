@@ -19,8 +19,9 @@ uniform mat4 model;
 
 void main()
 {
-  mat4 modelView = world.view * model;
+  mat4 modelView = world.camera.view * model;
   gl_Position = modelView * vec4( vbo_position, 1.0 );
+
   // gl_PointSize = 35.0;
   vs_out.lightColor = vbo_color;
 }

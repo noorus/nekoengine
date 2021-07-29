@@ -26,14 +26,19 @@ namespace neko::uniforms {
     vec4 dummy;
   };
 
-  NEKO_DECLARE_UNIFORMBLOCK( 0, World )
-  {
+  struct Camera {
+    vec4 position;
     mat4 projection;
     mat4 view;
+  };
+
+  NEKO_DECLARE_UNIFORMBLOCK( 0, World )
+  {
     float time;
     float d0;
     float d1;
     float d2;
+    Camera camera;
     PointLight pointLights[c_pointLightCount];
   } NEKO_UNIFORM_INSTANCE( world );
 

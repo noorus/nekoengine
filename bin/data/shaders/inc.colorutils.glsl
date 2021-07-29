@@ -1,6 +1,8 @@
 #ifndef COLORUTILS_INCLUDE_GLSL
 #define COLORUTILS_INCLUDE_GLSL
 
+const float c_PI = 3.14159265359;
+
 float bt709LumaExtract( vec3 linearColor )
 {
   return dot( linearColor, vec3( 0.2126, 0.7152, 0.0722 ) );
@@ -10,6 +12,8 @@ vec3 gammaCorrect( vec3 color )
 {
   return pow( color, vec3( 1.0 / gamma ) );
 }
+
+#ifdef COLORUTILS_TONEMAPPING
 
 vec3 tonemap_linear( vec3 color )
 {
@@ -74,6 +78,8 @@ vec3 tonemap_uncharted2( vec3 color )
   color = gammaCorrect( color );
   return color;
 }
+
+#endif
 
 //uniform vec3 palette[8];
 //uniform int paletteSize;

@@ -79,6 +79,7 @@ namespace neko {
     DirectorPtr director_;
     void sceneDraw( GameTime time, Camera& camera );
     void clearErrors();
+    void setCameraUniform( Camera& camera, uniforms::Camera& uniform );
   protected:
     FramebufferPtr mainbuffer_; //!< Multisampled primary scene render buffer
     FramebufferPtr intermediate_; //!< Intermediate non-multisampled buffer for postprocessing

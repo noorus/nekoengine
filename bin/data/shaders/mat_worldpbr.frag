@@ -9,18 +9,19 @@ in VertexData {
   vec3 fragpos;
 } vs_out;
 
-layout (location = 0) out vec4 out_color;
-layout (location = 1) out vec4 out_gbuffer;
+layout ( location = 0 ) out vec4 out_color;
+layout ( location = 1 ) out vec4 out_gbuffer;
 
 uniform sampler2D texAlbedo;
 uniform sampler2D texHeight;
 uniform sampler2D texMetallic;
 uniform sampler2D texNormal;
 
+uniform float gamma;
 uniform mat4 model;
 uniform vec3 camera;
 
-const float c_PI = 3.14159265359;
+#include "inc.colorutils.glsl"
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -114,7 +115,7 @@ void main()
   vec3 normal = texture(texNormal, vs_out.texcoord).rgb;
   normal = normalize(normal * 2.0 - 1.0);
 
-  vec3 viewdir = normalize(camera - vs_out.fragpos);
+  vec3 viewdir = normalize( world.camera.position.xyz - vs_out.fragpos );
 
   vec3 Lo = vec3(0.0);
   for (int i = 0; i < c_pointLightCount; i++)
@@ -128,7 +129,7 @@ void main()
 
   vec3 color = ambient + Lo;
 
-  float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
+  float brightness = bt709LumaExtract( color );
   vec3 bloomColor = color * vec3(0.05) * brightness;
   bloomColor += vec3(smoothstep(0.1, 0.5, brightness)) * color;
   out_gbuffer = vec4(bloomColor, 1.0);

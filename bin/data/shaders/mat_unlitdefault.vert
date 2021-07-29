@@ -7,19 +7,21 @@ out gl_PerVertex{
   vec4 gl_Position;
 };
 
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 vboNormal;
-layout(location = 2) in vec2 vboTexcoord;
+layout ( location = 0 ) in vec3 vbo_position;
+layout ( location = 1 ) in vec3 vbo_normal;
+layout ( location = 2 ) in vec2 vbo_texcoord;
 
 uniform mat4 model;
 
-out vec3 normal;
-out vec2 texcoord;
+out vec3 out_normal;
+out vec2 out_texcoord;
 
 void main()
 {
-  mat4 modelViewProjection = world.projection * world.view * model;
-  gl_Position = modelViewProjection * vec4(position, 1.0);
-  normal = vboNormal;
-  texcoord = vboTexcoord;
+  mat4 modelViewProjection = world.camera.projection * world.camera.view * model;
+
+  gl_Position = modelViewProjection * vec4( vbo_position, 1.0 );
+
+  out_normal = vbo_normal;
+  out_texcoord = vbo_texcoord;
 }

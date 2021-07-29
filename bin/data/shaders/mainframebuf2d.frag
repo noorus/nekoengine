@@ -5,6 +5,7 @@
 
 uniform sampler2D texMain;
 uniform sampler2D texGBuffer;
+
 uniform bool hdr;
 uniform float gamma;
 uniform float exposure;
@@ -13,6 +14,7 @@ in vec2 texcoord;
 
 out vec4 out_color;
 
+#define COLORUTILS_TONEMAPPING
 #include "inc.colorutils.glsl"
 
 vec3 gaussianBlurredSample( sampler2D txtr, vec2 coord )

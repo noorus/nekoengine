@@ -31,22 +31,28 @@ const float c_size = 0.1;
 
 void main()
 {
+  mat4 projection = world.camera.projection;
   float halfSize = ( c_size * 0.5 );
-  gl_Position = world.projection * ( vec4( -halfSize, -halfSize, 0.0, 0.0 ) + gl_in[0].gl_Position );
+
+  gl_Position = projection * ( vec4( -halfSize, -halfSize, 0.0, 0.0 ) + gl_in[0].gl_Position );
   gs_out.texcoord = vec2( 0.0, 0.0 );
   gs_out.lightColor = gs_in[0].lightColor;
   EmitVertex();
-  gl_Position = world.projection * ( vec4( halfSize, -halfSize, 0.0, 0.0 ) + gl_in[0].gl_Position );
+
+  gl_Position = projection * ( vec4( halfSize, -halfSize, 0.0, 0.0 ) + gl_in[0].gl_Position );
   gs_out.texcoord = vec2( 1.0, 0.0 );
   gs_out.lightColor = gs_in[0].lightColor;
   EmitVertex();
-  gl_Position = world.projection * ( vec4( -halfSize, halfSize, 0.0, 0.0 ) + gl_in[0].gl_Position );
+
+  gl_Position = projection * ( vec4( -halfSize, halfSize, 0.0, 0.0 ) + gl_in[0].gl_Position );
   gs_out.texcoord = vec2( 0.0, 1.0 );
   gs_out.lightColor = gs_in[0].lightColor;
   EmitVertex();
-  gl_Position = world.projection * ( vec4( halfSize, halfSize, 0.0, 0.0 ) + gl_in[0].gl_Position );
+
+  gl_Position = projection * ( vec4( halfSize, halfSize, 0.0, 0.0 ) + gl_in[0].gl_Position );
   gs_out.texcoord = vec2( 1.0, 1.0 );
   gs_out.lightColor = gs_in[0].lightColor;
   EmitVertex();
+
   EndPrimitive();
 }

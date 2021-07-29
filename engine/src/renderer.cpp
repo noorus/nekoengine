@@ -596,8 +596,8 @@ namespace neko {
     static bool inited = false;
     if ( !inited )
     {
-      for ( auto i = 0; i < 4; i++ )
-        empties[i] = builtin_.placeholderTexture_->layers_[0].texture_->handle();
+      for ( unsigned int& it : empties )
+        it = builtin_.placeholderTexture_->layers_[0].texture_->handle();
       inited = true;
     }
     if ( index >= materials_.size() || !materials_[index]->uploaded() )
@@ -610,10 +610,11 @@ namespace neko {
     {
       glBindTextureUnit( 0, mat->layers_[0].texture_->handle() );
       auto& pipeline = shaders_->usePipeline( "mat_unlit" );
+      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
       pipeline.setUniform( "tex", 0 );
       return pipeline;
     }
-    else if ( mat->type_ == Material::WorldPBR )
+    if ( mat->type_ == Material::WorldPBR )
     {
       GLuint units[4] = {
         mat->layers_[0].texture_->handle(),
@@ -623,6 +624,7 @@ namespace neko {
       };
       glBindTextures( 0, 4, units );
       auto& pipeline = shaders_->usePipeline( "mat_worldpbr" );
+      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
       pipeline.setUniform( "texAlbedo", 0 );
       pipeline.setUniform( "texHeight", 1 );
       pipeline.setUniform( "texMetallic", 2 );
@@ -630,6 +632,13 @@ namespace neko {
       return pipeline;
     }
     return shaders_->usePipeline( "mat_unlit" );
+  }
+
+  void Renderer::setCameraUniform( Camera& camera, uniforms::Camera& uniform )
+  {
+    uniform.position = vec4( camera.position(), 1.0f );
+    uniform.projection = camera.projection();
+    uniform.view = camera.view();
   }
 
   void Renderer::sceneDraw( GameTime time, Camera& camera )
@@ -649,9 +658,8 @@ namespace neko {
 
     glEnable( GL_MULTISAMPLE );
 
-    shaders_->world()->projection = camera.projection();
-    shaders_->world()->view = camera.view();
     shaders_->world()->time = (float)time;
+    setCameraUniform( camera, shaders_->world()->camera );
 
     for (int i = 0; i < neko::uniforms::c_pointLightCount; i++ )
     {
@@ -706,7 +714,7 @@ namespace neko {
     builtin_.cube_->begin();
     mat4 mdl( 1.0f );
     mdl = glm::scale( mdl, vec3( 3.0f, 3.0f, 3.0f ) );
-    useMaterial( 1 ).setUniform( "model", mdl ).setUniform( "camera", camera.position() );
+    useMaterial( 1 ).setUniform( "model", mdl );
     builtin_.cube_->draw();
 
     if ( g_CVar_dbg_shownormals.as_b() )

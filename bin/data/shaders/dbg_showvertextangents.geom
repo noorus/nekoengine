@@ -3,8 +3,8 @@
 
 #include "inc.buffers.glsl"
 
-layout (triangles) in;
-layout (line_strip, max_vertices = 6) out;
+layout ( triangles ) in;
+layout ( line_strip, max_vertices = 6 ) out;
 
 in gl_PerVertex
 {
@@ -30,18 +30,20 @@ uniform mat4 model;
 
 const float c_linemagnitude = 1.2;
 
-void lineFor(int index)
+void lineForVertex( mat4 projection, int index )
 {
-  gl_Position = world.projection * gl_in[index].gl_Position;
+  gl_Position = projection * gl_in[index].gl_Position;
   EmitVertex();
-  gl_Position = world.projection * (gl_in[index].gl_Position + vec4(gs_in[index].tangent, 0.0) * c_linemagnitude);
+
+  gl_Position = projection * ( gl_in[index].gl_Position + vec4( gs_in[index].tangent, 0.0 ) * c_linemagnitude );
   EmitVertex();
+
   EndPrimitive();
 }
 
 void main()
 {
-  lineFor(0);
-  lineFor(1);
-  lineFor(2);
+  lineForVertex( world.camera.projection, 0 );
+  lineForVertex( world.camera.projection, 1 );
+  lineForVertex( world.camera.projection, 2 );
 }
