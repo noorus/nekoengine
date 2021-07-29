@@ -402,12 +402,6 @@
     <None Include="..\bin\data\shaders\mainframebuf2d.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\text3d.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\text3d.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\bin\data\shaders\mainframebuf2d.frag">
       <Filter>Shaders</Filter>
     </None>

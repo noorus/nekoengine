@@ -20,7 +20,7 @@ namespace neko {
       string name;
     };
 
-    const ShaderMapper cShaderTypes[Max_Shader_Type] =
+    const ShaderMapper c_shaderTypes[Max_Shader_Type] =
     {
       { Shader_Vertex, GL_VERTEX_SHADER, GL_VERTEX_SHADER_BIT, "vertex" },
       { Shader_Fragment, GL_FRAGMENT_SHADER, GL_FRAGMENT_SHADER_BIT, "fragment" },
@@ -76,13 +76,12 @@ namespace neko {
       loadInclude( "inc.colorutils.glsl" );
 
       // Default pipelines
-      createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "tex" } );
-      createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag", { "texMain", "texGBuffer", "hdr", "exposure", "gamma" } );
-      createSimplePipeline( "text3d", "text3d.vert", "text3d.frag", { "model", "tex" } );
+      createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag", { "hdr", "exposure", "gamma", "texMain", "texGBuffer" } );
       createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag", { "yscale", "tex" } );
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
       createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
-      createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "camera", "texAlbedo", "texHeight", "texMetallic", "texNormal" } );
+      createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "gamma", "tex" } );
+      createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "gamma", "texAlbedo", "texHeight", "texMetallic", "texNormal" } );
       createSimplePipeline( "pointlight", "pointlight.vert", "pointlight.geom", "pointlight.frag", { "model" } );
     }
 
@@ -90,7 +89,7 @@ namespace neko {
 
     Shader::Shader( Type type ): type_( type ), id_( 0 ), compiled_( false )
     {
-      id_ = glCreateShader( cShaderTypes[type].glType );
+      id_ = glCreateShader( c_shaderTypes[type].glType );
       if ( id_ == 0 )
         NEKO_EXCEPT( "Shader creation failed" );
     }
@@ -133,7 +132,7 @@ namespace neko {
 
     void Pipeline::setProgramStage( Type stage, GLuint id )
     {
-      glUseProgramStages( id_, cShaderTypes[stage].maskBit, id );
+      glUseProgramStages( id_, c_shaderTypes[stage].maskBit, id );
     }
 
     Pipeline::~Pipeline()
@@ -242,7 +241,7 @@ namespace neko {
     {
       auto source = loadSource( filename );
 
-      console_->printf( Console::srcGfx, "Compiling %s shader: %s", cShaderTypes[type].name.c_str(), name.c_str() );
+      console_->printf( Console::srcGfx, "Compiling %s shader: %s", c_shaderTypes[type].name.c_str(), name.c_str() );
 
       shader = make_unique<Shader>( type );
       compileShader( *shader, source );
@@ -261,8 +260,8 @@ namespace neko {
       buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
 
       auto pipeline = make_unique<Pipeline>( name );
-      glUseProgramStages( pipeline->id(), cShaderTypes[vs->type()].maskBit, vp->id() );
-      glUseProgramStages( pipeline->id(), cShaderTypes[fs->type()].maskBit, fp->id() );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[vs->type()].maskBit, vp->id() );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[fs->type()].maskBit, fp->id() );
 
       pipeline->stages_[Type::Shader_Vertex] = vp;
       pipeline->stages_[Type::Shader_Fragment] = fp;
@@ -286,9 +285,9 @@ namespace neko {
       buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
 
       auto pipeline = make_unique<Pipeline>( name );
-      glUseProgramStages( pipeline->id(), cShaderTypes[vs->type()].maskBit, vp->id() );
-      glUseProgramStages( pipeline->id(), cShaderTypes[gs->type()].maskBit, gp->id() );
-      glUseProgramStages( pipeline->id(), cShaderTypes[fs->type()].maskBit, fp->id() );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[vs->type()].maskBit, vp->id() );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[gs->type()].maskBit, gp->id() );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[fs->type()].maskBit, fp->id() );
 
       pipeline->stages_[Type::Shader_Vertex] = vp;
       pipeline->stages_[Type::Shader_Geometry] = gp;

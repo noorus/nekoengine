@@ -295,8 +295,6 @@
     <None Include="..\bin\data\shaders\pointlight.frag" />
     <None Include="..\bin\data\shaders\pointlight.geom" />
     <None Include="..\bin\data\shaders\pointlight.vert" />
-    <None Include="..\bin\data\shaders\text3d.frag" />
-    <None Include="..\bin\data\shaders\text3d.vert" />
     <None Include="..\bin\script\initialization.js" />
     <None Include="..\bin\script\math.js" />
   </ItemGroup>
