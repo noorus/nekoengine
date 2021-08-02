@@ -2,6 +2,7 @@
 #include "loader.h"
 #include "utilities.h"
 #include "lodepng.h"
+#include "gfx_types.h"
 #include "renderer.h"
 #include "console.h"
 
@@ -89,7 +90,7 @@ namespace neko {
     finishedFontsEvent_.reset();
   }
 
-  void ThreadedLoader::getFinishedModels( vector<ModelLoadOutput>& models )
+  void ThreadedLoader::getFinishedModels( vector<SceneNode*>& models )
   {
     if ( !finishedModelsEvent_.check() )
       return;
@@ -202,20 +203,34 @@ namespace neko {
     Locator::console().printf( Console::srcLoader, "<attribute type='%s' name='%s'/>", typeName.Buffer(), attrName.Buffer() );
   }
 
-  struct SceneNode {
-    vec3 translate_;
-    quaternion rotate_;
-    vec3 scale_;
-    utf8String name_;
-  };
-
-  void parseFBXNode( FbxNode* node, vector<ModelLoadOutput>& out_models )
+  void updateSceneGraph( SceneNode& node )
   {
-    SceneNode out;
-    out.translate_ = tov3( node->LclTranslation.Get() );
-    out.scale_ = tov3( node->LclScaling.Get() );
-    out.rotate_ = toq( node->LclRotation.Get() );
+    node.update( true, true );
+  }
+
+  void dumpSceneGraph( SceneNode& root, int level = 0 )
+  {
+    utf8String prep;
+    for ( int i = 0; i < level; i++ )
+      prep.append( "  " );
+    Locator::console().printf( Console::srcGame, "%s<node \"%s\" pos %.2f %.2f %.2f, scale %.2f %.2f %.2f, rot %.2f %.2f %.2f %.2f>",
+      prep.c_str(), root.name_.c_str(),
+      root.translate_.x, root.translate_.y, root.translate_.z,
+      root.scale_.x, root.scale_.y, root.scale_.z,
+      root.rotate_.x, root.rotate_.y, root.rotate_.z, root.rotate_.z
+      );
+    for ( auto& child : root.children_ )
+      dumpSceneGraph( *child, level + 1 );
+  }
+
+  void parseFBXNode( FbxNode* node, SceneNode& out )
+  {
+    out.setTranslate( tov3( node->LclTranslation.Get() ) );
+    out.setScale( tov3( node->LclScaling.Get() ) );
+    out.setRotate( toq( node->LclRotation.Get() ) );
     out.name_ = node->GetName();
+    Locator::console().printf( Console::srcLoader, "Scene node: %s, pos %.2f %.2f %.2f, scale %.2f %.2f %.2f, rot %.2f %.2f %.2f %.2f",
+      out.name_.c_str(), out.translate_.x, out.translate_.y, out.translate_.z, out.scale_.x, out.scale_.y, out.scale_.z, out.rotate_.x, out.rotate_.y, out.rotate_.z, out.rotate_.w );
 
     for ( int i = 0; i < node->GetNodeAttributeCount(); i++ )
     {
@@ -223,7 +238,7 @@ namespace neko {
       PrintAttribute( attribute );
       if ( attribute->GetAttributeType() == FbxNodeAttribute::eMesh )
       {
-        ModelLoadOutput model;
+        out.mesh_ = make_shared<ModelLoadOutput>();
         auto mesh = static_cast<fbxsdk::FbxMesh*>( attribute );
         GLuint index_counter = 0;
         auto e_verts = mesh->GetControlPoints();
@@ -237,21 +252,21 @@ namespace neko {
         {
           auto polysize = mesh->GetPolygonSize( j );
           assert( polysize == 3 || polysize == 4 );
-          model.indices.push_back( index_counter + 0 );
-          model.indices.push_back( index_counter + 1 );
-          model.indices.push_back( index_counter + 2 );
+          out.mesh_->indices_.push_back( index_counter + 0 );
+          out.mesh_->indices_.push_back( index_counter + 1 );
+          out.mesh_->indices_.push_back( index_counter + 2 );
           if ( polysize == 4 )
           {
-            model.indices.push_back( index_counter + 2 );
-            model.indices.push_back( index_counter + 3 );
-            model.indices.push_back( index_counter + 0 );
+            out.mesh_->indices_.push_back( index_counter + 2 );
+            out.mesh_->indices_.push_back( index_counter + 3 );
+            out.mesh_->indices_.push_back( index_counter + 0 );
           }
           index_counter += (GLuint)polysize;
           for ( int k = 0; k < polysize; k++ )
           {
             auto idx = mesh->GetPolygonVertex( j, k );
-            Vertex3D out;
-            out.position = tov3( e_verts[idx] );
+            Vertex3D vout;
+            vout.position = tov3( e_verts[idx] );
             for ( int l = 0; l < uvcount; l++ )
             {
               auto e_uvs = mesh->GetElementUV( l );
@@ -265,7 +280,7 @@ namespace neko {
               } else if ( e_uvs->GetMappingMode() == FbxGeometryElement::eByPolygonVertex && e_uvs->GetReferenceMode() == FbxGeometryElement::eIndexToDirect )
                 index = mesh->GetTextureUVIndex( j, k );
               assert( index >= 0 );
-              out.texcoord = tov2( e_uvs->GetDirectArray().GetAt( index ) );
+              vout.texcoord = tov2( e_uvs->GetDirectArray().GetAt( index ) );
             }
             for ( int l = 0; l < normalcount; l++ )
             {
@@ -277,7 +292,7 @@ namespace neko {
               else if ( e_normals->GetReferenceMode() == FbxGeometryElement::eIndexToDirect )
                 index = e_normals->GetIndexArray().GetAt( idx );
               assert( index >= 0 );
-              out.normal = tov3( e_normals->GetDirectArray().GetAt( index ) );
+              vout.normal = tov3( e_normals->GetDirectArray().GetAt( index ) );
             }
             for ( int l = 0; l < tangentcount; l++ )
             {
@@ -289,13 +304,13 @@ namespace neko {
               else if ( e_tangents->GetReferenceMode() == FbxGeometryElement::eIndexToDirect )
                 index = e_tangents->GetIndexArray().GetAt( idx );
               assert( index >= 0 );
-              out.tangent = vec4( tov3( e_tangents->GetDirectArray().GetAt( index ) ), 1.0f );
+              vout.tangent = vec4( tov3( e_tangents->GetDirectArray().GetAt( index ) ), 0.0f );
             }
-            model.vertices.push_back( move( out ) );
+            out.mesh_->vertices_.push_back( move( vout ) );
           }
         }
-        util::generateTangentsAndBitangents( model.vertices, model.indices );
-        /*for ( auto& vert : model.vertices )
+        util::generateTangentsAndBitangents( out.mesh_->vertices_, out.mesh_->indices_ );
+        /*for ( auto& vert : out.mesh_->vertices_ )
         {
           Locator::console().printf( Console::srcEngine, "Vertex: pos %.2f %.2f %.2f normal %.2f %.2f %.2f uv %.2f %.2f tangent %.2f %.2f %.2f bitangent %.2f %.2f %.2f",
             vert.position.x, vert.position.y, vert.position.z,
@@ -304,11 +319,15 @@ namespace neko {
             vert.tangent.x, vert.tangent.y, vert.tangent.z,
             vert.bitangent.x, vert.bitangent.y, vert.bitangent.z );
         }*/
-        out_models.push_back( move( model ) );
       }
     }
+
     for ( int j = 0; j < node->GetChildCount(); j++ )
-      parseFBXNode( node->GetChild( j ), out_models );
+    {
+      auto child = new SceneNode( &out );
+      parseFBXNode( node->GetChild( j ), *child );
+      out.children_.push_back( child );
+    }
   }
 
   // Context: Worker thread
@@ -364,12 +383,18 @@ namespace neko {
         {
           auto scene = FbxScene::Create( fbxmgr_, "loaderScene" );
           importer->Import( scene );
+          fbxsdk::FbxAxisSystem axis( fbxsdk::FbxAxisSystem::eOpenGL );
+          axis.DeepConvertScene( scene );
+          fbxsdk::FbxSystemUnit::ConversionOptions opts = { true, true, true, true, true, true };
+          fbxsdk::FbxSystemUnit::m.ConvertScene( scene, opts );
           auto root = scene->GetRootNode();
           assert( root );
-          vector<ModelLoadOutput> out;
-          parseFBXNode( root, out );
+          auto node = new SceneNode( nullptr );
+          parseFBXNode( root, *node );
+          updateSceneGraph( *node );
+          dumpSceneGraph( *node );
           finishedTasksLock_.lock();
-          finishedModels_.insert( finishedModels_.end(), out.begin(), out.end() );
+          finishedModels_.push_back( node );
           finishedTasksLock_.unlock();
         }
         importer->Destroy( true );

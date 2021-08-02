@@ -62,6 +62,7 @@
 #include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #ifndef NEKO_NO_ICU
 # include <unicode/ustring.h>
@@ -160,6 +161,14 @@ namespace neko {
   using mat4 = glm::fmat4x4;
   using quaternion = glm::fquat;
 #endif
+
+  using quat = quaternion;
+  constexpr quaternion quatIdentity = quaternion( numbers::one, numbers::zero, numbers::zero, numbers::zero );
+  constexpr vec3 vec3UnitX = vec3( numbers::one, numbers::zero, numbers::zero );
+  constexpr vec3 vec3UnitY = vec3( numbers::zero, numbers::one, numbers::zero );
+  constexpr vec3 vec3UnitZ = vec3( numbers::zero, numbers::zero, numbers::one );
+  using Radians = Real;
+  using Degrees = Real;
 
   using GameTime = double;
 

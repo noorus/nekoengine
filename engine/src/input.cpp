@@ -11,7 +11,7 @@
 
 namespace neko {
 
-  GfxInput::GfxInput( ConsolePtr console ): console_( console )
+  GfxInput::GfxInput( ConsolePtr console ): console_( console ), movement_( 0 )
   {
   }
 
@@ -74,17 +74,24 @@ namespace neko {
 
   void GfxInput::onMouseMoved( nil::Mouse* mouse, const nil::MouseState& state )
   {
+    if ( state.buttons[1].pushed )
+      movement_ += vec3i( state.movement.relative.x, state.movement.relative.y, 0 );
     moved_ = true;
+  }
+
+  void GfxInput::resetMovement()
+  {
+    movement_ = vec3i( 0 );
   }
 
   void GfxInput::onMouseButtonPressed( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
   {
-    #ifndef NEKO_NO_GUI
+#ifndef NEKO_NO_GUI
     platform::getCursorPosition( window_, mousePosition_ );
     MyGUI::InputManager::getInstance().injectMousePress(
       (int)mousePosition_.x, (int)mousePosition_.y,
       MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) );
-    #endif
+#endif
   }
 
   void GfxInput::onMouseButtonReleased( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
@@ -101,7 +108,7 @@ namespace neko {
   void GfxInput::onMouseWheelMoved( nil::Mouse* mouse, const nil::MouseState& state )
   {
     moved_ = true;
-    mouseZ_ += state.wheel.relative;
+    movement_.z += state.wheel.relative;
   }
 
   void GfxInput::onKeyPressed( nil::Keyboard* keyboard, const nil::VirtualKeyCode keycode )
@@ -131,7 +138,7 @@ namespace neko {
   void GfxInput::update()
   {
     moved_ = false;
-    mouseZ_ = 0;
+    resetMovement();
     system_->update();
     if ( moved_ )
     {

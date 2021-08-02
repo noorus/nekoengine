@@ -146,11 +146,21 @@ namespace neko {
   {
     renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
     renderer_->preInitialize();
+    target_ = renderer_->createSceneNode( nullptr );
 
     setOpenGLDebugLogging( g_CVar_gl_debuglog.as_i() > 0 );
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
-    camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, -1.0f ) );
+    camera_ = make_unique<ArcballCamera>( renderer_.get(), realResolution, target_,
+      vec3( 5.0f, 3.0f, 5.0f ), // vecOffset
+      60.0f, // fov
+      true, // reverse
+      10.0f, // sens
+      5.0f, // mindist
+      50.0f, // maxdist
+      2.0f, // rotdecel
+      5.0f, // zoomaccel
+      2.0f ); // zoomdecel
 
     resize( window_->getSize().x, window_->getSize().y );
 
@@ -263,7 +273,7 @@ namespace neko {
     }
   }
 
-  void Gfx::update( GameTime time )
+  void Gfx::update( GameTime time, GameTime delta )
   {
     if ( flags_.reloadShaders )
     {
@@ -273,7 +283,8 @@ namespace neko {
     }
 
     renderer_->prepare( time );
-    camera_->update( time );
+    camera_->applyMovement( input_->movement() );
+    camera_->update( delta, time );
 
     // activate as current context
     window_->setActive( true );
@@ -308,6 +319,12 @@ namespace neko {
 
   void Gfx::shutdown()
   {
+    if ( target_ )
+    {
+      renderer_->destroySceneNode( target_ );
+      target_ = nullptr;
+    }
+
     input_->shutdown();
 
 #ifndef NEKO_NO_GUI
@@ -369,6 +386,7 @@ namespace neko {
   {
     gfx_ = make_shared<Gfx>( loader_, fonts_, messaging_, director_, console_ );
     gfx_->postInitialize();
+    lastTime_ = 0.0;
   }
 
   void ThreadedRenderer::run( platform::Event& wantStop )
@@ -391,7 +409,10 @@ namespace neko {
       gfx_->processEvents();
 
       auto time = engine_->renderTime().load();
-      gfx_->update( time );
+      auto delta = ( time - lastTime_ );
+      lastTime_ = time;
+
+      gfx_->update( time, delta );
 
       platform::sleep( 1 );
     }

@@ -368,7 +368,7 @@ namespace neko {
       R"(data\textures\SGT_Ground_1_MetallicSmoothness.png)",
       R"(data\textures\SGT_Ground_1_Normal.png)"
     } ) } );
-    loader_->addLoadTask( { LoadTask( R"(data\meshes\Tank_Tiger.FBX)" ) } );
+    loader_->addLoadTask( { LoadTask( R"(data\meshes\new_tank_tiger.fbx)" ) } );
 
     mainbuffer_ = make_shared<Framebuffer>( this, 2, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
     intermediate_ = make_shared<Framebuffer>( this, 2, 1 );
@@ -404,12 +404,27 @@ namespace neko {
     }
   }
 
+  void Renderer::uploadModelsEnterNode( SceneNode* node )
+  {
+    if ( node->mesh_ && !node->mesh_->mesh_ )
+      node->mesh_->mesh_ = meshes_->createStatic( GL_TRIANGLES, node->mesh_->vertices_, node->mesh_->indices_ );
+    for ( auto child : node->children_ )
+      uploadModelsEnterNode( child );
+  }
+
   void Renderer::uploadModels()
   {
-    vector<ModelLoadOutput> mods;
-    loader_->getFinishedModels( mods );
-    if ( !mods.empty() )
-      console_->printf( Console::srcGfx, "Renderer::uploadModels got %d new models", mods.size() );
+    vector<SceneNode*> nodes;
+    loader_->getFinishedModels( nodes );
+    if ( nodes.empty() )
+      return;
+
+    console_->printf( Console::srcGfx, "Renderer::uploadModels got %d new models", nodes.size() );
+
+    for ( auto node : nodes )
+      uploadModelsEnterNode( node );
+
+    sceneGraph_.insert( nodes.begin(), nodes.end() );
   }
 
   static bool g_textAdded = false;
@@ -641,6 +656,19 @@ namespace neko {
     uniform.view = camera.view();
   }
 
+  void Renderer::sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline )
+  {
+    if ( node->mesh_ && node->mesh_->mesh_ )
+    {
+      node->mesh_->mesh_->begin();
+      mat4 trns = node->getFullTransform().mat();
+      pipeline.setUniform( "model", trns );
+      node->mesh_->mesh_->draw();
+    }
+    for ( auto child : node->children_ )
+      sceneDrawEnterNode( child, pipeline );
+  }
+
   void Renderer::sceneDraw( GameTime time, Camera& camera )
   {
     glEnable( GL_DEPTH_TEST );
@@ -667,8 +695,8 @@ namespace neko {
     }
 
     vec3 lightpos[2] = {
-      vec3( math::sin( (Real)time * 0.25f * 1.2f ) * 5.0f, 4.0f, math::cos( (Real)time * 0.25f * 1.2f ) * 5.0f ),
-      vec3( math::cos( (Real)time * 0.25f * 1.6f ) * 4.0f, math::sin( (Real)time * 0.25f * 1.6f ) * 2.0f, math::sin( (Real)time * 0.25f + 2.0f * 1.6f ) * 4.0f )
+      vec3( math::sin( (Real)time * 1.2f ) * 7.0f, 3.0f, math::cos( (Real)time * 1.2f ) * 7.0f ),
+      vec3( math::cos( (Real)time * 1.6f ) * 7.5f, math::sin( (Real)time * 1.6f ) * 7.0f, math::sin( (Real)time * 0.25f + 2.0f * 1.6f ) * 7.5f )
     };
 
     shaders_->world()->pointLights[0].position = vec4( lightpos[0], 1.0f );
@@ -711,13 +739,17 @@ namespace neko {
     }
 #endif
 
-    builtin_.cube_->begin();
+    auto& pl = useMaterial( 1 );
+    for ( auto node : sceneGraph_ )
+      sceneDrawEnterNode( node, pl );
+
+    /*builtin_.cube_->begin();
     mat4 mdl( 1.0f );
     mdl = glm::scale( mdl, vec3( 3.0f, 3.0f, 3.0f ) );
     useMaterial( 1 ).setUniform( "model", mdl );
-    builtin_.cube_->draw();
+    builtin_.cube_->draw();*/
 
-    if ( g_CVar_dbg_shownormals.as_b() )
+    /*if ( g_CVar_dbg_shownormals.as_b() )
     {
       shaders_->usePipeline( "dbg_showvertexnormals" ).setUniform( "model", mdl );
       builtin_.cube_->begin();
@@ -731,7 +763,7 @@ namespace neko {
       builtin_.cube_->begin();
       glEnable( GL_LINE_SMOOTH );
       builtin_.cube_->draw();
-    }
+    }*/
 
     g_pointrender->buffer().lock();
     auto lightpoints = g_pointrender->buffer().buffer().data();

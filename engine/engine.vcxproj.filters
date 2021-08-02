@@ -231,6 +231,9 @@
     <ClCompile Include="src\fontmanager.cpp">
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenenode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">

@@ -2,14 +2,11 @@
 #include "utilities.h"
 #include "renderer.h"
 #include "fontmanager.h"
+#include "gfx_types.h"
 
 namespace neko {
 
-  struct ModelLoadOutput
-  {
-    vector<Vertex3D> vertices;
-    vector<GLuint> indices;
-  };
+  class SceneNode;
 
   struct LoadTask {
     enum LoadType {
@@ -28,8 +25,6 @@ namespace neko {
     } fontfaceLoad;
     struct ModelLoad {
       utf8String path_;
-      vector<Vertex3D> vertices_;
-      vector<GLuint> indices_;
     } modelLoad;
     LoadTask( MaterialPtr material, vector<utf8String> paths ): type_( Load_Texture )
     {
@@ -64,7 +59,7 @@ namespace neko {
     FbxIOSettings* fbxio_;
     LoadTaskVector newTasks_;
     MaterialVector finishedMaterials_;
-    vector<ModelLoadOutput> finishedModels_;
+    vector<SceneNode*> finishedModels_;
     FontVector finishedFonts_;
     void handleNewTasks();
   private:
@@ -75,7 +70,7 @@ namespace neko {
     void stop();
     void getFinishedMaterials( MaterialVector& materials );
     void getFinishedFonts( FontVector& fonts );
-    void getFinishedModels( vector<ModelLoadOutput>& models );
+    void getFinishedModels( vector<SceneNode*>& models );
     void addLoadTask( const LoadTaskVector& resources );
     ~ThreadedLoader();
   };

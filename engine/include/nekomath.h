@@ -38,6 +38,7 @@ namespace neko {
     using glm::dot;
     using glm::length;
     using glm::cross;
+    using glm::inverse;
 
     //! \fn inline Real round( Real value )
     //! \brief Rounds to the nearest non-decimal value.
@@ -213,12 +214,13 @@ namespace neko {
       return ( v - projection( v, normal ) );
     }
 
-    //! \fn inline Real angleBetween( vec2& v1, vec2& v2 )
-    //! \brief Angle between two 2D vectors.
+    //! \fn inline Real angleBetween( const T& v1, const T& v2 )
+    //! \brief Angle between two vectors.
     //! \param [in] v1 The first vector.
     //! \param [in] v2 The second vector.
     //! \returns The angle between the vectors in radians.
-    inline Real angleBetween( vec2& v1, vec2& v2 )
+    template <typename T>
+    inline Real angleBetween( const T& v1, const T& v2 )
     {
       auto lenProd = glm::length( v1 ) * glm::length( v2 );
       if ( lenProd < 1e-6f )

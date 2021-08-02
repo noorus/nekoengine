@@ -5,6 +5,7 @@
 #include "neko_platform.h"
 #include "messaging.h"
 #include "input.h"
+#include "camera.h"
 
 #include <MyGUI_NekoPlatform.h>
 
@@ -47,7 +48,8 @@ namespace neko {
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;
-    CameraPtr camera_;
+    SceneNode* target_;
+    unique_ptr<ArcballCamera> camera_;
     RendererPtr renderer_;
     Viewport viewport_;
     Image lastCapture_;
@@ -77,7 +79,7 @@ namespace neko {
     Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     const Image& renderWindowReadPixels() override;
     void processEvents(); //!< Process vital window events and such.
-    void update( GameTime time );
+    void update( GameTime time, GameTime delta );
     inline Renderer& renderer() throw() { return *( renderer_.get() ); }
     void shutdown();
     void restart();
@@ -98,6 +100,7 @@ namespace neko {
     MessagingPtr messaging_;
     ConsolePtr console_;
     DirectorPtr director_;
+    GameTime lastTime_;
   protected:
     static bool threadProc( platform::Event& running, platform::Event& wantStop, void* argument );
     void initialize();

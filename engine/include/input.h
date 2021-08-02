@@ -13,9 +13,9 @@ namespace neko {
     HWND window_;
     bool moved_;
     POINT mousePosition_;
-    int mouseZ_;
     ConsolePtr console_;
     vec2i windowSize_;
+    vec3i movement_;
   protected:
     unique_ptr<nil::System> system_;
     // nil::SystemListener events
@@ -40,6 +40,8 @@ namespace neko {
     GfxInput( ConsolePtr console );
     void initialize( HWND window );
     void setWindowSize( vec2i size );
+    inline vec3i movement() const { return movement_; }
+    void resetMovement();
     void shutdown();
     void update();
     virtual ~GfxInput();
