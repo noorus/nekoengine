@@ -105,7 +105,7 @@ vec3 pointLight(PointLight light, vec3 fragpos, vec3 viewdir, vec3 albedo, float
 
 void main()
 {
-  vec4 smp = texture(texAlbedo, vs_out.texcoord);
+  /*vec4 smp = texture(texAlbedo, vs_out.texcoord);
   vec3 albedo = pow(smp.rgb, vec3(2.2));
   float smoothness = smp.a;
   float roughness = (1.0 - smoothness);
@@ -113,6 +113,16 @@ void main()
   smp = texture(texMetallic, vs_out.texcoord);
   float metallic = smp.r;
   vec3 normal = texture(texNormal, vs_out.texcoord).rgb;
+  normal = normalize(normal * 2.0 - 1.0);*/
+
+  vec2 tc = vec2(vs_out.texcoord.x, 1 - vs_out.texcoord.y);
+
+  float height = 1;
+  vec4 smp = texture(texAlbedo, tc);
+  vec3 albedo = pow(smp.rgb, vec3(2.2));
+  float roughness = 0;
+  float metallic = texture(texMetallic, tc).r;
+  vec3 normal = texture(texNormal, tc).rgb;
   normal = normalize(normal * 2.0 - 1.0);
 
   vec3 viewdir = normalize( world.camera.position.xyz - vs_out.fragpos );
@@ -124,7 +134,6 @@ void main()
       Lo += pointLight(world.pointLights[i], vs_out.fragpos, viewdir, albedo, roughness, height, metallic, normal);
   }
 
-  // vec3 ambient = vec3(0.05, 0.05, 0.05) * albedo;
   vec3 ambient = processing.ambient.rgb * albedo;
 
   vec3 color = ambient + Lo;

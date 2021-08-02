@@ -194,14 +194,14 @@ namespace neko {
     }
   }
 
-  void PrintAttribute( FbxNodeAttribute* attribute )
+  /*void PrintAttribute( FbxNodeAttribute* attribute )
   {
     if ( !attribute || attribute->GetAttributeType() == FbxNodeAttribute::eNull )
       return;
     FbxString typeName = GetAttributeTypeName( attribute->GetAttributeType() );
     FbxString attrName = attribute->GetName();
     Locator::console().printf( Console::srcLoader, "<attribute type='%s' name='%s'/>", typeName.Buffer(), attrName.Buffer() );
-  }
+  }*/
 
   void updateSceneGraph( SceneNode& node )
   {
@@ -229,13 +229,10 @@ namespace neko {
     out.setScale( tov3( node->LclScaling.Get() ) );
     out.setRotate( toq( node->LclRotation.Get() ) );
     out.name_ = node->GetName();
-    Locator::console().printf( Console::srcLoader, "Scene node: %s, pos %.2f %.2f %.2f, scale %.2f %.2f %.2f, rot %.2f %.2f %.2f %.2f",
-      out.name_.c_str(), out.translate_.x, out.translate_.y, out.translate_.z, out.scale_.x, out.scale_.y, out.scale_.z, out.rotate_.x, out.rotate_.y, out.rotate_.z, out.rotate_.w );
 
     for ( int i = 0; i < node->GetNodeAttributeCount(); i++ )
     {
       auto attribute = node->GetNodeAttributeByIndex( i );
-      PrintAttribute( attribute );
       if ( attribute->GetAttributeType() == FbxNodeAttribute::eMesh )
       {
         out.mesh_ = make_shared<ModelLoadOutput>();
@@ -383,14 +380,15 @@ namespace neko {
         {
           auto scene = FbxScene::Create( fbxmgr_, "loaderScene" );
           importer->Import( scene );
-          fbxsdk::FbxAxisSystem axis( fbxsdk::FbxAxisSystem::eOpenGL );
-          axis.DeepConvertScene( scene );
-          fbxsdk::FbxSystemUnit::ConversionOptions opts = { true, true, true, true, true, true };
-          fbxsdk::FbxSystemUnit::m.ConvertScene( scene, opts );
+          //fbxsdk::FbxAxisSystem axis( fbxsdk::FbxAxisSystem::eOpenGL );
+          //axis.DeepConvertScene( scene );
+          //fbxsdk::FbxSystemUnit::ConversionOptions opts = { true, true, true, true, true, true };
+          //fbxsdk::FbxSystemUnit::m.ConvertScene( scene, opts );
           auto root = scene->GetRootNode();
           assert( root );
           auto node = new SceneNode( nullptr );
           parseFBXNode( root, *node );
+          node->setRotate( math::angleAxis( math::radians( -90.0f ), vec3UnitX ) );
           updateSceneGraph( *node );
           dumpSceneGraph( *node );
           finishedTasksLock_.lock();

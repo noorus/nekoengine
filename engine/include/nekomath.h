@@ -39,6 +39,9 @@ namespace neko {
     using glm::length;
     using glm::cross;
     using glm::inverse;
+    using glm::angleAxis;
+    using glm::radians;
+    using glm::degrees;
 
     //! \fn inline Real round( Real value )
     //! \brief Rounds to the nearest non-decimal value.

@@ -61,11 +61,15 @@ namespace neko {
     return derivedRotate_;
   }
 
-  const affine3& SceneNode::getFullTransform() const
+  const mat4& SceneNode::getFullTransform() const
   {
     if ( cachedOutOfDate_ )
     {
-      cachedTransform_.makeTransform( getDerivedTranslate(), getDerivedScale(), getDerivedRotate() );
+      cachedTransform_ = mat4( numbers::one );
+      cachedTransform_ = glm::scale( cachedTransform_, getDerivedScale() );
+      cachedTransform_ *= glm::toMat4( getDerivedRotate() );
+      cachedTransform_ = glm::translate( cachedTransform_, getDerivedTranslate() );
+      // cachedTransform_.makeTransform( getDerivedTranslate(), getDerivedScale(), getDerivedRotate() );
       cachedOutOfDate_ = false;
     }
     return cachedTransform_;
@@ -75,7 +79,7 @@ namespace neko {
   {
     if ( needParentUpdate_ )
       updateFromParent();
-    return getFullTransform() * localPosition;
+    return mat3( getFullTransform() ) * localPosition;
   }
 
   vec3 SceneNode::convertWorldToLocalPosition( const vec3& worldPosition )
@@ -102,6 +106,7 @@ namespace neko {
   void SceneNode::updateFromParent() const
   {
     cachedOutOfDate_ = true;
+    needParentUpdate_ = false;
     if ( parent_ )
     {
       const auto& prot = parent_->getDerivedRotate();
@@ -115,7 +120,6 @@ namespace neko {
     derivedRotate_ = rotate_;
     derivedScale_ = scale_;
     derivedTranslate_ = translate_;
-    needParentUpdate_ = false;
   }
 
   SceneNode* SceneManager::createSceneNode( SceneNode* parent )

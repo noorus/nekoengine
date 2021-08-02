@@ -361,13 +361,18 @@ namespace neko {
   {
     materials_.push_back( make_shared<Material>( Material::UnlitSimple ) );
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
+    materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
     loader_->addLoadTask( { LoadTask( materials_[0], { R"(data\textures\test.png)" } ) } );
     loader_->addLoadTask( { LoadTask( materials_[1], {
       R"(data\textures\SGT_Ground_1_AlbedoSmoothness.png)",
       R"(data\textures\SGT_Ground_1_Height.png)",
       R"(data\textures\SGT_Ground_1_MetallicSmoothness.png)",
-      R"(data\textures\SGT_Ground_1_Normal.png)"
-    } ) } );
+      R"(data\textures\SGT_Ground_1_Normal.png)" } ) } );
+    loader_->addLoadTask( { LoadTask( materials_[2], {
+      R"(data\textures\M_Tank_Tiger_Base_AlbedoTransparency.png)",
+      R"(data\textures\M_Tank_Tiger_Base_MetallicSmoothness.png)",
+      R"(data\textures\M_Tank_Tiger_Metal_AlbedoTransparency.png)",
+      R"(data\textures\M_Tank_Tiger_Base_Normal.png)" } ) } );
     loader_->addLoadTask( { LoadTask( R"(data\meshes\new_tank_tiger.fbx)" ) } );
 
     mainbuffer_ = make_shared<Framebuffer>( this, 2, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
@@ -661,8 +666,8 @@ namespace neko {
     if ( node->mesh_ && node->mesh_->mesh_ )
     {
       node->mesh_->mesh_->begin();
-      mat4 trns = node->getFullTransform().mat();
-      pipeline.setUniform( "model", trns );
+      mat4 model = node->getFullTransform();
+      pipeline.setUniform( "model", model );
       node->mesh_->mesh_->draw();
     }
     for ( auto child : node->children_ )
@@ -695,7 +700,7 @@ namespace neko {
     }
 
     vec3 lightpos[2] = {
-      vec3( math::sin( (Real)time * 1.2f ) * 7.0f, 3.0f, math::cos( (Real)time * 1.2f ) * 7.0f ),
+      vec3( math::sin( (Real)time * 1.2f ) * 4.0f, 1.0f, math::cos( (Real)time * 1.2f ) * 4.0f ),
       vec3( math::cos( (Real)time * 1.6f ) * 7.5f, math::sin( (Real)time * 1.6f ) * 7.0f, math::sin( (Real)time * 0.25f + 2.0f * 1.6f ) * 7.5f )
     };
 
@@ -739,7 +744,7 @@ namespace neko {
     }
 #endif
 
-    auto& pl = useMaterial( 1 );
+    auto& pl = useMaterial( 2 );
     for ( auto node : sceneGraph_ )
       sceneDrawEnterNode( node, pl );
 
@@ -751,18 +756,22 @@ namespace neko {
 
     /*if ( g_CVar_dbg_shownormals.as_b() )
     {
-      shaders_->usePipeline( "dbg_showvertexnormals" ).setUniform( "model", mdl );
-      builtin_.cube_->begin();
-      glEnable( GL_LINE_SMOOTH );
-      builtin_.cube_->draw();
+      pl = shaders_->usePipeline( "dbg_showvertexnormals" );
+      for ( auto node : sceneGraph_ )
+        sceneDrawEnterNode( node, pl );
+      //builtin_.cube_->begin();
+      //glEnable( GL_LINE_SMOOTH );
+      //builtin_.cube_->draw();
     }
 
     if ( g_CVar_dbg_showtangents.as_b() )
     {
-      shaders_->usePipeline( "dbg_showvertextangents" ).setUniform( "model", mdl );
-      builtin_.cube_->begin();
-      glEnable( GL_LINE_SMOOTH );
-      builtin_.cube_->draw();
+      pl = shaders_->usePipeline( "dbg_showvertextangents" );
+      for ( auto node : sceneGraph_ )
+        sceneDrawEnterNode( node, pl );
+      //builtin_.cube_->begin();
+      //glEnable( GL_LINE_SMOOTH );
+      //builtin_.cube_->draw();
     }*/
 
     g_pointrender->buffer().lock();

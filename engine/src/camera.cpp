@@ -31,9 +31,9 @@ namespace neko {
   }*/
 
   ArcballCamera::ArcballCamera( SceneManager* manager, vec2 resolution, SceneNode* target,
-    const vec3& offset, Degrees rFOVy, bool reverse, Real sensitivity,
+    const vec3& offset, Degrees fov, bool reverse, Real sensitivity,
     Real fMinDistance, Real fMaxDistance, Real fRotationDeceleration, Real zoomAccel, Real zoomDecel )
-      : Camera( manager, resolution, rFOVy ), mSensitivity( sensitivity ),
+      : Camera( manager, resolution, fov ), mSensitivity( sensitivity ),
         target_( target ), offset_( offset ), distanceMin_( fMinDistance ),
         distanceMax_( fMaxDistance ), mRotDeceleration( fRotationDeceleration ),
         zoom_( zoomAccel, zoomDecel ),
@@ -58,7 +58,7 @@ namespace neko {
       movement_.x += -( (Real)move.x / resolution_.x ) * mSensitivity;
       movement_.y += -( (Real)move.y / resolution_.y ) * mSensitivity;
     }
-    movement_.z += (Real)move.z / (Real)WHEEL_DELTA;
+    movement_.z += -( (Real)move.z / (Real)WHEEL_DELTA );
   }
 
   void ArcballCamera::update( GameTime delta, GameTime time )
@@ -153,6 +153,9 @@ namespace neko {
     movement_ = vec3( 0.0f );
 
     auto target = target_->getDerivedTranslate();
+    // HACK HACK HACK
+    target.y += 1.0f;
+    // HACK HACK HACK
     position_ = target + offset_;
     node_->setTranslate( position_ );
 
