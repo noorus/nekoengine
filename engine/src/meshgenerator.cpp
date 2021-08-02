@@ -11,6 +11,18 @@ namespace neko {
 
   namespace util {
 
+  inline void zeroNans( vec3& v )
+  {
+    if ( std::isnan( v.x ) || std::isnan( v.y ) || std::isnan( v.z ) )
+      v = vec3( 0.0f );
+  }
+
+  inline void zeroNans( vec4& v )
+  {
+    if ( std::isnan( v.x ) || std::isnan( v.y ) || std::isnan( v.z ) || std::isnan( v.w ) )
+      v = vec4( 0.0f );
+  }
+
   void generateTangentsAndBitangents( vector<Vertex3D>& verts, const vector<GLuint>& indices )
   {
     for ( auto& vert : verts )
@@ -52,7 +64,9 @@ namespace neko {
       auto xyz = math::normalize( math::rejection( t, n ) );
       auto w = ( math::dot( math::cross( t, b ), n ) > 0.0f ) ? 1.0f : -1.0f;
       vert.tangent = vec4( xyz, w );
+      zeroNans( vert.tangent );
       vert.bitangent = math::cross( n, xyz ) * w;
+      zeroNans( vert.bitangent );
     }
   }
 
