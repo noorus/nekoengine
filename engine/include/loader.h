@@ -8,6 +8,39 @@ namespace neko {
 
   class SceneNode;
 
+  namespace loaders {
+
+    struct UnityYamlNode {
+      bool isRoot = false;
+      size_t indent;
+      UnityYamlNode* parent;
+      utf8String name;
+      map<utf8String, utf8String> attribs;
+      vector<UnityYamlNode*> children;
+      UnityYamlNode( UnityYamlNode* parent_, size_t indent_ ): parent( parent_ ), indent( indent_ ) {}
+      ~UnityYamlNode()
+      {
+        for ( auto& child : children )
+          delete child;
+      }
+    };
+
+    void dumpUnityYaml( UnityYamlNode& node, size_t level = 0 );
+    void loadUnityYaml( const vector<uint8_t>& data );
+
+    class FbxLoader {
+    protected:
+      fbxsdk::FbxManager* fbxmgr_;
+      fbxsdk::FbxIOSettings* fbxio_;
+      void parseFBXNode( fbxsdk::FbxNode* node, SceneNode& out );
+    public:
+      FbxLoader();
+      void loadFBXScene( const vector<uint8_t>& data );
+      ~FbxLoader();
+    };
+
+  }
+
   struct LoadTask {
     enum LoadType {
       Load_Texture,
@@ -25,6 +58,7 @@ namespace neko {
     } fontfaceLoad;
     struct ModelLoad {
       utf8String path_;
+      vector<utf8String> animPaths_;
     } modelLoad;
     LoadTask( MaterialPtr material, vector<utf8String> paths ): type_( Load_Texture )
     {
@@ -38,9 +72,10 @@ namespace neko {
       fontfaceLoad.specs_.pointSize_ = pointSize;
       fontfaceLoad.path_ = path;
     }
-    LoadTask( const utf8String& path ): type_( Load_Model )
+    LoadTask( const utf8String& path, vector<utf8String> paths ): type_( Load_Model )
     {
       modelLoad.path_ = path;
+      modelLoad.animPaths_ = paths;
     }
   };
 
@@ -55,8 +90,6 @@ namespace neko {
     platform::Event finishedFontsEvent_;
     platform::Event finishedModelsEvent_;
     platform::RWLock finishedTasksLock_;
-    FbxManager* fbxmgr_;
-    FbxIOSettings* fbxio_;
     LoadTaskVector newTasks_;
     MaterialVector finishedMaterials_;
     vector<SceneNode*> finishedModels_;

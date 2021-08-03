@@ -151,10 +151,10 @@
 
 // MyGUI
 #ifndef NEKO_NO_GUI
-#pragma warning( push )
-#pragma warning( disable: 4275 )
-#include <MYGUI/MyGUI.h>
-#pragma warning( pop )
+# pragma warning( push )
+# pragma warning( disable: 4275 )
+# include <MYGUI/MyGUI.h>
+# pragma warning( pop )
 #endif
 
 // FBX
@@ -170,7 +170,8 @@
 #include <ozz/base/maths/simd_math.h>
 #include <ozz/base/maths/soa_transform.h>
 #include <ozz/base/maths/vec_float.h>
-#include <ozz/options/options.h>
+#include <ozz/animation/offline/animation_builder.h>
+#include <ozz/animation/offline/raw_animation.h>
 
 // Local types
 #include "neko_types.h"

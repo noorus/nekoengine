@@ -373,7 +373,9 @@ namespace neko {
       R"(data\textures\M_Tank_Tiger_Base_MetallicSmoothness.png)",
       R"(data\textures\M_Tank_Tiger_Metal_AlbedoTransparency.png)",
       R"(data\textures\M_Tank_Tiger_Base_Normal.png)" } ) } );
-    loader_->addLoadTask( { LoadTask( R"(data\meshes\new_tank_tiger.fbx)" ) } );
+    loader_->addLoadTask( { LoadTask( R"(data\meshes\new_tank_tiger.fbx)", {
+      R"(data\meshes\SCA_Aircraft_Flight.anim)",
+      } ) } );
 
     mainbuffer_ = make_shared<Framebuffer>( this, 2, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
     intermediate_ = make_shared<Framebuffer>( this, 2, 1 );
