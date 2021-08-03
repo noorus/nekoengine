@@ -26,7 +26,7 @@ namespace neko {
     };
 
     void dumpUnityYaml( UnityYamlNode& node, size_t level = 0 );
-    void loadUnityYaml( const vector<uint8_t>& data );
+    ozz::unique_ptr<ozz::animation::Animation> loadUnityYaml( const vector<uint8_t>& data );
 
     class FbxLoader {
     protected:

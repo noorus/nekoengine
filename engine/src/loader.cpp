@@ -152,7 +152,7 @@ namespace neko {
         {
           vector<uint8_t> input;
           platform::FileReader( path ).readFullVector( input );
-          loaders::loadUnityYaml( input );
+          auto anim = loaders::loadUnityYaml( input );
         }
         finishedTasksLock_.lock();
         //finishedModels_.push_back( node );

@@ -8,13 +8,13 @@
 
 namespace neko::loaders {
 
-  UnityYamlNode* findYamlNode( UnityYamlNode& root, const utf8String& name )
+  UnityYamlNode* findUnityYamlNode( UnityYamlNode& root, const utf8String& name )
   {
     if ( root.name == name )
       return &root;
     for ( auto& child : root.children )
     {
-      auto ret = findYamlNode( *child, name );
+      auto ret = findUnityYamlNode( *child, name );
       if ( ret )
         return ret;
     }
@@ -34,17 +34,92 @@ namespace neko::loaders {
       dumpUnityYaml( *child, level + 1 );
   }
 
-  void createAnimation( UnityYamlNode& root )
+  vec3 extract_v3( const utf8String& blob )
   {
-    ozz::animation::offline::RawAnimation animation;
-    auto settings = findYamlNode( root, "m_AnimationClipSettings" );
-    if ( !settings )
-      NEKO_EXCEPT( "No m_AnimationClipSettings node" );
-    animation.duration = static_cast<float>( ::atof( settings->attribs["m_StopTime"].c_str() ) );
-    //
+    vec3 out;
+    std::regex e( "(x|y|z|w):" );
+    auto fixd = std::regex_replace( blob, e, R"("$1":)" );
+    auto json = nlohmann::json::parse( fixd );
+    out.x = static_cast<Real>( json["x"].get<double>() );
+    out.y = static_cast<Real>( json["y"].get<double>() );
+    out.z = static_cast<Real>( json["z"].get<double>() );
+    return move( out );
   }
 
-  void loadUnityYaml( const vector<uint8_t>& data )
+  quaternion extract_q( const utf8String& blob )
+  {
+    quaternion out;
+    std::regex e( "(x|y|z|w):" );
+    auto fixd = std::regex_replace( blob, e, R"("$1":)" );
+    auto json = nlohmann::json::parse( fixd );
+    out.x = static_cast<Real>( json["x"].get<double>() );
+    out.y = static_cast<Real>( json["y"].get<double>() );
+    out.z = static_cast<Real>( json["z"].get<double>() );
+    out.w = static_cast<Real>( json["w"].get<double>() );
+    return move( out );
+  }
+
+  ozz::unique_ptr<ozz::animation::Animation> buildAnimationFromUnityYaml( UnityYamlNode& root )
+  {
+    ozz::animation::offline::RawAnimation animation;
+    size_t boneIndex = 0;
+    map<utf8String, size_t> boneMap;
+    auto clip = findUnityYamlNode( root, "AnimationClip" );
+    auto settings = findUnityYamlNode( *clip, "m_AnimationClipSettings" );
+    auto translations = findUnityYamlNode( *clip, "m_PositionCurves" );
+    auto rotations = findUnityYamlNode( *clip, "m_RotationCurves" );
+    if ( !clip || !settings || !translations || !rotations )
+      NEKO_EXCEPT( "Required node(s) missing" );
+
+    animation.duration = static_cast<float>( ::atof( settings->attribs["m_StopTime"].c_str() ) );
+    animation.name = clip->attribs["m_Name"];
+
+    for ( auto& node : translations->children )
+      if ( node->name == "curve" && !node->children.empty() )
+        if ( node->children[0]->name == "m_Curve" )
+        {
+          if ( boneMap.find( node->attribs["path"] ) == boneMap.end() )
+            boneMap[node->attribs["path"]] = boneIndex++;
+          if ( boneMap.size() > animation.tracks.size() )
+            animation.tracks.resize( boneMap.size() );
+          auto& track = animation.tracks[boneMap[node->attribs["path"]]];
+          for ( auto pt : node->children[0]->children )
+          {
+            auto pos = extract_v3( pt->attribs["value"] );
+            ozz::animation::offline::RawAnimation::TranslationKey key;
+            key.time = static_cast<float>( ::atof( pt->attribs["time"].c_str() ) );
+            key.value = ozz::math::Float3( pos.x, pos.y, pos.z );
+            track.translations.push_back( move( key ) );
+          }
+        }
+
+    for ( auto& node : rotations->children )
+      if ( node->name == "curve" && !node->children.empty() )
+        if ( node->children[0]->name == "m_Curve" )
+        {
+          if ( boneMap.find( node->attribs["path"] ) == boneMap.end() )
+            boneMap[node->attribs["path"]] = boneIndex++;
+          if ( boneMap.size() > animation.tracks.size() )
+            animation.tracks.resize( boneMap.size() );
+          auto& track = animation.tracks[boneMap[node->attribs["path"]]];
+          for ( auto pt : node->children[0]->children )
+          {
+            auto rot = extract_q( pt->attribs["value"] );
+            ozz::animation::offline::RawAnimation::RotationKey key;
+            key.time = static_cast<float>( ::atof( pt->attribs["time"].c_str() ) );
+            key.value = ozz::math::Quaternion( rot.x, rot.y, rot.z, rot.w );
+            track.rotations.push_back( move( key ) );
+          }
+        }
+
+    if ( !animation.Validate() )
+      NEKO_EXCEPT( "Ozz animation validate failed" );
+
+    ozz::animation::offline::AnimationBuilder builder;
+    return move( builder( animation ) );
+  }
+
+  ozz::unique_ptr<ozz::animation::Animation> loadUnityYaml( const vector<uint8_t>& data )
   {
     auto parseLine = []( const utf8String line, UnityYamlNode*& node, map<size_t, UnityYamlNode*>& lastindentmap, int& previndent ) -> void
     {
@@ -133,6 +208,8 @@ namespace neko::loaders {
     }
 
     dumpUnityYaml( root );
+
+    return move( buildAnimationFromUnityYaml( root ) );
   }
 
 }
