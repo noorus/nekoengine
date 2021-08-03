@@ -157,6 +157,9 @@
 # pragma warning( pop )
 #endif
 
+// JSON
+#include <json.hpp>
+
 // FBX
 #include <fbxsdk.h>
 
