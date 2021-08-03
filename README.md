@@ -14,3 +14,4 @@ One thread per concern: logic, loader, renderer.
 * Using [MyGUI](https://github.com/MyGUI/mygui) for GUI implementation.
 * Using [FBX SDK](https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-2020-2) for model descriptors.
 * Using [ozz](https://github.com/guillaumeblanc/ozz-animation) for animation.
+* Using [json](https://github.com/nlohmann/json) for parsing stuff.
