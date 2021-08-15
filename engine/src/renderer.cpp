@@ -363,7 +363,6 @@ namespace neko {
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
     loader_->addLoadTask( { LoadTask( materials_[0], { R"(data\textures\test.png)" } ) } );
-    #if 0
     loader_->addLoadTask( { LoadTask( materials_[1], {
       R"(data\textures\SGT_Ground_1_AlbedoSmoothness.png)",
       R"(data\textures\SGT_Ground_1_Height.png)",
@@ -374,10 +373,9 @@ namespace neko {
       R"(data\textures\M_Tank_Tiger_Base_MetallicSmoothness.png)",
       R"(data\textures\M_Tank_Tiger_Metal_AlbedoTransparency.png)",
       R"(data\textures\M_Tank_Tiger_Base_Normal.png)" } ) } );
-    loader_->addLoadTask( { LoadTask( R"(data\meshes\new_tank_tiger.fbx)", {
-      R"(data\meshes\SCA_Aircraft_Flight.anim)",
-      } ) } );
-    #endif
+    loader_->addLoadTask( { LoadTask( new SceneNode(), R"(data\meshes\new_tank_tiger.fbx)" ) } );
+
+    // loader_->addLoadTask( { LoadTask( R"(data\meshes\SCA_Aircraft_Flight.anim)"
 
     mainbuffer_ = make_shared<Framebuffer>( this, 2, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
     intermediate_ = make_shared<Framebuffer>( this, 2, 1 );
@@ -483,119 +481,6 @@ namespace neko {
     models_->jsReset();
     meshes_->jsReset();
 #endif
-  }
-
-  //! Called by Texture::Texture()
-  GLuint Renderer::implCreateTexture2D( size_t width, size_t height,
-  GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
-  const void* data, GLWrapMode wrap, Texture::Filtering filtering, int samples )
-  {
-    assert( width <= (size_t)info_.maxTextureSize && height <= (size_t)info_.maxTextureSize );
-
-    GLuint handle = 0;
-    glCreateTextures( samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D, 1, &handle );
-    assert( handle != 0 );
-
-    if ( samples < 2 )
-    {
-      // Wrapping (repeat, edge, border)
-      glTextureParameteri( handle, GL_TEXTURE_WRAP_S, wrap );
-      glTextureParameteri( handle, GL_TEXTURE_WRAP_T, wrap );
-
-      if ( wrap == GL_CLAMP_TO_BORDER )
-      {
-        // Set border color (to transparent)
-        float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-        glTextureParameterfv( handle, GL_TEXTURE_BORDER_COLOR, color );
-      }
-
-      // Filtering
-      if ( filtering == Texture::Nearest )
-      {
-        glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-        glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-      }
-      else if ( filtering == Texture::Linear )
-      {
-        glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-        glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-      }
-      else
-      {
-        glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-        glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-      }
-
-      if ( info_.maxAnisotropy > 1.0f )
-        glTextureParameterf( handle, GL_TEXTURE_MAX_ANISOTROPY, math::min( info_.maxAnisotropy, 16.0f ) );
-    }
-
-    // 1 byte alignment - i.e. unaligned.
-    // Could boost performance to use aligned memory in the future.
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-
-    if ( samples > 1 )
-      glTextureStorage2DMultisample( handle, samples, internalFormat, (GLsizei)width, (GLsizei)height, true );
-    else
-      glTextureStorage2D( handle, 1, internalFormat, (GLsizei)width, (GLsizei)height );
-
-    if ( data )
-      glTextureSubImage2D( handle, 0, 0, 0, (GLsizei)width, (GLsizei)height, format, internalType, data );
-
-    if ( filtering == Texture::Mipmapped )
-      glGenerateTextureMipmap( handle );
-
-    return handle;
-  }
-
-  //! Called by Texture::~Texture()
-  void Renderer::implDeleteTexture( GLuint handle )
-  {
-    assert( handle );
-    glDeleteTextures( 1, &handle );
-  }
-
-  //! Called by Renderbuffer::Renderbuffer()
-  GLuint Renderer::implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format, int samples )
-  {
-    assert( width <= (size_t)info_.maxRenderbufferSize && height <= (size_t)info_.maxRenderbufferSize );
-
-    GLuint handle = 0;
-    glCreateRenderbuffers( 1, &handle );
-    assert( handle != 0 );
-
-    if ( samples > 1 )
-      glNamedRenderbufferStorageMultisample( handle, samples, format, (GLsizei)width, (GLsizei)height );
-    else
-      glNamedRenderbufferStorage( handle, format, (GLsizei)width, (GLsizei)height );
-
-    return handle;
-  }
-
-  //! Called by Renderbuffer::~Renderbuffer()
-  void Renderer::implDeleteRenderbuffer( GLuint handle )
-  {
-    assert( handle );
-    glDeleteRenderbuffers( 1, &handle );
-  }
-
-  //! Called by Framebuffer::create()
-  GLuint Renderer::implCreateFramebuffer( size_t width, size_t height )
-  {
-    assert( width <= (size_t)info_.maxFramebufferWidth && height <= (size_t)info_.maxFramebufferHeight );
-
-    GLuint handle = 0;
-    glCreateFramebuffers( 1, &handle );
-    assert( handle != 0 );
-
-    return handle;
-  }
-
-  //! Called by Framebuffer::destroy()
-  void Renderer::implDeleteFramebuffer( GLuint handle )
-  {
-    assert( handle );
-    glDeleteFramebuffers( 1, &handle );
   }
 
   MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, PixelFormat format,
@@ -748,17 +633,15 @@ namespace neko {
     }
 #endif
 
-    #if 0
     auto& pl = useMaterial( 2 );
     for ( auto node : sceneGraph_ )
       sceneDrawEnterNode( node, pl );
-    #endif
 
-    builtin_.cube_->begin();
+    /*builtin_.cube_->begin();
     mat4 mdl( 1.0f );
     mdl = glm::scale( mdl, vec3( 3.0f, 3.0f, 3.0f ) );
     useMaterial( 1 ).setUniform( "model", mdl );
-    builtin_.cube_->draw();
+    builtin_.cube_->draw();*/
 
     /*if ( g_CVar_dbg_shownormals.as_b() )
     {

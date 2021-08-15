@@ -100,6 +100,19 @@ namespace neko {
     finishedModelsEvent_.reset();
   }
 
+  void ThreadedLoader::getFinishedAnimations( AnimationVector& animations )
+  {
+    if ( !finishedAnimationsEvent_.check() )
+      return;
+
+    finishedTasksLock_.lock();
+    animations.swap( finishedAnimations_ );
+    finishedTasksLock_.unlock();
+
+    finishedAnimations_.clear();
+    finishedAnimationsEvent_.reset();
+  }
+
   // Context: Worker thread
   void ThreadedLoader::handleNewTasks()
   {
@@ -148,16 +161,20 @@ namespace neko {
       }
       else if ( task.type_ == LoadTask::Load_Model )
       {
-#ifndef NEKO_NO_ANIMATION
-        for ( const auto& path : task.modelLoad.animPaths_ )
-        {
-          vector<uint8_t> input;
-          platform::FileReader( path ).readFullVector( input );
-          auto anim = loaders::loadUnityYaml( input );
-        }
-#endif
+        vector<uint8_t> input;
+        //platform::FileReader( task.modelLoad.path_ ).readFullVector( input );
+        fbxLoader_.loadFBXScene( input, task.modelLoad.path_, task.modelLoad.node_ );
         finishedTasksLock_.lock();
-        //finishedModels_.push_back( node );
+        finishedModels_.push_back( task.modelLoad.node_ );
+        finishedTasksLock_.unlock();
+      }
+      else if ( task.type_ == LoadTask::Load_Animation )
+      {
+        vector<uint8_t> input;
+        platform::FileReader( task.animationLoad.path_ ).readFullVector( input );
+        loaders::loadUnityAnimation( input, task.animationLoad.animation_ );
+        finishedTasksLock_.lock();
+        finishedAnimations_.push_back( task.animationLoad.animation_ );
         finishedTasksLock_.unlock();
       }
     }
@@ -170,6 +187,9 @@ namespace neko {
 
     if ( !finishedModels_.empty() )
       finishedModelsEvent_.set();
+
+    if ( !finishedAnimations_.empty() )
+      finishedAnimationsEvent_.set();
   }
 
   ThreadedLoader::~ThreadedLoader()

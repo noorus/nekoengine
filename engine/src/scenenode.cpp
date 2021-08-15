@@ -129,6 +129,11 @@ namespace neko {
     return node;
   }
 
+  void SceneManager::addSceneNode( SceneNode* node )
+  {
+    sceneGraph_.insert( node );
+  }
+
   void SceneManager::destroySceneNode( SceneNode* node )
   {
     sceneGraph_.erase( node );

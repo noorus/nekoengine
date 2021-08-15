@@ -61,11 +61,10 @@ namespace neko::loaders {
     return move( out );
   }
 
-  ozz::unique_ptr<ozz::animation::Animation> buildAnimationFromUnityYaml( UnityYamlNode& root )
+  void buildAnimationFromUnityYaml( UnityYamlNode& root, OzzAnimationEntry& entry )
   {
-    ozz::animation::offline::RawAnimation animation;
+    entry.animation_ = make_unique<ozz::animation::offline::RawAnimation>();
     size_t boneIndex = 0;
-    map<utf8String, size_t> boneMap;
     auto clip = findUnityYamlNode( root, "AnimationClip" );
     auto settings = findUnityYamlNode( *clip, "m_AnimationClipSettings" );
     auto translations = findUnityYamlNode( *clip, "m_PositionCurves" );
@@ -73,18 +72,18 @@ namespace neko::loaders {
     if ( !clip || !settings || !translations || !rotations )
       NEKO_EXCEPT( "Required node(s) missing" );
 
-    animation.duration = static_cast<float>( ::atof( settings->attribs["m_StopTime"].c_str() ) );
-    animation.name = clip->attribs["m_Name"];
+    entry.animation_->duration = static_cast<float>( ::atof( settings->attribs["m_StopTime"].c_str() ) );
+    entry.animation_->name = clip->attribs["m_Name"];
 
     for ( auto& node : translations->children )
       if ( node->name == "curve" && !node->children.empty() )
         if ( node->children[0]->name == "m_Curve" )
         {
-          if ( boneMap.find( node->attribs["path"] ) == boneMap.end() )
-            boneMap[node->attribs["path"]] = boneIndex++;
-          if ( boneMap.size() > animation.tracks.size() )
-            animation.tracks.resize( boneMap.size() );
-          auto& track = animation.tracks[boneMap[node->attribs["path"]]];
+          if ( entry.boneTrackMap_.find( node->attribs["path"] ) == entry.boneTrackMap_.end() )
+            entry.boneTrackMap_[node->attribs["path"]] = boneIndex++;
+          if ( entry.boneTrackMap_.size() > entry.animation_->tracks.size() )
+            entry.animation_->tracks.resize( entry.boneTrackMap_.size() );
+          auto& track = entry.animation_->tracks[entry.boneTrackMap_[node->attribs["path"]]];
           for ( auto pt : node->children[0]->children )
           {
             auto pos = extract_v3( pt->attribs["value"] );
@@ -99,11 +98,11 @@ namespace neko::loaders {
       if ( node->name == "curve" && !node->children.empty() )
         if ( node->children[0]->name == "m_Curve" )
         {
-          if ( boneMap.find( node->attribs["path"] ) == boneMap.end() )
-            boneMap[node->attribs["path"]] = boneIndex++;
-          if ( boneMap.size() > animation.tracks.size() )
-            animation.tracks.resize( boneMap.size() );
-          auto& track = animation.tracks[boneMap[node->attribs["path"]]];
+          if ( entry.boneTrackMap_.find( node->attribs["path"] ) == entry.boneTrackMap_.end() )
+            entry.boneTrackMap_[node->attribs["path"]] = boneIndex++;
+          if ( entry.boneTrackMap_.size() > entry.animation_->tracks.size() )
+            entry.animation_->tracks.resize( entry.boneTrackMap_.size() );
+          auto& track = entry.animation_->tracks[entry.boneTrackMap_[node->attribs["path"]]];
           for ( auto pt : node->children[0]->children )
           {
             auto rot = extract_q( pt->attribs["value"] );
@@ -114,14 +113,11 @@ namespace neko::loaders {
           }
         }
 
-    if ( !animation.Validate() )
+    if ( !entry.animation_->Validate() )
       NEKO_EXCEPT( "Ozz animation validate failed" );
-
-    ozz::animation::offline::AnimationBuilder builder;
-    return move( builder( animation ) );
   }
 
-  ozz::unique_ptr<ozz::animation::Animation> loadUnityYaml( const vector<uint8_t>& data )
+  void loadUnityAnimation( const vector<uint8_t>& data, AnimationEntryPtr& into )
   {
     auto parseLine = []( const utf8String line, UnityYamlNode*& node, map<size_t, UnityYamlNode*>& lastindentmap, int& previndent ) -> void
     {
@@ -211,7 +207,7 @@ namespace neko::loaders {
 
     dumpUnityYaml( root );
 
-    return move( buildAnimationFromUnityYaml( root ) );
+    buildAnimationFromUnityYaml( root, *( into.get() ) );
   }
 
 }

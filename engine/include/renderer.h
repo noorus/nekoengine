@@ -48,6 +48,8 @@ namespace neko {
     StaticMeshPtr mesh_;
   };
 
+  using ModelLoadOutputPtr = shared_ptr<ModelLoadOutput>;
+
   class SceneNode
   {
   public:
@@ -55,7 +57,7 @@ namespace neko {
     vec3 scale_;
     quaternion rotate_;
     utf8String name_;
-    shared_ptr<ModelLoadOutput> mesh_;
+    ModelLoadOutputPtr mesh_;
     vector<SceneNode*> children_;
     SceneNode* parent_;
     mutable bool needParentUpdate_ : 1;
@@ -118,6 +120,7 @@ namespace neko {
     set<SceneNode*> sceneGraph_;
   public:
     SceneNode* createSceneNode( SceneNode* parent = nullptr );
+    void addSceneNode( SceneNode* node );
     void destroySceneNode( SceneNode* node );
   };
 

@@ -56,11 +56,6 @@ namespace neko::loaders {
     }
   }
 
-  void updateSceneGraph( SceneNode& node )
-  {
-    node.update( true, true );
-  }
-
   void dumpSceneGraph( SceneNode& root, int level = 0 )
   {
     utf8String prep;
@@ -210,7 +205,7 @@ namespace neko::loaders {
     {
       return eOpen;
     }
-    bool Open( void* pStreamData ) override
+    bool Open( void* stream ) override
     {
       pos_ = 0;
       err_ = 0;
@@ -227,18 +222,18 @@ namespace neko::loaders {
       err_ = 0;
       return true;
     }
-    int Write( const void* pData, int pSize ) override
+    int Write( const void* data, int size ) override
     {
       err_ = 1;
       return 0;
     }
-    int Read( void* pData, int pSize ) const override
+    int Read( void* data, int size ) const override
     {
-      if ( pSize > ( data_.size_bytes() - pos_ ) )
-        pSize = ( data_.size_bytes() - pos_ );
-      memcpy( pData, &data_.data()[pos_], pSize );
-      pos_ = pos_ + pSize;
-      return pSize;
+      if ( size > ( data_.size_bytes() - pos_ ) )
+        size = ( data_.size_bytes() - pos_ );
+      memcpy( data, &data_.data()[pos_], size );
+      pos_ = pos_ + size;
+      return size;
     }
     int GetReaderID() const override
     {
@@ -248,14 +243,14 @@ namespace neko::loaders {
     {
       return 1337;
     }
-    void Seek( const fbxsdk::FbxInt64& pOffset, const fbxsdk::FbxFile::ESeekPos& pSeekPos ) override
+    void Seek( const fbxsdk::FbxInt64& offset, const fbxsdk::FbxFile::ESeekPos& seek ) override
     {
-      if ( pSeekPos == fbxsdk::FbxFile::ESeekPos::eBegin )
-        pos_ = static_cast<long>( pOffset );
-      if ( pSeekPos == fbxsdk::FbxFile::ESeekPos::eCurrent )
-        pos_ = pos_ + static_cast<long>( pOffset );
-      if ( pSeekPos == fbxsdk::FbxFile::ESeekPos::eEnd )
-        pos_ = static_cast<long>( data_.size_bytes() ) - static_cast<long>( pOffset );
+      if ( seek == fbxsdk::FbxFile::ESeekPos::eBegin )
+        pos_ = static_cast<long>( offset );
+      if ( seek == fbxsdk::FbxFile::ESeekPos::eCurrent )
+        pos_ = pos_ + static_cast<long>( offset );
+      if ( seek == fbxsdk::FbxFile::ESeekPos::eEnd )
+        pos_ = static_cast<long>( data_.size_bytes() ) - static_cast<long>( offset );
       err_ = 0;
     }
     long GetPosition() const override
@@ -263,10 +258,10 @@ namespace neko::loaders {
       err_ = 0;
       return pos_;
     }
-    void SetPosition( long pPosition ) override
+    void SetPosition( long pos ) override
     {
       err_ = 0;
-      pos_ = pPosition;
+      pos_ = pos;
     }
     int GetError() const override
     {
@@ -278,11 +273,12 @@ namespace neko::loaders {
     }
   };
 
-  void FbxLoader::loadFBXScene( const vector<uint8_t>& data )
+  void FbxLoader::loadFBXScene( const vector<uint8_t>& data, const utf8String& filename, SceneNode* rootNode )
   {
     auto importer = FbxImporter::Create( fbxmgr_, "" );
     FbxStreamAdapter stream( span( data.data(), data.size() ) );
-    if ( importer->Initialize( &stream, nullptr, -1, fbxmgr_->GetIOSettings() ) )
+    // if ( importer->Initialize( &stream, nullptr, -1, fbxmgr_->GetIOSettings() ) )
+    if ( importer->Initialize( filename.c_str(), -1, fbxmgr_->GetIOSettings() ) )
     {
       auto scene = FbxScene::Create( fbxmgr_, "loaderScene" );
       importer->Import( scene );
@@ -292,11 +288,9 @@ namespace neko::loaders {
       fbxsdk::FbxSystemUnit::m.ConvertScene( scene, opts );
       auto root = scene->GetRootNode();
       assert( root );
-      auto node = new SceneNode( nullptr );
-      parseFBXNode( root, *node );
-      node->setRotate( math::angleAxis( math::radians( -90.0f ), vec3UnitX ) );
-      updateSceneGraph( *node );
-      dumpSceneGraph( *node );
+      parseFBXNode( root, *rootNode );
+      rootNode->setRotate( math::angleAxis( math::radians( -90.0f ), vec3UnitX ) );
+      dumpSceneGraph( *rootNode );
     }
     importer->Destroy( true );
   }

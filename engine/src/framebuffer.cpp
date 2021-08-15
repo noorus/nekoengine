@@ -16,6 +16,25 @@ namespace neko {
     clearColor_ = vec4( 30.0f / 255.0f, 30.0f / 255.0f, 35.0f / 255.0f, 1.0f );
   }
 
+  //! Called by Framebuffer::create()
+  GLuint Renderer::implCreateFramebuffer( size_t width, size_t height )
+  {
+    assert( width <= (size_t)info_.maxFramebufferWidth && height <= (size_t)info_.maxFramebufferHeight );
+
+    GLuint handle = 0;
+    glCreateFramebuffers( 1, &handle );
+    assert( handle != 0 );
+
+    return handle;
+  }
+
+  //! Called by Framebuffer::destroy()
+  void Renderer::implDeleteFramebuffer( GLuint handle )
+  {
+    assert( handle );
+    glDeleteFramebuffers( 1, &handle );
+  }
+
 #define CONVGLENUM(en, add) (GLenum)((GLuint)en + add)
 
   void Framebuffer::recreate( size_t width, size_t height )

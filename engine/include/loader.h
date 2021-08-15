@@ -8,6 +8,16 @@ namespace neko {
 
   class SceneNode;
 
+  struct OzzAnimationEntry
+  {
+    unique_ptr<ozz::animation::offline::RawAnimation> animation_;
+    map<utf8String, size_t> boneTrackMap_;
+  };
+
+  using AnimationEntryPtr = shared_ptr<OzzAnimationEntry>;
+
+  using AnimationVector = vector<AnimationEntryPtr>;
+
   namespace loaders {
 
 #ifndef NEKO_NO_ANIMATION
@@ -28,7 +38,7 @@ namespace neko {
     };
 
     void dumpUnityYaml( UnityYamlNode& node, size_t level = 0 );
-    ozz::unique_ptr<ozz::animation::Animation> loadUnityYaml( const vector<uint8_t>& data );
+    void loadUnityAnimation( const vector<uint8_t>& data, AnimationEntryPtr& into );
 
 #endif
 
@@ -39,17 +49,19 @@ namespace neko {
       void parseFBXNode( fbxsdk::FbxNode* node, SceneNode& out );
     public:
       FbxLoader();
-      void loadFBXScene( const vector<uint8_t>& data );
+      void loadFBXScene( const vector<uint8_t>& data, const utf8String& filename, SceneNode* rootNode );
       ~FbxLoader();
     };
 
   }
 
-  struct LoadTask {
+  struct LoadTask
+  {
     enum LoadType {
       Load_Texture,
       Load_Fontface,
-      Load_Model
+      Load_Model,
+      Load_Animation
     } type_;
     struct TextureLoad {
       MaterialPtr material_;
@@ -61,9 +73,13 @@ namespace neko {
       utf8String path_;
     } fontfaceLoad;
     struct ModelLoad {
+      SceneNode* node_;
       utf8String path_;
-      vector<utf8String> animPaths_;
     } modelLoad;
+    struct AnimationLoad {
+      AnimationEntryPtr animation_;
+      utf8String path_;
+    } animationLoad;
     LoadTask( MaterialPtr material, vector<utf8String> paths ): type_( Load_Texture )
     {
       textureLoad.material_ = move( material );
@@ -76,10 +92,15 @@ namespace neko {
       fontfaceLoad.specs_.pointSize_ = pointSize;
       fontfaceLoad.path_ = path;
     }
-    LoadTask( const utf8String& path, vector<utf8String> paths ): type_( Load_Model )
+    LoadTask( SceneNode* modelRootNode, const utf8String& path ): type_( Load_Model )
     {
+      modelLoad.node_ = modelRootNode;
       modelLoad.path_ = path;
-      modelLoad.animPaths_ = paths;
+    }
+    LoadTask( AnimationEntryPtr animation, const utf8String& path ): type_( Load_Animation )
+    {
+      animationLoad.animation_ = move( animation );
+      animationLoad.path_ = path;
     }
   };
 
@@ -93,11 +114,14 @@ namespace neko {
     platform::Event finishedMaterialsEvent_;
     platform::Event finishedFontsEvent_;
     platform::Event finishedModelsEvent_;
+    platform::Event finishedAnimationsEvent_;
     platform::RWLock finishedTasksLock_;
     LoadTaskVector newTasks_;
     MaterialVector finishedMaterials_;
     vector<SceneNode*> finishedModels_;
     FontVector finishedFonts_;
+    AnimationVector finishedAnimations_;
+    loaders::FbxLoader fbxLoader_;
     void handleNewTasks();
   private:
     static bool threadProc( platform::Event& running, platform::Event& wantStop, void* argument );
@@ -108,6 +132,7 @@ namespace neko {
     void getFinishedMaterials( MaterialVector& materials );
     void getFinishedFonts( FontVector& fonts );
     void getFinishedModels( vector<SceneNode*>& models );
+    void getFinishedAnimations( AnimationVector& animations );
     void addLoadTask( const LoadTaskVector& resources );
     ~ThreadedLoader();
   };

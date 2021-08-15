@@ -21,7 +21,7 @@
 // convenient to drop some dependencies when developing stuff on the road.
 
 // Define to disable scripting & drop the V8 libraries requirement.
-#define NEKO_NO_SCRIPTING
+#undef NEKO_NO_SCRIPTING
 
 // Define to disable audio & drop FMOD SDK requirement.
 #define NEKO_NO_AUDIO
@@ -29,7 +29,9 @@
 // Define to disable the GUI & drop MyGUI SDK requirement.
 #define NEKO_NO_GUI
 
+// Define to disable the OZZ animation system stuff. Will probably break momentarily.
+#undef NEKO_NO_ANIMATION
+
+// Platform/store integrations
 #define NEKO_USE_DISCORD
 #undef NEKO_USE_STEAM
-
-#define NEKO_NO_ANIMATION
