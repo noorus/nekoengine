@@ -363,6 +363,7 @@ namespace neko {
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
     loader_->addLoadTask( { LoadTask( materials_[0], { R"(data\textures\test.png)" } ) } );
+    #if 0
     loader_->addLoadTask( { LoadTask( materials_[1], {
       R"(data\textures\SGT_Ground_1_AlbedoSmoothness.png)",
       R"(data\textures\SGT_Ground_1_Height.png)",
@@ -376,6 +377,7 @@ namespace neko {
     loader_->addLoadTask( { LoadTask( R"(data\meshes\new_tank_tiger.fbx)", {
       R"(data\meshes\SCA_Aircraft_Flight.anim)",
       } ) } );
+    #endif
 
     mainbuffer_ = make_shared<Framebuffer>( this, 2, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
     intermediate_ = make_shared<Framebuffer>( this, 2, 1 );
@@ -746,15 +748,17 @@ namespace neko {
     }
 #endif
 
+    #if 0
     auto& pl = useMaterial( 2 );
     for ( auto node : sceneGraph_ )
       sceneDrawEnterNode( node, pl );
+    #endif
 
-    /*builtin_.cube_->begin();
+    builtin_.cube_->begin();
     mat4 mdl( 1.0f );
     mdl = glm::scale( mdl, vec3( 3.0f, 3.0f, 3.0f ) );
     useMaterial( 1 ).setUniform( "model", mdl );
-    builtin_.cube_->draw();*/
+    builtin_.cube_->draw();
 
     /*if ( g_CVar_dbg_shownormals.as_b() )
     {

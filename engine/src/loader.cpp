@@ -148,12 +148,14 @@ namespace neko {
       }
       else if ( task.type_ == LoadTask::Load_Model )
       {
+#ifndef NEKO_NO_ANIMATION
         for ( const auto& path : task.modelLoad.animPaths_ )
         {
           vector<uint8_t> input;
           platform::FileReader( path ).readFullVector( input );
           auto anim = loaders::loadUnityYaml( input );
         }
+#endif
         finishedTasksLock_.lock();
         //finishedModels_.push_back( node );
         finishedTasksLock_.unlock();

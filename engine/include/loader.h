@@ -10,6 +10,8 @@ namespace neko {
 
   namespace loaders {
 
+#ifndef NEKO_NO_ANIMATION
+
     struct UnityYamlNode {
       bool isRoot = false;
       size_t indent;
@@ -27,6 +29,8 @@ namespace neko {
 
     void dumpUnityYaml( UnityYamlNode& node, size_t level = 0 );
     ozz::unique_ptr<ozz::animation::Animation> loadUnityYaml( const vector<uint8_t>& data );
+
+#endif
 
     class FbxLoader {
     protected:

@@ -20,8 +20,17 @@ namespace neko {
   const char* c_engineLogName = "nekoengine";
   const uint32_t c_engineVersion[3] = { 0, 1, 1 };
 
+#ifdef NEKO_USE_DISCORD
   const int64_t c_discordAppId = 862843623824556052;
+#else
+  const int64_t c_discordAppId = 0;
+#endif
+
+#ifdef NEKO_USE_STEAM
   const uint32_t c_steamAppId = 1692910;
+#else
+  const uint32_t c_steamAppId = 0;
+#endif
 
 #ifdef _DEBUG
   const wchar_t* c_tankLibraryName = L"tankengine_d.dll";
@@ -79,8 +88,8 @@ namespace neko {
     u_getVersion( icuVersion );
     console_->printf( Console::srcEngine, "Using ICU version %d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
 
-    //tanklib_.load( this );
-    //tanklib_.engine_->initialize( c_discordAppId, c_steamAppId );
+    tanklib_.load( this );
+    tanklib_.engine_->initialize( c_discordAppId, c_steamAppId );
 
     rendererTime_.store( 0.0f );
 
@@ -117,7 +126,7 @@ namespace neko {
     console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
 #endif
 
-    //tanklib_.engine_->update();
+    tanklib_.engine_->update( 0.0, 0.0 );
 
     //input_->postInitialize();
 
@@ -159,6 +168,11 @@ namespace neko {
   void Engine::onDiscordDebugPrint( const utf8String& message )
   {
     console_->printf( Console::srcEngine, "Discord: %s", message.c_str() );
+  }
+
+  void Engine::onDiscordUserImage( const uint64_t userId, size_t width, size_t height, const uint8_t* data )
+  {
+    console_->printf( Console::srcEngine, "Discord: Got user image %ix%i", width, height );
   }
 
   void Engine::onSteamDebugPrint( const utf8String& message )
@@ -206,7 +220,8 @@ namespace neko {
     console_->printf( Console::srcEngine, "Logic: targeting %.02f FPS, logic step %.02fms, max frame time %I64uus, max sleep %ims",
       (float)c_logicFPS, static_cast<float>( c_logicStep * 1000.0 ), c_logicMaxFrameMicroseconds, maxSleepytimeMs );
 
-    // tanklib_.engine_->update();
+    tanklib_.engine_->update( time_, 0.0 );
+    tanklib_.engine_->changeActivity_AlphaDevelop();
 
     // auto& inst = tanklib_.engine_->steamInstallation();
 
@@ -255,7 +270,7 @@ namespace neko {
 
       //input_->postUpdate( delta, time_ );
 
-      //tanklib_.engine_->update();
+      tanklib_.engine_->update( time_, delta );
 
 #ifndef NEKO_NO_SCRIPTING
       scripting_->postUpdate( delta, time_ );
@@ -313,7 +328,7 @@ namespace neko {
     messaging_.reset();
     Locator::provideMessaging( MessagingPtr() );
 
-    // tanklib_.unload();
+    tanklib_.unload();
 
     console_->resetEngine();
   }

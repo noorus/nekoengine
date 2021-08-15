@@ -26,19 +26,19 @@ namespace tank {
 
   struct GameInstallationState
   {
-    bool installed_;
+    bool installed_ = false;
     utf8String branch_;
     utf8String installPath_;
-    bool beta_;
-    GameOwnership ownership_;
-    uint32_t purchaseTime_;
-    uint64_t buildId_;
-    GameInstallationState(): installed_( false ), beta_( false ), purchaseTime_( 0 ), buildId_( 0 ) {}
+    bool beta_ = false;
+    GameOwnership ownership_ = GameOwnership::NotOwned;
+    uint32_t purchaseTime_ = 0;
+    uint64_t buildId_ = 0;
   };
 
   class TankHost {
   public:
     virtual void onDiscordDebugPrint( const utf8String& message ) = 0;
+    virtual void onDiscordUserImage( const uint64_t userId, size_t width, size_t height, const uint8_t* data ) = 0;
     virtual void onSteamDebugPrint( const utf8String& message ) = 0;
     virtual void onSteamOverlayToggle( bool enabled ) = 0;
   };
@@ -51,9 +51,10 @@ namespace tank {
   public:
     TankEngine( TankHost* host );
     virtual void initialize( int64_t discordAppID, uint32_t steamAppID );
+    virtual void changeActivity_AlphaDevelop() throw();
     virtual const GameInstallationState& discordInstallation() throw();
     virtual const GameInstallationState& steamInstallation() throw();
-    virtual void update();
+    virtual void update( double gameTime, double delta );
     virtual void shutdown();
     ~TankEngine();
   };

@@ -81,6 +81,7 @@ namespace neko {
     void onMessage( const Message& msg ) override;
     //! TankEngine log callback.
     virtual void onDiscordDebugPrint( const utf8String& message );
+    virtual void onDiscordUserImage( const uint64_t userId, size_t width, size_t height, const uint8_t* data );
     virtual void onSteamDebugPrint( const utf8String& message );
     virtual void onSteamOverlayToggle( bool enabled );
   public:

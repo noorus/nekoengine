@@ -89,3 +89,5 @@
 #endif // !NEKO_NO_ICU
 
 #pragma warning( pop )
+
+#include "neko_platform.h"

@@ -28,3 +28,8 @@
 
 // Define to disable the GUI & drop MyGUI SDK requirement.
 #define NEKO_NO_GUI
+
+#define NEKO_USE_DISCORD
+#undef NEKO_USE_STEAM
+
+#define NEKO_NO_ANIMATION

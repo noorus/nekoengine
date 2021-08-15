@@ -8,6 +8,8 @@ namespace neko {
 
   namespace platform {
 
+#ifndef NEKO_SIDELIBRARY_BUILD
+
     namespace api {
 
       using fnGetDpiForSystem = UINT( WINAPI* )( VOID );
@@ -40,6 +42,8 @@ namespace neko {
     void performanceTeardownCurrentThread();
 
     extern HINSTANCE g_instance;
+
+#endif
 
 #pragma warning( push )
 #pragma warning( disable : 26110 )
@@ -312,6 +316,21 @@ namespace neko {
       if ( !ScreenToClient( window, &position ) )
         return false;
       return true;
+    }
+
+    inline int64_t unixTimestamp()
+    {
+      constexpr int64_t c_unixTimeStart = 0x019DB1DED53E8000;
+      constexpr int64_t c_ticksPerSecond = 10000000;
+
+      FILETIME ft;
+      GetSystemTimeAsFileTime( &ft );
+
+      LARGE_INTEGER li;
+      li.LowPart = ft.dwLowDateTime;
+      li.HighPart = ft.dwHighDateTime;
+
+      return ( li.QuadPart - c_unixTimeStart ) / c_ticksPerSecond;
     }
 
     //! UTF-8 to wide string conversion.

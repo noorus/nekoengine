@@ -6,6 +6,8 @@
 #include "renderer.h"
 #include "console.h"
 
+#ifndef NEKO_NO_ANIMATION
+
 namespace neko::loaders {
 
   UnityYamlNode* findUnityYamlNode( UnityYamlNode& root, const utf8String& name )
@@ -213,3 +215,5 @@ namespace neko::loaders {
   }
 
 }
+
+#endif
