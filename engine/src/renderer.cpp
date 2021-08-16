@@ -363,11 +363,11 @@ namespace neko {
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
     loader_->addLoadTask( { LoadTask( materials_[0], { R"(data\textures\test.png)" } ) } );
-    loader_->addLoadTask( { LoadTask( materials_[1], {
+    /*loader_->addLoadTask( { LoadTask( materials_[1], {
       R"(data\textures\SGT_Ground_1_AlbedoSmoothness.png)",
       R"(data\textures\SGT_Ground_1_Height.png)",
       R"(data\textures\SGT_Ground_1_MetallicSmoothness.png)",
-      R"(data\textures\SGT_Ground_1_Normal.png)" } ) } );
+      R"(data\textures\SGT_Ground_1_Normal.png)" } ) } );*/
     loader_->addLoadTask( { LoadTask( materials_[2], {
       R"(data\textures\M_Tank_Tiger_Base_AlbedoTransparency.png)",
       R"(data\textures\M_Tank_Tiger_Base_MetallicSmoothness.png)",

@@ -21,6 +21,9 @@ namespace neko {
 # define NEKO_CONFIG_SUBDIRNAME "release"
 #endif
 
+  const wchar_t c_icuData[] = L"icudtl.dat";
+  const wchar_t c_snapshotData[] = L"snapshot_blob.bin";
+
   Scripting::Scripting( EnginePtr engine ):
     Subsystem( move( engine ) ),
     v8::ArrayBuffer::Allocator()
@@ -29,13 +32,13 @@ namespace neko {
 
     rootDirectory_ = platform::getCurrentDirectory();
     dataDirectory_ = rootDirectory_;
-    dataDirectory_.append( "\\data\\v8\\" NEKO_CONFIG_SUBDIRNAME "\\" );
+    dataDirectory_.append( L"\\data\\v8\\" NEKO_CONFIG_SUBDIRNAME "\\" );
 
-    if ( !v8::V8::InitializeICU( ( dataDirectory_ + "icudtl.dat" ).c_str() ) )
+    if ( !v8::V8::InitializeICU( platform::wideToUtf8( dataDirectory_ + c_icuData ).c_str() ) )
       NEKO_EXCEPT( "V8 ICU initialization failed" );
 
     v8::V8::InitializeExternalStartupDataFromFile(
-      ( dataDirectory_ + "snapshot_blob.bin" ).c_str()
+      platform::wideToUtf8( dataDirectory_ + c_snapshotData ).c_str()
     );
 
     platform_ = move( v8::platform::NewDefaultPlatform(
@@ -51,7 +54,7 @@ namespace neko {
   void Scripting::initialize()
   {
     global_ = make_shared<ScriptingContext>( this, this,
-      utf8String( rootDirectory_ ) + R"(\script\)" );
+      platform::wideToUtf8( rootDirectory_ + LR"(\script\)" ) );
   }
 
   void Scripting::postInitialize()

@@ -112,8 +112,8 @@ namespace neko {
   protected:
     unique_ptr<v8::Platform> platform_;
     ScriptingContextPtr global_;
-    utf8String rootDirectory_;
-    utf8String dataDirectory_;
+    wstring rootDirectory_;
+    wstring dataDirectory_;
   private:
     //! v8::ArrayBuffer::Allocator implementation
     virtual void* Allocate( size_t length ) override;

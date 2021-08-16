@@ -177,10 +177,11 @@ namespace neko {
   protected:
     platform::FileWriter impl_;
   public:
-    TextFileWriter( const string& filename ): impl_( filename, true )
+    TextFileWriter( const utf8String& filename ): TextFileWriter( platform::utf8ToWide( filename ) ) {}
+    TextFileWriter( const wstring& filename ): impl_( filename, true )
     {
     }
-    inline void write( const string& str )
+    inline void write( const utf8String& str )
     {
       impl_.writeBlob( (void*)str.c_str(), (uint32_t)str.size() );
     }
@@ -192,7 +193,8 @@ namespace neko {
   protected:
     platform::FileReader impl_;
   public:
-    TextFileReader( const utf8String& filename ): impl_( filename )
+    TextFileReader( const utf8String& filename ): TextFileReader( platform::utf8ToWide( filename ) ) {}
+    TextFileReader( const wstring& filename ): impl_( filename )
     {
     }
     inline utf8String readFullAssumeUtf8()

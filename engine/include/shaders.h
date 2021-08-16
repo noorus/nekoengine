@@ -154,7 +154,7 @@ namespace neko {
     class Shaders {
     protected:
       ConsolePtr console_;
-      utf8String rootFilePath_;
+      wstring rootFilePath_;
       ShaderVector shaders_;
       ProgramVector programs_;
       PipelineMap pipelines_;

@@ -34,6 +34,10 @@ inline int runMain( const std::vector<std::wstring>& arguments )
 {
   bool failure = false;
 
+  Environment env;
+  env.documentsPath_ = move( platform::getGameDocumentsPath() );
+  platform::ensureDirectory( env.documentsPath_ );
+
   platform::initialize();
   platform::prepareProcess();
 
@@ -63,7 +67,9 @@ inline int runMain( const std::vector<std::wstring>& arguments )
 
   platform::performanceInitializeGameThread();
 
-  EnginePtr engine = make_shared<Engine>( console );
+  console->printf( Console::srcEngine, R"(Documents directory is %s)", platform::wideToUtf8( env.documentsPath_ ).c_str() );
+
+  EnginePtr engine = make_shared<Engine>( console, env );
 
   size_t i = 0;
   while ( i < arguments.size() )

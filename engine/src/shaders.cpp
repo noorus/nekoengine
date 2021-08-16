@@ -45,7 +45,7 @@ namespace neko {
         NEKO_EXCEPT( "Shader compiler is not present on this platform" );
 
       rootFilePath_ = platform::getCurrentDirectory();
-      rootFilePath_.append( R"(\data\shaders\)" );
+      rootFilePath_.append( LR"(\data\shaders\)" );
 
       world_ = make_unique<PersistentBuffer<neko::uniforms::World>>();
       processing_ = make_unique<PersistentBuffer<neko::uniforms::Processing>>();
@@ -220,7 +220,7 @@ namespace neko {
     utf8String Shaders::loadSource( const utf8String& filename )
     {
       utf8String source;
-      platform::FileReader file( rootFilePath_ + filename );
+      platform::FileReader file( rootFilePath_ + platform::utf8ToWide( filename ) );
       source.resize( file.size() + 1 );
       file.read( &source[0], (uint32_t)file.size() );
       source[file.size()] = '\0';

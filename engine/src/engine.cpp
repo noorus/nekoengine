@@ -38,8 +38,8 @@ namespace neko {
   const wchar_t* c_tankLibraryName = L"tankengine.dll";
 #endif
 
-  Engine::Engine( ConsolePtr console ):
-  console_( move( console ) ), time_( 0.0 ), signal_( Signal_None )
+  Engine::Engine( ConsolePtr console, const Environment& env ):
+  console_( move( console ) ), time_( 0.0 ), signal_( Signal_None ), env_( env )
   {
     info_.logName = c_engineLogName;
     info_.engineName = c_engineName;

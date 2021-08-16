@@ -160,7 +160,7 @@ namespace neko {
     void unregisterSource( Source source );
     //! Automatic completion search for given command line.
     void autoComplete( const string& line, CVarList& matches );
-    void start( const EngineInfo& info );
+    void start( const EngineInfo& info, const Environment& env );
     void stop();
     void queueCommand( const string& commandLine );
     //! Queues a command for execution on next update call.

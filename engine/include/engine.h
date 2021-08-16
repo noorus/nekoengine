@@ -64,6 +64,7 @@ namespace neko {
     // InputPtr input_;
     EngineInfo info_;
     TankLibrary tanklib_;
+    Environment env_;
   protected:
     struct State {
       bool focusLost;
@@ -88,6 +89,7 @@ namespace neko {
   public:
     inline const EngineInfo& info() const throw() { return info_; }
     inline ConsolePtr console() throw() { return console_; }
+    inline Environment& env() throw() { return env_; }
     //inline GfxPtr gfx() throw() { return gfx_; }
     //inline InputPtr input() throw() { return input_; }
 #ifndef NEKO_NO_SCRIPTING
@@ -102,7 +104,7 @@ namespace neko {
     const tank::GameInstallationState& installationInfo();
   public:
     //! Constructor.
-    Engine( ConsolePtr console );
+    Engine( ConsolePtr console, const Environment& env );
     //! Destructor.
     ~Engine();
     //! Triggers a "graceful" quit in case of a fatal error.

@@ -266,7 +266,7 @@ namespace neko {
     if ( !engine )
       return resetEngine();
     engine_ = move( engine );
-    start( engine_->info() );
+    start( engine_->info(), engine_->env() );
   }
 
   void Console::resetEngine()
@@ -278,18 +278,18 @@ namespace neko {
     }
   }
 
-  void Console::start( const EngineInfo& info )
+  void Console::start( const EngineInfo& info, const Environment& env )
   {
     DateTime now;
     platform::getDateTime( now );
 
     fileOut_.reset();
 
-    char filename[64];
-    sprintf_s( filename, 64, "%04d%02d%02d_%s-%02d%02d%02d.log",
+    wchar_t filename[64];
+    swprintf_s( filename, 64, L"%04d%02d%02d_%S-%02d%02d%02d.log",
       now.year, now.month, now.day, info.logName.c_str(), now.hour, now.minute, now.second );
 
-    fileOut_ = make_unique<TextFileWriter>( filename );
+    fileOut_ = make_unique<TextFileWriter>( env.documentsPath_ + filename );
 
     writeStartBanner( info );
   }

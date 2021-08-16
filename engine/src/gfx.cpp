@@ -196,9 +196,11 @@ namespace neko {
 
     guiPlatform_ = make_unique<MyGUI::NekoPlatform>();
 
+    auto documentsPath = platform::wideToUtf8( engine.env().documentsPath_ );
+
     guiPlatform_->getDataManagerPtr()->setDataPath( "data\\gui" );
 
-    guiPlatform_->initialise( this, "mygui.log" );
+    guiPlatform_->initialise( this, documentsPath + "mygui.log" );
 
     gui_ = make_unique<MyGUI::Gui>();
     gui_->initialise( "gui_core.xml" );
