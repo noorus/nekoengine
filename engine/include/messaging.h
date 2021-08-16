@@ -14,6 +14,8 @@ namespace neko {
     M_Window_EnterMove,
     M_Window_ExitMove,
     M_Window_Close,
+    // External events
+    M_Extern_SteamOverlay,
     // Debug commands
     M_Debug_ReloadScript,
     M_Debug_ReloadShaders

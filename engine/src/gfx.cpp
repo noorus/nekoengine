@@ -10,6 +10,32 @@
 #include "messaging.h"
 #include "lodepng.h"
 
+#ifdef _DEBUG
+# ifndef NEKO_NO_GUI
+#  pragma comment( lib, "MyGUIEngine_d.lib" )
+# endif
+# ifndef NEKO_NO_ANIMATION
+#  pragma comment( lib, "ozz_animation_d.lib" )
+#  pragma comment( lib, "ozz_animation_offline_d.lib" )
+#  pragma comment( lib, "ozz_animation_tools_d.lib" )
+#  pragma comment( lib, "ozz_base_d.lib" )
+#  pragma comment( lib, "ozz_geometry_d.lib" )
+#  pragma comment( lib, "ozz_options_d.lib" )
+# endif
+#else
+# ifndef NEKO_NO_GUI
+#  pragma comment( lib, "MyGUIEngine.lib" )
+# endif
+# ifndef NEKO_NO_ANIMATION
+#  pragma comment( lib, "ozz_animation_r.lib" )
+#  pragma comment( lib, "ozz_animation_offline_r.lib" )
+#  pragma comment( lib, "ozz_animation_tools_r.lib" )
+#  pragma comment( lib, "ozz_base_r.lib" )
+#  pragma comment( lib, "ozz_geometry_r.lib" )
+#  pragma comment( lib, "ozz_options_r.lib" )
+# endif
+#endif
+
 namespace neko {
 
   using namespace gl;
@@ -142,7 +168,7 @@ namespace neko {
     printInfo();
   }
 
-  void Gfx::postInitialize()
+  void Gfx::postInitialize( Engine& engine )
   {
     renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
     renderer_->preInitialize();
@@ -181,15 +207,38 @@ namespace neko {
 
     MyGUI::PointerManager::getInstance().setVisible( true );
 
-    // auto root = MyGUI::LayoutManager::getInstance().loadLayout( "login.layout" );
-    // MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
-    // button->setCaption( "exit" );
+    auto loginRoot = MyGUI::LayoutManager::getInstance().loadLayout( "login.layout" );
+    //MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
+    //button->setCaption( "exit" );
+
+    auto buildinfoRoot = MyGUI::LayoutManager::getInstance().loadLayout( "buildinfo.layout" );
+    if ( !buildinfoRoot.empty() )
+    {
+      auto infobox = dynamic_cast<MyGUI::TextBox*>( buildinfoRoot[0]->findWidget( "lblBuildInfo" ) );
+      if ( infobox )
+      {
+        auto& install = engine.installationInfo();
+        char data[256];
+        sprintf_s( data, 256, "build: %s\nbuild id: %lld\nbranch: %s\nsku: %s",
+          install.host_ == tank::InstallationHost::Local ? "local" : install.host_ == tank::InstallationHost::Steam ? "steam" : "discord",
+          install.buildId_,
+          install.branch_.c_str(),
+          install.ownership_ == tank::GameOwnership::Owned ? "owned"
+          : install.ownership_ == tank::GameOwnership::TempFreeWeekend ? "free weekend"
+          : install.ownership_ == tank::GameOwnership::TempFamilySharing ? "family sharing"
+          : "unowned" );
+        infobox->setCaption( data );
+        infobox->setTextColour( MyGUI::Colour( 1.0f, 1.0f, 1.0f, 1.0f ) );
+      }
+    }
 
     window_->setMouseCursorVisible( false );
 
 #endif
 
     input_->initialize( window_->getSystemHandle() );
+
+    messaging_->listen( this );
   }
 
 #ifndef NEKO_NO_GUI
@@ -273,6 +322,12 @@ namespace neko {
     }
   }
 
+  void Gfx::onMessage( const Message& msg )
+  {
+    logicLock_.lock();
+    logicLock_.unlock();
+  }
+
   void Gfx::update( GameTime time, GameTime delta )
   {
     if ( flags_.reloadShaders )
@@ -319,6 +374,8 @@ namespace neko {
 
   void Gfx::shutdown()
   {
+    messaging_->remove( this );
+
     if ( target_ )
     {
       renderer_->destroySceneNode( target_ );
@@ -359,11 +416,11 @@ namespace neko {
     renderer_->prepare( 0.0 );
   }
 
-  void Gfx::restart()
+  void Gfx::restart( Engine& engine )
   {
     shutdown();
     preInitialize();
-    postInitialize();
+    postInitialize( engine );
   }
 
   Gfx::~Gfx()
@@ -385,7 +442,7 @@ namespace neko {
   void ThreadedRenderer::initialize()
   {
     gfx_ = make_shared<Gfx>( loader_, fonts_, messaging_, director_, console_ );
-    gfx_->postInitialize();
+    gfx_->postInitialize( *engine_.get() );
     lastTime_ = 0.0;
   }
 
@@ -400,11 +457,15 @@ namespace neko {
       {
         restartEvent_.reset();
         console_->printf( Console::srcGfx, "Restarting renderer" );
+        gfx_->logicLock_.lock();
         gfx_->jsRestart();
+        gfx_->logicLock_.unlock();
         console_->printf( Console::srcGfx, "Restart done" );
         restartedEvent_.set();
         continue;
       }
+
+      gfx_->logicLock_.lock();
 
       gfx_->processEvents();
 
@@ -413,6 +474,8 @@ namespace neko {
       lastTime_ = time;
 
       gfx_->update( time, delta );
+
+      gfx_->logicLock_.unlock();
 
       platform::sleep( 1 );
     }

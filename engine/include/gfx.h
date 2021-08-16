@@ -20,11 +20,13 @@ namespace neko {
   };
 
   class Gfx:
-    public platform::RenderWindowEventRecipient
+    public platform::RenderWindowEventRecipient,
+    public Listener
 #ifndef NEKO_NO_GUI
     , public MyGUI::NekoImageLoader
 #endif
   {
+    friend class ThreadedRenderer;
   public:
     struct Info {
       string renderer_;
@@ -57,6 +59,7 @@ namespace neko {
     unique_ptr<MyGUI::NekoPlatform> guiPlatform_;
     unique_ptr<MyGUI::Gui> gui_;
 #endif
+    platform::RWLock logicLock_;
     void preInitialize();
     void printInfo();
     void resize( size_t width, size_t height );
@@ -69,20 +72,21 @@ namespace neko {
     static void openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity,
       GLsizei length, const GLchar* message, const void* userParam );
     void setOpenGLDebugLogging( const bool enable );
+    virtual void onMessage( const Message& msg );
 #ifndef NEKO_NO_GUI
     // MyGUI::OpenGL3ImageLoader implementation
     void* loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename ) override;
     void saveImage( int width, int height, MyGUI::PixelFormat format, void* texture, const utf8String& filename ) override;
 #endif
   public:
-    void postInitialize();
+    void postInitialize( Engine& engine );
     Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     const Image& renderWindowReadPixels() override;
     void processEvents(); //!< Process vital window events and such.
     void update( GameTime time, GameTime delta );
     inline Renderer& renderer() throw() { return *( renderer_.get() ); }
     void shutdown();
-    void restart();
+    void restart( Engine& engine );
     void jsRestart();
     virtual ~Gfx();
   };

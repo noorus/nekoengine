@@ -17,15 +17,19 @@ namespace tank {
       steam_ = std::make_unique<Steam>( steamAppID, host_ );
       steam_->initialize();
     }
-    discord_ = std::make_unique<Discord>( discordAppID, discordAppID, steamAppID, host_ );
-    discord_->initialize();
+    if ( discordAppID )
+    {
+      discord_ = std::make_unique<Discord>( discordAppID, discordAppID, steamAppID, host_ );
+      discord_->initialize();
+    }
   }
 
   void TankEngine::update( double gameTime, double delta )
   {
     if ( steam_ )
       steam_->update();
-    discord_->update( gameTime, delta );
+    if ( discord_ )
+      discord_->update( gameTime, delta );
   }
 
   void TankEngine::changeActivity_AlphaDevelop() throw()

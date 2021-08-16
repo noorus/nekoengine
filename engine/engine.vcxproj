@@ -80,7 +80,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\FBX\FBX SDK\2020.2\lib\vs2019\x64\$(Configuration);$(SolutionDir)lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)..\SDK\ozz\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>tankengine_d.lib;nil64_d.lib;opengl32.lib;glbindingd.lib;glbinding-auxd.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;v8_d.dll.lib;v8_libbase_d.dll.lib;v8_libplatform_d.dll.lib;libbz2d.lib;freetyped.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;libfbxsdk.lib;ozz_animation_d.lib;ozz_animation_offline_d.lib;ozz_animation_tools_d.lib;ozz_base_d.lib;ozz_geometry_d.lib;ozz_options_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tankengine_d.lib;nil64_d.lib;opengl32.lib;glbindingd.lib;glbinding-auxd.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;v8_d.dll.lib;v8_libbase_d.dll.lib;v8_libplatform_d.dll.lib;libbz2d.lib;freetyped.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
@@ -141,12 +141,12 @@
       </AdditionalManifestDependencies>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
-      <GenerateMapFile>true</GenerateMapFile>
+      <GenerateMapFile>false</GenerateMapFile>
       <StackReserveSize>
       </StackReserveSize>
       <StackCommitSize>
       </StackCommitSize>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>/ignore:4099 /time %(AdditionalOptions)</AdditionalOptions>
     </Link>

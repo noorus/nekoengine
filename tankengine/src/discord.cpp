@@ -146,6 +146,7 @@ namespace tank {
 
   void Discord::initialize()
   {
+    installation_.host_ = InstallationHost::Discord;
   }
 
   void Discord::shutdown()

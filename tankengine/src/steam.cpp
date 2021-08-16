@@ -63,6 +63,8 @@ namespace tank {
   {
     SteamClient()->SetWarningMessageHook( staticSteamAPIWarningHook );
 
+    installation_.host_ = InstallationHost::Steam;
+
     if ( SteamApps()->BIsSubscribed() )
       installation_.ownership_ = GameOwnership::Owned;
     else if ( SteamApps()->BIsSubscribedFromFamilySharing() )

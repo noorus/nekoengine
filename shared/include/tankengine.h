@@ -16,6 +16,13 @@ namespace tank {
   class Discord;
   class Steam;
 
+  enum class InstallationHost
+  {
+    Local = 0,
+    Steam,
+    Discord
+  };
+
   enum class GameOwnership
   {
     NotOwned = 0,
@@ -26,6 +33,7 @@ namespace tank {
 
   struct GameInstallationState
   {
+    InstallationHost host_ = InstallationHost::Local;
     bool installed_ = false;
     utf8String branch_;
     utf8String installPath_;

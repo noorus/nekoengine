@@ -68,7 +68,8 @@ namespace neko {
     struct State {
       bool focusLost;
       bool windowMove;
-      State(): focusLost( false ), windowMove( false ) {}
+      bool steamOverlay;
+      State(): focusLost( false ), windowMove( false ), steamOverlay( false ) {}
     } state_;
     platform::PerformanceClock clock_;
     GameTime time_;
@@ -98,6 +99,7 @@ namespace neko {
     inline MessagingPtr msgs() throw() { return messaging_; }
     inline DirectorPtr director() throw() { return director_; }
     inline atomic<GameTime>& renderTime() throw() { return rendererTime_; }
+    const tank::GameInstallationState& installationInfo();
   public:
     //! Constructor.
     Engine( ConsolePtr console );

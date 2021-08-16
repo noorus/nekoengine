@@ -27,11 +27,11 @@
 #define NEKO_NO_AUDIO
 
 // Define to disable the GUI & drop MyGUI SDK requirement.
-#define NEKO_NO_GUI
+#undef NEKO_NO_GUI
 
 // Define to disable the OZZ animation system stuff. Will probably break momentarily.
 #undef NEKO_NO_ANIMATION
 
-// Platform/store integrations
-#define NEKO_USE_DISCORD
-#undef NEKO_USE_STEAM
+// -- Platform/Store integrations --
+#undef NEKO_USE_DISCORD
+#define NEKO_USE_STEAM

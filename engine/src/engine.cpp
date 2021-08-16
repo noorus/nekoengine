@@ -183,11 +183,16 @@ namespace neko {
   void Engine::onSteamOverlayToggle( bool enabled )
   {
     console_->printf( Console::srcEngine, "Steam: Overlay toggle %s", enabled ? "true" : "false" );
+    if ( enabled != state_.steamOverlay )
+    {
+      messaging_->send( M_Extern_SteamOverlay, 1, enabled );
+      state_.steamOverlay = enabled;
+    }
   }
 
   bool Engine::paused()
   {
-    if ( state_.focusLost || state_.windowMove )
+    if ( state_.focusLost || state_.windowMove || state_.steamOverlay )
       return true;
     return false;
   }
@@ -207,6 +212,15 @@ namespace neko {
 #endif
   }
 
+  const tank::GameInstallationState& Engine::installationInfo()
+  {
+    #ifdef NEKO_USE_STEAM
+    return tanklib_.engine_->steamInstallation();
+    #elif NEKO_USE_DISCORD
+    return tanklib_.engine_->discordInstallation();
+    #endif
+  }
+
   void Engine::run()
   {
     clock_.init();
@@ -223,7 +237,9 @@ namespace neko {
     tanklib_.engine_->update( time_, 0.0 );
     tanklib_.engine_->changeActivity_AlphaDevelop();
 
-    // auto& inst = tanklib_.engine_->steamInstallation();
+    #ifdef NEKO_USE_STEAM
+    auto& inst = tanklib_.engine_->steamInstallation();
+    #endif
 
     while ( signal_ != Signal_Stop )
     {

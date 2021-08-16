@@ -153,7 +153,7 @@ namespace neko {
         mousePosition_.y = (LONG)windowSize_.y - 1;
 #ifndef NEKO_NO_GUI
       MyGUI::InputManager::getInstance().injectMouseMove(
-        (int)mousePosition_.x, (int)mousePosition_.y, mouseZ_ );
+        (int)mousePosition_.x, (int)mousePosition_.y, (int)movement_.z );
 #endif
       moved_ = false;
     }
