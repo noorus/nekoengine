@@ -28,49 +28,6 @@ namespace neko::loaders {
     return math::quaternionFrom( (Real)eul[0], (Real)eul[1], (Real)eul[2] );
   }
 
-  FbxString GetAttributeTypeName( FbxNodeAttribute::EType type )
-  {
-    switch ( type )
-    {
-      case FbxNodeAttribute::eUnknown: return "unidentified";
-      case FbxNodeAttribute::eNull: return "null";
-      case FbxNodeAttribute::eMarker: return "marker";
-      case FbxNodeAttribute::eSkeleton: return "skeleton";
-      case FbxNodeAttribute::eMesh: return "mesh";
-      case FbxNodeAttribute::eNurbs: return "nurbs";
-      case FbxNodeAttribute::ePatch: return "patch";
-      case FbxNodeAttribute::eCamera: return "camera";
-      case FbxNodeAttribute::eCameraStereo: return "stereo";
-      case FbxNodeAttribute::eCameraSwitcher: return "camera switcher";
-      case FbxNodeAttribute::eLight: return "light";
-      case FbxNodeAttribute::eOpticalReference: return "optical reference";
-      case FbxNodeAttribute::eOpticalMarker: return "marker";
-      case FbxNodeAttribute::eNurbsCurve: return "nurbs curve";
-      case FbxNodeAttribute::eTrimNurbsSurface: return "trim nurbs surface";
-      case FbxNodeAttribute::eBoundary: return "boundary";
-      case FbxNodeAttribute::eNurbsSurface: return "nurbs surface";
-      case FbxNodeAttribute::eShape: return "shape";
-      case FbxNodeAttribute::eLODGroup: return "lodgroup";
-      case FbxNodeAttribute::eSubDiv: return "subdiv";
-      default: return "unknown";
-    }
-  }
-
-  void dumpSceneGraph( SceneNode& root, int level = 0 )
-  {
-    utf8String prep;
-    for ( int i = 0; i < level; i++ )
-      prep.append( "  " );
-    Locator::console().printf( Console::srcGame, "%s<node \"%s\" pos %.2f %.2f %.2f, scale %.2f %.2f %.2f, rot %.2f %.2f %.2f %.2f>",
-      prep.c_str(), root.name_.c_str(),
-      root.translate_.x, root.translate_.y, root.translate_.z,
-      root.scale_.x, root.scale_.y, root.scale_.z,
-      root.rotate_.x, root.rotate_.y, root.rotate_.z, root.rotate_.z
-    );
-    for ( auto& child : root.children_ )
-      dumpSceneGraph( *child, level + 1 );
-  }
-
   FbxLoader::FbxLoader(): fbxio_( nullptr ), fbxmgr_( nullptr )
   {
     fbxmgr_ = FbxManager::Create();
@@ -107,7 +64,7 @@ namespace neko::loaders {
         auto uvcount = mesh->GetElementUVCount();
         auto normalcount = mesh->GetElementNormalCount();
         auto tangentcount = mesh->GetElementTangentCount();
-        Locator::console().printf( Console::srcLoader, "Mesh has %i polygons, %i UV elements, %i normals, %i tangents", polycount, uvcount, normalcount, tangentcount );
+        // Locator::console().printf( Console::srcLoader, "Mesh has %i polygons, %i UV elements, %i normals, %i tangents", polycount, uvcount, normalcount, tangentcount );
         assert( uvcount == 1 && normalcount == 1 );
         for ( int j = 0; j < polycount; j++ )
         {
@@ -290,7 +247,6 @@ namespace neko::loaders {
       assert( root );
       parseFBXNode( root, *rootNode );
       rootNode->setRotate( math::angleAxis( math::radians( -90.0f ), vec3UnitX ) );
-      dumpSceneGraph( *rootNode );
     }
     importer->Destroy( true );
   }

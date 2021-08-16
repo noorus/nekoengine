@@ -133,11 +133,19 @@ namespace neko {
           unsigned int width, height;
           platform::FileReader( path ).readFullVector( input );
           MaterialLayer layer;
-          if ( lodepng::decode( layer.image_.data_, width, height, input.data(), input.size(), LCT_RGBA, 8 ) == 0 )
+          vector<uint8_t> rawData;
+          if ( lodepng::decode( rawData, width, height, input.data(), input.size(), LCT_RGBA, 8 ) == 0 )
           {
             layer.image_.width_ = width;
             layer.image_.height_ = height;
             layer.image_.format_ = PixFmtColorRGBA8;
+            layer.image_.data_.reserve( rawData.size() );
+            for ( auto i = 0; i < height; ++i )
+            {
+              auto srcRow = rawData.data() + ( i * width * 4 );
+              auto dstRow = layer.image_.data_.data() + ( ( height - 1 - i ) * width * 4 );
+              memcpy( dstRow, srcRow, width * 4 );
+            }
             task.textureLoad.material_->layers_.push_back( move( layer ) );
           }
           else

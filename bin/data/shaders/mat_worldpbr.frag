@@ -115,7 +115,7 @@ void main()
   vec3 normal = texture(texNormal, vs_out.texcoord).rgb;
   normal = normalize(normal * 2.0 - 1.0);*/
 
-  vec2 tc = vec2(vs_out.texcoord.x, 1 - vs_out.texcoord.y);
+  vec2 tc = vec2(vs_out.texcoord.x, vs_out.texcoord.y);
 
   float height = 1;
   vec4 smp = texture(texAlbedo, tc);

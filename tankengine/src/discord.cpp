@@ -37,7 +37,7 @@ namespace tank {
 
   inline Snowflake makeSnowflake()
   {
-    Snowflake f( neko::platform::unixTimestamp(), 123, 456, 7 );
+    Snowflake f( neko::platform::unixTimestamp(), (uint8_t)123, (uint8_t)456, (uint8_t)7 );
     return move( f );
   }
 
@@ -54,7 +54,9 @@ namespace tank {
     request.SetId( user.id_ );
     request.SetType( discord::ImageType::User );
     request.SetSize( 256 );
-    core_->ImageManager().Fetch( request, true,
+    // Re-enable this when Discord fixes the SDK (broken on 6.6.2021)
+
+    /*core_->ImageManager().Fetch( request, false,
     [&]( discord::Result result, discord::ImageHandle handle )
     {
       discord::ImageDimensions dims{};
@@ -67,7 +69,7 @@ namespace tank {
       state_.userImages_[user.id_] = move( img );
       state_.updated_.bits.images = true;
       host_->onDiscordUserImage( user.id_, dims.GetWidth(), dims.GetHeight(), state_.userImages_[user.id_].buffer_.data() );
-    });
+    });*/
   }
 
   Discord::Discord( int64_t clientID, int64_t applicationID, uint32_t steamAppID, TankHost* host ):
@@ -186,21 +188,21 @@ namespace tank {
     if ( result != discord::Result::Ok )
       NEKO_EXCEPT( "Discord callbacks run failed" );
 
-    char asd[1024];
+    // char asd[1024];
 
     if ( state_.updated_.field )
     {
       if ( state_.updated_.bits.self )
       {
-        sprintf_s( asd, 1024, "self: %s#%s (%I64u)", state_.localUser_.name_.c_str(), state_.localUser_.discriminator_.c_str(), state_.localUser_.id_ );
-        host_->onDiscordDebugPrint( asd );
+        // sprintf_s( asd, 1024, "self: %s#%s (%I64u)", state_.localUser_.name_.c_str(), state_.localUser_.discriminator_.c_str(), state_.localUser_.id_ );
+        // host_->onDiscordDebugPrint( asd );
       }
       if ( state_.updated_.bits.friends )
       {
         for ( auto& frnd : state_.friends_ )
         {
-          sprintf_s( asd, 1024, "friend: %s#%s (%I64u)", frnd.second.name_.c_str(), frnd.second.discriminator_.c_str(), frnd.second.id_ );
-          host_->onDiscordDebugPrint( asd );
+          // sprintf_s( asd, 1024, "friend: %s#%s (%I64u)", frnd.second.name_.c_str(), frnd.second.discriminator_.c_str(), frnd.second.id_ );
+          // host_->onDiscordDebugPrint( asd );
         }
       }
       state_.updated_.field = 0;

@@ -550,6 +550,20 @@ namespace neko {
     uniform.view = camera.view();
   }
 
+  void dumpSceneGraph( SceneNode& root, int level = 0 )
+  {
+    utf8String str;
+    for ( int i = 0; i < level; i++ )
+      str.append( "  " );
+    Locator::console().printf( Console::srcGame,
+      "%s<node \"%s\" pos %.2f %.2f %.2f, scale %.2f %.2f %.2f, rot %.2f %.2f %.2f %.2f>", str.c_str(), root.name_.c_str(),
+      root.translate_.x, root.translate_.y, root.translate_.z,
+      root.scale_.x, root.scale_.y, root.scale_.z,
+      root.rotate_.x, root.rotate_.y, root.rotate_.z, root.rotate_.z );
+    for ( auto& child : root.children_ )
+      dumpSceneGraph( *child, level + 1 );
+  }
+
   void Renderer::sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline )
   {
     if ( node->mesh_ && node->mesh_->mesh_ )
