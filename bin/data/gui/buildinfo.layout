@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="PanelEmpty" position="0 0 300 140" align="Default" layer="Info" name="pnlBuildInfo">
+        <Property key="NeedMouse" value="false"/>
+        <Widget type="TextBox" skin="TextBox" position="5 5 290 130" align="Stretch" name="lblBuildInfo"/>
+    </Widget>
+    <CodeGeneratorSettings/>
+</MyGUI>
