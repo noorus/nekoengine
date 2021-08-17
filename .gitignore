@@ -343,3 +343,5 @@ lib/*.lib
 lib/*.pdb
 lib/*.dll
 lib/*.exe
+
+publish*
