@@ -43,10 +43,21 @@ namespace tank {
     uint64_t buildId_ = 0;
   };
 
+  struct Image
+  {
+    size_t width_;
+    size_t height_;
+    std::vector<uint8_t> buffer_;
+  };
+
+  using SteamSnowflake = uint64_t;
+  using DcSnowflake = uint64_t;
+
   class TankHost {
   public:
     virtual void onDiscordDebugPrint( const utf8String& message ) = 0;
-    virtual void onDiscordUserImage( const uint64_t userId, size_t width, size_t height, const uint8_t* data ) = 0;
+    virtual void onDiscordUserImage( const DcSnowflake id, Image& image ) = 0;
+    virtual void onSteamUserImage( const SteamSnowflake id, Image& image ) = 0;
     virtual void onSteamDebugPrint( const utf8String& message ) = 0;
     virtual void onSteamOverlayToggle( bool enabled ) = 0;
   };
@@ -60,10 +71,13 @@ namespace tank {
     TankEngine( TankHost* host );
     virtual void initialize( int64_t discordAppID, uint32_t steamAppID );
     virtual void changeActivity_AlphaDevelop() throw();
+    virtual const GameInstallationState& localInstallation() throw();
     virtual const GameInstallationState& discordInstallation() throw();
     virtual const GameInstallationState& steamInstallation() throw();
     virtual void update( double gameTime, double delta );
     virtual void shutdown();
+    virtual bool startedFromSteam();
+    virtual bool startedFromDiscord();
     ~TankEngine();
   };
 

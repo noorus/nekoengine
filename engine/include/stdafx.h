@@ -19,15 +19,15 @@
 
 #include <sdkddkver.h>
 
-#include <windows.h>          // Windows
-#include <shellapi.h>         // ShellAPI
-#include <shlobj.h>           // ShellAPI OLE Objects
-#include <commctrl.h>         // Common Controls          (comctl32.lib)
-#include <richedit.h>         // RichEdit
-#include <time.h>             // Time
-//#include <psapi.h>            // Process Status API       (psapi.lib)
-//#include <dbghelp.h>          // Debug Help Library       (dbghelp.lib)
-#include <avrt.h>             // AVRT                     (avrt.lib)
+#include <windows.h>
+#include <shellapi.h>
+#include <shlobj.h>
+#include <commctrl.h>
+#include <richedit.h>
+#include <ctime>
+//#include <psapi.h>
+//#include <dbghelp.h>
+#include <avrt.h>
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX

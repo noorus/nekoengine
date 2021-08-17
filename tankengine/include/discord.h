@@ -5,19 +5,11 @@
 
 namespace tank {
 
-  struct DiscordImage {
-    size_t width_;
-    size_t height_;
-    std::vector<uint8_t> buffer_;
-  };
-
   struct DiscordUser {
-    uint64_t id_;
+    DcSnowflake id_;
     utf8String name_;
     utf8String discriminator_;
   };
-
-  using DcSnowflake = uint64_t;
 
   class DiscordState {
   public:
@@ -32,7 +24,7 @@ namespace tank {
       uint64_t field;
     } updated_;
     map<DcSnowflake, DiscordUser> friends_;
-    map<DcSnowflake, DiscordImage> userImages_;
+    map<DcSnowflake, Image> userImages_;
   };
 
   class Discord {

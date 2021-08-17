@@ -64,7 +64,7 @@ namespace tank {
       DiscordImage img;
       img.width_ = dims.GetWidth();
       img.height_ = dims.GetHeight();
-      img.buffer_.reserve( img.width_ * img.height_ * 4 );
+      img.buffer_.resize( img.width_ * img.height_ * 4 );
       core_->ImageManager().GetData( handle, img.buffer_.data(), img.buffer_.size() );
       state_.userImages_[user.id_] = move( img );
       state_.updated_.bits.images = true;

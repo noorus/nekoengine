@@ -22,6 +22,11 @@ namespace tank {
       discord_ = std::make_unique<Discord>( discordAppID, discordAppID, steamAppID, host_ );
       discord_->initialize();
     }
+    if ( !startedFromSteam() && !startedFromDiscord() )
+    {
+      // Get current dir?
+      // g_emptyGameInstallation.
+    }
   }
 
   void TankEngine::update( double gameTime, double delta )
@@ -40,6 +45,11 @@ namespace tank {
 
   static GameInstallationState g_emptyGameInstallation;
 
+  const GameInstallationState& TankEngine::localInstallation() throw()
+  {
+    return g_emptyGameInstallation;
+  }
+
   const GameInstallationState& TankEngine::discordInstallation() throw()
   {
     if ( !discord_ )
@@ -54,6 +64,20 @@ namespace tank {
       return g_emptyGameInstallation;
 
     return steam_->installation();
+  }
+
+  bool TankEngine::startedFromSteam()
+  {
+    if ( !steam_ )
+      return false;
+    return ( !steam_->commandline().empty() );
+  }
+
+  bool TankEngine::startedFromDiscord()
+  {
+    if ( !discord_ )
+      return false;
+    return false;
   }
 
   void TankEngine::shutdown()

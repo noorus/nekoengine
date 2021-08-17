@@ -201,9 +201,14 @@ namespace neko {
     console_->printf( Console::srcEngine, "Discord: %s", message.c_str() );
   }
 
-  void Engine::onDiscordUserImage( const uint64_t userId, size_t width, size_t height, const uint8_t* data )
+  void Engine::onDiscordUserImage( const tank::DcSnowflake id, tank::Image& image )
   {
-    console_->printf( Console::srcEngine, "Discord: Got user image %ix%i", width, height );
+    console_->printf( Console::srcEngine, "Discord: Got user image %llu %ix%i", id, image.width_, image.height_ );
+  }
+
+  void Engine::onSteamUserImage( const tank::SteamSnowflake id, tank::Image& image )
+  {
+    console_->printf( Console::srcEngine, "Steam: Got user image %llu %ix%i", id, image.width_, image.height_ );
   }
 
   void Engine::onSteamDebugPrint( const utf8String& message )
@@ -246,10 +251,13 @@ namespace neko {
   const tank::GameInstallationState& Engine::installationInfo()
   {
     #ifdef NEKO_USE_STEAM
-    return tanklib_.engine_->steamInstallation();
+    if ( tanklib_.engine_->startedFromSteam() )
+      return tanklib_.engine_->steamInstallation();
     #elif NEKO_USE_DISCORD
-    return tanklib_.engine_->discordInstallation();
+    if ( tanklib_.engine_->startedFromDiscord() )
+      return tanklib_.engine_->discordInstallation();
     #endif
+    return tanklib_.engine_->localInstallation();
   }
 
   void Engine::run()
@@ -267,10 +275,6 @@ namespace neko {
 
     tanklib_.engine_->update( time_, 0.0 );
     tanklib_.engine_->changeActivity_AlphaDevelop();
-
-    #ifdef NEKO_USE_STEAM
-    auto& inst = tanklib_.engine_->steamInstallation();
-    #endif
 
     while ( signal_ != Signal_Stop )
     {

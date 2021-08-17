@@ -48,6 +48,14 @@ namespace tank {
     host_->onSteamDebugPrint( "OnLicensesUpdated" );
   }
 
+  void Steam::OnNewUrlLaunchParameters( NewUrlLaunchParameters_t* cb )
+  {
+    host_->onSteamDebugPrint( "OnLicensesUpdated" );
+    char cmdline[1024] = { 0 };
+    SteamApps()->GetLaunchCommandLine( cmdline, 1024 );
+    host_->onSteamDebugPrint( cmdline );
+  }
+
   void Steam::baseInitialize()
   {
     if ( !SteamAPI_Init() )
@@ -59,11 +67,47 @@ namespace tank {
     SteamAPI_Shutdown();
   }
 
+  void getSteamUser( CSteamID from, SteamUser& to )
+  {
+    to.id_ = from;
+    to.name_ = SteamFriends()->GetFriendPersonaName( from );
+    auto nickname = SteamFriends()->GetPlayerNickname( from );
+    to.displayName_ = ( nickname ? nickname : to.name_ );
+  }
+
+  void Steam::fetchImage( SteamUser& user )
+  {
+    auto i = ::SteamFriends()->GetLargeFriendAvatar( user.id_ );
+    uint32_t width, height;
+    if ( !SteamUtils()->GetImageSize( i, &width, &height ) )
+      return;
+    Image img;
+    img.width_ = width;
+    img.height_ = height;
+    uint32_t bytes = img.width_ * img.height_ * 4;
+    img.buffer_.resize( bytes );
+    auto buffer = img.buffer_.data();
+    if ( !SteamUtils()->GetImageRGBA( i, buffer, bytes ) )
+      return;
+    auto acc = user.id_.ConvertToUint64();
+    state_.userImages_[acc] = move( img );
+    state_.updated_.bits.images = true;
+    host_->onSteamUserImage( acc, state_.userImages_[acc] );
+  }
+
   void Steam::initialize()
   {
     SteamClient()->SetWarningMessageHook( staticSteamAPIWarningHook );
 
+    state_.localUser_.id_ = ::SteamUser()->GetSteamID();
+    state_.localUser_.name_ = SteamFriends()->GetFriendPersonaName( state_.localUser_.id_ );
+    state_.localUser_.displayName_ = state_.localUser_.name_;
+
     installation_.host_ = InstallationHost::Steam;
+
+    char cmdline[1024] = { 0 };
+    SteamApps()->GetLaunchCommandLine( cmdline, 1024 );
+    commandLine_ = cmdline;
 
     if ( SteamApps()->BIsSubscribed() )
       installation_.ownership_ = GameOwnership::Owned;
@@ -80,13 +124,15 @@ namespace tank {
 
     installation_.purchaseTime_ = SteamApps()->GetEarliestPurchaseUnixTime( appID_ );
 
-    char temp[1024] = { 0 };
-    installation_.beta_ = SteamApps()->GetCurrentBetaName( temp, 1024 );
+    char temp[MAX_PATH] = { 0 };
+    installation_.beta_ = SteamApps()->GetCurrentBetaName( temp, MAX_PATH );
     installation_.branch_ = temp;
 
-    memset( temp, 0, 1024 );
-    SteamApps()->GetAppInstallDir( appID_, temp, 1024 );
+    memset( temp, 0, MAX_PATH );
+    SteamApps()->GetAppInstallDir( appID_, temp, MAX_PATH );
     installation_.installPath_ = temp;
+
+    fetchImage( state_.localUser_ );
   }
 
   void Steam::update()
