@@ -141,7 +141,7 @@ namespace neko {
     DynamicText( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontManagerPtr fontmgr )
     {
       font_ = fontmgr->createFont();
-      loader->addLoadTask( { LoadTask( font_, R"(data\fonts\LuckiestGuy.ttf)", 32.0f ) } );
+      loader->addLoadTask( { LoadTask( font_, R"(LuckiestGuy.ttf)", 32.0f ) } );
       mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_3D, true, false );
     }
     inline bool fontLoaded()
@@ -194,10 +194,10 @@ namespace neko {
     {
       material_ = rndr->createTextureWithData( font_->impl_->atlas_->width_, font_->impl_->atlas_->height_,
         PixFmtColorR8, (const void*)font_->impl_->atlas_->data_.data(), Texture::ClampBorder, Texture::Mipmapped );
-      /* platform::FileWriter writer("debug.png");
+      /*platform::FileWriter writer("debug.png");
       vector<uint8_t> buffer;
       lodepng::encode( buffer, font_->impl_->atlas_->data_, font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, LCT_GREY, 8 );
-      writer.writeBlob( buffer.data(), buffer.size() ); */
+      writer.writeBlob( buffer.data(), buffer.size() );*/
     }
     void begin()
     {
@@ -362,18 +362,18 @@ namespace neko {
     materials_.push_back( make_shared<Material>( Material::UnlitSimple ) );
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
-    loader_->addLoadTask( { LoadTask( materials_[0], { R"(data\textures\test.png)" } ) } );
+    loader_->addLoadTask( { LoadTask( materials_[0], { R"(test.png)" } ) } );
     /*loader_->addLoadTask( { LoadTask( materials_[1], {
       R"(data\textures\SGT_Ground_1_AlbedoSmoothness.png)",
       R"(data\textures\SGT_Ground_1_Height.png)",
       R"(data\textures\SGT_Ground_1_MetallicSmoothness.png)",
       R"(data\textures\SGT_Ground_1_Normal.png)" } ) } );*/
     loader_->addLoadTask( { LoadTask( materials_[2], {
-      R"(data\textures\M_Tank_Tiger_Base_AlbedoTransparency.png)",
-      R"(data\textures\M_Tank_Tiger_Base_MetallicSmoothness.png)",
-      R"(data\textures\M_Tank_Tiger_Metal_AlbedoTransparency.png)",
-      R"(data\textures\M_Tank_Tiger_Base_Normal.png)" } ) } );
-    loader_->addLoadTask( { LoadTask( new SceneNode(), R"(data\meshes\new_tank_tiger.fbx)" ) } );
+      R"(M_Tank_Tiger_Base_AlbedoTransparency.png)",
+      R"(M_Tank_Tiger_Base_MetallicSmoothness.png)",
+      R"(M_Tank_Tiger_Metal_AlbedoTransparency.png)",
+      R"(M_Tank_Tiger_Base_Normal.png)" } ) } );
+    loader_->addLoadTask( { LoadTask( new SceneNode(), R"(new_tank_tiger.fbx)" ) } );
 
     // loader_->addLoadTask( { LoadTask( R"(data\meshes\SCA_Aircraft_Flight.anim)"
 

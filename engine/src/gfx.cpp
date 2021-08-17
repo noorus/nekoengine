@@ -42,12 +42,18 @@ namespace neko {
 
   // Gfx
 
-  const char cWindowTitle[] = "nekoengine//render";
+#ifdef _DEBUG
+  const char c_windowTitle[] = "Panzer Pandemonium [debug]";
+#else
+  const char c_windowTitle[] = "Panzer Pandemonium [release]";
+#endif
 
   NEKO_DECLARE_CONVAR( vid_screenwidth, "Screen width. Changes are applied when the renderer is restarted.", 1920 );
   NEKO_DECLARE_CONVAR( vid_screenheight, "Screen height. Changes are applied when the renderer is restarted.", 1080 );
   NEKO_DECLARE_CONVAR( vid_vsync, "Whether to print OpenGL debug log output.", true );
   NEKO_DECLARE_CONVAR( gl_debuglog, "OpenGL debug log output level. 0 = none, 1 = some, 2 = debug context", 2 );
+
+  const char c_guiBaseDirectory[] = R"(assets\gui\)";
 
   Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
   loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ),
@@ -140,7 +146,7 @@ namespace neko {
     if ( g_CVar_gl_debuglog.as_i() > 1 )
       settings.attributeFlags |= sf::ContextSettings::Attribute::Debug;
 
-    window_ = make_unique<sf::Window>( videoMode, cWindowTitle, sf::Style::Default, settings );
+    window_ = make_unique<sf::Window>( videoMode, c_windowTitle, sf::Style::Default, settings );
 
     window_->setVerticalSyncEnabled( g_CVar_vid_vsync.as_b() ); // vsync
     window_->setFramerateLimit( 0 ); // no sleep till Brooklyn
@@ -198,7 +204,7 @@ namespace neko {
 
     auto documentsPath = platform::wideToUtf8( engine.env().documentsPath_ );
 
-    guiPlatform_->getDataManagerPtr()->setDataPath( "data\\gui" );
+    guiPlatform_->getDataManagerPtr()->setDataPath( c_guiBaseDirectory );
 
     guiPlatform_->initialise( this, documentsPath + "mygui.log" );
 
@@ -249,7 +255,7 @@ namespace neko {
   {
     vector<uint8_t> input, output;
     unsigned int wo, ho;
-    platform::FileReader( "data\\gui\\" + filename ).readFullVector( input );
+    platform::FileReader( c_guiBaseDirectory + filename ).readFullVector( input );
 
     if ( lodepng::decode( output, wo, ho, input.data(), input.size(), LCT_RGBA, 8 ) != 0 )
       NEKO_EXCEPT( "Lodepng image load failed" );

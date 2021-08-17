@@ -10,6 +10,11 @@ namespace neko {
 
   const string c_loaderThreadName = "nekoLoader";
 
+  const char c_fontsBaseDirectory[] = R"(assets\fonts\)";
+  const char c_texturesBaseDirectory[] = R"(assets\textures\)";
+  const char c_meshesBaseDirectory[] = R"(assets\meshes\)";
+  const char c_animationsBaseDirectory[] = R"(assets\animations\)";
+
   ThreadedLoader::ThreadedLoader(): thread_( c_loaderThreadName, threadProc, this )
   {
   }
@@ -127,8 +132,10 @@ namespace neko {
     {
       if ( task.type_ == LoadTask::Load_Texture )
       {
-        for ( const auto& path : task.textureLoad.paths_ )
+        for ( const auto& target : task.textureLoad.paths_ )
         {
+          auto path = c_texturesBaseDirectory + target;
+
           vector<uint8_t> input;
           unsigned int width, height;
           platform::FileReader( path ).readFullVector( input );
@@ -140,6 +147,7 @@ namespace neko {
             layer.image_.height_ = height;
             layer.image_.format_ = PixFmtColorRGBA8;
             layer.image_.data_.reserve( rawData.size() );
+            // Flip rows, PNG is stored upside down
             for ( auto i = 0; i < height; ++i )
             {
               auto srcRow = rawData.data() + ( i * width * 4 );
@@ -160,8 +168,10 @@ namespace neko {
       }
       else if ( task.type_ == LoadTask::Load_Fontface )
       {
+        auto path = c_fontsBaseDirectory + task.fontfaceLoad.path_;
+
         vector<uint8_t> input;
-        platform::FileReader( task.fontfaceLoad.path_ ).readFullVector( input );
+        platform::FileReader( path ).readFullVector( input );
         task.fontfaceLoad.font_->manager_->loadFont( task.fontfaceLoad.font_, task.fontfaceLoad.specs_, input );
         finishedTasksLock_.lock();
         finishedFonts_.push_back( task.fontfaceLoad.font_ );
@@ -169,17 +179,21 @@ namespace neko {
       }
       else if ( task.type_ == LoadTask::Load_Model )
       {
+        auto path = c_meshesBaseDirectory + task.modelLoad.path_;
+
         vector<uint8_t> input;
         //platform::FileReader( task.modelLoad.path_ ).readFullVector( input );
-        fbxLoader_.loadFBXScene( input, task.modelLoad.path_, task.modelLoad.node_ );
+        fbxLoader_.loadFBXScene( input, path, task.modelLoad.node_ );
         finishedTasksLock_.lock();
         finishedModels_.push_back( task.modelLoad.node_ );
         finishedTasksLock_.unlock();
       }
       else if ( task.type_ == LoadTask::Load_Animation )
       {
+        auto path = c_animationsBaseDirectory + task.animationLoad.path_;
+
         vector<uint8_t> input;
-        platform::FileReader( task.animationLoad.path_ ).readFullVector( input );
+        platform::FileReader( path ).readFullVector( input );
         loaders::loadUnityAnimation( input, task.animationLoad.animation_ );
         finishedTasksLock_.lock();
         finishedAnimations_.push_back( task.animationLoad.animation_ );

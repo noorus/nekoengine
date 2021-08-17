@@ -56,6 +56,35 @@ namespace neko {
     shutdown();
   }
 
+  const utf8String& Engine::listFlags()
+  {
+    static const utf8String flags = ""
+#ifdef NEKO_NO_AUDIO
+      "noaudio "
+#endif
+#ifdef NEKO_NO_GUI
+      "nogui "
+#endif
+#ifdef NEKO_NO_ANIMATION
+      "noanimation "
+#endif
+#ifdef NEKO_NO_SCRIPTING
+      "noscripting "
+#endif
+#ifdef NEKO_USE_STEAM
+      "steam "
+#else
+      "nosteam "
+#endif
+#ifdef NEKO_USE_DISCORD
+      "discord "
+#else
+      "nodiscord "
+#endif
+      "windows";
+    return flags;
+  }
+
   void TankLibrary::load( tank::TankHost* host )
   {
     module_ = LoadLibraryW( c_tankLibraryName );
@@ -81,6 +110,8 @@ namespace neko {
   void Engine::initialize( const Options& options )
   {
     console_->setEngine( shared_from_this() );
+
+    console_->printf( Console::srcEngine, "Build flags: %s", listFlags().c_str() );
 
     platform::PerformanceTimer timer;
 

@@ -101,6 +101,7 @@ namespace neko {
     inline MessagingPtr msgs() throw() { return messaging_; }
     inline DirectorPtr director() throw() { return director_; }
     inline atomic<GameTime>& renderTime() throw() { return rendererTime_; }
+    inline const utf8String& listFlags();
     const tank::GameInstallationState& installationInfo();
   public:
     //! Constructor.

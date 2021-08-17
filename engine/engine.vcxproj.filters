@@ -402,67 +402,64 @@
     </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\script\initialization.js">
+    <None Include="..\bin\scripts\initialization.js">
       <Filter>Scripts</Filter>
     </None>
-    <None Include="..\bin\data\shaders\mat_unlitdefault.vert">
+    <None Include="..\bin\shaders\dbg_showvertexnormals.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\mainframebuf2d.vert">
+    <None Include="..\bin\shaders\dbg_showvertexnormals.geom">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\mainframebuf2d.frag">
+    <None Include="..\bin\shaders\dbg_showvertexnormals.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\mat_unlitdefault.frag">
+    <None Include="..\bin\shaders\dbg_showvertextangents.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\script\math.js">
-      <Filter>Scripts</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\mygui3d.frag">
+    <None Include="..\bin\shaders\dbg_showvertextangents.geom">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\mygui3d.vert">
+    <None Include="..\bin\shaders\dbg_showvertextangents.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\dbg_showvertexnormals.frag">
+    <None Include="..\bin\shaders\inc.buffers.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\dbg_showvertexnormals.geom">
+    <None Include="..\bin\shaders\inc.colorutils.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\dbg_showvertexnormals.vert">
+    <None Include="..\bin\shaders\mainframebuf2d.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\mat_worldpbr.frag">
+    <None Include="..\bin\shaders\mainframebuf2d.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\mat_worldpbr.vert">
+    <None Include="..\bin\shaders\mat_unlitdefault.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\inc.buffers.glsl">
+    <None Include="..\bin\shaders\mat_unlitdefault.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\inc.colorutils.glsl">
+    <None Include="..\bin\shaders\mat_worldpbr.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\pointlight.frag">
+    <None Include="..\bin\shaders\mat_worldpbr.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\pointlight.vert">
+    <None Include="..\bin\shaders\mygui3d.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\pointlight.geom">
+    <None Include="..\bin\shaders\mygui3d.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\dbg_showvertextangents.frag">
+    <None Include="..\bin\shaders\pointlight.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\dbg_showvertextangents.geom">
+    <None Include="..\bin\shaders\pointlight.geom">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\data\shaders\dbg_showvertextangents.vert">
+    <None Include="..\bin\shaders\pointlight.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

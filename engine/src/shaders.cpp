@@ -10,6 +10,8 @@ namespace neko {
 
   using namespace gl;
 
+  const wchar_t c_shadersBaseDirectory[] = LR"(\shaders\)";
+
   namespace shaders {
 
     struct ShaderMapper
@@ -45,7 +47,7 @@ namespace neko {
         NEKO_EXCEPT( "Shader compiler is not present on this platform" );
 
       rootFilePath_ = platform::getCurrentDirectory();
-      rootFilePath_.append( LR"(\data\shaders\)" );
+      rootFilePath_.append( c_shadersBaseDirectory );
 
       world_ = make_unique<PersistentBuffer<neko::uniforms::World>>();
       processing_ = make_unique<PersistentBuffer<neko::uniforms::Processing>>();
