@@ -344,4 +344,5 @@ lib/*.pdb
 lib/*.dll
 lib/*.exe
 
+assets*
 publish*
