@@ -96,7 +96,7 @@
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(ProjectDir)manifest\neko.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(ProjectDir)engine.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
@@ -152,7 +152,7 @@
       <AdditionalOptions>/ignore:4099 /time %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(ProjectDir)manifest\neko.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(ProjectDir)engine.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
@@ -278,7 +278,7 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="manifest\neko.manifest" />
+    <Manifest Include="engine.manifest" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\scripts\initialization.js" />
@@ -307,8 +307,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\embed\panz_icon_v1.ico" />
-    <Image Include="icon1.ico" />
-    <Image Include="icon2.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
