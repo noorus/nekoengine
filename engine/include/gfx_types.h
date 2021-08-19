@@ -65,6 +65,33 @@ namespace neko {
     unsigned int height_ = 0;
     vector<uint8_t> data_;
     PixelFormat format_ = PixFmtColorRGBA8;
+    gl::GLenum uploadedFormat_ = gl::GLenum::GL_NONE;
   };
+
+  enum GLFormatSizeFlagBits
+  {
+    GL_FORMAT_SIZE_PACKED_BIT = 0x00000001,
+    GL_FORMAT_SIZE_COMPRESSED_BIT = 0x00000002,
+    GL_FORMAT_SIZE_PALETTIZED_BIT = 0x00000004,
+    GL_FORMAT_SIZE_DEPTH_BIT = 0x00000008,
+    GL_FORMAT_SIZE_STENCIL_BIT = 0x00000010,
+  };
+
+  struct GLFormatSize
+  {
+    uint32_t flags;
+    unsigned int paletteSizeInBits; // For KTX1.
+    unsigned int blockSizeInBits;
+    unsigned int blockWidth; // in texels
+    unsigned int blockHeight; // in texels
+    unsigned int blockDepth; // in texels
+    unsigned int minBlocksX; // Minimum required number of blocks
+    unsigned int minBlocksY;
+  };
+
+  gl::GLenum glGetFormatFromInternalFormat( const gl::GLenum internalFormat );
+  gl::GLenum glGetTypeFromInternalFormat( const gl::GLenum internalFormat );
+  int glGetTypeSizeFromType( gl::GLenum type );
+  GLFormatSize glGetFormatSize( const gl::GLenum internalFormat );
 
 }

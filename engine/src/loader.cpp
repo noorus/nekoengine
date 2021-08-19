@@ -6,6 +6,10 @@
 #include "renderer.h"
 #include "console.h"
 
+#include "tinytiffreader.hxx"
+#include <ktx.h>
+#pragma comment( lib, "ktx.lib" )
+
 namespace neko {
 
   const string c_loaderThreadName = "nekoLoader";
@@ -118,6 +122,19 @@ namespace neko {
     finishedAnimationsEvent_.reset();
   }
 
+  inline wstring extractExtension( const utf8String& path )
+  {
+    auto wpath = platform::utf8ToWide( path );
+    auto dot = wpath.find_last_of( L'.' );
+    if ( dot == wpath.npos )
+      return L"";
+    auto ext = wpath.substr( dot + 1 );
+    std::transform( ext.begin(), ext.end(), ext.begin(), ::towlower );
+    return move( ext );
+  }
+
+  using namespace gl;
+
   // Context: Worker thread
   void ThreadedLoader::handleNewTasks()
   {
@@ -141,20 +158,102 @@ namespace neko {
           platform::FileReader( path ).readFullVector( input );
           MaterialLayer layer;
           vector<uint8_t> rawData;
-          if ( lodepng::decode( rawData, width, height, input.data(), input.size(), LCT_RGBA, 8 ) == 0 )
+          auto ext = extractExtension( path );
+          /*if ( ext == L"ktx2" )
           {
-            layer.image_.width_ = width;
-            layer.image_.height_ = height;
-            layer.image_.format_ = PixFmtColorRGBA8;
-            layer.image_.data_.reserve( rawData.size() );
-            // Flip rows, PNG is stored upside down
-            for ( unsigned int i = 0; i < height; ++i )
+            ktxTexture2* ktx;
+            auto ret = ktxTexture2_CreateFromMemory( input.data(), input.size(), KTX_TEXTURE_CREATE_NO_FLAGS, &ktx );
+            if ( ktx && ret == KTX_SUCCESS )
             {
-              auto srcRow = rawData.data() + ( i * width * 4 );
-              auto dstRow = layer.image_.data_.data() + ( ( height - 1 - i ) * width * 4 );
-              memcpy( dstRow, srcRow, width * 4 );
+              Locator::console().printf( Console::srcLoader, "ktx: libktx loaded %s, %ix%i depth %i %id %i faces",
+                target.c_str(), ktx->baseWidth, ktx->baseHeight, ktx->baseDepth, ktx->numDimensions, ktx->numFaces );
+              GLuint gl_id = 0;
+              auto gl_tgt = gl::GLenum::GL_NONE;
+              auto gl_err = gl::GLenum::GL_NONE;
+              ret = ktxTexture_GLUpload( (ktxTexture*)ktx, &gl_id, (unsigned int*)&gl_tgt, (unsigned int*)&gl_err );
+              if ( ret != KTX_SUCCESS )
+                NEKO_OPENGL_EXCEPT( "ktxTexture_GLUpload failed", gl_err );
+              //layer.preuploaded_ = gl_id;
+              layer.image_.width_ = ktx->baseWidth;
+              layer.image_.height_ = ktx->baseHeight;
+              layer.image_.format_ = PixFmtColorRGBA16f;
+              layer.image_.data_.resize( ktxTexture_GetDataSize( (ktxTexture*)ktx ) );
+              auto source = ktxTexture_GetData( ktx );
+              memcpy( layer.image_.data_.data(), source, layer.image_.data_.size() );
+              //layer.image_.uploadedFormat_ = gl_tgt;
+              task.textureLoad.material_->layers_.push_back( move( layer ) );
+              ktxTexture_Destroy( (ktxTexture*)ktx );
             }
-            task.textureLoad.material_->layers_.push_back( move( layer ) );
+            else
+              NEKO_EXCEPT( "KTX creation failed" );
+          }
+          else*/ if ( ext == L"png" )
+          {
+            if ( lodepng::decode( rawData, width, height, input.data(), input.size(), LCT_RGBA, 8 ) == 0 )
+            {
+              Locator::console().printf( Console::srcLoader, "png: lodepng loaded %s, %ix%i, rgba8", target.c_str(), width, height );
+              layer.image_.width_ = width;
+              layer.image_.height_ = height;
+              layer.image_.format_ = PixFmtColorRGBA8;
+              layer.image_.data_.reserve( rawData.size() );
+              // Flip rows, PNG is stored upside down
+              for ( size_t i = 0; i < height; ++i )
+              {
+                auto srcRow = rawData.data() + ( i * (size_t)width * 4 );
+                auto dstRow = layer.image_.data_.data() + ( ( (size_t)height - 1 - i ) * width * 4 );
+                memcpy( dstRow, srcRow, (size_t)width * 4 );
+              }
+              task.textureLoad.material_->layers_.push_back( move( layer ) );
+            }
+            else
+              NEKO_EXCEPT( "PNG decode failed" );
+          }
+          else if ( ext == L"tif" )
+          {
+            auto tiff = TinyTIFFReader_open( platform::utf8ToWide( path ).c_str() );
+            if ( tiff )
+            {
+              layer.image_.width_ = TinyTIFFReader_getWidth( tiff );
+              layer.image_.height_ = TinyTIFFReader_getHeight( tiff );
+              auto bps = TinyTIFFReader_getBitsPerSample( tiff, 0 );
+              auto sf = TinyTIFFReader_getSampleFormat( tiff );
+              auto spp = TinyTIFFReader_getSamplesPerPixel( tiff );
+              Locator::console().printf( Console::srcLoader, "tif: tinytiff loaded %s, %ix%i %ibit %ix%s",
+                target.c_str(), layer.image_.width_, layer.image_.height_, bps, spp,
+                sf == TINYTIFF_SAMPLEFORMAT_FLOAT ? "float" : sf == TINYTIFF_SAMPLEFORMAT_INT ? "int" : "uint", spp );
+              vector<uint8_t> tiffSource;
+              tiffSource.resize( layer.image_.width_ * layer.image_.height_ * ( bps / 8 ) );
+              if ( bps == 16 && sf == TINYTIFF_SAMPLEFORMAT_UINT )
+              {
+                layer.image_.format_ = PixFmtColorRGBA8;
+                layer.image_.data_.resize( layer.image_.width_ * layer.image_.height_ * spp * sizeof( uint8_t ) );
+                auto data = reinterpret_cast<uint8_t*>( layer.image_.data_.data() );
+                auto source = reinterpret_cast<uint16_t*>( tiffSource.data() );
+                for ( auto s = 0; s < spp; ++s )
+                {
+                  TinyTIFFReader_getSampleData( tiff, tiffSource.data(), s );
+                  if ( TinyTIFFReader_wasError( tiff ) )
+                  {
+                    NEKO_EXCEPT( "It's a fucking error" );
+                  }
+                  uint16_t maxval = 0;
+                  for ( auto y = 0; y < layer.image_.height_; ++y )
+                  {
+                    for ( auto x = 0; x < layer.image_.width_; ++x )
+                    {
+                      size_t p = ( y * layer.image_.width_ ) + x;
+                      size_t d = ( ( ( y * layer.image_.width_ ) + x ) * spp ) + s;
+                      if ( source[p] > maxval )
+                        maxval = source[p];
+                      data[d] = static_cast<uint8_t>( source[p] );
+                    }
+                  }
+                  Locator::console().printf( Console::srcLoader, "tif: maximum value was %i", maxval );
+                }
+              }
+              task.textureLoad.material_->layers_.push_back( move( layer ) );
+              free( tiff );
+            }
           }
           else
           {
