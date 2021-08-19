@@ -2,6 +2,7 @@
 <MyGUI type="List">
 	<List file="gui_generatedfonts.xml"/>
 	<List file="gui_fonts.xml"/>
+	<List file="gui_font_banksia.xml"/>
 	<List file="gui_commonskins.xml"/>
 	<List file="gui_bluewhitetheme.xml"/>
 	<List file="gui_pointerimages.xml"/>
