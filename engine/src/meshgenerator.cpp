@@ -115,7 +115,7 @@ namespace neko {
 
   }
 
-  void implAddPlane( vector<Vertex3D>& verts, vector<GLuint>& indices, GLuint& offset, vec2 dimensions, vec2u segments, vec3 normal, vec3 position = vec3( 0.0f ) )
+  void implAddPlane( vector<Vertex3D>& verts, vector<GLuint>& indices, GLuint& offset, vec2 dimensions, vec2u segments, vec3 normal, vec4 color, vec3 position = vec3( 0.0f ) )
   {
     verts.resize( verts.size() + ( ( segments.x + 1 ) * ( segments.y + 1 ) ) );
     indices.resize( indices.size() + ( segments.x * segments.y * 6 ) );
@@ -126,16 +126,14 @@ namespace neko {
     auto delta1 = vec3( dimensions.x / (Real)segments.x * vx );
     auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
 
-    // World is a bleak place
-    auto color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-
     auto orig = position + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
     for ( auto i = 0; i <= segments.x; ++i )
       for ( auto j = 0; j <= segments.y; ++j )
       {
         auto v = Vertex3D{
-          orig + (Real)i * delta1 + (Real)j * delta2, normal,
-          vec2( i / (Real)segments.x, j / (Real)segments.y ),
+          orig + (Real)i * delta1 + (Real)j * delta2,
+          normal,
+          vec2( (Real)i, (Real)j ), // vec2( i / (Real)segments.x, j / (Real)segments.y ),
           color };
         verts[i * ( segments.y + 1 ) + j] = move( v );
       }
@@ -159,13 +157,60 @@ namespace neko {
     }
   }
 
-  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makePlane( vec2 dimensions, vec2u segments, vec3 normal )
+  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makePlane( vec2 dimensions, vec2u segments, vec3 normal, vec4 color )
   {
     vector<Vertex3D> verts;
     vector<GLuint> indices;
     GLuint offset = 0;
 
-    implAddPlane( verts, indices, offset, dimensions, segments, normal );
+    implAddPlane( verts, indices, offset, dimensions, segments, normal, color );
+
+    return make_pair( verts, indices );
+  }
+
+  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makeSphere( Real diameter, vec2u segments, vec4 color )
+  {
+    vector<Vertex3D> verts;
+    vector<GLuint> indices;
+
+    auto scaler = vec3( diameter );
+
+    for ( unsigned int y = 0; y <= segments.y; ++y )
+    {
+      for ( unsigned int x = 0; x <= segments.x; ++x )
+      {
+        vec2 fsegm( static_cast<Real>( x ), static_cast<Real>( y ) );
+        fsegm /= segments;
+        vec3 pos(
+          math::cos( fsegm.x * 2.0f * numbers::pi ) * math::sin( fsegm.y * numbers::pi ),
+          math::cos( fsegm.y * numbers::pi ),
+          math::sin( fsegm.x * 2.0f * numbers::pi ) * math::sin( fsegm.y * numbers::pi )
+        );
+        verts.emplace_back( pos * scaler, pos, fsegm, color );
+      }
+    }
+
+    auto odd = false;
+    for ( unsigned int y = 0; y < segments.y; ++y )
+    {
+      if ( !odd )
+      {
+        for ( unsigned int x = 0; x <= segments.x; ++x )
+        {
+          indices.push_back( y * ( segments.x + 1 ) + x );
+          indices.push_back( ( y + 1 ) * ( segments.x + 1 ) + x );
+        }
+      }
+      else
+      {
+        for ( auto x = (int)segments.x; x >= 0; --x )
+        {
+          indices.push_back( ( y + 1 ) * ( segments.x + 1 ) + x );
+          indices.push_back( y * ( segments.x + 1 ) + x );
+        }
+      }
+      odd = !odd;
+    }
 
     return make_pair( verts, indices );
   }
