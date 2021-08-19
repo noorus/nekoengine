@@ -5,6 +5,11 @@
 #include <windows.h>
 #include <shlobj.h>
 
+#ifndef NEKO_SIDELIBRARY_BUILD
+// fucking ICU steals the priority of resolving resource.h directly
+# include "../../engine/resource.h"
+#endif
+
 namespace neko {
 
   namespace platform {
@@ -305,10 +310,32 @@ namespace neko {
       }
     };
 
+#ifndef NEKO_SIDELIBRARY_BUILD
+
+    enum class KnownIcon
+    {
+      MainIcon,
+      ConsoleIcon
+    };
+
+    inline void setWindowIcon( HWND window, KnownIcon icon )
+    {
+      HICON ld = nullptr;
+      if ( icon == KnownIcon::MainIcon )
+        ld = LoadIconW( g_instance, MAKEINTRESOURCEW( IDI_MAINICON ) );
+      if ( ld )
+      {
+        SendMessageW( window, WM_SETICON, ICON_BIG, (LPARAM)ld );
+        SendMessageW( window, WM_SETICON, ICON_SMALL, (LPARAM)ld );
+      }
+    }
+
+#endif
+
     inline void createDirectory( const wstring& path )
     {
       wstring unicp = L"\\\\?\\" + path;
-      if ( !CreateDirectoryW( unicp.c_str(), NULL ) )
+      if ( !CreateDirectoryW( unicp.c_str(), nullptr ) )
         NEKO_WINAPI_EXCEPT( "CreateDirectoryW failed" );
     }
 
@@ -330,7 +357,7 @@ namespace neko {
     inline wstring getGameDocumentsPath()
     {
       PWSTR folder;
-      if ( ::SHGetKnownFolderPath( FOLDERID_Documents, 0, 0, &folder ) != S_OK )
+      if ( ::SHGetKnownFolderPath( FOLDERID_Documents, 0, nullptr, &folder ) != S_OK )
         NEKO_EXCEPT( "SHGetKnownFolderPath failed" );
       wchar_t fullpath[MAX_PATH];
       swprintf_s( fullpath, MAX_PATH, L"%s\\%s\\", folder, c_gameName );

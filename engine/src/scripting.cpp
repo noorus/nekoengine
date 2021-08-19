@@ -13,6 +13,16 @@
 #include "js_console.h"
 #include "js_util.h"
 
+#ifdef _DEBUG
+# pragma comment( lib, "v8_d.dll.lib" )
+# pragma comment( lib, "v8_libbase_d.dll.lib" )
+# pragma comment( lib, "v8_libplatform_d.dll.lib" )
+#else
+# pragma comment( lib, "v8.dll.lib" )
+# pragma comment( lib, "v8_libbase.dll.lib" )
+# pragma comment( lib, "v8_libplatform.dll.lib" )
+#endif
+
 namespace neko {
 
 #ifdef _DEBUG

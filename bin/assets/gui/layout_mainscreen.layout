@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Widget" skin="PanelEmpty" position="10 10 300 140" align="Default" layer="Overlapped" name="g_pnlBuildInfo">
+        <Property key="NeedMouse" value="false"/>
+        <Property key="NeedKey" value="false"/>
+        <Widget type="TextBox" skin="TextBox" position="5 5 290 130" align="Stretch" name="lblBuildInfo">
+            <Property key="TextColour" value="1 1 1"/>
+        </Widget>
+    </Widget>
+    <Widget type="Widget" skin="PanelEmpty" position="1675 885 235 185" align="Default" layer="Overlapped" name="g_pnlStats">
+        <Property key="NeedMouse" value="false"/>
+        <Property key="NeedKey" value="false"/>
+        <Widget type="TextBox" skin="TextBox" position="5 35 225 145" align="Stretch" name="lblStats">
+            <Property key="TextColour" value="1 1 1"/>
+            <Property key="Colour" value="1 0 0"/>
+        </Widget>
+        <Widget type="TextBox" skin="TextBox" position="5 5 225 30" align="Default">
+            <Property key="Caption" value="Stats"/>
+            <Property key="TextAlign" value="HCenter VCenter"/>
+            <Property key="TextColour" value="1 1 1"/>
+        </Widget>
+    </Widget>
+    <Widget type="TextBox" skin="TextBox" position="1685 480 210 40" name="g_lblPlayersOnline">
+        <Property key="TextAlign" value="HCenter VCenter"/>
+        <Property key="TextColour" value="1 1 1"/>
+    </Widget>
+    <CodeGeneratorSettings/>
+</MyGUI>

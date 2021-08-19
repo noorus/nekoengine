@@ -148,7 +148,7 @@ namespace neko {
             layer.image_.format_ = PixFmtColorRGBA8;
             layer.image_.data_.reserve( rawData.size() );
             // Flip rows, PNG is stored upside down
-            for ( auto i = 0; i < height; ++i )
+            for ( unsigned int i = 0; i < height; ++i )
             {
               auto srcRow = rawData.data() + ( i * width * 4 );
               auto dstRow = layer.image_.data_.data() + ( ( height - 1 - i ) * width * 4 );

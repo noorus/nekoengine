@@ -10,7 +10,14 @@
 #include "messaging.h"
 #include "lodepng.h"
 
+#pragma comment( lib, "opengl32.lib" )
+
 #ifdef _DEBUG
+# pragma comment( lib, "glbindingd.lib" )
+# pragma comment( lib, "glbinding-auxd.lib" )
+# pragma comment( lib, "sfml-main-d.lib" )
+# pragma comment( lib, "sfml-system-d.lib" )
+# pragma comment( lib, "sfml-window-d.lib" )
 # ifndef NEKO_NO_GUI
 #  pragma comment( lib, "MyGUIEngine_d.lib" )
 # endif
@@ -23,6 +30,10 @@
 #  pragma comment( lib, "ozz_options_d.lib" )
 # endif
 #else
+# pragma comment( lib, "glbinding.lib" )
+# pragma comment( lib, "sfml-main.lib" )
+# pragma comment( lib, "sfml-system.lib" )
+# pragma comment( lib, "sfml-window.lib" )
 # ifndef NEKO_NO_GUI
 #  pragma comment( lib, "MyGUIEngine.lib" )
 # endif
@@ -148,6 +159,8 @@ namespace neko {
 
     window_ = make_unique<sf::Window>( videoMode, c_windowTitle, sf::Style::Default, settings );
 
+    platform::setWindowIcon( window_->getSystemHandle(), platform::KnownIcon::MainIcon );
+
     window_->setVerticalSyncEnabled( g_CVar_vid_vsync.as_b() ); // vsync
     window_->setFramerateLimit( 0 ); // no sleep till Brooklyn
 
@@ -172,6 +185,22 @@ namespace neko {
     glstrGetClean( GL_VENDOR, info_.vendor_ );
 
     printInfo();
+  }
+
+  class Gui {
+  protected:
+
+  public:
+    void enterMainScreen();
+    void leaveMainScreen();
+  };
+
+  void Gui::enterMainScreen()
+  {
+  }
+
+  void Gui::leaveMainScreen()
+  {
   }
 
   void Gfx::postInitialize( Engine& engine )
@@ -215,28 +244,33 @@ namespace neko {
 
     MyGUI::PointerManager::getInstance().setVisible( true );
 
-    auto loginRoot = MyGUI::LayoutManager::getInstance().loadLayout( "login.layout" );
+    //auto loginRoot = MyGUI::LayoutManager::getInstance().loadLayout( "layout_login.layout" );
     //MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
     //button->setCaption( "exit" );
 
-    auto buildinfoRoot = MyGUI::LayoutManager::getInstance().loadLayout( "buildinfo.layout" );
-    if ( !buildinfoRoot.empty() )
+    auto buildinfoRoot = MyGUI::LayoutManager::getInstance().loadLayout( "layout_mainscreen.layout" );
+    for ( auto& root : buildinfoRoot )
     {
-      auto infobox = dynamic_cast<MyGUI::TextBox*>( buildinfoRoot[0]->findWidget( "lblBuildInfo" ) );
-      if ( infobox )
+      if ( root->getName() == "g_pnlBuildInfo" )
       {
+        auto infobox = dynamic_cast<MyGUI::TextBox*>( root->getChildAt( 0 ) );
         auto& install = engine.installationInfo();
         char data[256];
         sprintf_s( data, 256, "build: %s\nbuild id: %lld\nbranch: %s\nsku: %s",
-          install.host_ == tank::InstallationHost::Local ? "local" : install.host_ == tank::InstallationHost::Steam ? "steam" : "discord",
+          install.host_ == tank::InstallationHost::Local ? "local"
+          : install.host_ == tank::InstallationHost::Steam ? "steam"
+          : "discord",
           install.buildId_,
           install.branch_.c_str(),
           install.ownership_ == tank::GameOwnership::Owned ? "owned"
           : install.ownership_ == tank::GameOwnership::TempFreeWeekend ? "free weekend"
-          : install.ownership_ == tank::GameOwnership::TempFamilySharing ? "family sharing"
-          : "unowned" );
+          : install.ownership_ == tank::GameOwnership::TempFamilySharing ? "family sharing" :
+          "unowned" );
         infobox->setCaption( data );
-        infobox->setTextColour( MyGUI::Colour( 1.0f, 1.0f, 1.0f, 1.0f ) );
+        // infobox->setTextColour( MyGUI::Colour( 1.0f, 1.0f, 1.0f, 1.0f ) );
+      }
+      else if ( root->getName() == "g_pnlStats" )
+      {
       }
     }
 

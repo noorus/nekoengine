@@ -42,6 +42,7 @@ namespace neko {
 
 #endif
 
+#ifndef NEKO_NO_FBX
     class FbxLoader {
     protected:
       fbxsdk::FbxManager* fbxmgr_;
@@ -52,6 +53,7 @@ namespace neko {
       void loadFBXScene( const vector<uint8_t>& data, const utf8String& filename, SceneNode* rootNode );
       ~FbxLoader();
     };
+#endif
 
   }
 

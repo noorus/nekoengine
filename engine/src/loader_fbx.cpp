@@ -6,6 +6,10 @@
 #include "renderer.h"
 #include "console.h"
 
+#ifndef NEKO_NO_FBX
+
+#pragma comment( lib, "libfbxsdk.lib" )
+
 namespace neko::loaders {
 
   inline vec2 tov2( const fbxsdk::FbxVector2& v2 )
@@ -187,7 +191,7 @@ namespace neko::loaders {
     int Read( void* data, int size ) const override
     {
       if ( size > ( data_.size_bytes() - pos_ ) )
-        size = ( data_.size_bytes() - pos_ );
+        size = ( static_cast<int>( data_.size_bytes() ) - pos_ );
       memcpy( data, &data_.data()[pos_], size );
       pos_ = pos_ + size;
       return size;
@@ -252,3 +256,5 @@ namespace neko::loaders {
   }
 
 }
+
+#endif
