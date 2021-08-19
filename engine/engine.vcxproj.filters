@@ -76,6 +76,12 @@
     <Filter Include="Header Files\gfx\gui">
       <UniqueIdentifier>{e6ff7844-2725-477a-9973-e5fd4fc0718e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\extern\tinytiff">
+      <UniqueIdentifier>{616e001a-a50c-4c73-82a4-c78a0b733ea5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\tinytiff">
+      <UniqueIdentifier>{176a687f-f44c-4f79-a50b-bb84ee4ad35a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -240,6 +246,15 @@
     <ClCompile Include="src\loader_fbx.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\extern\tinytiff\tinytiffreader.cpp">
+      <Filter>Source Files\extern\tinytiff</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\tinytiff\tinytiffwriter.cpp">
+      <Filter>Source Files\extern\tinytiff</Filter>
+    </ClCompile>
+    <ClCompile Include="src\glformats.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -398,11 +413,30 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tiff_definitions_internal.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiff_defs.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiff_tools.hxx">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiff_version.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiffreader.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiffreader.hxx">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiffwriter.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="manifest\neko.manifest">
-      <Filter>Resource Files</Filter>
-    </Manifest>
+    <Manifest Include="engine.manifest" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\scripts\initialization.js">
@@ -463,6 +497,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\shaders\pointlight.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_ground.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_ground.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_untexturedpbs.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_untexturedpbs.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

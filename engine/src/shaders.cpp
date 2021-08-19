@@ -83,7 +83,9 @@ namespace neko {
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
       createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
       createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "gamma", "tex" } );
-      createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "gamma", "texAlbedo", "texHeight", "texMetallic", "texNormal" } );
+      createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "gamma", "texAlbedoTransparency", "texMetalSmoothness", "texNormal", "texTeamColor" } );
+      createSimplePipeline( "mat_ground", "mat_ground.vert", "mat_ground.frag", { "model", "gamma", "texAlbedoSmoothness", "texHeight", "texMetallicSmoothness", "texNormal" } );
+      createSimplePipeline( "mat_untexturedpbs", "mat_untexturedpbs.vert", "mat_untexturedpbs.frag", { "model", "gamma", "matAlbedo", "matRoughness", "matMetallic" } );
       createSimplePipeline( "pointlight", "pointlight.vert", "pointlight.geom", "pointlight.frag", { "model" } );
     }
 

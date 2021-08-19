@@ -134,6 +134,7 @@ namespace neko {
       StaticMeshPtr screenQuad_;
       GLuint emptyVAO_;
       StaticMeshPtr cube_;
+      StaticMeshPtr unitSphere_;
       StaticData(): emptyVAO_( 0 ) {}
     } builtin_;
     GLuint implCreateTexture2D( size_t width, size_t height,
@@ -148,6 +149,7 @@ namespace neko {
     GLuint implCreateFramebuffer( size_t width, size_t height );
     void implDeleteFramebuffer( GLuint handle );
     shaders::Pipeline& useMaterial( size_t index );
+    shaders::Pipeline& useUntexturedPBS( vec4 color, float roughness, float metallic );
   protected:
     GLInformation info_;
     ConsolePtr console_;

@@ -9,6 +9,7 @@ namespace neko {
   struct MaterialLayer {
     ImageData image_;
     TexturePtr texture_;
+    GLuint preuploaded_ = 0; //!< Don't touch or use this, it's a hack for libktx
     inline const bool hasHostCopy() const { return !image_.data_.empty(); }
     inline const bool uploaded() const throw() { return ( texture_.get() != nullptr ); }
   };
@@ -18,7 +19,9 @@ namespace neko {
   struct Material {
     enum Type {
       UnlitSimple,
-      WorldPBR
+      WorldGround,
+      WorldPBR,
+      WorldUntexturedPBS
     } type_;
     bool loaded_;
     MaterialLayers layers_;

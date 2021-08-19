@@ -15,8 +15,8 @@ namespace neko {
   using namespace gl;
 
   NEKO_DECLARE_CONVAR( vid_msaa, "Main buffer multisample antialiasing multiplier.", 8 );
-  NEKO_DECLARE_CONVAR( dbg_shownormals, "Whether to visualize vertex normals with lines.", true );
-  NEKO_DECLARE_CONVAR( dbg_showtangents, "Whether to visualize vertex tangents with lines.", true );
+  NEKO_DECLARE_CONVAR( dbg_shownormals, "Whether to visualize vertex normals with lines.", false );
+  NEKO_DECLARE_CONVAR( dbg_showtangents, "Whether to visualize vertex tangents with lines.", false );
   NEKO_DECLARE_CONVAR( vid_hdr, "Toggle HDR processing.", true );
   NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 2.2f );
   NEKO_DECLARE_CONVAR( vid_exposure, "Testing.", 1.0f );
@@ -86,6 +86,9 @@ namespace neko {
       16, 17, 18, 18, 19, 16,
       20, 21, 22, 22, 23, 20
     };
+
+    static vector<Vertex3D> worldUnitSphere;
+    static vector<GLuint> worldUnitSphereIndices;
 
   }
 
@@ -355,24 +358,23 @@ namespace neko {
     builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
     util::generateTangentsAndBitangents( BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
     builtin_.cube_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
+
+    auto unitSphere = Locator::meshGenerator().makeSphere( 1.0f, vec2u( 64, 64 ) );
+    builtin_.unitSphere_ = meshes_->createStatic( GL_TRIANGLE_STRIP, unitSphere.first, unitSphere.second );
   }
 
   void Renderer::initialize( size_t width, size_t height )
   {
     materials_.push_back( make_shared<Material>( Material::UnlitSimple ) );
-    materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
+    materials_.push_back( make_shared<Material>( Material::WorldGround ) );
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
     loader_->addLoadTask( { LoadTask( materials_[0], { R"(test.png)" } ) } );
-    /*loader_->addLoadTask( { LoadTask( materials_[1], {
-      R"(data\textures\SGT_Ground_1_AlbedoSmoothness.png)",
-      R"(data\textures\SGT_Ground_1_Height.png)",
-      R"(data\textures\SGT_Ground_1_MetallicSmoothness.png)",
-      R"(data\textures\SGT_Ground_1_Normal.png)" } ) } );*/
+    loader_->addLoadTask( { LoadTask( materials_[1], { R"(SGT_Tile_3_AlbedoSmoothness.png)", R"(SGT_Tile_3_Height.png)", R"(SGT_Tile_3_MetallicSmoothness.png)", R"(SGT_Tile_3_Normal.png)" } ) } );
     loader_->addLoadTask( { LoadTask( materials_[2], {
-      R"(M_Tank_Tiger_Base_AlbedoTransparency.png)",
-      R"(M_Tank_Tiger_Base_MetallicSmoothness.png)",
-      R"(M_Tank_Tiger_Metal_AlbedoTransparency.png)",
-      R"(M_Tank_Tiger_Base_Normal.png)" } ) } );
+      R"(AnyTexture.png)", // R"(M_Tank_Tiger_AlbedoTransparency.png)",
+      R"(M_Tank_Tiger_MetallicSmoothness.png)",
+      R"(M_Tank_Tiger_Normal.png)",
+      R"(M_Tank_Tiger_Base_ColorTeam.png)" } ) } );
     loader_->addLoadTask( { LoadTask( new SceneNode(), R"(new_tank_tiger.fbx)" ) } );
 
     // loader_->addLoadTask( { LoadTask( R"(data\meshes\SCA_Aircraft_Flight.anim)"
@@ -404,9 +406,14 @@ namespace neko {
         continue;
       for ( auto& layer : mat->layers_ )
       {
-        layer.texture_ = make_shared<Texture>( this,
-          layer.image_.width_, layer.image_.height_, layer.image_.format_,
-          layer.image_.data_.data(), Texture::ClampEdge, Texture::Mipmapped );
+        if ( layer.preuploaded_ )
+        {
+          layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, PixFmtColorRGBA8, layer.preuploaded_, layer.image_.uploadedFormat_ );
+        }
+        else
+        {
+          layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, layer.image_.format_, layer.image_.data_.data(), Texture::Repeat, Texture::Mipmapped );
+        }
       }
     }
   }
@@ -523,6 +530,25 @@ namespace neko {
       pipeline.setUniform( "tex", 0 );
       return pipeline;
     }
+    if ( mat->type_ == Material::WorldGround )
+    {
+      GLuint units[4] = {
+        mat->layers_[0].texture_->handle(),
+        mat->layers_[1].texture_->handle(),
+        mat->layers_[2].texture_->handle(),
+        mat->layers_[3].texture_->handle() };
+      glBindTextures( 0, 4, units );
+      auto& pipeline = shaders_->usePipeline( "mat_ground" );
+      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+      pipeline.setUniform( "texAlbedoSmoothness", 0 );
+      pipeline.setUniform( "texHeight", 1 );
+      pipeline.setUniform( "texMetallicSmoothness", 2 );
+      pipeline.setUniform( "texNormal", 3 );
+      return pipeline;
+    }
+    if ( mat->type_ == Material::WorldUntexturedPBS )
+    {
+    }
     if ( mat->type_ == Material::WorldPBR )
     {
       GLuint units[4] = {
@@ -534,13 +560,23 @@ namespace neko {
       glBindTextures( 0, 4, units );
       auto& pipeline = shaders_->usePipeline( "mat_worldpbr" );
       pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
-      pipeline.setUniform( "texAlbedo", 0 );
-      pipeline.setUniform( "texHeight", 1 );
-      pipeline.setUniform( "texMetallic", 2 );
-      pipeline.setUniform( "texNormal", 3 );
+      pipeline.setUniform( "texAlbedoTransparency", 0 );
+      pipeline.setUniform( "texMetalSmoothness", 1 );
+      pipeline.setUniform( "texNormal", 2 );
+      pipeline.setUniform( "texTeamColor", 3 );
       return pipeline;
     }
     return shaders_->usePipeline( "mat_unlit" );
+  }
+
+  shaders::Pipeline& Renderer::useUntexturedPBS( vec4 color, float roughness, float metallic )
+  {
+    auto& pipeline = shaders_->usePipeline( "mat_untexturedpbs" );
+    pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+    pipeline.setUniform( "matAlbedo", color );
+    pipeline.setUniform( "matRoughness", roughness );
+    pipeline.setUniform( "matMetallic", metallic );
+    return pipeline;
   }
 
   void Renderer::setCameraUniform( Camera& camera, uniforms::Camera& uniform )
@@ -603,71 +639,86 @@ namespace neko {
     }
 
     vec3 lightpos[2] = {
-      vec3( math::sin( (Real)time * 1.2f ) * 4.0f, 1.0f, math::cos( (Real)time * 1.2f ) * 4.0f ),
-      vec3( math::cos( (Real)time * 1.6f ) * 7.5f, math::sin( (Real)time * 1.6f ) * 7.0f, math::sin( (Real)time * 0.25f + 2.0f * 1.6f ) * 7.5f )
+      vec3( 0.0f, 15.0f, 0.0f ), // vec3( math::sin( (Real)time * 1.2f ) * 4.0f, 1.0f, math::cos( (Real)time * 1.2f ) * 4.0f ),
+      vec3( math::sin( (Real)time ) * 3.0f, /*math::sin( (Real)time * 1.6f ) **/ 1.1f, math::cos( (Real)time ) * 3.0f )
     };
 
     shaders_->world()->pointLights[0].position = vec4( lightpos[0], 1.0f );
     shaders_->world()->pointLights[0].color = vec4( 250.0f, 250.0f, 250.0f, 1.0f );
-    shaders_->world()->pointLights[0].dummy = vec4( 1.0f );
+    shaders_->world()->pointLights[0].dummy = vec4( 0.0f );
 
     shaders_->world()->pointLights[1].position = vec4( lightpos[1], 1.0f );
-    shaders_->world()->pointLights[1].color = vec4( math::sin( (Real)time * 2.0f ) * 50.0f + 50.0f, 0.0f, math::cos( (Real)time * 2.0f ) * 50.0f + 50.0f, 1.0f );
+    shaders_->world()->pointLights[1].color = vec4( math::sin( (Real)time * 0.3f ) * 30.0f + 50.0f, 0.0f, math::cos( (Real)time * 0.4f ) * 30.0f + 50.0f, 1.0f );
     shaders_->world()->pointLights[1].dummy = vec4( 1.0f );
 
     shaders_->processing()->ambient = vec4( 0.05f, 0.05f, 0.05f, 1.0f );
 
-    // FIXME ridiculously primitive
-    // Also, investigate glMultiDrawArraysIndirect
-#ifndef NEKO_NO_SCRIPTING
-    if ( models_ )
+    auto fn_drawModels = [&]( shaders::Pipeline& pipeline ) -> void
     {
-      for ( auto& modelptr : models_->models() )
+#ifndef NEKO_NO_SCRIPTING
+      if ( models_ )
       {
-        if ( !modelptr.second )
-          continue;
+        for ( auto& modelptr : models_->models() )
+        {
+          if ( !modelptr.second )
+            continue;
 
-        auto& model = modelptr.second->model();
-        auto mesh = model.mesh_.get();
+          auto& model = modelptr.second->model();
+          auto mesh = model.mesh_.get();
 
-        if ( !mesh || !mesh->mesh().vao_ || !mesh->mesh().vao_->uploaded_ )
-          continue;
+          if ( !mesh || !mesh->mesh().vao_ || !mesh->mesh().vao_->uploaded_ )
+            continue;
 
-        mesh->mesh().vao_->begin();
+          mesh->mesh().vao_->begin();
 
-        mat4 mdl( 1.0f );
-        mdl = glm::translate( mdl, model.translate_->v() );
-        mdl = glm::scale( mdl, model.scale_->v() );
-        mdl *= glm::toMat4( model.rotate_->q() );
+          mat4 mdl( 1.0f );
+          mdl = glm::translate( mdl, model.translate_->v() );
+          mdl = glm::scale( mdl, model.scale_->v() );
+          mdl *= glm::toMat4( model.rotate_->q() );
 
-        useMaterial( 0 ).setUniform( "model", mdl );
+          pipeline.setUniform( "model", mdl );
 
-        mesh->mesh().vao_->draw( GL_TRIANGLES );
+          mesh->mesh().vao_->draw( GL_TRIANGLES );
+        }
       }
-    }
 #endif
+    };
 
-    auto& pl = useMaterial( 2 );
-    for ( auto node : sceneGraph_ )
-      sceneDrawEnterNode( node, pl );
+    auto& pipeline = useMaterial( 1 );
+    fn_drawModels( pipeline );
+
+    mat4 mdl( 1.0f );
+    mdl = glm::translate( mdl, vec3( 0.0f, 1.0f, 0.0f ) );
+    mdl = glm::scale( mdl, vec3( 1.0f ) );
+    mdl *= glm::toMat4( glm::quat_identity<Real, glm::defaultp>() );
+
+    useUntexturedPBS( vec4( 1.0f ), 0.3f, 1.0f ).setUniform( "model", mdl );
+    builtin_.unitSphere_->begin();
+    builtin_.unitSphere_->draw();
+
+    //auto& pl = useMaterial( 2 );
+    //for ( auto node : sceneGraph_ )
+    //  sceneDrawEnterNode( node, pl );
 
     /*builtin_.cube_->begin();
     mat4 mdl( 1.0f );
     mdl = glm::scale( mdl, vec3( 3.0f, 3.0f, 3.0f ) );
-    useMaterial( 1 ).setUniform( "model", mdl );
+    // useMaterial( 1 ).setUniform( "model", mdl );
+    pl.setUniform( "model", mdl );
     builtin_.cube_->draw();*/
 
     /*if ( g_CVar_dbg_shownormals.as_b() )
     {
       pl = shaders_->usePipeline( "dbg_showvertexnormals" );
+      glEnable( GL_LINE_SMOOTH );
+      fn_drawModels( pl );
       for ( auto node : sceneGraph_ )
         sceneDrawEnterNode( node, pl );
-      //builtin_.cube_->begin();
-      //glEnable( GL_LINE_SMOOTH );
-      //builtin_.cube_->draw();
-    }
+      builtin_.cube_->begin();
+      builtin_.cube_->draw();
+    }*/
 
-    if ( g_CVar_dbg_showtangents.as_b() )
+    /*if ( g_CVar_dbg_showtangents.as_b() )
     {
       pl = shaders_->usePipeline( "dbg_showvertextangents" );
       for ( auto node : sceneGraph_ )

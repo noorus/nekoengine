@@ -45,9 +45,9 @@ void main()
   vec3 result = vec3( 0.0 );
   if ( hdr )
   {
-    vec3 bloomcolor = gaussianBlurredSample( texGBuffer, texcoord );
+    vec3 bloomcolor = texture( texGBuffer, texcoord ).rgb; // gaussianBlurredSample( texGBuffer, texcoord );
     hdrcolor += bloomcolor;
-    result = tonemap_linear( hdrcolor );
+    result = tonemap_lumaBasedReinhard( hdrcolor );
   }
   else
   {

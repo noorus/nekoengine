@@ -13,6 +13,49 @@ vec3 gammaCorrect( vec3 color )
   return pow( color, vec3( 1.0 / gamma ) );
 }
 
+float saturate( float v )
+{
+  return clamp( v, 0.0, 1.0 );
+}
+
+vec3 util_unpackNormalDXT5nm( vec4 packednormal )
+{
+  vec3 normal;
+  normal.xy = packednormal.wy * 2 - 1;
+  normal.z = sqrt( 1 - saturate( dot( normal.xy, normal.xy ) ) );
+  return normal;
+}
+
+vec3 util_unpackNormalRGorAG( vec4 packednormal )
+{
+  packednormal.x *= packednormal.w;
+  vec3 normal;
+  normal.xy = packednormal.xy * 2 - 1;
+  normal.z = sqrt( 1 - saturate( dot( normal.xy, normal.xy ) ) );
+  return normal;
+}
+
+vec3 util_unpackUnityNormal( vec4 packednormal )
+{
+  vec3 unpacked = util_unpackNormalRGorAG( packednormal );
+  return vec3( unpacked.x, -unpacked.y, unpacked.z );
+}
+
+vec3 util_normalToWorld( vec3 tangentNormal, vec2 texcoord, vec3 worldpos, vec3 vertNormal )
+{
+  vec3 Q1 = dFdx( worldpos );
+  vec3 Q2 = dFdy( worldpos );
+  vec2 st1 = dFdx( texcoord );
+  vec2 st2 = dFdy( texcoord );
+
+  vec3 N = normalize( vertNormal );
+  vec3 T = normalize( Q1 * st2.t - Q2 * st1.t );
+  vec3 B = -normalize( cross( N, T ) );
+  mat3 TBN = mat3( T, B, N );
+
+  return normalize( TBN * tangentNormal );
+}
+
 #ifdef COLORUTILS_TONEMAPPING
 
 vec3 tonemap_linear( vec3 color )

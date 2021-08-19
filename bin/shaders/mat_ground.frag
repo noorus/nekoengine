@@ -12,10 +12,10 @@ in VertexData {
 layout ( location = 0 ) out vec4 out_color;
 layout ( location = 1 ) out vec4 out_gbuffer;
 
-uniform sampler2D texAlbedoTransparency;
-uniform sampler2D texMetalSmoothness;
+uniform sampler2D texAlbedoSmoothness;
+uniform sampler2D texHeight;
+uniform sampler2D texMetallicSmoothness;
 uniform sampler2D texNormal;
-uniform sampler2D texTeamColor;
 
 uniform float gamma;
 uniform mat4 model;
@@ -105,30 +105,16 @@ vec3 pointLight(PointLight light, vec3 fragpos, vec3 viewdir, vec3 albedo, float
 
 void main()
 {
-  /*vec4 smp = texture(texAlbedo, vs_out.texcoord);
-  vec3 albedo = pow(smp.rgb, vec3(2.2));
-  float smoothness = smp.a;
-  float roughness = (1.0 - smoothness);
-  float height = texture(texHeight, vs_out.texcoord).r;
-  smp = texture(texMetallic, vs_out.texcoord);
-  float metallic = smp.r;
-  vec3 normal = texture(texNormal, vs_out.texcoord).rgb;
-  normal = normalize(normal * 2.0 - 1.0);*/
-
   vec2 tc = vec2( vs_out.texcoord.x, vs_out.texcoord.y );
-  vec3 AlbedoBase = gammaCorrect( texture( texAlbedoTransparency, tc ).rgb );
-  vec4 TeamColorSample = texture( texTeamColor, tc );
-  vec4 TeamColorMask = vec4( gammaCorrect( TeamColorSample.rgb ), TeamColorSample.a );
+  vec3 Albedo = texture( texAlbedoSmoothness, tc ).rgb;
   vec3 unpacked = util_unpackUnityNormal( texture( texNormal, tc ) );
   vec3 Normal = util_normalToWorld( unpacked, tc, vs_out.worldpos, vs_out.normal );
-  float Metallic = gammaCorrect( texture( texMetalSmoothness, tc ).rgb ).r;
-  float Smoothness = 0.48;
+  float Metallic = texture( texMetallicSmoothness, tc ).r;
+  float Smoothness = texture( texMetallicSmoothness, tc ).a;
   float Alpha = 1.0;
   vec4 Color = vec4( 1.0, 1.0, 1.0, 0.0 );
 
-  vec3 Albedo = mix( ( Color.rgb * AlbedoBase ), TeamColorMask.rgb, TeamColorMask.a );
-
-  float height = 1.0;
+  float Height = texture( texHeight, tc ).r * 1.0;
 
   vec3 viewdir = normalize( world.camera.position.xyz - vs_out.worldpos );
 
@@ -136,17 +122,17 @@ void main()
   for (int i = 0; i < c_pointLightCount; i++)
   {
     if ( world.pointLights[i].dummy.r > 0.1 )
-      Lo += pointLight( world.pointLights[i], vs_out.worldpos, viewdir, Albedo, Smoothness, height, Metallic, Normal );
+      Lo += pointLight( world.pointLights[i], vs_out.worldpos, viewdir, Albedo, Smoothness, Height, Metallic, Normal );
   }
 
-  vec3 ambient = processing.ambient.rgb * Albedo;
+  vec3 ambient = processing.ambient.rgb * Albedo * vec3(0.06);
 
   vec3 color = ambient + Lo;
 
   float brightness = bt709LumaExtract( color );
   vec3 bloomColor = color * vec3(0.05) * brightness;
-  bloomColor += vec3(smoothstep(0.1, 0.5, brightness)) * color;
-  out_gbuffer = vec4( bloomColor, 1.0 );
+  bloomColor += vec3(smoothstep(0.2, 1.0, brightness)) * color;
+  out_gbuffer = vec4( bloomColor, Alpha );
 
-  out_color = vec4( color, 1.0 );
+  out_color = vec4( color, Alpha );
 }

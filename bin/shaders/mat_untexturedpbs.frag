@@ -5,17 +5,15 @@
 
 in VertexData {
   vec3 normal;
-  vec2 texcoord;
   vec3 worldpos;
 } vs_out;
 
 layout ( location = 0 ) out vec4 out_color;
 layout ( location = 1 ) out vec4 out_gbuffer;
 
-uniform sampler2D texAlbedoTransparency;
-uniform sampler2D texMetalSmoothness;
-uniform sampler2D texNormal;
-uniform sampler2D texTeamColor;
+uniform vec4 matAlbedo;
+uniform float matRoughness;
+uniform float matMetallic;
 
 uniform float gamma;
 uniform mat4 model;
@@ -63,6 +61,16 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
   return F0 + (1.0 - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 }
 
+vec3 EnvBRDFApprox(vec3 specularColor, float roughness, float ndotv)
+{
+	const vec4 c0 = vec4(-1, -0.0275, -0.572, 0.022);
+	const vec4 c1 = vec4(1, 0.0425, 1.04, -0.04);
+	vec4 r = roughness * c0 + c1;
+	float a004 = min(r.x * r.x, exp2(-9.28 * ndotv)) * r.x + r.y;
+	vec2 AB = vec2(-1.04, 1.04) * a004 + r.zw;
+	return specularColor * AB.x + AB.y;
+}
+
 // world.pointLights[i], vs_out.fragpos, viewdir, albedo, smoothness, height, metallic, normal
 vec3 pointLight(PointLight light, vec3 fragpos, vec3 viewdir, vec3 albedo, float roughness, float height, float metallic, vec3 normal)
 {
@@ -71,7 +79,7 @@ vec3 pointLight(PointLight light, vec3 fragpos, vec3 viewdir, vec3 albedo, float
   vec3 H = normalize(viewdir + L);
   float distance = length(light.position.xyz - fragpos);
   float attenuation = 1.0 / (distance * distance);
-  vec3 radiance = light.color.rgb * attenuation;
+  vec3 radiance = EnvBRDFApprox( light.color.rgb, roughness, dot(normal, viewdir)) * attenuation;
 
   // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
   // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)
@@ -105,30 +113,13 @@ vec3 pointLight(PointLight light, vec3 fragpos, vec3 viewdir, vec3 albedo, float
 
 void main()
 {
-  /*vec4 smp = texture(texAlbedo, vs_out.texcoord);
-  vec3 albedo = pow(smp.rgb, vec3(2.2));
-  float smoothness = smp.a;
-  float roughness = (1.0 - smoothness);
-  float height = texture(texHeight, vs_out.texcoord).r;
-  smp = texture(texMetallic, vs_out.texcoord);
-  float metallic = smp.r;
-  vec3 normal = texture(texNormal, vs_out.texcoord).rgb;
-  normal = normalize(normal * 2.0 - 1.0);*/
+  vec3 Albedo = matAlbedo.rgb;
+  vec3 Normal = vs_out.normal;
+  float Metallic = matMetallic;
+  float Roughness = matRoughness;
+  float Alpha = matAlbedo.a;
 
-  vec2 tc = vec2( vs_out.texcoord.x, vs_out.texcoord.y );
-  vec3 AlbedoBase = gammaCorrect( texture( texAlbedoTransparency, tc ).rgb );
-  vec4 TeamColorSample = texture( texTeamColor, tc );
-  vec4 TeamColorMask = vec4( gammaCorrect( TeamColorSample.rgb ), TeamColorSample.a );
-  vec3 unpacked = util_unpackUnityNormal( texture( texNormal, tc ) );
-  vec3 Normal = util_normalToWorld( unpacked, tc, vs_out.worldpos, vs_out.normal );
-  float Metallic = gammaCorrect( texture( texMetalSmoothness, tc ).rgb ).r;
-  float Smoothness = 0.48;
-  float Alpha = 1.0;
-  vec4 Color = vec4( 1.0, 1.0, 1.0, 0.0 );
-
-  vec3 Albedo = mix( ( Color.rgb * AlbedoBase ), TeamColorMask.rgb, TeamColorMask.a );
-
-  float height = 1.0;
+  float Height = 0.0;
 
   vec3 viewdir = normalize( world.camera.position.xyz - vs_out.worldpos );
 
@@ -136,17 +127,17 @@ void main()
   for (int i = 0; i < c_pointLightCount; i++)
   {
     if ( world.pointLights[i].dummy.r > 0.1 )
-      Lo += pointLight( world.pointLights[i], vs_out.worldpos, viewdir, Albedo, Smoothness, height, Metallic, Normal );
+      Lo += pointLight( world.pointLights[i], vs_out.worldpos, viewdir, Albedo, Roughness, Height, Metallic, Normal );
   }
 
-  vec3 ambient = processing.ambient.rgb * Albedo;
+  vec3 ambient = processing.ambient.rgb * Albedo * vec3(0.06);
 
   vec3 color = ambient + Lo;
 
   float brightness = bt709LumaExtract( color );
   vec3 bloomColor = color * vec3(0.05) * brightness;
-  bloomColor += vec3(smoothstep(0.1, 0.5, brightness)) * color;
-  out_gbuffer = vec4( bloomColor, 1.0 );
+  bloomColor += vec3(smoothstep(0.2, 1.0, brightness)) * color;
+  out_gbuffer = vec4( bloomColor, Alpha );
 
-  out_color = vec4( color, 1.0 );
+  out_color = vec4( color, Alpha );
 }
