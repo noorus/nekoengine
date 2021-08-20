@@ -19,6 +19,11 @@
 
 #include "stdafx.h"
 
+#pragma warning( push )
+#pragma warning( disable : 4267 )
+#pragma warning( disable : 4334 )
+#pragma warning( disable : 4018 )
+
 #define TINYTIFF_WRITE_COMMENTS
 
 #include <math.h>
@@ -1106,3 +1111,4 @@ const char *TinyTIFFWriter_getVersion()
     return tmp;
 }
 
+#pragma warning( pop )

@@ -82,6 +82,24 @@
     <Filter Include="Source Files\extern\tinytiff">
       <UniqueIdentifier>{176a687f-f44c-4f79-a50b-bb84ee4ad35a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\extern\tinyexr">
+      <UniqueIdentifier>{b3c119ab-8d94-435a-a463-aeb90eb8edb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\lodepng">
+      <UniqueIdentifier>{11ea1cd4-c0f9-40d7-9a92-3d65fcb18691}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\miniz">
+      <UniqueIdentifier>{e8de2be6-057d-4e8f-bb3f-30302ecaadcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extern\miniz">
+      <UniqueIdentifier>{1979ab2f-44bc-46bc-a049-9f9c9543ecf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extern\lodepng">
+      <UniqueIdentifier>{5f6fd66e-84f4-4116-82cd-a7b4ba150565}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extern\tinyexr">
+      <UniqueIdentifier>{a3a63eb7-d7df-41ba-9008-af5a7185f12d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -107,9 +125,6 @@
     </ClCompile>
     <ClCompile Include="src\locator.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\lodepng\lodepng.cpp">
-      <Filter>Source Files\extern</Filter>
     </ClCompile>
     <ClCompile Include="src\framebuffer.cpp">
       <Filter>Source Files\gfx</Filter>
@@ -255,6 +270,15 @@
     <ClCompile Include="src\glformats.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
+    <ClCompile Include="..\extern\lodepng\lodepng.cpp">
+      <Filter>Source Files\extern\lodepng</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\tinyexr\tinyexr.cpp">
+      <Filter>Source Files\extern\tinyexr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\miniz\miniz.cpp">
+      <Filter>Source Files\extern\miniz</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -301,9 +325,6 @@
     </ClInclude>
     <ClInclude Include="include\camera.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\lodepng\lodepng.h">
-      <Filter>Header Files\extern</Filter>
     </ClInclude>
     <ClInclude Include="include\gfx.h">
       <Filter>Header Files\gfx</Filter>
@@ -433,6 +454,15 @@
     </ClInclude>
     <ClInclude Include="..\extern\tinytiff\tinytiffwriter.h">
       <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\lodepng\lodepng.h">
+      <Filter>Header Files\extern\lodepng</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\miniz\miniz.h">
+      <Filter>Header Files\extern\miniz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinyexr\tinyexr.h">
+      <Filter>Header Files\extern\tinyexr</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

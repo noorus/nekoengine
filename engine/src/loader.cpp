@@ -10,6 +10,8 @@
 #include <ktx.h>
 #pragma comment( lib, "ktx.lib" )
 
+#include "tinyexr.h"
+
 namespace neko {
 
   const string c_loaderThreadName = "nekoLoader";
@@ -208,6 +210,47 @@ namespace neko {
             else
               NEKO_EXCEPT( "PNG decode failed" );
           }
+          else if ( ext == L"exr" )
+          {
+            float* exr_values = nullptr;
+            int exr_width, exr_height;
+            const char* exr_err = nullptr;
+            auto ret = LoadEXRFromMemory( &exr_values, &exr_width, &exr_height, input.data(), input.size(), &exr_err );
+            if ( ret != TINYEXR_SUCCESS )
+              NEKO_EXCEPT( "LoadEXRFromMemory failed" );
+            if ( exr_values )
+            {
+              Locator::console().printf( Console::srcLoader, "exr: tinyexr loaded %s, %ix%i, rgba32f", target.c_str(), exr_width, exr_height );
+              layer.image_.width_ = exr_width;
+              layer.image_.height_ = exr_height;
+              layer.image_.data_.resize( exr_width * exr_height * 4 * sizeof( float ) );
+              layer.image_.format_ = PixFmtColorRGBA32f;
+              memcpy( layer.image_.data_.data(), exr_values, layer.image_.data_.size() );
+              free( exr_values );
+              task.textureLoad.material_->layers_.push_back( move( layer ) );
+            }
+            /*const char* miniexr_err = nullptr;
+            size_t data_size;
+            EXRVersion version;
+            auto ret = ParseEXRVersionFromMemory( &version, input.data(), input.size() );
+            if ( ret != TINYEXR_SUCCESS )
+              NEKO_EXCEPT( "ParseEXRVersionFromMemory failed" );
+            if ( version.multipart || version.non_image )
+              NEKO_EXCEPT( "EXR is multipart or non-image" );
+            EXRHeader header;
+            InitEXRHeader( &header );
+            ret = ParseEXRHeaderFromMemory( &header, &version, input.data(), input.size(), &miniexr_err );
+            if ( ret != TINYEXR_SUCCESS )
+              NEKO_EXCEPT( "ParseEXRHeaderFromMemory failed" );
+            EXRImage image;
+            InitEXRImage( &image );
+            ret = LoadEXRImageFromMemory( &image, &header, input.data(), input.size(), &miniexr_err );
+            if ( ret != TINYEXR_SUCCESS )
+              NEKO_EXCEPT( "LoadEXRImageFromMemory failed" );
+            image.
+            FreeEXRImage( &image );
+            FreeEXRHeader( &header );*/
+          }
           else if ( ext == L"tif" )
           {
             auto tiff = TinyTIFFReader_open( platform::utf8ToWide( path ).c_str() );
@@ -237,9 +280,9 @@ namespace neko {
                     NEKO_EXCEPT( "It's a fucking error" );
                   }
                   uint16_t maxval = 0;
-                  for ( auto y = 0; y < layer.image_.height_; ++y )
+                  for ( unsigned int y = 0; y < layer.image_.height_; ++y )
                   {
-                    for ( auto x = 0; x < layer.image_.width_; ++x )
+                    for ( unsigned int x = 0; x < layer.image_.width_; ++x )
                     {
                       size_t p = ( y * layer.image_.width_ ) + x;
                       size_t d = ( ( ( y * layer.image_.width_ ) + x ) * spp ) + s;

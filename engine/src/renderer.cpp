@@ -87,9 +87,6 @@ namespace neko {
       20, 21, 22, 22, 23, 20
     };
 
-    static vector<Vertex3D> worldUnitSphere;
-    static vector<GLuint> worldUnitSphereIndices;
-
   }
 
 #pragma pack( push, 1 )
@@ -406,14 +403,7 @@ namespace neko {
         continue;
       for ( auto& layer : mat->layers_ )
       {
-        if ( layer.preuploaded_ )
-        {
-          layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, PixFmtColorRGBA8, layer.preuploaded_, layer.image_.uploadedFormat_ );
-        }
-        else
-        {
-          layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, layer.image_.format_, layer.image_.data_.data(), Texture::Repeat, Texture::Mipmapped );
-        }
+        layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, layer.image_.format_, layer.image_.data_.data(), Texture::Repeat, Texture::Mipmapped );
       }
     }
   }
@@ -684,17 +674,23 @@ namespace neko {
 #endif
     };
 
-    auto& pipeline = useMaterial( 1 );
-    fn_drawModels( pipeline );
+    // This breaks lighting on our solid PBS spheres. Wat?
+    // glEnable( GL_CULL_FACE );
+    // glCullFace( GL_BACK );
+    // glFrontFace( GL_CCW );
 
-    mat4 mdl( 1.0f );
-    mdl = glm::translate( mdl, vec3( 0.0f, 1.0f, 0.0f ) );
-    mdl = glm::scale( mdl, vec3( 1.0f ) );
-    mdl *= glm::toMat4( glm::quat_identity<Real, glm::defaultp>() );
+    {
+      auto& pipeline = useMaterial( 1 );
+      fn_drawModels( pipeline );
+    }
 
-    useUntexturedPBS( vec4( 1.0f ), 0.3f, 1.0f ).setUniform( "model", mdl );
-    builtin_.unitSphere_->begin();
-    builtin_.unitSphere_->draw();
+    {
+      auto& pipeline = useUntexturedPBS( vec4( 1.0f ), 0.3f, 1.0f );
+      builtin_.unitSphere_->drawOnce( pipeline, vec3( -3.0f, 1.0f, -3.0f ) );
+      builtin_.unitSphere_->drawOnce( pipeline, vec3( -3.0f, 1.0f,  3.0f ) );
+      builtin_.unitSphere_->drawOnce( pipeline, vec3(  3.0f, 1.0f, -3.0f ) );
+      builtin_.unitSphere_->drawOnce( pipeline, vec3(  3.0f, 1.0f,  3.0f ) );
+    }
 
     //auto& pl = useMaterial( 2 );
     //for ( auto node : sceneGraph_ )

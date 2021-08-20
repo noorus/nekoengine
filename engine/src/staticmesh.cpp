@@ -2,6 +2,7 @@
 #include "gfx_types.h"
 #include "meshmanager.h"
 #include "neko_exception.h"
+#include "shaders.h"
 
 namespace neko {
 
@@ -46,6 +47,21 @@ namespace neko {
   {
     if ( !vao_->uploaded_ )
       return;
+    vao_->draw( drawMode_ );
+  }
+
+  void StaticMesh::drawOnce( shaders::Pipeline& pipeline, vec3 position, vec3 scale, quaternion rotation )
+  {
+    if ( !vao_->uploaded_ )
+      return;
+
+    mat4 modelMatrix( 1.0f );
+    modelMatrix = glm::translate( modelMatrix, position );
+    modelMatrix = glm::scale( modelMatrix, scale );
+    modelMatrix *= glm::toMat4( rotation );
+
+    vao_->begin();
+    pipeline.setUniform( "model", modelMatrix );
     vao_->draw( drawMode_ );
   }
 

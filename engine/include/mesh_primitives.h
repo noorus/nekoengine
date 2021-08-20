@@ -23,6 +23,12 @@ namespace neko {
 
   }
 
+  namespace shaders {
+
+    struct Pipeline;
+
+  }
+
   template <typename T>
   class PersistentBuffer {
   protected:
@@ -450,6 +456,7 @@ namespace neko {
     ~StaticMesh();
     void begin();
     void draw();
+    void drawOnce( shaders::Pipeline& pipeline, vec3 position, vec3 scale = vec3( 1.0f ), quaternion rotation = glm::quat_identity<Real, glm::defaultp>() );
   };
 
   using StaticMeshPtr = shared_ptr<StaticMesh>;
