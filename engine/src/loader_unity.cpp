@@ -136,7 +136,7 @@ namespace neko::loaders {
         first += 2;
         newsibling = true;
       }
-      auto indent = ( first / 2 );
+      auto indent = static_cast<int>( first / 2 );
       //if ( line.find( "pptrCurveMapping" ) != line.npos )
       //  DebugBreak();
       if ( indent < node->indent )

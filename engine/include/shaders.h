@@ -24,7 +24,7 @@ namespace neko {
 
     class Shaders;
 
-    struct Shader {
+    struct Shader: public nocopy {
       friend class Shaders;
     protected:
       Type type_;
@@ -42,7 +42,7 @@ namespace neko {
     using ShaderPtr = unique_ptr<Shader>;
     using ShaderVector = vector<ShaderPtr>;
 
-    struct Program {
+    struct Program: public nocopy {
       friend class Shaders;
     protected:
       GLuint id_;
@@ -117,7 +117,7 @@ namespace neko {
     using ProgramPtr = shared_ptr<Program>;
     using ProgramVector = vector<ProgramPtr>;
 
-    struct Pipeline {
+    struct Pipeline: public nocopy {
       friend class Shaders;
     private:
       Pipeline() = delete;
@@ -151,7 +151,7 @@ namespace neko {
     using PipelineVector = vector<PipelinePtr>;
     using PipelineMap = map<utf8String, PipelinePtr>;
 
-    class Shaders {
+    class Shaders: public nocopy {
     protected:
       ConsolePtr console_;
       wstring rootFilePath_;

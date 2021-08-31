@@ -15,7 +15,7 @@ namespace neko {
   using MeshMap = map<size_t, js::Mesh*>;
 #endif
 
-  class MeshManager: public enable_shared_from_this<MeshManager> {
+  class MeshManager: public enable_shared_from_this<MeshManager>, public nocopy {
   private:
     ConsolePtr console_;
     vector<VBOPtr> vbos_[Max_VBOType];

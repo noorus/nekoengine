@@ -188,6 +188,15 @@ namespace neko {
   using vec3f = glm::fvec3;
   using vec4f = glm::fvec4;
 
+  class nocopy {
+  private:
+    nocopy( const nocopy& ) = delete;
+    nocopy& operator=( const nocopy& ) = delete;
+  protected:
+    constexpr nocopy() = default;
+    ~nocopy() = default;
+  };
+
   struct size2i {
     int64_t w;
     int64_t h;

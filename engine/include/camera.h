@@ -39,7 +39,8 @@ namespace neko {
     SceneNode* target_; //!< Target scenenode
     vec3 offset_; //!< Offset from target
     vec3 direction_; //!< Normalised direction vector
-    vec3 movement_; //!< Frame mouse movement accumulator
+    vec3 rotationInput_; //!< Input accumulator for rotation
+    vec3 movementInput_; //!< Input accumulator for movement
     quat rotation_; //!< Rotation velocity
     quat mClampRotation; //!< Rotation for changed clamp variables
     Real mClampRotProgress; //!< Slerp Progress
@@ -54,7 +55,9 @@ namespace neko {
     bool reverseAxes_; // Reverse rotation axes?
   public:
     explicit ArcballCamera( SceneManager* manager, vec2 resolution, SceneNode* pgeTarget, const vec3& vecOffset, Real rFOVy, bool bReverseAxes, Real fSensitivity, Real fMinDistance, Real fMaxDistance, Real fRotationDeceleration, Real fZoomAcceleration, Real fZoomDeceleration );
-    virtual void applyMovement( const vec3i& vecMovement );
+    virtual void applyInputRotation( const vec3i& mousemovement );
+    virtual void applyInputPanning( const vec3i& mousemovement );
+    virtual void applyInputZoom( int zoom );
     virtual void update( GameTime delta, GameTime time );
     virtual const vec3& getDirection() const throw() { return direction_; }
     virtual Real getSensitivity() { return mSensitivity; }

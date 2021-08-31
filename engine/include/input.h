@@ -8,14 +8,15 @@
 
 namespace neko {
 
-  class GfxInput: public nil::SystemListener, public nil::MouseListener, public nil::KeyboardListener {
-  private:
+  class GfxInput: public nocopy, public nil::SystemListener, public nil::MouseListener, public nil::KeyboardListener {
+  public:
     HWND window_;
     bool moved_;
     POINT mousePosition_;
     ConsolePtr console_;
     vec2i windowSize_;
     vec3i movement_;
+    bool mouseButtons_[5] = { false };
   protected:
     unique_ptr<nil::System> system_;
     // nil::SystemListener events
@@ -41,6 +42,11 @@ namespace neko {
     void initialize( HWND window );
     void setWindowSize( vec2i size );
     inline vec3i movement() const { return movement_; }
+    inline bool mousebtn( size_t index ) const
+    {
+      assert( index >= 0 && index < 6 );
+      return mouseButtons_[index];
+    }
     void resetMovement();
     void shutdown();
     void update();

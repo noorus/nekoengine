@@ -8,7 +8,7 @@
 #include "fontmanager.h"
 #include "console.h"
 #include "messaging.h"
-#include "lodepng.h"
+#include "gui.h"
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -23,8 +23,9 @@
 # endif
 # ifndef NEKO_NO_ANIMATION
 #  pragma comment( lib, "ozz_animation_d.lib" )
-#  pragma comment( lib, "ozz_animation_offline_d.lib" )
+#  pragma comment( lib, "ozz_animation_fbx_d.lib" )
 #  pragma comment( lib, "ozz_animation_tools_d.lib" )
+#  pragma comment( lib, "ozz_animation_offline_d.lib" )
 #  pragma comment( lib, "ozz_base_d.lib" )
 #  pragma comment( lib, "ozz_geometry_d.lib" )
 #  pragma comment( lib, "ozz_options_d.lib" )
@@ -39,8 +40,9 @@
 # endif
 # ifndef NEKO_NO_ANIMATION
 #  pragma comment( lib, "ozz_animation_r.lib" )
-#  pragma comment( lib, "ozz_animation_offline_r.lib" )
+#  pragma comment( lib, "ozz_animation_fbx_r.lib" )
 #  pragma comment( lib, "ozz_animation_tools_r.lib" )
+#  pragma comment( lib, "ozz_animation_offline_r.lib" )
 #  pragma comment( lib, "ozz_base_r.lib" )
 #  pragma comment( lib, "ozz_geometry_r.lib" )
 #  pragma comment( lib, "ozz_options_r.lib" )
@@ -64,8 +66,6 @@ namespace neko {
   NEKO_DECLARE_CONVAR( vid_vsync, "Whether to print OpenGL debug log output.", true );
   NEKO_DECLARE_CONVAR( gl_debuglog, "OpenGL debug log output level. 0 = none, 1 = some, 2 = debug context", 2 );
 
-  const char c_guiBaseDirectory[] = R"(assets\gui\)";
-
   Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
   loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ),
   messaging_( move( messaging ) ), director_( move( director ) )
@@ -73,6 +73,7 @@ namespace neko {
     assert( loader_ && fonts_ && director_ && messaging_ && console_ );
     preInitialize();
     input_ = make_shared<GfxInput>( console_ );
+    gui_ = make_shared<GUI>();
   }
 
   void Gfx::printInfo()
@@ -187,22 +188,6 @@ namespace neko {
     printInfo();
   }
 
-  class Gui {
-  protected:
-
-  public:
-    void enterMainScreen();
-    void leaveMainScreen();
-  };
-
-  void Gui::enterMainScreen()
-  {
-  }
-
-  void Gui::leaveMainScreen()
-  {
-  }
-
   void Gfx::postInitialize( Engine& engine )
   {
     renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
@@ -227,87 +212,14 @@ namespace neko {
 
     renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
 
-#ifndef NEKO_NO_GUI
-
-    guiPlatform_ = make_unique<MyGUI::NekoPlatform>();
-
     auto documentsPath = platform::wideToUtf8( engine.env().documentsPath_ );
-
-    guiPlatform_->getDataManagerPtr()->setDataPath( c_guiBaseDirectory );
-
-    guiPlatform_->initialise( this, documentsPath + "mygui.log" );
-
-    gui_ = make_unique<MyGUI::Gui>();
-    gui_->initialise( "gui_core.xml" );
-
-    guiPlatform_->getRenderManagerPtr()->setViewSize( window_->getSize().x, window_->getSize().y );
-
-    MyGUI::PointerManager::getInstance().setVisible( true );
-
-    //auto loginRoot = MyGUI::LayoutManager::getInstance().loadLayout( "layout_login.layout" );
-    //MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
-    //button->setCaption( "exit" );
-
-    auto buildinfoRoot = MyGUI::LayoutManager::getInstance().loadLayout( "layout_mainscreen.layout" );
-    for ( auto& root : buildinfoRoot )
-    {
-      if ( root->getName() == "g_pnlBuildInfo" )
-      {
-        auto infobox = dynamic_cast<MyGUI::TextBox*>( root->getChildAt( 0 ) );
-        auto& install = engine.installationInfo();
-        char data[256];
-        sprintf_s( data, 256, "build: %s\nbuild id: %lld\nbranch: %s\nsku: %s",
-          install.host_ == tank::InstallationHost::Local ? "local"
-          : install.host_ == tank::InstallationHost::Steam ? "steam"
-          : "discord",
-          install.buildId_,
-          install.branch_.c_str(),
-          install.ownership_ == tank::GameOwnership::Owned ? "owned"
-          : install.ownership_ == tank::GameOwnership::TempFreeWeekend ? "free weekend"
-          : install.ownership_ == tank::GameOwnership::TempFamilySharing ? "family sharing" :
-          "unowned" );
-        infobox->setCaption( data );
-        // infobox->setTextColour( MyGUI::Colour( 1.0f, 1.0f, 1.0f, 1.0f ) );
-      }
-      else if ( root->getName() == "g_pnlStats" )
-      {
-      }
-    }
-
-    window_->setMouseCursorVisible( false );
-
-#endif
+    gui_->initialize( this, documentsPath, *window_.get() );
+    gui_->poop();
 
     input_->initialize( window_->getSystemHandle() );
 
     messaging_->listen( this );
   }
-
-#ifndef NEKO_NO_GUI
-
-  void* Gfx::loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename )
-  {
-    vector<uint8_t> input, output;
-    unsigned int wo, ho;
-    platform::FileReader( c_guiBaseDirectory + filename ).readFullVector( input );
-
-    if ( lodepng::decode( output, wo, ho, input.data(), input.size(), LCT_RGBA, 8 ) != 0 )
-      NEKO_EXCEPT( "Lodepng image load failed" );
-
-    width = wo;
-    height = ho;
-    format = MyGUI::PixelFormat::R8G8B8A8;
-    auto outbuf = new uint8_t[output.size()];
-    memcpy( outbuf, output.data(), output.size() );
-    return outbuf;
-  }
-
-  void Gfx::saveImage( int width, int height, MyGUI::PixelFormat format, void* texture, const utf8String& filename )
-  {
-    //
-  }
-
-#endif
 
   void Gfx::resize( size_t width, size_t height )
   {
@@ -321,10 +233,7 @@ namespace neko {
 
     glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
 
-#ifndef NEKO_NO_GUI
-    if ( guiPlatform_ )
-      guiPlatform_->getRenderManagerPtr()->setViewSize( (int)width, (int)height );
-#endif
+    gui_->resize( static_cast<int>( width ), static_cast<int>( height ) );
   }
 
   void Gfx::processEvents()
@@ -380,7 +289,24 @@ namespace neko {
     }
 
     renderer_->prepare( time );
-    camera_->applyMovement( input_->movement() );
+
+    char asd[256];
+    sprintf_s( asd, 256, "[%s,%s,%s,%s,%s]\nmouse x %lli y %lli z %lli",
+      input_->mouseButtons_[0] ? "true" : "false",
+      input_->mouseButtons_[1] ? "true" : "false",
+      input_->mouseButtons_[2] ? "true" : "false",
+      input_->mouseButtons_[3] ? "true" : "false",
+      input_->mouseButtons_[4] ? "true" : "false",
+      input_->movement_.x, input_->movement_.y, input_->movement_.z );
+    gui_->setshit( asd );
+
+    if ( input_->mousebtn( 2 ) )
+      camera_->applyInputPanning( input_->movement() );
+    else if ( input_->mousebtn( 1 ) )
+      camera_->applyInputRotation( input_->movement() );
+
+    camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
+
     camera_->update( delta, time );
 
     // activate as current context
@@ -394,7 +320,7 @@ namespace neko {
     }
 
 #ifndef NEKO_NO_GUI
-    renderer_->draw( time, *camera_.get(), guiPlatform_.get() );
+    renderer_->draw( time, *camera_.get(), gui_->platform() );
 #else
     renderer_->draw( time, *camera_.get(), nullptr );
 #endif
@@ -426,21 +352,7 @@ namespace neko {
 
     input_->shutdown();
 
-#ifndef NEKO_NO_GUI
-
-    if ( gui_ )
-    {
-      gui_->shutdown();
-      gui_.reset();
-    }
-
-    if ( guiPlatform_ )
-    {
-      guiPlatform_->shutdown();
-      guiPlatform_.reset();
-    }
-
-#endif
+    gui_->shutdown();
 
     camera_.reset();
 
@@ -476,7 +388,7 @@ namespace neko {
   ThreadedRenderer::ThreadedRenderer( EnginePtr engine, ThreadedLoaderPtr loader,
   FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
   engine_( move( engine ) ), loader_( move( loader ) ), fonts_( move( fonts ) ),
-  messaging_( move( messaging ) ), director_( move( director ) ),
+  messaging_( move( messaging ) ), director_( move( director ) ), lastTime_( 0.0 ),
   console_( move( console ) ), thread_( c_gfxThreadName, threadProc, this )
   {
   }

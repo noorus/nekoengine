@@ -117,6 +117,37 @@ namespace neko {
       return result;
     }
 
+    inline wstring extractExtension( const utf8String& path )
+    {
+      auto wpath = platform::utf8ToWide( path );
+      auto dot = wpath.find_last_of( L'.' );
+      if ( dot == wpath.npos )
+        return L"";
+      auto ext = wpath.substr( dot + 1 );
+      std::transform( ext.begin(), ext.end(), ext.begin(), ::towlower );
+      return ext;
+    }
+
+    inline wstring extractFilename( const utf8String& path )
+    {
+      auto wpath = platform::utf8ToWide( path );
+      auto slash = wpath.find_last_of( LR"(\/)" );
+      if ( slash == wpath.npos )
+        return L"";
+      auto fname = wpath.substr( slash + 1 );
+      return fname;
+    }
+
+    inline wstring extractFilepath( const utf8String& path )
+    {
+      auto wpath = platform::utf8ToWide( path );
+      auto slash = wpath.find_last_of( LR"(\/)" );
+      if ( slash == wpath.npos )
+        return L"";
+      auto fpath = wpath.substr( 0, slash );
+      return fpath;
+    }
+
     class DumbBuffer {
     private:
       Memory::Sector sector_;
@@ -203,7 +234,7 @@ namespace neko {
       if ( str.length() < 3 )
         return str;
 
-      const uint8_t utf8BOM[3] = {0xEF, 0xBB, 0xBF};
+      const uint8_t utf8BOM[3] = { 0xEF, 0xBB, 0xBF };
       if ( memcmp( str.data(), utf8BOM, 3 ) == 0 )
         str.erase( 0, 3 );
 

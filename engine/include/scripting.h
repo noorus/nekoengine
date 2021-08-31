@@ -29,7 +29,7 @@ namespace neko {
 
   }
 
-  class Script {
+  class Script: public nocopy {
   public:
     enum Status {
       Status_Unknown,
@@ -64,7 +64,7 @@ namespace neko {
 
   using V8FunctionCallback = void(*)( const v8::FunctionCallbackInfo<v8::Value>& args );
 
-  class ScriptingContext {
+  class ScriptingContext: public nocopy {
   private:
     const bool externalIsolate_;
     v8::Isolate* isolate_;

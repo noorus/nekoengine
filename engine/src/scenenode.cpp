@@ -40,6 +40,24 @@ namespace neko {
     needUpdate();
   }
 
+  void SceneNode::translate( const vec3& position )
+  {
+    translate_ += position;
+    needUpdate();
+  }
+
+  void SceneNode::scale( const vec3& scale )
+  {
+    scale_ *= scale;
+    needUpdate();
+  }
+
+  void SceneNode::rotate( const quaternion& rotation )
+  {
+    rotate_ = math::normalize( rotation * rotate_ );
+    needUpdate();
+  }
+
   const vec3& SceneNode::getDerivedTranslate() const
   {
     if ( needParentUpdate_ )

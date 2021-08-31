@@ -59,13 +59,22 @@ namespace neko {
     PixFmtColorR8
   };
 
-  struct ImageData
+  struct ImageData: public nocopy
   {
     unsigned int width_ = 0;
     unsigned int height_ = 0;
     vector<uint8_t> data_;
     PixelFormat format_ = PixFmtColorRGBA8;
     gl::GLenum uploadedFormat_ = gl::GLenum::GL_NONE;
+    ImageData() {}
+    // move constructor
+    ImageData( ImageData&& rhs )
+    {
+      width_ = rhs.width_;
+      height_ = rhs.height_;
+      data_.swap( rhs.data_ );
+      format_ = rhs.format_;
+    }
   };
 
   enum GLFormatSizeFlagBits

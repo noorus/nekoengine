@@ -23,9 +23,10 @@ uniform mat4 model;
 
 void main()
 {
+  vec3 N = normalize( vbo_normal );
   mat3 normalMatrix = mat3( transpose( inverse( world.camera.view * model ) ) );
   gl_Position = world.camera.view * model * vec4( vbo_position, 1.0 );
 
-  vs_out.normal = vec3( vec4( normalMatrix * vbo_normal, 0.0 ) );
-  vs_out.orignormal = vbo_normal;
+  vs_out.normal = vec3( vec4( normalMatrix * N, 0.0 ) );
+  vs_out.orignormal = N;
 }

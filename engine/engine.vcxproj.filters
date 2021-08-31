@@ -100,6 +100,15 @@
     <Filter Include="Header Files\extern\tinyexr">
       <UniqueIdentifier>{a3a63eb7-d7df-41ba-9008-af5a7185f12d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\loader">
+      <UniqueIdentifier>{3745b50a-538b-481b-905a-dfecf36005d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\tinygltf">
+      <UniqueIdentifier>{ee5b64c7-db23-4230-91e0-d0dff2bc915e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extern\tinygltf">
+      <UniqueIdentifier>{9098ca5c-5991-40a6-b6da-a08566101fb7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -154,9 +163,6 @@
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
     <ClCompile Include="src\engine.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\loader.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="src\subsystem.cpp">
@@ -255,12 +261,6 @@
     <ClCompile Include="src\scenenode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\loader_unity.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\loader_fbx.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\extern\tinytiff\tinytiffreader.cpp">
       <Filter>Source Files\extern\tinytiff</Filter>
     </ClCompile>
@@ -278,6 +278,24 @@
     </ClCompile>
     <ClCompile Include="..\extern\miniz\miniz.cpp">
       <Filter>Source Files\extern\miniz</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader.cpp">
+      <Filter>Source Files\loader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader_fbx.cpp">
+      <Filter>Source Files\loader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader_unity.cpp">
+      <Filter>Source Files\loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\tinygltf\tiny_gltf.cc">
+      <Filter>Source Files\extern\tinygltf</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader_gltf.cpp">
+      <Filter>Source Files\loader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -463,6 +481,18 @@
     </ClInclude>
     <ClInclude Include="..\extern\tinyexr\tinyexr.h">
       <Filter>Header Files\extern\tinyexr</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui.h">
+      <Filter>Header Files\gfx\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\text.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_camera.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinygltf\tiny_gltf.h">
+      <Filter>Header Files\extern\tinygltf</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

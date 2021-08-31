@@ -117,8 +117,8 @@ void main()
 
   vec2 tc = vec2( vs_out.texcoord.x, vs_out.texcoord.y );
   vec3 AlbedoBase = gammaCorrect( texture( texAlbedoTransparency, tc ).rgb );
-  vec4 TeamColorSample = texture( texTeamColor, tc );
-  vec4 TeamColorMask = vec4( gammaCorrect( TeamColorSample.rgb ), TeamColorSample.a );
+  // vec4 TeamColorSample = texture( texTeamColor, tc );
+  // vec4 TeamColorMask = vec4( gammaCorrect( TeamColorSample.rgb ), TeamColorSample.a );
   vec3 unpacked = util_unpackUnityNormal( texture( texNormal, tc ) );
   vec3 Normal = util_normalToWorld( unpacked, tc, vs_out.worldpos, vs_out.normal );
   float Metallic = gammaCorrect( texture( texMetalSmoothness, tc ).rgb ).r;
@@ -126,7 +126,7 @@ void main()
   float Alpha = 1.0;
   vec4 Color = vec4( 1.0, 1.0, 1.0, 0.0 );
 
-  vec3 Albedo = mix( ( Color.rgb * AlbedoBase ), TeamColorMask.rgb, TeamColorMask.a );
+  vec3 Albedo = AlbedoBase; // mix( ( Color.rgb * AlbedoBase ), TeamColorMask.rgb, TeamColorMask.a );
 
   float height = 1.0;
 

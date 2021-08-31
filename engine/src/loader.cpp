@@ -124,17 +124,6 @@ namespace neko {
     finishedAnimationsEvent_.reset();
   }
 
-  inline wstring extractExtension( const utf8String& path )
-  {
-    auto wpath = platform::utf8ToWide( path );
-    auto dot = wpath.find_last_of( L'.' );
-    if ( dot == wpath.npos )
-      return L"";
-    auto ext = wpath.substr( dot + 1 );
-    std::transform( ext.begin(), ext.end(), ext.begin(), ::towlower );
-    return move( ext );
-  }
-
   using namespace gl;
 
   // Context: Worker thread
@@ -160,7 +149,7 @@ namespace neko {
           platform::FileReader( path ).readFullVector( input );
           MaterialLayer layer;
           vector<uint8_t> rawData;
-          auto ext = extractExtension( path );
+          auto ext = utils::extractExtension( path );
           /*if ( ext == L"ktx2" )
           {
             ktxTexture2* ktx;
@@ -198,7 +187,7 @@ namespace neko {
               layer.image_.height_ = height;
               layer.image_.format_ = PixFmtColorRGBA8;
               layer.image_.data_.reserve( rawData.size() );
-              // Flip rows, PNG is stored upside down
+              // flip rows
               for ( size_t i = 0; i < height; ++i )
               {
                 auto srcRow = rawData.data() + ( i * (size_t)width * 4 );
@@ -322,10 +311,20 @@ namespace neko {
       else if ( task.type_ == LoadTask::Load_Model )
       {
         auto path = c_meshesBaseDirectory + task.modelLoad.path_;
+        auto filename = utils::extractFilename( path );
+        auto filepath = utils::extractFilepath( path );
+        auto ext = utils::extractExtension( path );
 
-        vector<uint8_t> input;
+        if ( ext == L"gltf" )
+        {
+          vector<uint8_t> input;
+          platform::FileReader( path ).readFullVector( input );
+          loaders::loadGLTFModel( input, platform::wideToUtf8( filename ), platform::wideToUtf8( filepath ), task.modelLoad.node_ );
+        }
+        else
+          NEKO_EXCEPT( "Unsupported mesh format in load model task" );
         //platform::FileReader( task.modelLoad.path_ ).readFullVector( input );
-        fbxLoader_.loadFBXScene( input, path, task.modelLoad.node_ );
+        /*fbxLoader_.loadFBXScene( input, path, task.modelLoad.node_ );*/
         finishedTasksLock_.lock();
         finishedModels_.push_back( task.modelLoad.node_ );
         finishedTasksLock_.unlock();

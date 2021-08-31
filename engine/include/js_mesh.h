@@ -40,7 +40,6 @@ namespace neko {
         local_.localVAO_ = other.localVAO_;
       }*/
       inline JSMesh& mesh() { return local_; } //!< Get the internal JSMesh.
-      inline operator JSMesh() const { return local_; }
     };
 
     using MeshPtr = shared_ptr<Mesh>;

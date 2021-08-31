@@ -45,7 +45,7 @@ namespace neko {
 
 #endif
 
-  class Director {
+  class Director: public nocopy {
   protected:
     RenderSyncContext renderSync_; //!< Synchronizer between game and renderer objects
   public:

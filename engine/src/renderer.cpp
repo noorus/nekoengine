@@ -132,91 +132,6 @@ namespace neko {
 
   static unique_ptr<PointRenderBuffer> g_pointrender;
 
-  class DynamicText {
-  public:
-    DynamicMeshPtr mesh_;
-    FontPtr font_;
-    MaterialPtr material_;
-  public:
-    DynamicText( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontManagerPtr fontmgr )
-    {
-      font_ = fontmgr->createFont();
-      loader->addLoadTask( { LoadTask( font_, R"(LuckiestGuy.ttf)", 32.0f ) } );
-      mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_3D, true, false );
-    }
-    inline bool fontLoaded()
-    {
-      return font_ && font_->loaded_;
-    }
-    void addText( const utf8String& str, vec2 pen )
-    {
-      uint32_t prev_codepoint = 0;
-      for ( size_t i = 0; i < str.length(); ++i )
-      {
-        auto codepoint = utils::utf8_to_utf32( &str[i] );
-        auto glyph = font_->impl_->getGlyph( codepoint );
-        if ( !glyph )
-        {
-          font_->impl_->loadGlyph( codepoint );
-          glyph = font_->impl_->getGlyph( codepoint );
-        }
-        assert( glyph );
-        Real kerning = 0.0f;
-        if ( i > 0 )
-          kerning = glyph->getKerning( prev_codepoint );
-        prev_codepoint = codepoint;
-        pen.x += kerning;
-        auto p0 = vec2(
-          ( pen.x + glyph->offset.x ),
-          (int)( pen.y + glyph->offset.y ) );
-        auto p1 = vec2(
-          ( p0.x + glyph->width ),
-          (int)( p0.y - glyph->height )
-        );
-        auto index = (GLuint)mesh_->vertsCount();
-        auto normal = vec3( 1.0f, 0.0f, 0.0f );
-        auto color = vec4( 0.0f, 1.0f, 0.0f, 1.0f );
-        vector<Vertex3D> vertices = {
-          { vec3( p0.x, p1.y, 0.0f ), normal, vec2( glyph->coords[0].x, glyph->coords[1].y ), color },
-          { vec3( p0.x, p0.y, 0.0f ), normal, vec2( glyph->coords[0].x, glyph->coords[0].y ), color },
-          { vec3( p1.x, p0.y, 0.0f ), normal, vec2( glyph->coords[1].x, glyph->coords[0].y ), color },
-          { vec3( p1.x, p1.y, 0.0f ), normal, vec2( glyph->coords[1].x, glyph->coords[1].y ), color }
-        };
-        vector<GLuint> indices = {
-          index + 0, index + 1, index + 2, index + 0, index + 2, index + 3
-        };
-        mesh_->pushIndices( move( indices ) );
-        mesh_->pushVertices( move( vertices ) );
-        pen.x += glyph->advance.x;
-      }
-    }
-    void updateTexture( Renderer* rndr )
-    {
-      material_ = rndr->createTextureWithData( font_->impl_->atlas_->width_, font_->impl_->atlas_->height_,
-        PixFmtColorR8, (const void*)font_->impl_->atlas_->data_.data(), Texture::ClampBorder, Texture::Mipmapped );
-      /*platform::FileWriter writer("debug.png");
-      vector<uint8_t> buffer;
-      lodepng::encode( buffer, font_->impl_->atlas_->data_, font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, LCT_GREY, 8 );
-      writer.writeBlob( buffer.data(), buffer.size() );*/
-    }
-    void begin()
-    {
-      mesh_->begin();
-    }
-    void draw()
-    {
-      glBindTextureUnit( 0, material_->layers_[0].texture_->handle() );
-      mesh_->draw();
-      glBindTextureUnit( 0, 0 );
-    }
-    ~DynamicText()
-    {
-      //
-    }
-  };
-
-  using DynamicTextPtr = shared_ptr<DynamicText>;
-
   void glStartupFetchAndCheck( GLInformation& info )
   {
     auto glbAuxStr = []( GLenum e ) -> utf8String
@@ -365,14 +280,14 @@ namespace neko {
     materials_.push_back( make_shared<Material>( Material::UnlitSimple ) );
     materials_.push_back( make_shared<Material>( Material::WorldGround ) );
     materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
-    loader_->addLoadTask( { LoadTask( materials_[0], { R"(test.png)" } ) } );
+    loader_->addLoadTask( { LoadTask( materials_[0], { R"(uvtest_diffuse.png)" } ) } );
     loader_->addLoadTask( { LoadTask( materials_[1], { R"(SGT_Tile_3_AlbedoSmoothness.png)", R"(SGT_Tile_3_Height.png)", R"(SGT_Tile_3_MetallicSmoothness.png)", R"(SGT_Tile_3_Normal.png)" } ) } );
     loader_->addLoadTask( { LoadTask( materials_[2], {
-      R"(AnyTexture.png)", // R"(M_Tank_Tiger_AlbedoTransparency.png)",
-      R"(M_Tank_Tiger_MetallicSmoothness.png)",
-      R"(M_Tank_Tiger_Normal.png)",
-      R"(M_Tank_Tiger_Base_ColorTeam.png)" } ) } );
-    loader_->addLoadTask( { LoadTask( new SceneNode(), R"(new_tank_tiger.fbx)" ) } );
+      R"(M_Tank_Pz35_Blue_AlbedoTransparency.png)",
+      R"(M_Tank_Pz35_MetallicSmoothness.png)",
+      R"(M_Tank_Pz35_Normal.png)",
+      R"(M_Tank_Pz35_Blue_AlbedoTransparency.png)" } ) } );
+    loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
 
     // loader_->addLoadTask( { LoadTask( R"(data\meshes\SCA_Aircraft_Flight.anim)"
 
@@ -403,7 +318,7 @@ namespace neko {
         continue;
       for ( auto& layer : mat->layers_ )
       {
-        layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, layer.image_.format_, layer.image_.data_.data(), Texture::Repeat, Texture::Mipmapped );
+        layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, layer.image_.format_, layer.image_.data_.data(), Texture::ClampEdge, Texture::Mipmapped );
       }
     }
   }
@@ -431,9 +346,6 @@ namespace neko {
     sceneGraph_.insert( nodes.begin(), nodes.end() );
   }
 
-  static bool g_textAdded = false;
-  static shared_ptr<DynamicText> g_testText;
-
   void Renderer::prepare( GameTime time )
   {
     // Upload any new textures. Could this be parallellized?
@@ -457,18 +369,6 @@ namespace neko {
 #ifndef NEKO_NO_SCRIPTING
     models_->jsUpdate( director_->renderSync() );
 #endif
-
-    if ( !g_testText )
-    {
-      g_testText = make_shared<DynamicText>( loader_, meshes_, fonts_ );
-    }
-
-    if ( g_testText && g_testText->fontLoaded() && !g_textAdded )
-    {
-      g_textAdded = true;
-      g_testText->addText( "nekoengine", vec2( 256.0f, 720.0f - 256.0f + 32.0f ) );
-      g_testText->updateTexture( this );
-    }
   }
 
   void Renderer::jsRestart()
@@ -629,13 +529,13 @@ namespace neko {
     }
 
     vec3 lightpos[2] = {
-      vec3( 0.0f, 15.0f, 0.0f ), // vec3( math::sin( (Real)time * 1.2f ) * 4.0f, 1.0f, math::cos( (Real)time * 1.2f ) * 4.0f ),
-      vec3( math::sin( (Real)time ) * 3.0f, /*math::sin( (Real)time * 1.6f ) **/ 1.1f, math::cos( (Real)time ) * 3.0f )
+      vec3( math::sin( (Real)time * 1.2f ) * 3.0f, 4.0f, math::cos( (Real)time * 1.2f ) * 3.0f ),
+      vec3( math::sin( (Real)time ) * 3.0f, 1.0f, math::cos( (Real)time ) * 3.0f )
     };
 
     shaders_->world()->pointLights[0].position = vec4( lightpos[0], 1.0f );
-    shaders_->world()->pointLights[0].color = vec4( 250.0f, 250.0f, 250.0f, 1.0f );
-    shaders_->world()->pointLights[0].dummy = vec4( 0.0f );
+    shaders_->world()->pointLights[0].color = vec4( 100.0f, 100.0f, 100.0f, 1.0f );
+    shaders_->world()->pointLights[0].dummy = vec4( 1.0f );
 
     shaders_->world()->pointLights[1].position = vec4( lightpos[1], 1.0f );
     shaders_->world()->pointLights[1].color = vec4( math::sin( (Real)time * 0.3f ) * 30.0f + 50.0f, 0.0f, math::cos( (Real)time * 0.4f ) * 30.0f + 50.0f, 1.0f );
@@ -675,9 +575,9 @@ namespace neko {
     };
 
     // This breaks lighting on our solid PBS spheres. Wat?
-    // glEnable( GL_CULL_FACE );
-    // glCullFace( GL_BACK );
-    // glFrontFace( GL_CCW );
+    glEnable( GL_CULL_FACE );
+    glCullFace( GL_BACK );
+    glFrontFace( GL_CCW );
 
     {
       auto& pipeline = useMaterial( 1 );
@@ -692,9 +592,11 @@ namespace neko {
       builtin_.unitSphere_->drawOnce( pipeline, vec3(  3.0f, 1.0f,  3.0f ) );
     }
 
-    //auto& pl = useMaterial( 2 );
-    //for ( auto node : sceneGraph_ )
-    //  sceneDrawEnterNode( node, pl );
+    {
+      auto& pipeline = useMaterial( 0 );
+      for ( auto node : sceneGraph_ )
+        sceneDrawEnterNode( node, pipeline );
+    }
 
     /*builtin_.cube_->begin();
     mat4 mdl( 1.0f );
@@ -703,26 +605,24 @@ namespace neko {
     pl.setUniform( "model", mdl );
     builtin_.cube_->draw();*/
 
-    /*if ( g_CVar_dbg_shownormals.as_b() )
-    {
-      pl = shaders_->usePipeline( "dbg_showvertexnormals" );
-      glEnable( GL_LINE_SMOOTH );
-      fn_drawModels( pl );
-      for ( auto node : sceneGraph_ )
-        sceneDrawEnterNode( node, pl );
-      builtin_.cube_->begin();
-      builtin_.cube_->draw();
-    }*/
+    glEnable( GL_LINE_SMOOTH );
 
-    /*if ( g_CVar_dbg_showtangents.as_b() )
+    if ( g_CVar_dbg_shownormals.as_b() )
     {
-      pl = shaders_->usePipeline( "dbg_showvertextangents" );
+      auto& pipeline = shaders_->usePipeline( "dbg_showvertexnormals" );
+      fn_drawModels( pipeline );
       for ( auto node : sceneGraph_ )
-        sceneDrawEnterNode( node, pl );
-      //builtin_.cube_->begin();
-      //glEnable( GL_LINE_SMOOTH );
-      //builtin_.cube_->draw();
-    }*/
+        sceneDrawEnterNode( node, pipeline );
+    }
+
+    if ( g_CVar_dbg_showtangents.as_b() )
+    {
+      auto& pipeline = shaders_->usePipeline( "dbg_showvertextangents" );
+      for ( auto node : sceneGraph_ )
+        sceneDrawEnterNode( node, pipeline );
+    }
+
+    glDisable( GL_LINE_SMOOTH );
 
     g_pointrender->buffer().lock();
     auto lightpoints = g_pointrender->buffer().buffer().data();
@@ -733,19 +633,6 @@ namespace neko {
     g_pointrender->buffer().unlock();
 
     g_pointrender->draw( *shaders_.get(), 2, 0 );
-
-    /*if ( g_testText && g_textAdded )
-    {
-      g_testText->begin();
-      mat4 model( 1.0f );
-      model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
-      model = glm::translate( model, vec3( 1.0f, 1.0f, 0.0f ) );
-
-      auto& pipeline = shaders_->usePipeline( "text3d" );
-      pipeline.setUniform( "model", model );
-      pipeline.setUniform( "tex", 0 );
-      g_testText->draw();
-    }*/
   }
 
   void Renderer::draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui )
@@ -822,7 +709,6 @@ namespace neko {
     glBindVertexArray( builtin_.emptyVAO_ );
 
     g_pointrender.reset();
-    g_testText.reset();
 
     intermediate_.reset();
     mainbuffer_.reset();

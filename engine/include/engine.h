@@ -33,7 +33,7 @@ namespace neko {
 
   //! \class Engine
   //! The main engine class that makes the world go round
-  class Engine: public enable_shared_from_this<Engine>, public Listener, public tank::TankHost {
+  class Engine: public enable_shared_from_this<Engine>, public nocopy, public Listener, public tank::TankHost {
   public:
     //! Possible signal values interpreted by the engine's gameloop
     enum Signal {

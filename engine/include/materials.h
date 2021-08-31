@@ -6,16 +6,23 @@
 
 namespace neko {
 
-  struct MaterialLayer {
+  struct MaterialLayer: public nocopy {
+  public:
     ImageData image_;
     TexturePtr texture_;
+  public:
     inline const bool hasHostCopy() const { return !image_.data_.empty(); }
     inline const bool uploaded() const throw() { return ( texture_.get() != nullptr ); }
+    MaterialLayer() {}
+    // move constructor
+    MaterialLayer( MaterialLayer&& rhs ): image_( move( rhs.image_ ) ), texture_( rhs.texture_ )
+    {
+    }
   };
 
   using MaterialLayers = vector<MaterialLayer>;
 
-  struct Material {
+  struct Material: public nocopy {
     enum Type {
       UnlitSimple,
       WorldGround,

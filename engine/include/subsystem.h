@@ -4,7 +4,7 @@
 
 namespace neko {
 
-  class Subsystem {
+  class Subsystem: public nocopy {
   protected:
     EnginePtr engine_;
   public:

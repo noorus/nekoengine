@@ -3,6 +3,7 @@
 #include "renderer.h"
 #include "fontmanager.h"
 #include "gfx_types.h"
+#include <ozz/animation/offline/fbx/fbx.h>
 
 namespace neko {
 
@@ -24,12 +25,12 @@ namespace neko {
 
     struct UnityYamlNode {
       bool isRoot = false;
-      size_t indent;
+      int indent;
       UnityYamlNode* parent;
       utf8String name;
       map<utf8String, utf8String> attribs;
       vector<UnityYamlNode*> children;
-      UnityYamlNode( UnityYamlNode* parent_, size_t indent_ ): parent( parent_ ), indent( indent_ ) {}
+      UnityYamlNode( UnityYamlNode* parent_, int indent_ ): parent( parent_ ), indent( indent_ ) {}
       ~UnityYamlNode()
       {
         for ( auto& child : children )
@@ -40,6 +41,8 @@ namespace neko {
     void dumpUnityYaml( UnityYamlNode& node, size_t level = 0 );
     void loadUnityAnimation( const vector<uint8_t>& data, AnimationEntryPtr& into );
 
+    void loadGLTFModel( const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, SceneNode* out );
+
 #endif
 
 #ifndef NEKO_NO_FBX
@@ -47,6 +50,7 @@ namespace neko {
     protected:
       fbxsdk::FbxManager* fbxmgr_;
       fbxsdk::FbxIOSettings* fbxio_;
+      unique_ptr<ozz::animation::offline::fbx::FbxSystemConverter> converter_;
       void parseFBXNode( fbxsdk::FbxNode* node, SceneNode& out );
     public:
       FbxLoader();
@@ -108,7 +112,7 @@ namespace neko {
 
   using LoadTaskVector = vector<LoadTask>;
 
-  class ThreadedLoader: public enable_shared_from_this<ThreadedLoader> {
+  class ThreadedLoader: public enable_shared_from_this<ThreadedLoader>, public nocopy {
   protected:
     platform::Thread thread_;
     platform::Event newTasksEvent_;

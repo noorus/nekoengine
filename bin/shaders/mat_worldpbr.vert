@@ -26,9 +26,9 @@ void main()
 {
   mat4 modelViewProjection = world.camera.projection * world.camera.view * model;
 
-  gl_Position = modelViewProjection * vec4( vbo_position, 1.0 );
+  gl_Position = modelViewProjection * vec4( vbo_position.xyz, 1.0 );
 
-  vs_out.normal = mat3( model ) * vbo_normal;
+  vs_out.normal = mat3( model ) * vec3( vbo_normal.x, vbo_normal.y, vbo_normal.z );
   vs_out.texcoord = vbo_texcoord;
   vs_out.fragpos = vec3( model * vec4( vbo_position, 1.0 ) );
 }

@@ -203,7 +203,7 @@ namespace MyGUI {
   public:
     NekoPlatform();
     ~NekoPlatform();
-    void initialise( neko::Gfx* gfx, const utf8String& logname );
+    void initialise( neko::Renderer* renderer, NekoImageLoader* imageloader, const utf8String& logname );
     void shutdown();
     inline NekoRenderManager* getRenderManagerPtr() const throw() { return renderManager_.get(); }
     NekoDataManager* getDataManagerPtr() const throw() { return dataManager_.get(); }

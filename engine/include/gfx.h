@@ -6,8 +6,7 @@
 #include "messaging.h"
 #include "input.h"
 #include "camera.h"
-
-#include <MyGUI_NekoPlatform.h>
+#include "gui.h"
 
 namespace neko {
 
@@ -22,9 +21,6 @@ namespace neko {
   class Gfx:
     public platform::RenderWindowEventRecipient,
     public Listener
-#ifndef NEKO_NO_GUI
-    , public MyGUI::NekoImageLoader
-#endif
   {
     friend class ThreadedRenderer;
   public:
@@ -47,6 +43,7 @@ namespace neko {
     MessagingPtr messaging_;
     DirectorPtr director_;
     GfxInputPtr input_;
+    GUIPtr gui_;
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;
@@ -55,10 +52,6 @@ namespace neko {
     RendererPtr renderer_;
     Viewport viewport_;
     Image lastCapture_;
-#ifndef NEKO_NO_GUI
-    unique_ptr<MyGUI::NekoPlatform> guiPlatform_;
-    unique_ptr<MyGUI::Gui> gui_;
-#endif
     platform::RWLock logicLock_;
     void preInitialize();
     void printInfo();
@@ -73,11 +66,6 @@ namespace neko {
       GLsizei length, const GLchar* message, const void* userParam );
     void setOpenGLDebugLogging( const bool enable );
     virtual void onMessage( const Message& msg );
-#ifndef NEKO_NO_GUI
-    // MyGUI::OpenGL3ImageLoader implementation
-    void* loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename ) override;
-    void saveImage( int width, int height, MyGUI::PixelFormat format, void* texture, const utf8String& filename ) override;
-#endif
   public:
     void postInitialize( Engine& engine );
     Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );

@@ -50,7 +50,7 @@ namespace neko {
 
   using ModelLoadOutputPtr = shared_ptr<ModelLoadOutput>;
 
-  class SceneNode
+  class SceneNode: public nocopy
   {
   public:
     vec3 translate_;
@@ -78,24 +78,32 @@ namespace neko {
     void setTranslate( const vec3& position );
     void setScale( const vec3& scale );
     void setRotate( const quaternion& rotation );
+    void translate( const vec3& position );
+    void scale( const vec3& scale );
+    void rotate( const quaternion& rotation );
     void needUpdate();
+    inline void name( const utf8String& name ) { name_ = name; }
+    inline const utf8String& name() const throw() { return name_; }
+    inline const vec3& translation() const throw() { return translate_; }
+    inline const vec3& scaling() const throw() { return scale_; }
+    inline const quaternion& rotation() const throw() { return rotate_; }
     vec3 convertLocalToWorldPosition( const vec3& localPosition );
     vec3 convertWorldToLocalPosition( const vec3& worldPosition );
     quaternion convertLocalToWorldOrientation( const quaternion& localOrientation );
     quaternion convertWorldToLocalOrientation( const quaternion& worldOrientation );
-    SceneNode()
-        : translate_( 0.0f ),
-          rotate_( quatIdentity ),
-          scale_( 0.0f ),
-          parent_( nullptr ),
-          inheritOrientation_( true ),
-          inheritScale_( true ),
-          needParentUpdate_( true ),
-          needChildUpdate_( true ),
-          cachedOutOfDate_( true ),
-          derivedTranslate_( 0.0f ),
-          derivedScale_( 1.0f ),
-          derivedRotate_( quatIdentity )
+    SceneNode():
+      translate_( 0.0f ),
+      rotate_( quatIdentity ),
+      scale_( 0.0f ),
+      parent_( nullptr ),
+      inheritOrientation_( true ),
+      inheritScale_( true ),
+      needParentUpdate_( true ),
+      needChildUpdate_( true ),
+      cachedOutOfDate_( true ),
+      derivedTranslate_( 0.0f ),
+      derivedScale_( 1.0f ),
+      derivedRotate_( quatIdentity )
     {
     }
     SceneNode( SceneNode* parent ):
@@ -115,7 +123,7 @@ namespace neko {
     }
   };
 
-  class SceneManager {
+  class SceneManager: public nocopy {
   protected:
     set<SceneNode*> sceneGraph_;
   public:

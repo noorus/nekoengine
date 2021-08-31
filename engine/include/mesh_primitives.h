@@ -57,7 +57,7 @@ namespace neko {
   };
 
   template <typename T>
-  class SmarterBuffer {
+  class SmarterBuffer: public nocopy {
   protected:
     GLuint id_;
     size_t size_;
@@ -92,7 +92,7 @@ namespace neko {
     }
   };
 
-  class AttribWriter {
+  class AttribWriter: public nocopy {
   private:
     struct Record {
       GLenum type_;
@@ -160,7 +160,7 @@ namespace neko {
   //! \class VBO
   //! \brief Vertex Buffer Object
   //! A buffer of raw vertex data (of only one type), referenceable by an ID.
-  class VBO {
+  class VBO: public nocopy {
   private:
     std::variant<
       vector<Vertex2D>,
@@ -310,7 +310,7 @@ namespace neko {
   //! \class EBO
   //! \brief Element Buffer Object
   //! An array of indices into a VBO.
-  class EBO {
+  class EBO: public nocopy {
   public:
     vector<GLuint> storage_; //!< Contents of this ebo
     GLuint id_; //!< GL name for this ebo
@@ -351,7 +351,7 @@ namespace neko {
   //! \class VAO
   //! \brief Vertex Array Object
   //! An object that describes structure of variables in a VBO, referenceable by an ID.
-  class VAO {
+  class VAO: public nocopy {
   public:
     VBOPtr vbo_; //!< Associated vbo
     EBOPtr ebo_; //!< Associated ebo, optional
@@ -381,7 +381,7 @@ namespace neko {
 
   using VAOPtr = shared_ptr<VAO>;
 
-  class DynamicMesh {
+  class DynamicMesh: public nocopy {
   public:
     MeshManagerPtr manager_;
     VBOPtr vbo_;
@@ -426,6 +426,7 @@ namespace neko {
   using DynamicMeshPtr = shared_ptr<DynamicMesh>;
   using DynamicMeshVector = vector<DynamicMeshPtr>;
 
+  // Lightweight, purposefully copyable
   class JSMesh {
   public:
     size_t id_;
@@ -440,7 +441,7 @@ namespace neko {
     JSMesh();
   };
 
-  class StaticMesh {
+  class StaticMesh: public nocopy {
   private:
     MeshManagerPtr manager_;
     VBOPtr vbo_;

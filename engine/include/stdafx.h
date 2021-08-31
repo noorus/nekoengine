@@ -176,6 +176,7 @@
 # include <ozz/base/maths/vec_float.h>
 # include <ozz/animation/offline/animation_builder.h>
 # include <ozz/animation/offline/raw_animation.h>
+# include <ozz/animation/offline/fbx/fbx.h>
 #endif
 
 // Local types

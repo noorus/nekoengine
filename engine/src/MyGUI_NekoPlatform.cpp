@@ -19,7 +19,7 @@ namespace MyGUI {
     assert( !initialized_ );
   }
 
-  void NekoPlatform::initialise( neko::Gfx* gfx, const utf8String& logname )
+  void NekoPlatform::initialise( neko::Renderer* renderer, NekoImageLoader* imageloader, const utf8String& logname )
   {
     assert( !initialized_ );
     initialized_ = true;
@@ -30,7 +30,7 @@ namespace MyGUI {
     if ( !logname.empty() )
       LogManager::getInstance().createDefaultSource( logname );
 
-    renderManager_->initialise( &( gfx->renderer() ), gfx );
+    renderManager_->initialise( renderer, imageloader );
   }
 
   void NekoPlatform::shutdown()
