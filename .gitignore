@@ -348,3 +348,4 @@ lib/*.exe
 xdata/
 assets*
 publish*
+junk/
