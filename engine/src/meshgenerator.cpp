@@ -197,16 +197,16 @@ namespace neko {
       {
         for ( unsigned int x = 0; x <= segments.x; ++x )
         {
-          indices.push_back( y * ( segments.x + 1 ) + x );
           indices.push_back( ( y + 1 ) * ( segments.x + 1 ) + x );
+          indices.push_back( y * ( segments.x + 1 ) + x );
         }
       }
       else
       {
         for ( auto x = (int)segments.x; x >= 0; --x )
         {
-          indices.push_back( ( y + 1 ) * ( segments.x + 1 ) + x );
           indices.push_back( y * ( segments.x + 1 ) + x );
+          indices.push_back( ( y + 1 ) * ( segments.x + 1 ) + x );
         }
       }
       odd = !odd;
