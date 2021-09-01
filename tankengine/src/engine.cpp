@@ -32,7 +32,7 @@ namespace tank {
   void TankEngine::update( double gameTime, double delta )
   {
     if ( steam_ )
-      steam_->update();
+      steam_->update( gameTime, delta );
     if ( discord_ )
       discord_->update( gameTime, delta );
   }
@@ -78,6 +78,36 @@ namespace tank {
     if ( !discord_ )
       return false;
     return false;
+  }
+
+  void TankEngine::steamStatIncrement( const utf8String& name )
+  {
+    if ( steam_ )
+      steam_->statAdd( name, 1 );
+  }
+
+  void TankEngine::steamStatAdd( const utf8String& name, int value )
+  {
+    if ( steam_ )
+      steam_->statAdd( name, value );
+  }
+
+  void TankEngine::steamStatAdd( const utf8String& name, float value )
+  {
+    if ( steam_ )
+      steam_->statAdd( name, value );
+  }
+
+  void TankEngine::uploadStats()
+  {
+    if ( steam_ )
+      steam_->uploadStats();
+  }
+
+  const map<utf8String, SteamStat>& TankEngine::steamStats()
+  {
+    assert( steam_ );
+    return steam_->myStats().map_;
   }
 
   void TankEngine::shutdown()

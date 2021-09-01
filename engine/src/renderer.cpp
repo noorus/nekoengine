@@ -318,7 +318,7 @@ namespace neko {
         continue;
       for ( auto& layer : mat->layers_ )
       {
-        layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, layer.image_.format_, layer.image_.data_.data(), Texture::ClampEdge, Texture::Mipmapped );
+        layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, layer.image_.format_, layer.image_.data_.data(), Texture::Repeat, Texture::Mipmapped );
       }
     }
   }

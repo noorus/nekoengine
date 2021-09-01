@@ -279,7 +279,7 @@ namespace neko {
     logicLock_.unlock();
   }
 
-  void Gfx::update( GameTime time, GameTime delta )
+  void Gfx::update( GameTime time, GameTime delta, Engine& engine )
   {
     if ( flags_.reloadShaders )
     {
@@ -289,8 +289,11 @@ namespace neko {
     }
 
     renderer_->prepare( time );
-
     char asd[256];
+    sprintf_s( asd, 256, "Launches: %i\nTime wasted: %.0f seconds", engine.stats().i_launches.load(), engine.stats().f_timeWasted.load() + (float)time );
+    gui_->setshit( asd );
+
+    /*char asd[256];
     sprintf_s( asd, 256, "[%s,%s,%s,%s,%s]\nmouse x %lli y %lli z %lli",
       input_->mouseButtons_[0] ? "true" : "false",
       input_->mouseButtons_[1] ? "true" : "false",
@@ -298,7 +301,7 @@ namespace neko {
       input_->mouseButtons_[3] ? "true" : "false",
       input_->mouseButtons_[4] ? "true" : "false",
       input_->movement_.x, input_->movement_.y, input_->movement_.z );
-    gui_->setshit( asd );
+    gui_->setshit( asd );*/
 
     if ( input_->mousebtn( 2 ) )
       camera_->applyInputPanning( input_->movement() );
@@ -427,7 +430,7 @@ namespace neko {
       auto delta = ( time - lastTime_ );
       lastTime_ = time;
 
-      gfx_->update( time, delta );
+      gfx_->update( time, delta, *engine_.get() );
 
       gfx_->logicLock_.unlock();
 

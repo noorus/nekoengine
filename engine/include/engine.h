@@ -31,6 +31,11 @@ namespace neko {
     void unload();
   };
 
+  struct Stats {
+    atomic<int> i_launches = 0;
+    atomic<float> f_timeWasted = 0.0f;
+  };
+
   //! \class Engine
   //! The main engine class that makes the world go round
   class Engine: public enable_shared_from_this<Engine>, public nocopy, public Listener, public tank::TankHost {
@@ -42,7 +47,7 @@ namespace neko {
       Signal_Restart
     };
     //! Possible fatal errors
-    enum FatalError {
+    enum class FatalError {
       Fatal_Generic, //!< Non-specific fatal error case.
       Fatal_MemoryAllocation //!< Memory allocation failure.
     };
@@ -72,6 +77,7 @@ namespace neko {
       bool steamOverlay;
       State(): focusLost( false ), windowMove( false ), steamOverlay( false ) {}
     } state_;
+    Stats stats_;
     platform::PerformanceClock clock_;
     GameTime time_;
     volatile Signal signal_;
@@ -82,11 +88,12 @@ namespace neko {
     //! Message listener callback.
     void onMessage( const Message& msg ) override;
     //! TankEngine log callback.
-    virtual void onDiscordDebugPrint( const utf8String& message );
-    virtual void onDiscordUserImage( const tank::DcSnowflake id, tank::Image& image );
-    virtual void onSteamUserImage( const tank::SteamSnowflake id, tank::Image& image );
-    virtual void onSteamDebugPrint( const utf8String& message );
-    virtual void onSteamOverlayToggle( bool enabled );
+    void onDiscordDebugPrint( const utf8String& message ) override;
+    void onDiscordUserImage( const tank::DcSnowflake id, tank::Image& image ) override;
+    void onSteamUserImage( const tank::SteamSnowflake id, tank::Image& image ) override;
+    void onSteamDebugPrint( const utf8String& message ) override;
+    void onSteamOverlayToggle( bool enabled ) override;
+    void onSteamStatsUpdated( tank::StateUpdateIndex index ) override;
   public:
     inline const EngineInfo& info() const throw() { return info_; }
     inline ConsolePtr console() throw() { return console_; }
@@ -104,6 +111,7 @@ namespace neko {
     inline atomic<GameTime>& renderTime() throw() { return rendererTime_; }
     inline const utf8String& listFlags();
     const tank::GameInstallationState& installationInfo();
+    inline const Stats& stats() const throw() { return stats_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console, const Environment& env );

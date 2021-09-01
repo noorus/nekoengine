@@ -226,6 +226,14 @@ namespace neko {
     }
   }
 
+  void Engine::onSteamStatsUpdated( tank::StateUpdateIndex index )
+  {
+    if ( index == 0 )
+      tanklib_.engine_->steamStatIncrement( "dev_launches" );
+    stats_.i_launches.store( tanklib_.engine_->steamStats().at( "dev_launches" ).i_ );
+    stats_.f_timeWasted.store( tanklib_.engine_->steamStats().at( "dev_debugTime" ).f_ );
+  }
+
   bool Engine::paused()
   {
     if ( state_.focusLost || state_.windowMove || state_.steamOverlay )
@@ -272,6 +280,10 @@ namespace neko {
 
     console_->printf( Console::srcEngine, "Logic: targeting %.02f FPS, logic step %.02fms, max frame time %I64uus, max sleep %ims",
       (float)c_logicFPS, static_cast<float>( c_logicStep * 1000.0 ), c_logicMaxFrameMicroseconds, maxSleepytimeMs );
+
+    // this thing is just for silly stats
+    platform::PerformanceTimer overallTime;
+    overallTime.start();
 
     tanklib_.engine_->update( time_, 0.0 );
     tanklib_.engine_->changeActivity_AlphaDevelop();
@@ -348,6 +360,10 @@ namespace neko {
         platform::sleep( 2 );
       }
     }
+
+    auto secondsDebugged = static_cast<float>( overallTime.stop() / 1000.0 );
+    tanklib_.engine_->steamStatAdd( "dev_debugTime", secondsDebugged );
+    tanklib_.engine_->uploadStats();
   }
 
   void Engine::shutdown()

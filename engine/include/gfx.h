@@ -65,13 +65,13 @@ namespace neko {
     static void openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity,
       GLsizei length, const GLchar* message, const void* userParam );
     void setOpenGLDebugLogging( const bool enable );
-    virtual void onMessage( const Message& msg );
+    void onMessage( const Message& msg ) override;
   public:
     void postInitialize( Engine& engine );
     Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     const Image& renderWindowReadPixels() override;
     void processEvents(); //!< Process vital window events and such.
-    void update( GameTime time, GameTime delta );
+    void update( GameTime time, GameTime delta, Engine& engine );
     inline Renderer& renderer() throw() { return *( renderer_.get() ); }
     void shutdown();
     void restart( Engine& engine );

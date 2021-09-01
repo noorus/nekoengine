@@ -50,11 +50,69 @@ namespace tank {
 
   void Steam::OnNewUrlLaunchParameters( NewUrlLaunchParameters_t* cb )
   {
-    host_->onSteamDebugPrint( "OnLicensesUpdated" );
+    host_->onSteamDebugPrint( "OnNewUrlLaunchParameters" );
     char cmdline[1024] = { 0 };
     SteamApps()->GetLaunchCommandLine( cmdline, 1024 );
     host_->onSteamDebugPrint( cmdline );
   }
+
+  // Stats
+
+  const std::vector<std::pair<utf8String, StatType>> c_statDefinitions = {
+    { "dev_launches", StatType::Int },
+    { "dev_debugTime", StatType::Float }
+  };
+
+  void Steam::OnUserStatsReceived( UserStatsReceived_t* cb )
+  {
+    if ( cb->m_eResult != k_EResultOK )
+      return;
+    if ( cb->m_nGameID != appID_ )
+      return;
+    SteamStats stats;
+    stats.id_ = cb->m_steamIDUser.ConvertToUint64();
+    int ret = 0;
+    for ( const auto& entry : c_statDefinitions )
+    {
+      SteamStat stat;
+      stat.name_ = entry.first;
+      stat.type_ = entry.second;
+      if ( stats.id_ == state_.localUser_.id_.ConvertToUint64() )
+      {
+        if ( stat.type_ == StatType::Int )
+          ret += SteamUserStats()->GetStat( stat.name_.c_str(), &stat.i_ ) ? 1 : 0;
+        else if ( stat.type_ == StatType::Float )
+          ret += SteamUserStats()->GetStat( stat.name_.c_str(), &stat.f_ ) ? 1 : 0;
+      }
+      else
+      {
+        if ( stat.type_ == StatType::Int )
+          ret += SteamUserStats()->GetUserStat( cb->m_steamIDUser, stat.name_.c_str(), &stat.i_ ) ? 1 : 0;
+        else if ( stat.type_ == StatType::Float )
+          ret += SteamUserStats()->GetUserStat( cb->m_steamIDUser, stat.name_.c_str(), &stat.f_ ) ? 1 : 0;
+      }
+      stats.map_[entry.first] = move( stat );
+    }
+    if ( ret )
+    {
+      state_.userStats_[stats.id_] = move( stats );
+      state_.updated_.bits.stats = true;
+    }
+  }
+
+  void Steam::OnUserStatsStored( UserStatsStored_t* cb )
+  {
+  }
+
+  void Steam::OnNumberOfCurrentPlayers( NumberOfCurrentPlayers_t* cb )
+  {
+    if ( !cb->m_bSuccess )
+      return;
+    state_.globalPlayercount_ = cb->m_cPlayers;
+    state_.updated_.bits.playerCount = true;
+  }
+
+  // Class impl
 
   void Steam::baseInitialize()
   {
@@ -84,10 +142,10 @@ namespace tank {
     Image img;
     img.width_ = width;
     img.height_ = height;
-    uint32_t bytes = img.width_ * img.height_ * 4;
+    size_t bytes = img.width_ * img.height_ * 4;
     img.buffer_.resize( bytes );
     auto buffer = img.buffer_.data();
-    if ( !SteamUtils()->GetImageRGBA( i, buffer, bytes ) )
+    if ( !SteamUtils()->GetImageRGBA( i, buffer, static_cast<int>( bytes ) ) )
       return;
     auto acc = user.id_.ConvertToUint64();
     state_.userImages_[acc] = move( img );
@@ -95,13 +153,37 @@ namespace tank {
     host_->onSteamUserImage( acc, state_.userImages_[acc] );
   }
 
+  void Steam::refreshStats()
+  {
+    ::SteamUserStats()->RequestCurrentStats();
+    ::SteamUserStats()->GetNumberOfCurrentPlayers();
+  }
+
+  void Steam::statAdd( const utf8String& name, int value )
+  {
+    auto val = myStats().map_.at( name ).i_;
+    ::SteamUserStats()->SetStat( name.c_str(), val + value );
+  }
+
+  void Steam::statAdd( const utf8String& name, float value )
+  {
+    auto val = myStats().map_.at( name ).f_;
+    ::SteamUserStats()->SetStat( name.c_str(), val + value );
+  }
+
+  void Steam::uploadStats()
+  {
+    ::SteamUserStats()->StoreStats();
+  }
+
   void Steam::initialize()
   {
-    SteamClient()->SetWarningMessageHook( staticSteamAPIWarningHook );
+    ::SteamClient()->SetWarningMessageHook( staticSteamAPIWarningHook );
 
     state_.localUser_.id_ = ::SteamUser()->GetSteamID();
     state_.localUser_.name_ = SteamFriends()->GetFriendPersonaName( state_.localUser_.id_ );
     state_.localUser_.displayName_ = state_.localUser_.name_;
+    state_.updated_.bits.self = true;
 
     installation_.host_ = InstallationHost::Steam;
 
@@ -132,12 +214,54 @@ namespace tank {
     SteamApps()->GetAppInstallDir( appID_, temp, MAX_PATH );
     installation_.installPath_ = temp;
 
+    refreshStats();
+
     fetchImage( state_.localUser_ );
   }
 
-  void Steam::update()
+  void Steam::update( double gameTime, double delta )
   {
     SteamAPI_RunCallbacks();
+
+    char asd[1024];
+
+    if ( state_.updated_.field )
+    {
+      if ( state_.updated_.bits.self )
+      {
+        sprintf_s( asd, 1024, "self: %s (%I64u)", state_.localUser_.name_.c_str(), state_.localUser_.id_.ConvertToUint64() );
+        host_->onSteamDebugPrint( asd );
+      }
+      if ( state_.updated_.bits.friends )
+      {
+        for ( auto& frnd : state_.friends_ )
+        {
+          sprintf_s( asd, 1024, "friend: %s (%I64u)", frnd.second.name_.c_str(), frnd.second.id_.ConvertToUint64() );
+          host_->onSteamDebugPrint( asd );
+        }
+      }
+      if ( state_.updated_.bits.images )
+      {
+      }
+      if ( state_.updated_.bits.stats )
+      {
+        for ( auto& stats : state_.userStats_ )
+        {
+          for ( auto& stat : stats.second.map_ )
+          {
+            sprintf_s( asd, 1024, "stat: uid %I64u stat %s val %i %f", stats.first, stat.second.name_.c_str(), stat.second.i_, stat.second.f_ );
+            host_->onSteamDebugPrint( asd );
+          }
+        }
+        host_->onSteamStatsUpdated( counters_.statsUpdate++ );
+      }
+      if ( state_.updated_.bits.playerCount )
+      {
+        sprintf_s( asd, 1024, "player count: %i", state_.globalPlayercount_ );
+        host_->onSteamDebugPrint( asd );
+      }
+      state_.updated_.field = 0;
+    }
   }
 
   void Steam::shutdown()

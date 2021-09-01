@@ -13,6 +13,8 @@ namespace tank {
   using std::move;
   using utf8String = neko::utf8String;
 
+  using StateUpdateIndex = uint64_t;
+
   class Discord;
   class Steam;
 
@@ -53,6 +55,21 @@ namespace tank {
   using SteamSnowflake = uint64_t;
   using DcSnowflake = uint64_t;
 
+  enum class StatType
+  {
+    Unknown = 0,
+    Int,
+    Float
+  };
+
+  struct SteamStat
+  {
+    utf8String name_;
+    StatType type_ = StatType::Unknown;
+    int i_ = 0;
+    float f_ = 0.0f;
+  };
+
   class TankHost {
   public:
     virtual void onDiscordDebugPrint( const utf8String& message ) = 0;
@@ -60,6 +77,7 @@ namespace tank {
     virtual void onSteamUserImage( const SteamSnowflake id, Image& image ) = 0;
     virtual void onSteamDebugPrint( const utf8String& message ) = 0;
     virtual void onSteamOverlayToggle( bool enabled ) = 0;
+    virtual void onSteamStatsUpdated( StateUpdateIndex index ) = 0;
   };
 
   class TankEngine {
@@ -78,6 +96,11 @@ namespace tank {
     virtual void shutdown();
     virtual bool startedFromSteam();
     virtual bool startedFromDiscord();
+    virtual void steamStatIncrement( const utf8String& name );
+    virtual void steamStatAdd( const utf8String& name, int value );
+    virtual void steamStatAdd( const utf8String& name, float value );
+    virtual void uploadStats();
+    virtual const map<utf8String, SteamStat>& steamStats();
     ~TankEngine();
   };
 
