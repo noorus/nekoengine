@@ -41,6 +41,24 @@ namespace neko {
       internalFormat_ = GL_DEPTH_COMPONENT32F;
       internalType_ = GL_FLOAT;
     }
+    else if ( format_ == PixFmtDepth24 )
+    {
+      glFormat_ = GL_DEPTH_COMPONENT;
+      internalFormat_ = GL_DEPTH_COMPONENT24;
+      internalType_ = GL_UNSIGNED_INT;
+    }
+    else if ( format_ == PixFmtDepth16 )
+    {
+      glFormat_ = GL_DEPTH_COMPONENT;
+      internalFormat_ = GL_DEPTH_COMPONENT16;
+      internalType_ = GL_UNSIGNED_SHORT;
+    }
+    else if ( format_ == PixFmtDepth24Stencil8 )
+    {
+      glFormat_ = GL_DEPTH_STENCIL;
+      internalFormat_ = GL_DEPTH24_STENCIL8;
+      internalType_ = GL_UNSIGNED_INT_24_8;
+    }
     else if ( format_ == PixFmtColorR8 )
     {
       glFormat_ = GL_RED;

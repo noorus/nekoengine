@@ -56,6 +56,9 @@ namespace neko {
     PixFmtColorRGBA16f,
     PixFmtColorRGBA32f,
     PixFmtDepth32f,
+    PixFmtDepth24,
+    PixFmtDepth16,
+    PixFmtDepth24Stencil8,
     PixFmtColorR8
   };
 
