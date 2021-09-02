@@ -467,6 +467,7 @@ namespace neko {
   public:
     pair<vector<Vertex3D>, vector<GLuint>> makePlane( vec2 dimensions, vec2u segments, vec3 normal, vec4 color = vec4( 1.0, 1.0, 1.0, 1.0 ) );
     pair<vector<Vertex3D>, vector<GLuint>> makeSphere( Real diameter, vec2u segments, vec4 color = vec4( 1.0, 1.0, 1.0, 1.0 ) );
+    pair<vector<Vertex3D>, vector<GLuint>> makeTerrain( vec2i size, vec3 dimensions );
   };
 
 }

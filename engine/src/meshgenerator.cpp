@@ -168,6 +168,105 @@ namespace neko {
     return make_pair( verts, indices );
   }
 
+  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makeTerrain( vec2i size, vec3 dimensions )
+  {
+    vector<Vertex3D> verts;
+    vector<GLuint> indices;
+
+    const auto width = size.x;
+    const auto height = size.y;
+
+    verts.resize( width * height );
+
+    // two triangles per step
+    indices.resize( ( width - 1 ) * ( height - 1 ) * 2 * 3 );
+
+    auto scale = vec3( dimensions.x / static_cast<Real>( size.x ), dimensions.y / static_cast<Real>( size.y ), dimensions.z );
+    const auto twidth = static_cast<Real>( width - 1 ) * scale.x;
+    const auto theight = static_cast<Real>( height - 1 ) * scale.y;
+
+    // vertices
+    for ( int j = 0; j < height; ++j )
+    {
+      for ( int i = 0; i < width; ++i )
+      {
+        unsigned int vertidx = ( j * width ) + i;
+        Real s = ( static_cast<Real>( i ) / static_cast<Real>( width - 1 ) );
+        Real t = ( static_cast<Real>( j ) / static_cast<Real>( height - 1 ) );
+
+        Real value = 0.5f; // ( math::sin( (Real)i * 0.3f ) + math::cos( (Real)j * 0.3f ) ) * 0.5f;
+
+        verts[vertidx].position = vec3(
+          ( s * twidth ) - ( twidth * 0.5f ),
+          value * scale.z,
+          ( t * theight ) - ( theight * 0.5f ) );
+        verts[vertidx].texcoord = vec2( s, t );
+        verts[vertidx].normal = vec3( numbers::zero );
+        verts[vertidx].tangent = vec4( numbers::zero );
+        verts[vertidx].bitangent = vec3( numbers::zero );
+        verts[vertidx].color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+      }
+    }
+
+    // indices
+    unsigned int index = 0;
+    for ( int j = 0; j < ( height - 1 ); ++j )
+    {
+      for ( int i = 0; i < ( width - 1 ); ++i )
+      {
+        unsigned int vert = ( j * width ) + i;
+        // t0
+        indices[index++] = vert;
+        indices[index++] = vert + width + 1;
+        indices[index++] = vert + 1;
+        // t1
+        indices[index++] = vert;
+        indices[index++] = vert + width;
+        indices[index++] = vert + width + 1;
+      }
+    }
+
+    // normals & tangents step 1
+    for ( uint64_t i = 0; i < indices.size(); i += 3 )
+    {
+      Vertex3D triangle[3];
+      for ( uint64_t j = 0; j < 3; ++j )
+        triangle[j] = verts[indices[i + j]];
+
+      auto e1 = ( triangle[1].position - triangle[0].position );
+      auto e2 = ( triangle[2].position - triangle[0].position );
+      auto n = math::normalize( math::cross( e1, e2 ) ); // normal
+
+      auto xy1 = ( triangle[1].texcoord - triangle[0].texcoord );
+      auto xy2 = ( triangle[2].texcoord - triangle[0].texcoord );
+
+      auto r = ( numbers::one / ( xy1.x * xy2.y - xy2.x * xy1.y ) );
+      auto t = ( ( e1 * xy2.y - e2 * xy1.y ) * r ); // tangent
+      auto b = ( ( e2 * xy1.x - e1 * xy2.x ) * r ); // bitangent
+
+      for ( uint64_t j = 0; j < 3; ++j )
+      {
+        verts[indices[i + j]].normal += n;
+        verts[indices[i + j]].tangent += vec4( t, numbers::zero );
+        verts[indices[i + j]].bitangent += b;
+      }
+    }
+
+    // normals & tangents step 2
+    for ( auto& vert : verts )
+    {
+      vert.normal = math::normalize( vert.normal );
+      auto t = math::normalize( vec3( vert.tangent ) );
+      auto b = math::normalize( vert.bitangent );
+      auto xyz = math::normalize( math::rejection( t, vert.normal ) );
+      auto w = ( math::dot( math::cross( t, b ), vert.normal ) > numbers::zero ) ? numbers::one : -( numbers::one );
+      vert.tangent = vec4( xyz, w );
+      vert.bitangent = math::cross( vert.normal, xyz ) * w;
+    }
+
+    return make_pair( verts, indices );
+  }
+
   pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makeSphere( Real diameter, vec2u segments, vec4 color )
   {
     vector<Vertex3D> verts;
