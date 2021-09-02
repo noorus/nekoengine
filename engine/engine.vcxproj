@@ -22,6 +22,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -29,6 +30,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -37,22 +39,21 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\NooraCPPDeps.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\..\NooraCPPDeps.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <GenerateManifest>true</GenerateManifest>
+    <TargetName>panzer</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <TargetName>$(ProjectName)_d</TargetName>
+    <TargetName>panzer_d</TargetName>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -61,9 +62,9 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)..\SDK\packages\freetype_x64-windows\include\;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\include\;$(SolutionDir)extern\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\ktx\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)..\SDK\packages\freetype_x64-windows\include\;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)..\SDK\FBX\FBX SDK\2020.2\include\;$(SolutionDir)..\SDK\ozz\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_TRACE_MAPS;V8_ENABLE_ALLOCATION_TIMEOUT;V8_ENABLE_FORCE_SLOW_PATH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_SNAPSHOT_NATIVE_CODE_COUNTERS;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_CHECK_MICROTASKS_SCOPES_CONSISTENCY;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_ENABLE_CHECKS;V8_TARGET_ARCH_X64;V8_COMPRESS_POINTERS;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;U_STATIC_IMPLEMENTATION;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_HANDLE_ZAPPING;ENABLE_DISASSEMBLER;ENABLE_MINOR_MC;OBJECT_PRINT;VERIFY_HEAP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;WIN64;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_TRACE_MAPS;V8_ENABLE_ALLOCATION_TIMEOUT;V8_ENABLE_FORCE_SLOW_PATH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_SNAPSHOT_NATIVE_CODE_COUNTERS;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_CHECK_MICROTASKS_SCOPES_CONSISTENCY;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_ENABLE_CHECKS;V8_TARGET_ARCH_X64;V8_COMPRESS_POINTERS;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;U_STATIC_IMPLEMENTATION;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_HANDLE_ZAPPING;ENABLE_DISASSEMBLER;ENABLE_MINOR_MC;OBJECT_PRINT;VERIFY_HEAP;MYGUI_USE_FREETYPE;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>/bigobj /utf-8</AdditionalOptions>
       <CompileAsManaged>false</CompileAsManaged>
@@ -71,33 +72,43 @@
       <ControlFlowGuard>false</ControlFlowGuard>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <EnableModules>false</EnableModules>
-      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformation>false</BrowseInformation>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>
       </MinimalRebuild>
       <ShowIncludes>false</ShowIncludes>
-      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <GuardEHContMetadata>false</GuardEHContMetadata>
+      <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <TreatSpecificWarningsAsErrors>26479</TreatSpecificWarningsAsErrors>
+      <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\debug\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\debug\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glbindingd.lib;glbinding-auxd.lib;sfml-main-d.lib;sfml-system-d.lib;sfml-window-d.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;v8_d.dll.lib;v8_libbase_d.dll.lib;v8_libplatform_d.dll.lib;fmodL_vc.lib;fmodstudioL_vc.lib;zlibstaticd.lib;libbz2d.lib;freetyped.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\FBX\FBX SDK\2020.2\lib\vs2019\x64\$(Configuration);$(SolutionDir)lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)..\SDK\ozz\lib;$(SolutionDir)extern\ktx\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>tankengine_d.lib;nil64_d.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;libbz2d.lib;freetyped.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
-      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
       <AssemblyDebug>true</AssemblyDebug>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
-      <AdditionalOptions>/ignore:4099 /time %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /ignore:4217 /ignore:4286 /time %(AdditionalOptions)</AdditionalOptions>
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(ProjectDir)manifest\neko.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(ProjectDir)engine.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
@@ -111,9 +122,9 @@
       <SDLCheck>
       </SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\lodepng;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)extern\v8pp\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)..\SDK\packages\freetype_x64-windows\include\;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\include\;$(SolutionDir)extern\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\ktx\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\v8\icu\common\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)..\SDK\packages\freetype_x64-windows\include\;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)..\SDK\FBX\FBX SDK\2020.2\include\;$(SolutionDir)..\SDK\ozz\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_I18N_SUPPORT;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_TARGET_ARCH_X64;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_MINOR_MC;OBJECT_PRINT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;COMPONENT_BUILD;USE_AURA=1;NO_TCMALLOC;V8_I18N_SUPPORT;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_USE_EXTERNAL_STARTUP_DATA;V8_CONCURRENT_MARKING;V8_EMBEDDED_BUILTINS;V8_WIN64_UNWINDING_INFO;V8_TARGET_ARCH_X64;U_USING_ICU_NAMESPACE=0;U_EU_CHARSET_IS_UTF8=1;U_CHARSET_IS_UTF8=1;USING_V8_SHARED;USING_V8_BASE_SHARED;USING_V8_PLATFORM_SHARED;V8_TYPED_ARRAY_MAX_SIZE_IN_HEAP=64;ENABLE_MINOR_MC;OBJECT_PRINT;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;MYGUI_USE_FREETYPE;FBXSDK_SHARED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <CompileAsManaged>false</CompileAsManaged>
       <CompileAsWinRT>false</CompileAsWinRT>
@@ -126,24 +137,25 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <AdditionalOptions>/bigobj /utf-8</AdditionalOptions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <DebugInformationFormat>None</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <CallingConvention>Cdecl</CallingConvention>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerListingLocation>$(SolutionDir)asm\</AssemblerListingLocation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26812;4819</DisableSpecificWarnings>
+      <DiagnosticsFormat>Caret</DiagnosticsFormat>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;sfml-main.lib;sfml-system.lib;sfml-window.lib;glbinding.lib;opengl32.lib;icui18n.dll.lib;icuuc.dll.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;fmod_vc.lib;fmodstudio_vc.lib;zlibstatic.lib;libbz2.lib;freetype.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\packages\freetype_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\packages\harfbuzz_x64-windows\$(Configuration)\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\FBX\FBX SDK\2020.2\lib\vs2019\x64\$(Configuration);$(SolutionDir)lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)..\SDK\ozz\lib;$(SolutionDir)extern\ktx\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>tankengine.lib;nil64.lib;legacy_stdio_definitions.lib;icui18n.dll.lib;icuuc.dll.lib;libbz2.lib;freetype.lib;harfbuzz.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
-      <GenerateMapFile>true</GenerateMapFile>
+      <GenerateMapFile>false</GenerateMapFile>
       <StackReserveSize>
       </StackReserveSize>
       <StackCommitSize>
@@ -151,9 +163,11 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>/ignore:4099 /time %(AdditionalOptions)</AdditionalOptions>
+      <ShowProgress>LinkVerbose</ShowProgress>
+      <SetChecksum>true</SetChecksum>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(ProjectDir)manifest\neko.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(ProjectDir)engine.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
       <UpdateFileHashes>true</UpdateFileHashes>
     </Manifest>
@@ -167,6 +181,11 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4267</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4267</DisableSpecificWarnings>
     </ClCompile>
+    <ClCompile Include="..\extern\miniz\miniz.cpp" />
+    <ClCompile Include="..\extern\tinyexr\tinyexr.cpp" />
+    <ClCompile Include="..\extern\tinygltf\tiny_gltf.cc" />
+    <ClCompile Include="..\extern\tinytiff\tinytiffreader.cpp" />
+    <ClCompile Include="..\extern\tinytiff\tinytiffwriter.cpp" />
     <ClCompile Include="..\shared\src\exception.cpp" />
     <ClCompile Include="..\shared\src\platform_windows.cpp" />
     <ClCompile Include="src\camera.cpp" />
@@ -181,6 +200,9 @@
     <ClCompile Include="src\font_textured.cpp" />
     <ClCompile Include="src\framebuffer.cpp" />
     <ClCompile Include="src\gfx.cpp" />
+    <ClCompile Include="src\glformats.cpp" />
+    <ClCompile Include="src\gui.cpp" />
+    <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\js_console.cpp" />
     <ClCompile Include="src\js_game.cpp" />
     <ClCompile Include="src\js_math.cpp" />
@@ -191,6 +213,9 @@
     <ClCompile Include="src\js_vector2.cpp" />
     <ClCompile Include="src\js_vector3.cpp" />
     <ClCompile Include="src\loader.cpp" />
+    <ClCompile Include="src\loader_fbx.cpp" />
+    <ClCompile Include="src\loader_gltf.cpp" />
+    <ClCompile Include="src\loader_unity.cpp" />
     <ClCompile Include="src\locator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\memory.cpp" />
@@ -198,9 +223,16 @@
     <ClCompile Include="src\meshmanager.cpp" />
     <ClCompile Include="src\messaging.cpp" />
     <ClCompile Include="src\modelmanager.cpp" />
+    <ClCompile Include="src\MyGUI_NekoDataManager.cpp" />
+    <ClCompile Include="src\MyGUI_NekoPlatform.cpp" />
+    <ClCompile Include="src\MyGUI_NekoRenderManager.cpp" />
+    <ClCompile Include="src\MyGUI_NekoRTTexture.cpp" />
+    <ClCompile Include="src\MyGUI_NekoTexture.cpp" />
+    <ClCompile Include="src\MyGUI_NekoVertexBuffer.cpp" />
     <ClCompile Include="src\renderbuffer.cpp" />
     <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\rendersynccontext.cpp" />
+    <ClCompile Include="src\scenenode.cpp" />
     <ClCompile Include="src\script.cpp" />
     <ClCompile Include="src\scripting.cpp" />
     <ClCompile Include="src\scriptingcontext.cpp" />
@@ -216,6 +248,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extern\lodepng\lodepng.h" />
+    <ClInclude Include="..\extern\miniz\miniz.h" />
+    <ClInclude Include="..\extern\tinyexr\tinyexr.h" />
+    <ClInclude Include="..\extern\tinygltf\tiny_gltf.h" />
+    <ClInclude Include="..\extern\tinytiff\tiff_definitions_internal.h" />
+    <ClInclude Include="..\extern\tinytiff\tinytiffreader.h" />
+    <ClInclude Include="..\extern\tinytiff\tinytiffreader.hxx" />
+    <ClInclude Include="..\extern\tinytiff\tinytiffwriter.h" />
+    <ClInclude Include="..\extern\tinytiff\tinytiff_defs.h" />
+    <ClInclude Include="..\extern\tinytiff\tinytiff_tools.hxx" />
+    <ClInclude Include="..\extern\tinytiff\tinytiff_version.h" />
     <ClInclude Include="..\shared\include\neko_algorithm.h" />
     <ClInclude Include="..\shared\include\neko_compilerdef.h" />
     <ClInclude Include="..\shared\include\neko_config.h" />
@@ -224,6 +266,7 @@
     <ClInclude Include="..\shared\include\neko_platform_windows.h" />
     <ClInclude Include="..\shared\include\neko_pooledtypes.h" />
     <ClInclude Include="..\shared\include\neko_types.h" />
+    <ClInclude Include="..\shared\include\tankengine.h" />
     <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\console.h" />
     <ClInclude Include="include\consolelistener.h" />
@@ -236,6 +279,9 @@
     <ClInclude Include="include\framebuffer.h" />
     <ClInclude Include="include\gfx.h" />
     <ClInclude Include="include\gfx_types.h" />
+    <ClInclude Include="include\gui.h" />
+    <ClInclude Include="include\input.h" />
+    <ClInclude Include="include\js_camera.h" />
     <ClInclude Include="include\js_console.h" />
     <ClInclude Include="include\js_game.h" />
     <ClInclude Include="include\js_math.h" />
@@ -252,6 +298,8 @@
     <ClInclude Include="include\mesh_primitives.h" />
     <ClInclude Include="include\messaging.h" />
     <ClInclude Include="include\modelmanager.h" />
+    <ClInclude Include="include\MyGUI_NekoPlatform.h" />
+    <ClInclude Include="include\MyGUI_NekoRTTexture.h" />
     <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\renderbuffer.h" />
     <ClInclude Include="include\renderer.h" />
@@ -260,23 +308,45 @@
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\subsystem.h" />
     <ClInclude Include="include\surface.h" />
+    <ClInclude Include="include\text.h" />
     <ClInclude Include="include\texture.h" />
     <ClInclude Include="include\utilities.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="manifest\neko.manifest" />
+    <Manifest Include="engine.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\data\shaders\default2d.frag" />
-    <None Include="..\bin\data\shaders\default2d.vert" />
-    <None Include="..\bin\data\shaders\default3d.frag" />
-    <None Include="..\bin\data\shaders\default3d.vert" />
-    <None Include="..\bin\data\shaders\mainframebuf2d.frag" />
-    <None Include="..\bin\data\shaders\mainframebuf2d.vert" />
-    <None Include="..\bin\data\shaders\text3d.frag" />
-    <None Include="..\bin\data\shaders\text3d.vert" />
-    <None Include="..\bin\script\initialization.js" />
-    <None Include="..\bin\script\math.js" />
+    <None Include="..\bin\scripts\initialization.js" />
+    <None Include="..\bin\shaders\dbg_showvertexnormals.frag" />
+    <None Include="..\bin\shaders\dbg_showvertexnormals.geom" />
+    <None Include="..\bin\shaders\dbg_showvertexnormals.vert" />
+    <None Include="..\bin\shaders\dbg_showvertextangents.frag" />
+    <None Include="..\bin\shaders\dbg_showvertextangents.geom" />
+    <None Include="..\bin\shaders\dbg_showvertextangents.vert" />
+    <None Include="..\bin\shaders\inc.buffers.glsl" />
+    <None Include="..\bin\shaders\inc.colorutils.glsl" />
+    <None Include="..\bin\shaders\mainframebuf2d.frag" />
+    <None Include="..\bin\shaders\mainframebuf2d.vert" />
+    <None Include="..\bin\shaders\mat_ground.frag" />
+    <None Include="..\bin\shaders\mat_ground.vert" />
+    <None Include="..\bin\shaders\mat_unlitdefault.frag" />
+    <None Include="..\bin\shaders\mat_unlitdefault.vert" />
+    <None Include="..\bin\shaders\mat_untexturedpbs.frag" />
+    <None Include="..\bin\shaders\mat_untexturedpbs.vert" />
+    <None Include="..\bin\shaders\mat_worldpbr.frag" />
+    <None Include="..\bin\shaders\mat_worldpbr.vert" />
+    <None Include="..\bin\shaders\mygui3d.frag" />
+    <None Include="..\bin\shaders\mygui3d.vert" />
+    <None Include="..\bin\shaders\pointlight.frag" />
+    <None Include="..\bin\shaders\pointlight.geom" />
+    <None Include="..\bin\shaders\pointlight.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="engine.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\embed\panz_icon_v1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

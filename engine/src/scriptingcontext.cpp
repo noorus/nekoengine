@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#ifndef NEKO_NO_SCRIPTING
 
 #include "neko_types.h"
 #include "forwards.h"
@@ -244,3 +245,5 @@ namespace neko {
   }
 
 }
+
+#endif

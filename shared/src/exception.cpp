@@ -4,6 +4,8 @@
 # include "windows.h"
 #endif
 
+#ifndef NEKO_SIDELIBRARY_BUILD
+// FreeType stuff
 #undef __FTERRORS_H__
 #define FT_ERRORDEF( e, v, s )  { e, s },
 #define FT_ERROR_START_LIST     {
@@ -13,6 +15,7 @@ const struct {
   const char*  message;
 } FT_Errors[] =
 #include FT_ERRORS_H
+#endif
 
 namespace neko {
 
@@ -40,6 +43,7 @@ namespace neko {
 #endif
   }
 
+#ifndef NEKO_SIDELIBRARY_BUILD
   Exception::Exception( const string& description, FT_Error error, const string& source ):
     description_( description ), source_( source )
   {
@@ -55,6 +59,7 @@ namespace neko {
     description_.append( " (" + std::to_string( (unsigned int)gle ) + ")" );
 #endif
   }
+#endif
 
   const string& Exception::getFullDescription() const
   {

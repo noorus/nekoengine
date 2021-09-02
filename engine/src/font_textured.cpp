@@ -53,7 +53,7 @@ namespace neko {
         NEKO_FREETYPE_EXCEPT( "FreeType font face load failed", err );
       }
 
-      Locator::console().printf( Console::srcFonts,
+      Locator::console().printf( Console::srcGfx,
         "Font: %s, face %d/%d, glyphs: %d, charmaps: %d, scalable? %s",
         face_->family_name,
         0, face_->num_faces,

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef NEKO_NO_SCRIPTING
+
 #include "neko_types.h"
 #include "neko_exception.h"
 #include "forwards.h"
@@ -288,8 +290,8 @@ namespace neko {
       }
       virtual ~DynamicObjectWrapper()
       {
-        //OutputDebugStringA( __FUNCTION__ "\r\n" );
-        //reset();
+        // OutputDebugStringA( __FUNCTION__ "\r\n" );
+        // reset();
       }
       inline V8Object handle()
       {
@@ -317,3 +319,5 @@ namespace neko {
   }
 
 }
+
+#endif

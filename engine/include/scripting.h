@@ -1,4 +1,5 @@
 #pragma once
+#ifndef NEKO_NO_SCRIPTING
 
 #include "neko_types.h"
 #include "forwards.h"
@@ -28,7 +29,7 @@ namespace neko {
 
   }
 
-  class Script {
+  class Script: public nocopy {
   public:
     enum Status {
       Status_Unknown,
@@ -63,7 +64,7 @@ namespace neko {
 
   using V8FunctionCallback = void(*)( const v8::FunctionCallbackInfo<v8::Value>& args );
 
-  class ScriptingContext {
+  class ScriptingContext: public nocopy {
   private:
     const bool externalIsolate_;
     v8::Isolate* isolate_;
@@ -111,8 +112,8 @@ namespace neko {
   protected:
     unique_ptr<v8::Platform> platform_;
     ScriptingContextPtr global_;
-    utf8String rootDirectory_;
-    utf8String dataDirectory_;
+    wstring rootDirectory_;
+    wstring dataDirectory_;
   private:
     //! v8::ArrayBuffer::Allocator implementation
     virtual void* Allocate( size_t length ) override;
@@ -131,3 +132,5 @@ namespace neko {
   };
 
 }
+
+#endif

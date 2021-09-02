@@ -11,15 +11,16 @@ namespace neko {
 
   // MeshManager: Generics
 
-  VBOPtr MeshManager::createVBO( VBOType type )
+  VBOPtr MeshManager::createVBO( VBOType type, bool mappable )
   {
-    VBOPtr ptr = make_shared<VBO>( type );
+    VBOPtr ptr = make_shared<VBO>( type, mappable );
     vbos_[type].push_back( ptr );
     return move( ptr );
   }
 
   void MeshManager::freeVBO( VBOPtr vbo )
   {
+    freeBuffers_.push_back( vbo->id_ );
     auto target = &vbos_[vbo->type_];
     target->erase( std::remove( target->begin(), target->end(), move( vbo ) ), target->end() );
   }
@@ -33,6 +34,7 @@ namespace neko {
 
   void MeshManager::freeEBO( EBOPtr ebo )
   {
+    freeBuffers_.push_back( ebo->id_ );
     ebos_.erase( std::remove( ebos_.begin(), ebos_.end(), move( ebo ) ), ebos_.end() );
   }
 
@@ -45,8 +47,11 @@ namespace neko {
 
   void MeshManager::freeVAO( VAOPtr vao )
   {
+    freeVaos_.push_back( vao->id_ );
     vaos_.erase( std::remove( vaos_.begin(), vaos_.end(), move( vao ) ), vaos_.end() );
   }
+
+#ifndef NEKO_NO_SCRIPTING
 
   void MeshManager::addJSMesh( js::Mesh* mesh )
   {
@@ -112,25 +117,27 @@ namespace neko {
     meshes_.clear();
   }
 
+#endif
+
   // MeshManager: VBOs
 
   VBOPtr MeshManager::pushVBO( const vector<Vertex2D>& vertices )
   {
-    auto vbo = createVBO( VBO_2D );
+    auto vbo = createVBO( VBO_2D, false );
     vbo->pushVertices( vertices );
     return move( vbo );
   }
 
   VBOPtr MeshManager::pushVBO( const vector<Vertex3D>& vertices )
   {
-    auto vbo = createVBO( VBO_3D );
+    auto vbo = createVBO( VBO_3D, false );
     vbo->pushVertices( vertices );
     return move( vbo );
   }
 
-  VBOPtr MeshManager::pushVBO( const vector<VertexText3D>& vertices )
+  VBOPtr MeshManager::pushVBO( const vector<MyGUI::Vertex>& vertices )
   {
-    auto vbo = createVBO( VBO_Text );
+    auto vbo = createVBO( VBO_MyGUI, false );
     vbo->pushVertices( vertices );
     return move( vbo );
   }
@@ -141,6 +148,13 @@ namespace neko {
     for ( auto& buf : vbos )
       if ( ( !buf->uploaded_ || buf->dirty_ ) && !buf->empty() )
         dirties.push_back( buf.get() );
+
+    auto resolveFlags = []( VBO* vbo ) -> gl::BufferStorageMask
+    {
+      auto mapflags = ( gl::GL_MAP_WRITE_BIT | gl::GL_MAP_READ_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT );
+      auto storeflags = ( mapflags | gl::GL_DYNAMIC_STORAGE_BIT );
+      return ( vbo->mappable_ ? ( storeflags | mapflags ) : storeflags );
+    };
 
     if ( !dirties.empty() )
     {
@@ -155,13 +169,12 @@ namespace neko {
         if ( !dirties[i]->empty() )
           switch ( dirties[i]->type_ )
           {
-            case VBO_2D:
-            {
+            case VBO_2D: {
               auto& store = dirties[i]->v2d();
               glNamedBufferStorage( dirties[i]->id_,
                 store.size() * sizeof( Vertex2D ),
                 store.data(),
-                GL_DYNAMIC_STORAGE_BIT );
+                resolveFlags( dirties[i] ) );
             } break;
             case VBO_3D:
             {
@@ -169,16 +182,18 @@ namespace neko {
               glNamedBufferStorage( dirties[i]->id_,
                 store.size() * sizeof( Vertex3D ),
                 store.data(),
-                GL_DYNAMIC_STORAGE_BIT );
+                resolveFlags( dirties[i] ) );
             } break;
-            case VBO_Text:
+            break;
+            case VBO_MyGUI:
             {
-              auto& store = dirties[i]->vt3d();
+              auto& store = dirties[i]->guiv();
               glNamedBufferStorage( dirties[i]->id_,
-                store.size() * sizeof( VertexText3D ),
+                store.size() * sizeof( MyGUI::Vertex ),
                 store.data(),
-                GL_DYNAMIC_STORAGE_BIT );
-            } break;
+                resolveFlags( dirties[i] ) );
+            }
+            break;
           }
         dirties[i]->uploaded_ = true;
         dirties[i]->dirty_ = false;
@@ -209,46 +224,9 @@ namespace neko {
     return move( ptr );
   }
 
-  class AttribWriter {
-  private:
-    struct Record {
-      GLenum type_;
-      GLsizei count_;
-      size_t size_;
-      Record( GLenum type, GLsizei count, size_t size ): type_( type ), count_( count ), size_( size ) {}
-    };
-    vector<Record> recs_;
-    GLsizei stride_;
-  public:
-    AttribWriter(): stride_( 0 ) {}
-    inline GLsizei stride() const { return stride_; }
-    void add( GLenum type, GLsizei count )
-    {
-      GLsizei size = 0;
-      if ( type == GL_FLOAT )
-        size = ( count * sizeof( float ) );
-      else
-        NEKO_EXCEPT( "Unsupported vertex attribute type in writer" );
-
-      recs_.emplace_back( type, count, size );
-      stride_ += size;
-    }
-    void write( GLuint handle )
-    {
-      GLuint ptr = 0;
-      for ( GLuint i = 0; i < recs_.size(); ++i )
-      {
-        glEnableVertexArrayAttrib( handle, i );
-        glVertexArrayAttribBinding( handle, i, 0 );
-        glVertexArrayAttribFormat( handle, i, recs_[i].count_, recs_[i].type_, GL_FALSE, ptr );
-        ptr += (GLuint)recs_[i].size_;
-      }
-    }
-  };
-
-  DynamicMeshPtr MeshManager::createDynamic( GLenum drawMode, VBOType vertexType )
+  DynamicMeshPtr MeshManager::createDynamic( GLenum drawMode, VBOType vertexType, bool useIndices, bool mappable )
   {
-    auto mesh = make_shared<DynamicMesh>( shared_from_this(), vertexType, drawMode );
+    auto mesh = make_shared<DynamicMesh>( shared_from_this(), vertexType, drawMode, useIndices, mappable );
     dynamics_.push_back( mesh );
     return move( mesh );
   }
@@ -265,6 +243,28 @@ namespace neko {
     auto mesh = make_shared<StaticMesh>( shared_from_this(), drawMode, move( verts ), move( indices ) );
     statics_.push_back( mesh );
     return move( mesh );
+  }
+
+  StaticMeshPtr MeshManager::createStatic( GLenum drawMode, vector<Vertex3D> verts )
+  {
+    auto mesh = make_shared<StaticMesh>( shared_from_this(), drawMode, move( verts ) );
+    statics_.push_back( mesh );
+    return move( mesh );
+  }
+
+  StaticMeshPtr MeshManager::createStatic( GLenum drawMode, vector<Vertex3D> verts, vector<GLuint> indices )
+  {
+    auto mesh = make_shared<StaticMesh>( shared_from_this(), drawMode, move( verts ), move( indices ) );
+    statics_.push_back( mesh );
+    return move( mesh );
+  }
+
+  void MeshManager::destroyFreed()
+  {
+    glDeleteVertexArrays( (GLsizei)freeVaos_.size(), freeVaos_.data() );
+    glDeleteBuffers( (GLsizei)freeBuffers_.size(), freeBuffers_.data() );
+    freeVaos_.clear();
+    freeBuffers_.clear();
   }
 
   void MeshManager::uploadVAOs()
@@ -293,16 +293,7 @@ namespace neko {
         glVertexArrayElementBuffer( ids[i], dirties[i]->ebo_->id_ );
       }
 
-      if ( vbo->type_ == VBO_3D )
-      {
-        AttribWriter attribs;
-        attribs.add( GL_FLOAT, 3 ); // vec3 position
-        attribs.add( GL_FLOAT, 3 ); // vec3 normal
-        attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
-        attribs.write( ids[i] );
-        glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
-      }
-      else if ( vbo->type_ == VBO_2D )
+      if ( vbo->type_ == VBO_2D )
       {
         AttribWriter attribs;
         attribs.add( GL_FLOAT, 2 ); // vec2 position
@@ -310,12 +301,24 @@ namespace neko {
         attribs.write( ids[i] );
         glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
       }
-      else if ( dirties[i]->vbo_->type_ == VBO_Text )
+      else if ( vbo->type_ == VBO_3D )
       {
         AttribWriter attribs;
         attribs.add( GL_FLOAT, 3 ); // vec3 position
+        attribs.add( GL_FLOAT, 3 ); // vec3 normal
         attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
         attribs.add( GL_FLOAT, 4 ); // vec4 color
+        attribs.add( GL_FLOAT, 4 ); // vec4 tangent
+        attribs.add( GL_FLOAT, 3 ); // vec3 bitangent
+        attribs.write( ids[i] );
+        glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
+      }
+      else if ( dirties[i]->vbo_->type_ == VBO_MyGUI )
+      {
+        AttribWriter attribs;
+        attribs.add( GL_FLOAT, 3 ); // vec3 position
+        attribs.add( GL_UNSIGNED_BYTE, 4, true ); // b4 color
+        attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
         attribs.write( ids[i] );
         glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
       }
@@ -332,15 +335,14 @@ namespace neko {
     glBindVertexArray( id_ );
   }
 
-  void VAO::draw( GLenum mode, GLsizei size )
+  void VAO::draw( GLenum mode, int count )
   {
     if ( !valid() || !uploaded_ )
       return;
-    assert( size > 0 );
-    if ( ebo_ )
-      glDrawElements( mode, size, GL_UNSIGNED_INT, nullptr );
-    else
-      glDrawArrays( mode, 0, size );
+    if ( ebo_ && !ebo_->empty() )
+      glDrawElements( mode, count ? count : (GLsizei)ebo_->storage_.size(), GL_UNSIGNED_INT, nullptr );
+    else if ( !vbo_->empty() )
+      glDrawArrays( mode, 0, count ? count : (GLsizei)vbo_->size() );
   }
 
   // MeshManager: EBOs
@@ -388,7 +390,9 @@ namespace neko {
 
   void MeshManager::teardown()
   {
+#ifndef NEKO_NO_SCRIPTING
     jsReset();
+#endif
     dynamics_.clear();
     statics_.clear();
   }

@@ -3,10 +3,15 @@
 #include "neko_types.h"
 #include "forwards.h"
 #include "subsystem.h"
-#include "js_mesh.h"
-#include "js_model.h"
+
+#ifndef NEKO_NO_SCRIPTING
+# include "js_mesh.h"
+# include "js_model.h"
+#endif
 
 namespace neko {
+
+#ifndef NEKO_NO_SCRIPTING
 
   struct RenderSyncContext
   {
@@ -31,7 +36,16 @@ namespace neko {
     void resetFromRenderer();
   };
 
-  class Director {
+#else
+
+  struct RenderSyncContext
+  {
+    int dummy_;
+  };
+
+#endif
+
+  class Director: public nocopy {
   protected:
     RenderSyncContext renderSync_; //!< Synchronizer between game and renderer objects
   public:

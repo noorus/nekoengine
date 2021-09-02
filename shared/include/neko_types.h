@@ -25,7 +25,7 @@
 #include <any>
 #include <optional>
 #include <atomic>
-#include <boost/math/constants/constants.hpp>
+#include <numbers>
 
 #undef min
 #undef max
@@ -61,6 +61,8 @@
 #include <glm/gtx/projection.hpp>
 #include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #ifndef NEKO_NO_ICU
 # include <unicode/ustring.h>
@@ -120,12 +122,9 @@ namespace neko {
 
   using std::numeric_limits;
 
-  using boost::noncopyable;
-
 #ifdef NEKO_MATH_DOUBLE
   using Real = double;
   namespace numbers {
-    using namespace boost::math::double_constants;
     constexpr Real zero = 0.0;
     constexpr Real one = 1.0;
     constexpr Real two = 2.0;
@@ -133,6 +132,7 @@ namespace neko {
     constexpr Real six = 6.0;
     constexpr Real ten = 10.0;
     constexpr Real fifteen = 15.0;
+    constexpr Real pi = std::numbers::pi_v<double>;
   }
   using vec2 = glm::dvec2;
   using vec3 = glm::dvec3;
@@ -144,7 +144,6 @@ namespace neko {
 #else
   using Real = float;
   namespace numbers {
-    using namespace boost::math::float_constants;
     constexpr Real zero = 0.0f;
     constexpr Real one = 1.0f;
     constexpr Real two = 2.0f;
@@ -152,6 +151,7 @@ namespace neko {
     constexpr Real six = 6.0f;
     constexpr Real ten = 10.0f;
     constexpr Real fifteen = 15.0f;
+    constexpr Real pi = std::numbers::pi_v<float>;
   }
   using vec2 = glm::fvec2;
   using vec3 = glm::fvec3;
@@ -161,6 +161,14 @@ namespace neko {
   using mat4 = glm::fmat4x4;
   using quaternion = glm::fquat;
 #endif
+
+  using quat = quaternion;
+  constexpr quaternion quatIdentity = quaternion( numbers::one, numbers::zero, numbers::zero, numbers::zero );
+  constexpr vec3 vec3UnitX = vec3( numbers::one, numbers::zero, numbers::zero );
+  constexpr vec3 vec3UnitY = vec3( numbers::zero, numbers::one, numbers::zero );
+  constexpr vec3 vec3UnitZ = vec3( numbers::zero, numbers::zero, numbers::one );
+  using Radians = Real;
+  using Degrees = Real;
 
   using GameTime = double;
 
@@ -179,6 +187,15 @@ namespace neko {
   using vec2f = glm::fvec2;
   using vec3f = glm::fvec3;
   using vec4f = glm::fvec4;
+
+  class nocopy {
+  private:
+    nocopy( const nocopy& ) = delete;
+    nocopy& operator=( const nocopy& ) = delete;
+  protected:
+    constexpr nocopy() = default;
+    ~nocopy() = default;
+  };
 
   struct size2i {
     int64_t w;
@@ -283,6 +300,11 @@ namespace neko {
     uint16_t hour;    //!< Hour
     uint16_t minute;  //!< Minute
     uint16_t second;  //!< Second
+  };
+
+  struct Environment
+  {
+    wstring documentsPath_;
   };
 
 }

@@ -12,8 +12,28 @@
 // Set this to print extra verbose info/warnings during compilation.
 #undef NEKO_VERBOSE_COMPILE
 
-// Set this to catch any new cases of failing backwards compatibility down to Windows Vista that need to be addressed.
-#undef NEKO_TEST_WINVISTACOMPAT
-
 // Set this to use doubles for all math primitives. Otherwise using floats.
+// Will most likely break things.
 #undef NEKO_MATH_DOUBLE
+
+// -- Platform/Store integrations --
+#undef NEKO_USE_DISCORD
+#define NEKO_USE_STEAM
+
+// -- Feature switches --
+// The game/engine isn't meant to work properly without these, but it is
+// convenient to drop some dependencies when developing stuff on the road.
+
+// Define to disable scripting & drop the V8 libraries requirement.
+#undef NEKO_NO_SCRIPTING
+
+// Define to disable audio & drop FMOD SDK requirement.
+#undef NEKO_NO_AUDIO
+
+// Define to disable the GUI & drop MyGUI SDK requirement.
+#undef NEKO_NO_GUI
+
+// Define to disable the OZZ animation system stuff. Will probably break momentarily.
+#undef NEKO_NO_ANIMATION
+
+#undef NEKO_NO_FBX

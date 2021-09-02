@@ -7,12 +7,35 @@ namespace neko {
 
   using namespace gl;
 
-  Framebuffer::Framebuffer( Renderer* renderer ):
-    renderer_( renderer ), width_( 0 ), height_( 0 ), handle_( 0 ), available_( false )
+  Framebuffer::Framebuffer( Renderer* renderer, size_t colorBufferCount, int multisamples ):
+  renderer_( renderer ), width_( 0 ), height_( 0 ), handle_( 0 ), colorbufcount_( colorBufferCount ),
+  available_( false ), multisamples_( multisamples ), savedViewport_{ 0 }
   {
     assert( renderer_ );
+    colorBuffers_.resize( colorBufferCount );
     clearColor_ = vec4( 30.0f / 255.0f, 30.0f / 255.0f, 35.0f / 255.0f, 1.0f );
   }
+
+  //! Called by Framebuffer::create()
+  GLuint Renderer::implCreateFramebuffer( size_t width, size_t height )
+  {
+    assert( width <= (size_t)info_.maxFramebufferWidth && height <= (size_t)info_.maxFramebufferHeight );
+
+    GLuint handle = 0;
+    glCreateFramebuffers( 1, &handle );
+    assert( handle != 0 );
+
+    return handle;
+  }
+
+  //! Called by Framebuffer::destroy()
+  void Renderer::implDeleteFramebuffer( GLuint handle )
+  {
+    assert( handle );
+    glDeleteFramebuffers( 1, &handle );
+  }
+
+#define CONVGLENUM(en, add) (GLenum)((GLuint)en + add)
 
   void Framebuffer::recreate( size_t width, size_t height )
   {
@@ -25,22 +48,36 @@ namespace neko {
     handle_ = renderer_->implCreateFramebuffer( width_, height_ );
     assert( handle_ );
 
-    // currently using a static framebuffer format:
-    // 8-bit RGB color, 32-bit float depth
-    colorBuffer_ = make_shared<Texture>( renderer_, width_, height_, PixFmtColorRGB8, nullptr, Texture::ClampEdge, Texture::Nearest );
-    depthBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepth32f );
-
-    array<GLenum, 32> drawBuffers;
-    auto colorHandle = colorBuffer_->handle();
-    for ( unsigned int i = 0; i < 1; ++i )
+    for ( int i = 0; i < colorbufcount_; i++ )
     {
-      drawBuffers[i] = GL_COLOR_ATTACHMENT0 + i;
+      colorBuffers_.push_back( make_shared<Texture>( renderer_, width_, height_, PixFmtColorRGBA16f, nullptr, Texture::ClampEdge, Texture::Nearest, multisamples_ ) );
+    }
+    depthBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepth32f, multisamples_ );
+
+    assert( colorBuffers_.size() < 32 );
+    array<GLenum, 32> drawBuffers;
+    for ( unsigned int i = 0; i < colorBuffers_.size(); ++i )
+    {
+      drawBuffers[i] = CONVGLENUM(GL_COLOR_ATTACHMENT0, i);
+      glNamedFramebufferTexture( handle_, drawBuffers[i], colorBuffers_[i]->handle(), 0 );
     }
 
-    glNamedFramebufferDrawBuffers( handle_, 1, drawBuffers.data() );
-
-    glNamedFramebufferTexture( handle_, GL_COLOR_ATTACHMENT0, colorBuffer_->handle(), 0 );
+    glNamedFramebufferDrawBuffers( handle_, (GLsizei)colorBuffers_.size(), drawBuffers.data() );
     glNamedFramebufferRenderbuffer( handle_, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_->handle() );
+  }
+
+  void Framebuffer::blitColorTo( size_t sourceIndex, size_t destIndex, Framebuffer& target )
+  {
+    glNamedFramebufferReadBuffer( handle_, CONVGLENUM( GL_COLOR_ATTACHMENT0, sourceIndex ) );
+    // We can do this because we know the indexing is 1:1 due to how we set it up in recreate()
+    // The technically correct thing would be to either not touch this on the destination side,
+    // or query what the actual value over there would be, but it's the same class so assumptions are fine.
+    GLenum tgtbuf = CONVGLENUM( GL_COLOR_ATTACHMENT0, destIndex );
+    glNamedFramebufferDrawBuffers( target.handle_, 1, &tgtbuf );
+    glBlitNamedFramebuffer( handle_, target.handle_,
+      0, 0, (GLint)width_, (GLint)height_,
+      0, 0, (GLint)target.width_, (GLint)target.height_,
+      GL_COLOR_BUFFER_BIT, GL_NEAREST );
   }
 
   void Framebuffer::destroy()
@@ -51,7 +88,7 @@ namespace neko {
       renderer_->implDeleteFramebuffer( handle_ );
       handle_ = 0;
     }
-    colorBuffer_.reset();
+    colorBuffers_.clear();
     depthBuffer_.reset();
   }
 
@@ -69,17 +106,39 @@ namespace neko {
     return available_;
   }
 
+  void Framebuffer::prepare( size_t colorReadIndex, vector<size_t> colorWriteIndexes )
+  {
+    assert( colorReadIndex < colorBuffers_.size() );
+    glNamedFramebufferReadBuffer( handle_, CONVGLENUM( GL_COLOR_ATTACHMENT0, colorReadIndex ) );
+    array<GLenum, 32> drawBuffers;
+    int ctr = 0;
+    for ( auto index : colorWriteIndexes )
+    {
+      assert( index < colorBuffers_.size() );
+      drawBuffers[ctr++] = CONVGLENUM( GL_COLOR_ATTACHMENT0, index );
+    }
+    glNamedFramebufferDrawBuffers( handle_, (GLsizei)colorWriteIndexes.size(), drawBuffers.data() );
+  }
+
   void Framebuffer::begin()
   {
     const GLfloat clearDepth = 0.0f;
+
+    glGetIntegerv( GL_VIEWPORT, savedViewport_ );
+
     glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
-    glClearNamedFramebufferfv( handle_, GL_COLOR, 0, glm::value_ptr( clearColor_ ) );
+    for ( int i = 0; i < colorBuffers_.size(); i++ )
+      glClearNamedFramebufferfv( handle_, GL_COLOR, i, glm::value_ptr( clearColor_ ) );
     glClearNamedFramebufferfv( handle_, GL_DEPTH, 0, &clearDepth );
+
+    glViewport( 0, 0, (GLsizei)width_, (GLsizei)height_ );
   }
 
   void Framebuffer::end()
   {
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+
+    glViewport( savedViewport_[0], savedViewport_[1], savedViewport_[2], savedViewport_[3] );
   }
 
   Framebuffer::~Framebuffer()

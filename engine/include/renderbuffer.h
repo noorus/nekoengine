@@ -13,9 +13,13 @@ namespace neko {
   //!   Unlike textures, renderbuffers cannot be sampled and have some other additional limitations.
   //!   Existing data also cannot be uploaded to a renderbuffer, it can only be drawn to on a framebuffer.
   class Renderbuffer: public Surface {
+  protected:
+    GLsizei multisamples_;
+  public:
+    inline size_t samples() const throw() { return multisamples_; }
   public:
     Renderbuffer() = delete;
-    Renderbuffer( Renderer* renderer, size_t width, size_t height, PixelFormat format );
+    Renderbuffer( Renderer* renderer, size_t width, size_t height, PixelFormat format, int samples = 0 );
     ~Renderbuffer();
   };
 

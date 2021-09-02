@@ -14,6 +14,14 @@ namespace neko {
 
   using namespace gl;
 
+  NEKO_DECLARE_CONVAR( vid_msaa, "Main buffer multisample antialiasing multiplier.", 8 );
+  NEKO_DECLARE_CONVAR( dbg_shownormals, "Whether to visualize vertex normals with lines.", false );
+  NEKO_DECLARE_CONVAR( dbg_showtangents, "Whether to visualize vertex tangents with lines.", false );
+  NEKO_DECLARE_CONVAR( dbg_wireframe, "Whether to render in wireframe mode.", false );
+  NEKO_DECLARE_CONVAR( vid_hdr, "Toggle HDR processing.", true );
+  NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 2.2f );
+  NEKO_DECLARE_CONVAR( vid_exposure, "Testing.", 1.0f );
+
   namespace BuiltinData {
 
     const vector<PixelRGBA> placeholderImage2x2 =
@@ -25,7 +33,7 @@ namespace neko {
     };
 
     const vector<Vertex2D> screenQuad2D =
-    {   // x      y     s     t
+    {  // x      y     s     t
       { -1.0f,  1.0f, 0.0f, 1.0f },
       { -1.0f, -1.0f, 0.0f, 0.0f },
       {  1.0f, -1.0f, 1.0f, 0.0f },
@@ -37,94 +45,93 @@ namespace neko {
       0, 1, 2, 0, 2, 3
     };
 
+    static vector<Vertex3D> worldUnitCube3D =
+    {  // x      y      z      nx     ny     nz     s     t
+      { -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      { -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+
+      { -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      { -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+
+      { -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      { -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      { -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      { -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+
+      {  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+
+      { -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      { -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+
+      { -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      {  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f },
+      { -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f }
+    };
+
+    const vector<GLuint> cubeIndices =
+    {
+      0,  1,  2,  2,  3,  0,
+      4,  5,  6,  6,  7,  4,
+      8,  9,  10, 10, 11, 8,
+      12, 13, 14, 14, 15, 12,
+      16, 17, 18, 18, 19, 16,
+      20, 21, 22, 22, 23, 20
+    };
+
   }
 
-  static FramebufferPtr g_framebuf;
+#pragma pack( push, 1 )
+  struct VertexPointRender {
+    vec3 pos;
+    vec4 color;
+  };
+#pragma pack( pop )
 
-  class DynamicText {
+  class PointRenderBuffer {
+  protected:
+    const GLuint c_maxVertices = 32;
+    unique_ptr<SmarterBuffer<VertexPointRender>> buffer_;
+    GLuint vao_;
   public:
-    DynamicMeshPtr mesh_;
-    FontPtr font_;
-    MaterialPtr material_;
-  public:
-    DynamicText( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontManagerPtr fontmgr )
+    PointRenderBuffer()
     {
-      font_ = fontmgr->createFont();
-      loader->addLoadTask( { LoadTask( font_, R"(data\fonts\LuckiestGuy.ttf)", 32.0f ) } );
-      mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_Text );
+      buffer_ = make_unique<SmarterBuffer<VertexPointRender>>( c_maxVertices );
+      glCreateVertexArrays( 1, &vao_ );
+      neko::AttribWriter attribs;
+      attribs.add( GL_FLOAT, 3 ); // vec3 position
+      attribs.add( GL_FLOAT, 4 ); // vec4 color
+      attribs.write( vao_ );
+      glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
     }
-    inline bool fontLoaded()
+    inline SmarterBuffer<VertexPointRender>& buffer() { return *buffer_.get(); }
+    void draw( shaders::Shaders& shaders, GLsizei count, GLint base = 0 )
     {
-      return font_ && font_->loaded_;
+      glBindVertexArray( vao_ );
+      auto& pipeline = shaders.usePipeline( "pointlight" );
+      mat4 mdl( 1.0f );
+      pipeline.setUniform( "model", mdl );
+      // glEnable( GL_PROGRAM_POINT_SIZE );
+      glDrawArrays( GL_POINTS, base, count );
+      glBindVertexArray( 0 );
     }
-    void addText( const utf8String& str, vec2 pen )
+    ~PointRenderBuffer()
     {
-      uint32_t prev_codepoint = 0;
-      for ( size_t i = 0; i < str.length(); ++i )
-      {
-        auto codepoint = utils::utf8_to_utf32( &str[i] );
-        auto glyph = font_->impl_->getGlyph( codepoint );
-        if ( !glyph )
-        {
-          font_->impl_->loadGlyph( codepoint );
-          glyph = font_->impl_->getGlyph( codepoint );
-        }
-        assert( glyph );
-        Real kerning = 0.0f;
-        if ( i > 0 )
-          kerning = glyph->getKerning( prev_codepoint );
-        prev_codepoint = codepoint;
-        pen.x += kerning;
-        auto p0 = vec2(
-          ( pen.x + glyph->offset.x ),
-          (int)( pen.y + glyph->offset.y ) );
-        auto p1 = vec2(
-          ( p0.x + glyph->width ),
-          (int)( p0.y - glyph->height )
-        );
-        auto index = (GLuint)mesh_->vertsCount();
-        auto color = vec4( 0.0f, 1.0f, 0.0f, 1.0f );
-        vector<VertexText3D> vertices = {
-          { vec3( p0.x, p1.y, 0.0f ), vec2( glyph->coords[0].x, glyph->coords[1].y ), color },
-          { vec3( p0.x, p0.y, 0.0f ), vec2( glyph->coords[0].x, glyph->coords[0].y ), color },
-          { vec3( p1.x, p0.y, 0.0f ), vec2( glyph->coords[1].x, glyph->coords[0].y ), color },
-          { vec3( p1.x, p1.y, 0.0f ), vec2( glyph->coords[1].x, glyph->coords[1].y ), color }
-        };
-        vector<GLuint> indices = {
-          index + 0, index + 1, index + 2, index + 0, index + 2, index + 3
-        };
-        mesh_->pushIndices( move( indices ) );
-        mesh_->pushVertices( move( vertices ) );
-        pen.x += glyph->advance.x;
-      }
-    }
-    void updateTexture( Renderer* rndr )
-    {
-      material_ = rndr->createTextureWithData( font_->impl_->atlas_->width_, font_->impl_->atlas_->height_,
-        PixFmtColorR8, (const void*)font_->impl_->atlas_->data_.data(), Texture::ClampBorder, Texture::Mipmapped );
-      /* platform::FileWriter writer("debug.png");
-      vector<uint8_t> buffer;
-      lodepng::encode( buffer, font_->impl_->atlas_->data_, font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, LCT_GREY, 8 );
-      writer.writeBlob( buffer.data(), buffer.size() ); */
-    }
-    void begin()
-    {
-      mesh_->begin();
-    }
-    void draw()
-    {
-      glBindTextureUnit( 0, material_->texture_->handle() );
-      mesh_->draw();
-    }
-    ~DynamicText()
-    {
-      //
+      glDeleteVertexArrays( 1, &vao_ );
+      buffer_.reset();
     }
   };
 
-  using DynamicTextPtr = shared_ptr<DynamicText>;
-
-  // static DynamicTextPtr g_testText;
+  static unique_ptr<PointRenderBuffer> g_pointrender;
 
   void glStartupFetchAndCheck( GLInformation& info )
   {
@@ -136,7 +143,7 @@ namespace neko {
       return utf8String( std::to_string( (unsigned int)e ) );
 #endif
     };
-    auto glvGetI32NoThrow = []( GLenum e  ) -> int32_t
+    auto glvGetI32NoThrow = []( GLenum e ) -> int32_t
     {
       GLint data = 0;
       glGetIntegerv( e, &data );
@@ -154,6 +161,20 @@ namespace neko {
         return false;
       }
       target = (int64_t)data;
+      return true;
+    };
+    auto glvGetFloat = [glbAuxStr]( GLenum e, float& target, bool doNotThrow = false ) -> bool
+    {
+      GLfloat data = 0.0f;
+      glGetFloatv( e, &data );
+      auto error = glGetError();
+      if ( error != GL_NO_ERROR )
+      {
+        if ( !doNotThrow )
+          NEKO_OPENGL_EXCEPT( "glGetFloatv failed for " + glbAuxStr( e ), error );
+        return false;
+      }
+      target = (float)data;
       return true;
     };
 
@@ -191,6 +212,10 @@ namespace neko {
       info.maxFramebufferHeight = info.maxTextureSize;
     }
 
+    // Maximum anistropic filtering level
+    if ( !glvGetFloat( GL_MAX_TEXTURE_MAX_ANISOTROPY, info.maxAnisotropy, true ) )
+      info.maxAnisotropy = 1.0f;
+
     // Uniform buffer alignments
     glvGetI64( GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, info.textureBufferAlignment );
     glvGetI64( GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, info.uniformBufferAlignment );
@@ -220,6 +245,12 @@ namespace neko {
 
     clearErrors();
     glStartupFetchAndCheck( info_ );
+
+    console_->printf( Console::srcGfx, "Buffer alignments are %i/texture %i/uniform",
+      info_.textureBufferAlignment, info_.uniformBufferAlignment );
+    console_->printf( Console::srcGfx, "Maximums are %i/texture %i/renderbuffer %ix%i/framebuffer",
+      info_.maxTextureSize, info_.maxRenderbufferSize, info_.maxFramebufferWidth, info_.maxFramebufferHeight );
+    console_->printf( Console::srcGfx, "Maximum anisotropy is %.1f", info_.maxAnisotropy );
   }
 
   void Renderer::preInitialize()
@@ -230,29 +261,50 @@ namespace neko {
     shaders_->initialize();
 
     meshes_ = make_shared<MeshManager>( console_ );
+#ifndef NEKO_NO_SCRIPTING
     models_ = make_shared<ModelManager>( console_ );
+#endif
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
     builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
       (const void*)BuiltinData::placeholderImage2x2.data() );
     builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
+    util::generateTangentsAndBitangents( BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
+    builtin_.cube_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
+
+    auto unitSphere = Locator::meshGenerator().makeSphere( 1.0f, vec2u( 64, 64 ) );
+    builtin_.unitSphere_ = meshes_->createStatic( GL_TRIANGLE_STRIP, unitSphere.first, unitSphere.second );
   }
 
   void Renderer::initialize( size_t width, size_t height )
   {
-    MaterialPtr myMat = make_shared<Material>();
-    materials_.push_back( myMat );
-    loader_->addLoadTask( { LoadTask( myMat, R"(data\textures\test.png)" ) } );
+    materials_.push_back( make_shared<Material>( Material::UnlitSimple ) );
+    materials_.push_back( make_shared<Material>( Material::WorldGround ) );
+    materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
+    loader_->addLoadTask( { LoadTask( materials_[0], { R"(uvtest_diffuse.png)" } ) } );
+    loader_->addLoadTask( { LoadTask( materials_[1], { R"(SGT_Tile_3_AlbedoSmoothness.png)", R"(SGT_Tile_3_Height.png)", R"(SGT_Tile_3_MetallicSmoothness.png)", R"(SGT_Tile_3_Normal.png)" } ) } );
+    loader_->addLoadTask( { LoadTask( materials_[2], {
+      R"(M_Tank_Pz35_Blue_AlbedoTransparency.png)",
+      R"(M_Tank_Pz35_MetallicSmoothness.png)",
+      R"(M_Tank_Pz35_Normal.png)",
+      R"(M_Tank_Pz35_Blue_AlbedoTransparency.png)" } ) } );
+    loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
 
-    g_framebuf = make_shared<Framebuffer>( this );
+    // loader_->addLoadTask( { LoadTask( R"(data\meshes\SCA_Aircraft_Flight.anim)"
+
+    mainbuffer_ = make_shared<Framebuffer>( this, 2, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
+    intermediate_ = make_shared<Framebuffer>( this, 2, 1 );
+
+    g_pointrender = make_unique<PointRenderBuffer>();
 
     reset( width, height );
   }
 
   void Renderer::reset( size_t width, size_t height )
   {
-    assert( g_framebuf );
-    g_framebuf->recreate( width, height );
+    assert( mainbuffer_ && intermediate_ );
+    mainbuffer_->recreate( width, height );
+    intermediate_->recreate( width, height );
   }
 
   void Renderer::uploadTextures()
@@ -265,20 +317,49 @@ namespace neko {
     {
       if ( !mat->loaded_ )
         continue;
-      mat->texture_ = make_shared<Texture>( this,
-        mat->image_.width_, mat->image_.height_, mat->image_.format_, mat->image_.data_.data(),
-        Texture::ClampEdge, Texture::Mipmapped );
+      for ( auto& layer : mat->layers_ )
+      {
+        layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, layer.image_.format_, layer.image_.data_.data(), Texture::Repeat, Texture::Mipmapped );
+      }
     }
   }
 
-  static bool g_textAdded = false;
+  void Renderer::uploadModelsEnterNode( SceneNode* node )
+  {
+    if ( node->mesh_ && !node->mesh_->mesh_ )
+      node->mesh_->mesh_ = meshes_->createStatic( GL_TRIANGLES, node->mesh_->vertices_, node->mesh_->indices_ );
+    for ( auto child : node->children_ )
+      uploadModelsEnterNode( child );
+  }
+
+  void Renderer::uploadModels()
+  {
+    vector<SceneNode*> nodes;
+    loader_->getFinishedModels( nodes );
+    if ( nodes.empty() )
+      return;
+
+    console_->printf( Console::srcGfx, "Renderer::uploadModels got %d new models", nodes.size() );
+
+    for ( auto node : nodes )
+      uploadModelsEnterNode( node );
+
+    sceneGraph_.insert( nodes.begin(), nodes.end() );
+  }
 
   void Renderer::prepare( GameTime time )
   {
     // Upload any new textures. Could this be parallellized?
     uploadTextures();
 
+#ifndef NEKO_NO_SCRIPTING
     meshes_->jsUpdate( director_->renderSync() );
+#endif
+
+    // Delete all handles for which our buffer objects were already destroyed
+    meshes_->destroyFreed();
+
+    uploadModels();
 
     // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point at which we try to create the VAO.
     // Thus uploading the VAOs should always come last.
@@ -286,237 +367,370 @@ namespace neko {
     meshes_->uploadEBOs();
     meshes_->uploadVAOs();
 
+#ifndef NEKO_NO_SCRIPTING
     models_->jsUpdate( director_->renderSync() );
-
-    /*if ( !g_testText )
-    {
-      g_testText = make_shared<DynamicText>( loader_, meshes_, fonts_ );
-    }
-
-    if ( g_testText && g_testText->fontLoaded() && !g_textAdded )
-    {
-      g_textAdded = true;
-      g_testText->addText( "nekoengine", vec2( 256.0f, 720.0f - 256.0f + 32.0f ) );
-      g_testText->updateTexture( this );
-    }*/
+#endif
   }
 
   void Renderer::jsRestart()
   {
+#ifndef NEKO_NO_SCRIPTING
     director_->renderSync().resetFromRenderer();
     models_->jsReset();
     meshes_->jsReset();
-  }
-
-  //! Called by Texture::Texture()
-  GLuint Renderer::implCreateTexture2D( size_t width, size_t height,
-    GLGraphicsFormat format, GLGraphicsFormat internalFormat, GLGraphicsFormat internalType,
-    const void* data, GLWrapMode wrap, Texture::Filtering filtering )
-  {
-    assert( width <= (size_t)info_.maxTextureSize && height <= (size_t)info_.maxTextureSize );
-
-    GLuint handle = 0;
-    glCreateTextures( GL_TEXTURE_2D, 1, &handle );
-    assert( handle != 0 );
-
-    // Wrapping (repeat, edge, border)
-    glTextureParameteri( handle, GL_TEXTURE_WRAP_S, wrap );
-    glTextureParameteri( handle, GL_TEXTURE_WRAP_T, wrap );
-
-    // Filtering
-    if ( filtering == Texture::Nearest )
-    {
-      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-      glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    }
-    else if ( filtering == Texture::Linear )
-    {
-      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-      glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    }
-    else
-    {
-      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-      glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    }
-
-    // 1 byte alignment - i.e. unaligned.
-    // Could boost performance to use aligned memory in the future.
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-
-    glTextureStorage2D( handle, 1, internalFormat, (GLsizei)width, (GLsizei)height );
-
-    if ( data )
-      glTextureSubImage2D( handle, 0, 0, 0, (GLsizei)width, (GLsizei)height, format, internalType, data );
-
-    if ( filtering == Texture::Mipmapped )
-      glGenerateTextureMipmap( handle );
-
-    return handle;
-  }
-
-  //! Called by Texture::~Texture()
-  void Renderer::implDeleteTexture( GLuint handle )
-  {
-    assert( handle );
-    glDeleteTextures( 1, &handle );
-  }
-
-  //! Called by Renderbuffer::Renderbuffer()
-  GLuint Renderer::implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format )
-  {
-    assert( width <= (size_t)info_.maxRenderbufferSize && height <= (size_t)info_.maxRenderbufferSize );
-
-    GLuint handle = 0;
-    glCreateRenderbuffers( 1, &handle );
-    assert( handle != 0 );
-
-    glNamedRenderbufferStorage( handle, format, (GLsizei)width, (GLsizei)height );
-
-    return handle;
-  }
-
-  //! Called by Renderbuffer::~Renderbuffer()
-  void Renderer::implDeleteRenderbuffer( GLuint handle )
-  {
-    assert( handle );
-    glDeleteRenderbuffers( 1, &handle );
-  }
-
-  //! Called by Framebuffer::create()
-  GLuint Renderer::implCreateFramebuffer( size_t width, size_t height )
-  {
-    assert( width <= (size_t)info_.maxFramebufferWidth && height <= (size_t)info_.maxFramebufferHeight );
-
-    GLuint handle = 0;
-    glCreateFramebuffers( 1, &handle );
-    assert( handle != 0 );
-
-    return handle;
-  }
-
-  //! Called by Framebuffer::destroy()
-  void Renderer::implDeleteFramebuffer( GLuint handle )
-  {
-    assert( handle );
-    glDeleteFramebuffers( 1, &handle );
+#endif
   }
 
   MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, PixelFormat format,
-    const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
+  const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
-    MaterialPtr mat = make_shared<Material>();
-    mat->image_.format_ = format;
-    mat->image_.width_ = (unsigned int)width;
-    mat->image_.height_ = (unsigned int)height;
-    mat->texture_ = make_shared<Texture>( this,
-      mat->image_.width_, mat->image_.height_, mat->image_.format_,
+    MaterialPtr mat = make_shared<Material>( Material::UnlitSimple );
+    MaterialLayer layer;
+    layer.image_.format_ = format;
+    layer.image_.width_ = (unsigned int)width;
+    layer.image_.height_ = (unsigned int)height;
+    layer.texture_ = make_shared<Texture>( this,
+      layer.image_.width_, layer.image_.height_, layer.image_.format_,
       data, wrapping, filtering );
+    mat->layers_.push_back( move( layer ) );
     mat->loaded_ = true;
     return move( mat );
   }
 
-  void Renderer::sceneDraw( CameraPtr camera )
+  shaders::Pipeline& Renderer::useMaterial( size_t index )
   {
-    glDisable( GL_DEPTH_TEST );
-    glDepthMask( 0 );
+    GLuint empties[4] = { 0, 0, 0, 0 };
+    static bool inited = false;
+    if ( !inited )
+    {
+      for ( unsigned int& it : empties )
+        it = builtin_.placeholderTexture_->layers_[0].texture_->handle();
+      inited = true;
+    }
+    if ( index >= materials_.size() || !materials_[index]->uploaded() )
+    {
+      glBindTextures( 0, 4, empties );
+      return shaders_->usePipeline( "mat_unlit" );
+    }
+    const auto& mat = materials_[index];
+    if ( mat->type_ == Material::UnlitSimple )
+    {
+      glBindTextureUnit( 0, mat->layers_[0].texture_->handle() );
+      auto& pipeline = shaders_->usePipeline( "mat_unlit" );
+      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+      pipeline.setUniform( "tex", 0 );
+      return pipeline;
+    }
+    if ( mat->type_ == Material::WorldGround )
+    {
+      GLuint units[4] = {
+        mat->layers_[0].texture_->handle(),
+        mat->layers_[1].texture_->handle(),
+        mat->layers_[2].texture_->handle(),
+        mat->layers_[3].texture_->handle() };
+      glBindTextures( 0, 4, units );
+      auto& pipeline = shaders_->usePipeline( "mat_ground" );
+      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+      pipeline.setUniform( "texAlbedoSmoothness", 0 );
+      pipeline.setUniform( "texHeight", 1 );
+      pipeline.setUniform( "texMetallicSmoothness", 2 );
+      pipeline.setUniform( "texNormal", 3 );
+      return pipeline;
+    }
+    if ( mat->type_ == Material::WorldUntexturedPBS )
+    {
+    }
+    if ( mat->type_ == Material::WorldPBR )
+    {
+      GLuint units[4] = {
+        mat->layers_[0].texture_->handle(),
+        mat->layers_[1].texture_->handle(),
+        mat->layers_[2].texture_->handle(),
+        mat->layers_[3].texture_->handle()
+      };
+      glBindTextures( 0, 4, units );
+      auto& pipeline = shaders_->usePipeline( "mat_worldpbr" );
+      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+      pipeline.setUniform( "texAlbedoTransparency", 0 );
+      pipeline.setUniform( "texMetalSmoothness", 1 );
+      pipeline.setUniform( "texNormal", 2 );
+      pipeline.setUniform( "texTeamColor", 3 );
+      return pipeline;
+    }
+    return shaders_->usePipeline( "mat_unlit" );
+  }
+
+  shaders::Pipeline& Renderer::useUntexturedPBS( vec4 color, float roughness, float metallic )
+  {
+    auto& pipeline = shaders_->usePipeline( "mat_untexturedpbs" );
+    pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+    pipeline.setUniform( "matAlbedo", color );
+    pipeline.setUniform( "matRoughness", roughness );
+    pipeline.setUniform( "matMetallic", metallic );
+    return pipeline;
+  }
+
+  void Renderer::setCameraUniform( Camera& camera, uniforms::Camera& uniform )
+  {
+    uniform.position = vec4( camera.position(), 1.0f );
+    uniform.projection = camera.projection();
+    uniform.view = camera.view();
+  }
+
+  void dumpSceneGraph( SceneNode& root, int level = 0 )
+  {
+    utf8String str;
+    for ( int i = 0; i < level; i++ )
+      str.append( "  " );
+    Locator::console().printf( Console::srcGame,
+      "%s<node \"%s\" pos %.2f %.2f %.2f, scale %.2f %.2f %.2f, rot %.2f %.2f %.2f %.2f>", str.c_str(), root.name_.c_str(),
+      root.translate_.x, root.translate_.y, root.translate_.z,
+      root.scale_.x, root.scale_.y, root.scale_.z,
+      root.rotate_.x, root.rotate_.y, root.rotate_.z, root.rotate_.z );
+    for ( auto& child : root.children_ )
+      dumpSceneGraph( *child, level + 1 );
+  }
+
+  void Renderer::sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline )
+  {
+    if ( node->mesh_ && node->mesh_->mesh_ )
+    {
+      node->mesh_->mesh_->begin();
+      mat4 model = node->getFullTransform();
+      pipeline.setUniform( "model", model );
+      node->mesh_->mesh_->draw();
+    }
+    for ( auto child : node->children_ )
+      sceneDrawEnterNode( child, pipeline );
+  }
+
+  void Renderer::sceneDraw( GameTime time, Camera& camera )
+  {
+    glDepthMask( GL_TRUE ); // Enable depth buffer writes
+    glDisable( GL_SCISSOR_TEST );
+    glDisable( GL_STENCIL_TEST );
+
+    glPolygonMode( GL_FRONT_AND_BACK, g_CVar_dbg_wireframe.as_b() ? GL_LINE : GL_FILL );
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    shaders_->world()->projection = camera->projection();
-    shaders_->world()->view = camera->view();
+    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    auto& pl = shaders_->usePipeline( "default3d" );
+    glEnable( GL_LINE_SMOOTH );
+    glEnable( GL_POLYGON_SMOOTH );
 
-    // FIXME ridiculously primitive
-    // Also, investigate glMultiDrawArraysIndirect
-    if ( models_ )
+    glEnable( GL_MULTISAMPLE );
+
+    glEnable( GL_CULL_FACE );
+    glCullFace( GL_BACK );
+    glFrontFace( GL_CCW );
+
+    shaders_->world()->time = (float)time;
+    setCameraUniform( camera, shaders_->world()->camera );
+
+    for (int i = 0; i < neko::uniforms::c_pointLightCount; i++ )
     {
-      for ( auto& modelptr : models_->models() )
-      {
-        if ( !modelptr.second )
-          continue;
-
-        auto& model = modelptr.second->model();
-        auto mesh = model.mesh_.get();
-
-        if ( !mesh || !mesh->mesh().vao_ || !mesh->mesh().vao_->uploaded_ )
-          continue;
-
-        mesh->mesh().vao_->begin();
-
-        mat4 mdl( 1.0f );
-        mdl = glm::translate( mdl, model.translate_->v() );
-        mdl = glm::scale( mdl, model.scale_->v() );
-        mdl *= glm::toMat4( model.rotate_->q() );
-
-        pl.setUniform( "model", mdl );
-        pl.setUniform( "tex", 0 );
-
-        if ( !materials_.empty() && materials_[0]->texture_ )
-          glBindTextureUnit( 0, materials_[0]->texture_->handle() );
-        else
-          glBindTextureUnit( 0, builtin_.placeholderTexture_->texture_->handle() );
-
-        auto indices = mesh->mesh().ebo_->storage_.size();
-        mesh->mesh().vao_->draw( GL_TRIANGLES, (GLsizei)indices );
-      }
+      shaders_->world()->pointLights[i].dummy = vec4( 0.0f );
     }
 
-    /*if ( g_testText && g_textAdded )
-    {
-      g_testText->begin();
-      mat4 model( 1.0f );
-      model = glm::scale( model, vec3( 1.0f, 1.0f, 1.0f ) );
-      model = glm::translate( model, vec3( 1.0f, 1.0f, 0.0f ) );
+    vec3 lightpos[2] = {
+      vec3( math::sin( (Real)time * 1.2f ) * 3.0f, 4.0f, math::cos( (Real)time * 1.2f ) * 3.0f ),
+      vec3( math::sin( (Real)time ) * 3.0f, 1.0f, math::cos( (Real)time ) * 3.0f )
+    };
 
-      shaders_->use( "text3d" ).setUniform( "model", model );
-      g_testText->draw();
-    }*/
+    shaders_->world()->pointLights[0].position = vec4( lightpos[0], 1.0f );
+    shaders_->world()->pointLights[0].color = vec4( 100.0f, 100.0f, 100.0f, 1.0f );
+    shaders_->world()->pointLights[0].dummy = vec4( 1.0f );
+
+    shaders_->world()->pointLights[1].position = vec4( lightpos[1], 1.0f );
+    shaders_->world()->pointLights[1].color = vec4( math::sin( (Real)time * 0.3f ) * 30.0f + 50.0f, 0.0f, math::cos( (Real)time * 0.4f ) * 30.0f + 50.0f, 1.0f );
+    shaders_->world()->pointLights[1].dummy = vec4( 1.0f );
+
+    shaders_->processing()->ambient = vec4( 0.05f, 0.05f, 0.05f, 1.0f );
+
+    auto fn_drawModels = [&]( shaders::Pipeline& pipeline ) -> void
+    {
+#ifndef NEKO_NO_SCRIPTING
+      if ( models_ )
+      {
+        for ( auto& modelptr : models_->models() )
+        {
+          if ( !modelptr.second )
+            continue;
+
+          auto& model = modelptr.second->model();
+          auto mesh = model.mesh_.get();
+
+          if ( !mesh || !mesh->mesh().vao_ || !mesh->mesh().vao_->uploaded_ )
+            continue;
+
+          mesh->mesh().vao_->begin();
+
+          mat4 mdl( 1.0f );
+          mdl = glm::translate( mdl, model.translate_->v() );
+          mdl = glm::scale( mdl, model.scale_->v() );
+          mdl *= glm::toMat4( model.rotate_->q() );
+
+          pipeline.setUniform( "model", mdl );
+
+          mesh->mesh().vao_->draw( GL_TRIANGLES );
+        }
+      }
+#endif
+    };
+
+    {
+      auto& pipeline = useMaterial( 1 );
+      fn_drawModels( pipeline );
+    }
+
+    {
+      auto& pipeline = useUntexturedPBS( vec4( 1.0f ), 0.3f, 1.0f );
+      builtin_.unitSphere_->drawOnce( pipeline, vec3( -3.0f, 1.0f, -3.0f ) );
+      builtin_.unitSphere_->drawOnce( pipeline, vec3( -3.0f, 1.0f,  3.0f ) );
+      builtin_.unitSphere_->drawOnce( pipeline, vec3(  3.0f, 1.0f, -3.0f ) );
+      builtin_.unitSphere_->drawOnce( pipeline, vec3(  3.0f, 1.0f,  3.0f ) );
+    }
+
+    {
+      auto& pipeline = useMaterial( 0 );
+      for ( auto node : sceneGraph_ )
+        sceneDrawEnterNode( node, pipeline );
+    }
+
+    /*builtin_.cube_->begin();
+    mat4 mdl( 1.0f );
+    mdl = glm::scale( mdl, vec3( 3.0f, 3.0f, 3.0f ) );
+    // useMaterial( 1 ).setUniform( "model", mdl );
+    pl.setUniform( "model", mdl );
+    builtin_.cube_->draw();*/
+
+    glEnable( GL_LINE_SMOOTH );
+
+    if ( g_CVar_dbg_shownormals.as_b() )
+    {
+      auto& pipeline = shaders_->usePipeline( "dbg_showvertexnormals" );
+      fn_drawModels( pipeline );
+      for ( auto node : sceneGraph_ )
+        sceneDrawEnterNode( node, pipeline );
+    }
+
+    if ( g_CVar_dbg_showtangents.as_b() )
+    {
+      auto& pipeline = shaders_->usePipeline( "dbg_showvertextangents" );
+      for ( auto node : sceneGraph_ )
+        sceneDrawEnterNode( node, pipeline );
+    }
+
+    glDisable( GL_LINE_SMOOTH );
+
+    g_pointrender->buffer().lock();
+    auto lightpoints = g_pointrender->buffer().buffer().data();
+    lightpoints[0].pos = lightpos[0];
+    lightpoints[0].color = shaders_->world()->pointLights[0].color;
+    lightpoints[1].pos = lightpos[1];
+    lightpoints[1].color = shaders_->world()->pointLights[1].color;
+    g_pointrender->buffer().unlock();
+
+    g_pointrender->draw( *shaders_.get(), 2, 0 );
   }
 
-  void Renderer::draw( CameraPtr camera )
+  void Renderer::draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui )
   {
-    if ( !g_framebuf->available() )
+    if ( !mainbuffer_->available() || !intermediate_->available() )
       return;
+
+    // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
+    glBindVertexArray( builtin_.emptyVAO_ );
+
+    // Draw the scene inside the framebuffer.
+    mainbuffer_->prepare( 0, { 0, 1 } );
+    glDepthFunc( GL_LESS );
+    glEnable( GL_DEPTH_TEST );
+    mainbuffer_->begin();
+    sceneDraw( time, camera );
+    mainbuffer_->end();
+
+    mainbuffer_->blitColorTo( 0, 0, *intermediate_.get() );
+    mainbuffer_->blitColorTo( 1, 1, *intermediate_.get() );
+
+    // Draw the fullscreen quad
+
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_CULL_FACE );
-
-    glEnable( GL_MULTISAMPLE );
+    glDisable( GL_MULTISAMPLE );
 
     // Smoothing can generate sub-fragments and cause visible ridges between triangles.
     // Use a framebuffer for AA instead.
     glDisable( GL_LINE_SMOOTH );
     glDisable( GL_POLYGON_SMOOTH );
 
-    // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
-    glBindVertexArray( builtin_.emptyVAO_ );
-
-    // Draw the scene inside the framebuffer.
-    g_framebuf->begin();
-    sceneDraw( camera );
-    g_framebuf->end();
-
     // Framebuffer has been unbound, now draw to the default context, the window.
-    glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );
+    glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
 
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
     builtin_.screenQuad_->begin();
-    shaders_->usePipeline( "mainframebuf2d" ).setUniform( "tex", 0 );
-    glBindTextureUnit( 0, g_framebuf->texture()->handle() );
+    auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
+    pipeline.setUniform( "texMain", 0 );
+    pipeline.setUniform( "texGBuffer", 1 );
+    pipeline.setUniform( "hdr", g_CVar_vid_hdr.as_b() );
+    pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+    pipeline.setUniform( "exposure", g_CVar_vid_exposure.as_f() );
+
+    /*auto pgm = pipeline.getProgramStage( shaders::Shader_Fragment );
+    auto pal = gl::glGetUniformLocation( pgm, "palette" );
+    vec3 vals[8] = {
+      { 1.0f, 0.0f, 0.0f },
+      { 0.0f, 1.0f, 0.0f },
+      { 0.0f, 0.0f, 1.0f },
+      { 1.0f, 1.0f, 0.0f },
+      { 0.0f, 1.0f, 1.0f },
+      { 1.0f, 0.0f, 1.0f },
+      { 0.0f, 0.0f, 0.0f },
+      { 0.5f, 0.5f, 0.5f }
+    };
+    gl::glProgramUniform3fv( pgm, pal, 8, (GLfloat*)vals );
+    pipeline.setUniform( "paletteSize", 8 );*/
+
+    glBindTextureUnit( 0, intermediate_->texture( 0 )->handle() );
+    glBindTextureUnit( 1, intermediate_->texture( 1 )->handle() );
     builtin_.screenQuad_->draw();
+
+#ifndef NEKO_NO_GUI
+    if ( gui )
+      gui->getRenderManagerPtr()->drawOneFrame( shaders_.get() );
+#endif
+
+    glBindTextureUnit( 0, 0 );
+    glBindTextureUnit( 1, 0 );
+    glBindVertexArray( builtin_.emptyVAO_ );
+
+    glFinish();
   }
 
   Renderer::~Renderer()
   {
-    // g_testText.reset();
+    glBindTextureUnit( 0, 0 );
+    glBindVertexArray( builtin_.emptyVAO_ );
 
-    g_framebuf.reset();
+    g_pointrender.reset();
 
+    intermediate_.reset();
+    mainbuffer_.reset();
+
+#ifndef NEKO_NO_SCRIPTING
     models_->teardown();
+#endif
+
     meshes_->teardown();
+
+    meshes_->destroyFreed();
 
     shaders_->shutdown();
     shaders_.reset();

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef NEKO_NO_SCRIPTING
+
 #include "subsystem.h"
 #include "forwards.h"
 #include "gfx_types.h"
@@ -12,7 +14,7 @@ namespace neko {
 
   using ModelMap = map<size_t, js::Model*>;
 
-  class ModelManager: public enable_shared_from_this<ModelManager> {
+  class ModelManager: public enable_shared_from_this<ModelManager>, public nocopy {
   private:
     ConsolePtr console_;
     ModelMap models_;
@@ -29,3 +31,5 @@ namespace neko {
   using ModelManagerPtr = shared_ptr<ModelManager>;
 
 }
+
+#endif

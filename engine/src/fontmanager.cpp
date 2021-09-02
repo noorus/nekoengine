@@ -30,10 +30,10 @@ namespace neko {
     FT_Add_Default_Modules( freeType_ );
 
     FT_Library_Version( freeType_, &ftVersion_.major, &ftVersion_.minor, &ftVersion_.patch );
-    engine_->console()->printf( Console::srcFonts, "FreeType version %i.%i.%i", ftVersion_.major, ftVersion_.minor, ftVersion_.patch );
+    engine_->console()->printf( Console::srcGfx, "FreeType version %i.%i.%i", ftVersion_.major, ftVersion_.minor, ftVersion_.patch );
 
     ftVersion_.trueTypeSupport = FT_Get_TrueType_Engine_Type( freeType_ );
-    engine_->console()->printf( Console::srcFonts, "TrueType engine support: %s",
+    engine_->console()->printf( Console::srcGfx, "TrueType engine support: %s",
       ftVersion_.trueTypeSupport == FT_TRUETYPE_ENGINE_TYPE_PATENTED ? "full"
       : ftVersion_.trueTypeSupport == FT_TRUETYPE_ENGINE_TYPE_UNPATENTED ? "partial"
       : "none" );
@@ -46,7 +46,7 @@ namespace neko {
     FontVector fonts;
     engine_->loader()->getFinishedFonts( fonts );
     if ( !fonts.empty() )
-      engine_->console()->printf( Console::srcFonts, "FontManager::uploadFonts got %d new fonts", fonts.size() );
+      engine_->console()->printf( Console::srcGfx, "FontManager::uploadFonts got %d new fonts", fonts.size() );
     for ( auto& font : fonts )
     {
       if ( !font->loaded_ )

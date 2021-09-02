@@ -3,54 +3,19 @@
 #include "gfx_types.h"
 #include "forwards.h"
 #include "neko_exception.h"
+#include "mesh_primitives.h"
+#include "inc.buffers.glsl"
 
 namespace neko {
 
   namespace shaders {
 
-    template <typename T>
-    class PersistentBuffer
-    {
-    protected:
-      GLuint id_;
-      size_t size_;
-      span<T> buffer_;
-
-    public:
-      PersistentBuffer( size_t count = 1 ): id_( 0 )
-      {
-        assert( count > 0 );
-        size_ = ( count * sizeof( T ) );
-        gl::glCreateBuffers( 1, &id_ );
-        auto mapflags = ( gl::GL_MAP_WRITE_BIT | gl::GL_MAP_READ_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT );
-        auto storeflags = ( mapflags | gl::GL_DYNAMIC_STORAGE_BIT );
-        gl::glNamedBufferStorage( id_, size_, nullptr, storeflags );
-        auto buf = reinterpret_cast<T*>( gl::glMapNamedBufferRange( id_, 0, size_, mapflags ) );
-        buffer_ = span<T>( buf, size_ );
-      }
-      inline GLuint id() const { return id_; }
-      inline span<T>& buffer() { return buffer_; }
-      ~PersistentBuffer()
-      {
-        gl::glUnmapNamedBuffer( id_ );
-        gl::glDeleteBuffers( 1, &id_ );
-      }
-    };
-
-    // FIXME This alignment isn't guaranteed to work.
-    // Should query the requirement from the driver, it could be as bad as 256
-    __declspec(align(16)) struct World
-    {
-      mat4 projection;
-      mat4 view;
-    };
-
     enum Type {
       Shader_Vertex,
       Shader_Fragment,
       Shader_Geometry,
-      Shader_TesselationControl,
-      Shader_TesselationEvaluation,
+      Shader_TessellationControl,
+      Shader_TessellationEvaluation,
       Shader_Compute,
       Shader_Mesh,
       Shader_Task,
@@ -59,7 +24,7 @@ namespace neko {
 
     class Shaders;
 
-    struct Shader {
+    struct Shader: public nocopy {
       friend class Shaders;
     protected:
       Type type_;
@@ -77,7 +42,7 @@ namespace neko {
     using ShaderPtr = unique_ptr<Shader>;
     using ShaderVector = vector<ShaderPtr>;
 
-    struct Program {
+    struct Program: public nocopy {
       friend class Shaders;
     protected:
       GLuint id_;
@@ -152,7 +117,7 @@ namespace neko {
     using ProgramPtr = shared_ptr<Program>;
     using ProgramVector = vector<ProgramPtr>;
 
-    struct Pipeline {
+    struct Pipeline: public nocopy {
       friend class Shaders;
     private:
       Pipeline() = delete;
@@ -164,14 +129,20 @@ namespace neko {
       Pipeline( const utf8String& name );
       inline GLuint id() const { return id_; }
       void setProgramStage( Type stage, GLuint id );
+      inline GLuint getProgramStage( Type stage )
+      {
+        assert( stages_[stage] );
+        return stages_[stage]->id();
+      }
       inline bool ready() { return ( gl::glIsProgramPipeline( id_ ) && !stages_.empty() ); }
       template <typename T>
-      inline void setUniform( const char* name, T const& value )
+      inline Pipeline& setUniform( const char* name, T const& value )
       {
         for ( auto& stage : stages_ )
         {
           stage.second->setUniform( name, value );
         }
+        return ( *this );
       }
       ~Pipeline();
     };
@@ -180,23 +151,28 @@ namespace neko {
     using PipelineVector = vector<PipelinePtr>;
     using PipelineMap = map<utf8String, PipelinePtr>;
 
-    class Shaders {
+    class Shaders: public nocopy {
     protected:
       ConsolePtr console_;
-      utf8String rootFilePath_;
+      wstring rootFilePath_;
       ShaderVector shaders_;
       ProgramVector programs_;
       PipelineMap pipelines_;
-      unique_ptr<PersistentBuffer<World>> world_;
+      unique_ptr<PersistentBuffer<neko::uniforms::World>> world_;
+      unique_ptr<PersistentBuffer<neko::uniforms::Processing>> processing_;
       void dumpLog( const GLuint& target, const bool isProgram );
+      void loadInclude( utf8String filename );
       void compileShader( Shader& shader, const string_view source );
-      void linkSingleProgram( Program& program, Shader& shader );
+      void linkSingleProgram( Program& program, Shader& shader, const vector<utf8String>& uniforms );
       utf8String loadSource( const utf8String& filename );
+      void buildSeparableProgram( const utf8String& name, const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program, const vector<utf8String>& uniforms );
     public:
       Shaders( ConsolePtr console );
-      inline World* world() { return world_->buffer().data(); }
+      inline neko::uniforms::World* world() { return world_->buffer().data(); }
+      inline neko::uniforms::Processing* processing() { return processing_->buffer().data(); }
       void initialize();
-      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename );
+      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );
+      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );
       Pipeline& usePipeline( const utf8String& name );
       void shutdown();
       ~Shaders();

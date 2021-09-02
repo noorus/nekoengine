@@ -3,7 +3,7 @@
 
 namespace neko {
 
-  class Memory: public noncopyable {
+  class Memory: public nocopy {
   public:
     enum class Sector {
       Generic,

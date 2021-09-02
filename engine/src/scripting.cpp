@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#ifndef NEKO_NO_SCRIPTING
 
 #include "neko_types.h"
 #include "forwards.h"
@@ -12,6 +13,16 @@
 #include "js_console.h"
 #include "js_util.h"
 
+#ifdef _DEBUG
+# pragma comment( lib, "v8_d.dll.lib" )
+# pragma comment( lib, "v8_libbase_d.dll.lib" )
+# pragma comment( lib, "v8_libplatform_d.dll.lib" )
+#else
+# pragma comment( lib, "v8.dll.lib" )
+# pragma comment( lib, "v8_libbase.dll.lib" )
+# pragma comment( lib, "v8_libplatform.dll.lib" )
+#endif
+
 namespace neko {
 
 #ifdef _DEBUG
@@ -20,6 +31,10 @@ namespace neko {
 # define NEKO_CONFIG_SUBDIRNAME "release"
 #endif
 
+  const wchar_t c_icuData[] = L"icudtl.dat";
+  const wchar_t c_snapshotData[] = L"snapshot_blob.bin";
+  const wchar_t c_v8BaseDirectory[] = LR"(\v8\)";
+
   Scripting::Scripting( EnginePtr engine ):
     Subsystem( move( engine ) ),
     v8::ArrayBuffer::Allocator()
@@ -27,14 +42,14 @@ namespace neko {
     engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
 
     rootDirectory_ = platform::getCurrentDirectory();
-    dataDirectory_ = rootDirectory_;
-    dataDirectory_.append( "\\data\\v8\\" NEKO_CONFIG_SUBDIRNAME "\\" );
+    dataDirectory_ = rootDirectory_ + c_v8BaseDirectory;
+    dataDirectory_.append( L"" NEKO_CONFIG_SUBDIRNAME "\\" );
 
-    if ( !v8::V8::InitializeICU( ( dataDirectory_ + "icudtl.dat" ).c_str() ) )
+    if ( !v8::V8::InitializeICU( platform::wideToUtf8( dataDirectory_ + c_icuData ).c_str() ) )
       NEKO_EXCEPT( "V8 ICU initialization failed" );
 
     v8::V8::InitializeExternalStartupDataFromFile(
-      ( dataDirectory_ + "snapshot_blob.bin" ).c_str()
+      platform::wideToUtf8( dataDirectory_ + c_snapshotData ).c_str()
     );
 
     platform_ = move( v8::platform::NewDefaultPlatform(
@@ -50,7 +65,7 @@ namespace neko {
   void Scripting::initialize()
   {
     global_ = make_shared<ScriptingContext>( this, this,
-      utf8String( rootDirectory_ ) + R"(\script\)" );
+      platform::wideToUtf8( rootDirectory_ + LR"(\scripts\)" ) );
   }
 
   void Scripting::postInitialize()
@@ -106,3 +121,5 @@ namespace neko {
   }
 
 }
+
+#endif

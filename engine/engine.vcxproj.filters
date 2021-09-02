@@ -64,6 +64,51 @@
     <Filter Include="Scripts">
       <UniqueIdentifier>{4672329b-8d04-4d51-914d-0517bfbe0195}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\input">
+      <UniqueIdentifier>{dbf34eb9-c76b-43da-a55c-248a31b783fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\input">
+      <UniqueIdentifier>{55fc5b6b-79c5-435f-8d92-572fda3e9c73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gfx\gui">
+      <UniqueIdentifier>{1e570fc3-0704-4d46-8ab2-8fbe35b5deec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gfx\gui">
+      <UniqueIdentifier>{e6ff7844-2725-477a-9973-e5fd4fc0718e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extern\tinytiff">
+      <UniqueIdentifier>{616e001a-a50c-4c73-82a4-c78a0b733ea5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\tinytiff">
+      <UniqueIdentifier>{176a687f-f44c-4f79-a50b-bb84ee4ad35a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\tinyexr">
+      <UniqueIdentifier>{b3c119ab-8d94-435a-a463-aeb90eb8edb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\lodepng">
+      <UniqueIdentifier>{11ea1cd4-c0f9-40d7-9a92-3d65fcb18691}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\miniz">
+      <UniqueIdentifier>{e8de2be6-057d-4e8f-bb3f-30302ecaadcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extern\miniz">
+      <UniqueIdentifier>{1979ab2f-44bc-46bc-a049-9f9c9543ecf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extern\lodepng">
+      <UniqueIdentifier>{5f6fd66e-84f4-4116-82cd-a7b4ba150565}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extern\tinyexr">
+      <UniqueIdentifier>{a3a63eb7-d7df-41ba-9008-af5a7185f12d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\loader">
+      <UniqueIdentifier>{3745b50a-538b-481b-905a-dfecf36005d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\tinygltf">
+      <UniqueIdentifier>{ee5b64c7-db23-4230-91e0-d0dff2bc915e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extern\tinygltf">
+      <UniqueIdentifier>{9098ca5c-5991-40a6-b6da-a08566101fb7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -89,9 +134,6 @@
     </ClCompile>
     <ClCompile Include="src\locator.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\lodepng\lodepng.cpp">
-      <Filter>Source Files\extern</Filter>
     </ClCompile>
     <ClCompile Include="src\framebuffer.cpp">
       <Filter>Source Files\gfx</Filter>
@@ -123,9 +165,6 @@
     <ClCompile Include="src\engine.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\loader.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
     <ClCompile Include="src\subsystem.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
@@ -154,9 +193,6 @@
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
     <ClCompile Include="src\font_textured.cpp">
-      <Filter>Source Files\gfx\fonts</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fontmanager.cpp">
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
     <ClCompile Include="src\staticmesh.cpp">
@@ -197,6 +233,69 @@
     </ClCompile>
     <ClCompile Include="src\rendersynccontext.cpp">
       <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input.cpp">
+      <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoDataManager.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoPlatform.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoRenderManager.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoRTTexture.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoTexture.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MyGUI_NekoVertexBuffer.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fontmanager.cpp">
+      <Filter>Source Files\gfx\fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenenode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\tinytiff\tinytiffreader.cpp">
+      <Filter>Source Files\extern\tinytiff</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\tinytiff\tinytiffwriter.cpp">
+      <Filter>Source Files\extern\tinytiff</Filter>
+    </ClCompile>
+    <ClCompile Include="src\glformats.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\lodepng\lodepng.cpp">
+      <Filter>Source Files\extern\lodepng</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\tinyexr\tinyexr.cpp">
+      <Filter>Source Files\extern\tinyexr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\miniz\miniz.cpp">
+      <Filter>Source Files\extern\miniz</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader.cpp">
+      <Filter>Source Files\loader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader_fbx.cpp">
+      <Filter>Source Files\loader</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader_unity.cpp">
+      <Filter>Source Files\loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\tinygltf\tiny_gltf.cc">
+      <Filter>Source Files\extern\tinygltf</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loader_gltf.cpp">
+      <Filter>Source Files\loader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -244,9 +343,6 @@
     </ClInclude>
     <ClInclude Include="include\camera.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\extern\lodepng\lodepng.h">
-      <Filter>Header Files\extern</Filter>
     </ClInclude>
     <ClInclude Include="include\gfx.h">
       <Filter>Header Files\gfx</Filter>
@@ -341,42 +437,149 @@
     <ClInclude Include="..\shared\include\neko_compilerdef.h">
       <Filter>Header Files\shared</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\include\tankengine.h">
+      <Filter>Header Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="include\input.h">
+      <Filter>Header Files\input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MyGUI_NekoPlatform.h">
+      <Filter>Header Files\gfx\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MyGUI_NekoRTTexture.h">
+      <Filter>Header Files\gfx\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tiff_definitions_internal.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiff_defs.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiff_tools.hxx">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiff_version.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiffreader.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiffreader.hxx">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinytiff\tinytiffwriter.h">
+      <Filter>Header Files\extern\tinytiff</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\lodepng\lodepng.h">
+      <Filter>Header Files\extern\lodepng</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\miniz\miniz.h">
+      <Filter>Header Files\extern\miniz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinyexr\tinyexr.h">
+      <Filter>Header Files\extern\tinyexr</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui.h">
+      <Filter>Header Files\gfx\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\text.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_camera.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\tinygltf\tiny_gltf.h">
+      <Filter>Header Files\extern\tinygltf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="manifest\neko.manifest">
+    <Manifest Include="engine.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\scripts\initialization.js">
+      <Filter>Scripts</Filter>
+    </None>
+    <None Include="..\bin\shaders\dbg_showvertexnormals.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\dbg_showvertexnormals.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\dbg_showvertexnormals.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\dbg_showvertextangents.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\dbg_showvertextangents.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\dbg_showvertextangents.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\inc.buffers.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\inc.colorutils.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mainframebuf2d.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mainframebuf2d.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_unlitdefault.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_unlitdefault.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_worldpbr.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_worldpbr.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mygui3d.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mygui3d.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\pointlight.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\pointlight.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\pointlight.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_ground.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_ground.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_untexturedpbs.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\mat_untexturedpbs.vert">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="engine.rc">
       <Filter>Resource Files</Filter>
-    </Manifest>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\bin\script\initialization.js">
-      <Filter>Scripts</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\default3d.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\default2d.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\mainframebuf2d.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\text3d.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\text3d.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\mainframebuf2d.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\default3d.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\data\shaders\default2d.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\script\math.js">
-      <Filter>Scripts</Filter>
-    </None>
+    <Image Include="..\embed\panz_icon_v1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

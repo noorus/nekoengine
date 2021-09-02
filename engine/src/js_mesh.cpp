@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#ifndef NEKO_NO_SCRIPTING
+
 #include "js_util.h"
 #include "console.h"
 #include "scripting.h"
@@ -61,6 +63,7 @@ namespace neko {
         verts[i].normal = vec3( 0.0f );
         verts[i].texcoord.x = static_cast<Real>( arrayValue->Get( context, 3 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
         verts[i].texcoord.y = static_cast<Real>( arrayValue->Get( context, 4 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
       }
       vbo->pushVertices( move( verts ) );
     }
@@ -86,7 +89,7 @@ namespace neko {
       auto context = args.GetIsolate()->GetCurrentContext();
 
       JSMesh mesh;
-      mesh.vbo_ = make_shared<VBO>( VBOType::VBO_3D );
+      mesh.vbo_ = make_shared<VBO>( VBOType::VBO_3D, false );
       mesh.ebo_ = make_shared<EBO>();
       mesh.vao_.reset();
 
@@ -218,4 +221,4 @@ namespace neko {
 
 }
 
-
+#endif

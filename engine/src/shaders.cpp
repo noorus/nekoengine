@@ -10,6 +10,8 @@ namespace neko {
 
   using namespace gl;
 
+  const wchar_t c_shadersBaseDirectory[] = LR"(\shaders\)";
+
   namespace shaders {
 
     struct ShaderMapper
@@ -20,13 +22,13 @@ namespace neko {
       string name;
     };
 
-    const ShaderMapper cShaderTypes[Max_Shader_Type] =
+    const ShaderMapper c_shaderTypes[Max_Shader_Type] =
     {
       { Shader_Vertex, GL_VERTEX_SHADER, GL_VERTEX_SHADER_BIT, "vertex" },
       { Shader_Fragment, GL_FRAGMENT_SHADER, GL_FRAGMENT_SHADER_BIT, "fragment" },
       { Shader_Geometry, GL_GEOMETRY_SHADER, GL_GEOMETRY_SHADER_BIT, "geometry" },
-      { Shader_TesselationControl, GL_TESS_CONTROL_SHADER, GL_TESS_CONTROL_SHADER_BIT, "tess_ctrl" },
-      { Shader_TesselationEvaluation, GL_TESS_EVALUATION_SHADER, GL_TESS_EVALUATION_SHADER_BIT, "tess_eval" },
+      { Shader_TessellationControl, GL_TESS_CONTROL_SHADER, GL_TESS_CONTROL_SHADER_BIT, "tess_ctrl" },
+      { Shader_TessellationEvaluation, GL_TESS_EVALUATION_SHADER, GL_TESS_EVALUATION_SHADER_BIT, "tess_eval" },
       { Shader_Compute, GL_COMPUTE_SHADER, GL_COMPUTE_SHADER_BIT, "compute" },
       { Shader_Mesh, GL_MESH_SHADER_NV, GL_MESH_SHADER_BIT_NV, "mesh" },
       { Shader_Task, GL_TASK_SHADER_NV, GL_TASK_SHADER_BIT_NV, "task" }
@@ -45,21 +47,53 @@ namespace neko {
         NEKO_EXCEPT( "Shader compiler is not present on this platform" );
 
       rootFilePath_ = platform::getCurrentDirectory();
-      rootFilePath_.append( R"(\data\shaders\)" );
+      rootFilePath_.append( c_shadersBaseDirectory );
 
-      world_ = make_unique<PersistentBuffer<World>>();
+      world_ = make_unique<PersistentBuffer<neko::uniforms::World>>();
+      processing_ = make_unique<PersistentBuffer<neko::uniforms::Processing>>();
 
-      //createSimplePipeline( "default2d", "default2d.vert", "default2d.frag" );
-      createSimplePipeline( "default3d", "default3d.vert", "default3d.frag" );
-      createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag" );
-      //createSimplePipeline( "text3d", "text3d.vert", "text3d.frag" );
+      // Generate the gaussian blur kernel
+      {
+        auto& buf = processing_->buffer();
+        const float sigma = 15.0f;
+        auto normpdf = []( float x, float sigma ) -> float
+        {
+          return 0.39894f * exp( -0.5f * x * x / ( sigma * sigma ) ) / sigma;
+        };
+        const int ksize = ( ( neko::uniforms::c_gaussianBlurSamples - 1 ) / 2 );
+        for ( int i = 0; i <= ksize; ++i )
+        {
+          buf.data()->gaussianKernel[ksize + i]
+            = buf.data()->gaussianKernel[ksize - i]
+            = normpdf( (float)i, sigma );
+        }
+        float z = 0.0f;
+        for ( int i = 0; i < neko::uniforms::c_gaussianBlurSamples; ++i )
+          z += buf.data()->gaussianKernel[i];
+        buf.data()->gaussianZ = z;
+      }
+
+      // Includes
+      loadInclude( "inc.buffers.glsl" );
+      loadInclude( "inc.colorutils.glsl" );
+
+      // Default pipelines
+      createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag", { "hdr", "exposure", "gamma", "texMain", "texGBuffer" } );
+      createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag", { "yscale", "tex" } );
+      createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
+      createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
+      createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "gamma", "tex" } );
+      createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "gamma", "texAlbedoTransparency", "texMetalSmoothness", "texNormal", "texTeamColor" } );
+      createSimplePipeline( "mat_ground", "mat_ground.vert", "mat_ground.frag", { "model", "gamma", "texAlbedoSmoothness", "texHeight", "texMetallicSmoothness", "texNormal" } );
+      createSimplePipeline( "mat_untexturedpbs", "mat_untexturedpbs.vert", "mat_untexturedpbs.frag", { "model", "gamma", "matAlbedo", "matRoughness", "matMetallic" } );
+      createSimplePipeline( "pointlight", "pointlight.vert", "pointlight.geom", "pointlight.frag", { "model" } );
     }
 
     // Shader
 
     Shader::Shader( Type type ): type_( type ), id_( 0 ), compiled_( false )
     {
-      id_ = glCreateShader( cShaderTypes[type].glType );
+      id_ = glCreateShader( c_shaderTypes[type].glType );
       if ( id_ == 0 )
         NEKO_EXCEPT( "Shader creation failed" );
     }
@@ -102,7 +136,7 @@ namespace neko {
 
     void Pipeline::setProgramStage( Type stage, GLuint id )
     {
-      glUseProgramStages( id_, cShaderTypes[stage].maskBit, id );
+      glUseProgramStages( id_, c_shaderTypes[stage].maskBit, id );
     }
 
     Pipeline::~Pipeline()
@@ -137,6 +171,8 @@ namespace neko {
       }
     }
 
+    static const char* const c_includeSearchPath = "/";
+
     void Shaders::compileShader( Shader& shader, const string_view source )
     {
       if ( shader.type() >= Max_Shader_Type )
@@ -147,7 +183,8 @@ namespace neko {
 
       auto src = (const GLchar*)source.data();
       glShaderSource( shader.id(), 1, &src, nullptr );
-      glCompileShader( shader.id() );
+      glCompileShaderIncludeARB( shader.id(), 1, &c_includeSearchPath, nullptr );
+      // glCompileShader( shader.id() );
 
       GLint compiled = 0;
       glGetShaderiv( shader.id(), GL_COMPILE_STATUS, &compiled );
@@ -159,7 +196,7 @@ namespace neko {
       }
     }
 
-    void Shaders::linkSingleProgram( Program& program, Shader& shader )
+    void Shaders::linkSingleProgram( Program& program, Shader& shader, const vector<utf8String>& uniforms )
     {
       if ( !shader.ready() )
         NEKO_EXCEPT( "Passed shader is not ready" );
@@ -180,47 +217,55 @@ namespace neko {
         NEKO_EXCEPT( "GL program linking failed" );
       }
 
-      program.uniforms_["model"] = glGetUniformLocation( program.id(), "model" );
-      program.uniforms_["tex"] = glGetUniformLocation( program.id(), "tex" );
+      for ( const auto& uni : uniforms )
+        program.uniforms_[uni.c_str()] = glGetUniformLocation( program.id(), uni.c_str() );
     }
 
     utf8String Shaders::loadSource( const utf8String& filename )
     {
       utf8String source;
-      platform::FileReader file( rootFilePath_ + filename );
+      platform::FileReader file( rootFilePath_ + platform::utf8ToWide( filename ) );
       source.resize( file.size() + 1 );
       file.read( &source[0], (uint32_t)file.size() );
       source[file.size()] = '\0';
       return move( source );
     }
 
-    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename )
+    void Shaders::loadInclude( utf8String filename )
+    {
+      // https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_shading_language_include.txt
+      auto source = loadSource( filename );
+      filename = "/" + filename;
+      source[source.length() - 1] = '\n';
+      glNamedStringARB( gl::GL_SHADER_INCLUDE_ARB, (GLint)filename.length(), filename.c_str(), (GLint)source.length(), source.c_str() );
+    }
+
+    void Shaders::buildSeparableProgram( const utf8String& name,
+    const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program, const vector<utf8String>& uniforms )
+    {
+      auto source = loadSource( filename );
+
+      console_->printf( Console::srcGfx, "Compiling %s shader: %s", c_shaderTypes[type].name.c_str(), name.c_str() );
+
+      shader = make_unique<Shader>( type );
+      compileShader( *shader, source );
+      program = make_shared<Program>();
+      linkSingleProgram( *program, *shader, uniforms );
+    }
+
+    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms )
     {
       assert( pipelines_.find( name ) == pipelines_.end() );
 
-      auto vertexSource = loadSource( vp_filename );
+      ShaderPtr vs, fs;
+      ProgramPtr vp, fp;
 
-      console_->printf( Console::srcGfx, "Compiling %s shader: %s",
-        cShaderTypes[Type::Shader_Vertex].name.c_str(), name.c_str() );
-
-      auto vs = make_unique<Shader>( Type::Shader_Vertex );
-      compileShader( *vs, vertexSource );
-      auto vp = make_shared<Program>();
-      linkSingleProgram( *vp, *vs );
-
-      auto fragmentSource = loadSource( fp_filename );
-
-      console_->printf( Console::srcGfx, "Compiling %s shader: %s",
-        cShaderTypes[Type::Shader_Fragment].name.c_str(), name.c_str() );
-
-      auto fs = make_unique<Shader>( Type::Shader_Fragment );
-      compileShader( *fs, fragmentSource );
-      auto fp = make_shared<Program>();
-      linkSingleProgram( *fp, *fs );
+      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp, uniforms );
+      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
 
       auto pipeline = make_unique<Pipeline>( name );
-      glUseProgramStages( pipeline->id(), cShaderTypes[vs->type()].maskBit, vp->id() );
-      glUseProgramStages( pipeline->id(), cShaderTypes[fs->type()].maskBit, fp->id() );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[vs->type()].maskBit, vp->id() );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[fs->type()].maskBit, fp->id() );
 
       pipeline->stages_[Type::Shader_Vertex] = vp;
       pipeline->stages_[Type::Shader_Fragment] = fp;
@@ -232,12 +277,42 @@ namespace neko {
       pipelines_[name] = move( pipeline );
     }
 
+    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms )
+    {
+      assert( pipelines_.find( name ) == pipelines_.end() );
+
+      ShaderPtr vs, gs, fs;
+      ProgramPtr vp, gp, fp;
+
+      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp, uniforms );
+      buildSeparableProgram( name, gp_filename, Type::Shader_Geometry, gs, gp, uniforms );
+      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
+
+      auto pipeline = make_unique<Pipeline>( name );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[vs->type()].maskBit, vp->id() );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[gs->type()].maskBit, gp->id() );
+      glUseProgramStages( pipeline->id(), c_shaderTypes[fs->type()].maskBit, fp->id() );
+
+      pipeline->stages_[Type::Shader_Vertex] = vp;
+      pipeline->stages_[Type::Shader_Geometry] = gp;
+      pipeline->stages_[Type::Shader_Fragment] = fp;
+
+      shaders_.push_back( move( vs ) );
+      shaders_.push_back( move( gs ) );
+      shaders_.push_back( move( fs ) );
+      programs_.push_back( move( vp ) );
+      programs_.push_back( move( gp ) );
+      programs_.push_back( move( fp ) );
+      pipelines_[name] = move( pipeline );
+    }
+
     Pipeline& Shaders::usePipeline( const utf8String& name )
     {
       assert( pipelines_.find( name ) != pipelines_.end() );
       auto& pipeline = ( *pipelines_[name] );
       glBindProgramPipeline( pipeline.id_ );
       glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 0, world_->id() );
+      glBindBufferBase( GL_SHADER_STORAGE_BUFFER, 1, processing_->id() );
 
       return pipeline;
     }

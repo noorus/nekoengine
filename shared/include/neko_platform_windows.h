@@ -3,10 +3,18 @@
 #include "neko_exception.h"
 //#include "consolelistener.h"
 #include <windows.h>
+#include <shlobj.h>
+
+#ifndef NEKO_SIDELIBRARY_BUILD
+// fucking ICU steals the priority of resolving resource.h directly
+# include "../../engine/resource.h"
+#endif
 
 namespace neko {
 
   namespace platform {
+
+#ifndef NEKO_SIDELIBRARY_BUILD
 
     namespace api {
 
@@ -41,12 +49,14 @@ namespace neko {
 
     extern HINSTANCE g_instance;
 
+#endif
+
 #pragma warning( push )
 #pragma warning( disable : 26110 )
 
     //! \class RWLock
     //! Reader-writer lock class for easy portability.
-    class RWLock: noncopyable {
+    class RWLock {
     protected:
       SRWLOCK lock_;
     public:
@@ -96,7 +106,7 @@ namespace neko {
     //! Synchronously wait for one or all of native events to fire, or timeout.
     inline size_t waitForEvents( const EventVector& events, uint32_t milliseconds, bool waitAll = false, size_t timeoutValue = WAIT_TIMEOUT )
     {
-      auto ret = static_cast<size_t>( WaitForMultipleObjects( (DWORD)events.size(), events.data(), waitAll, milliseconds ) );
+      auto ret = static_cast<size_t>( WaitForMultipleObjects( (DWORD)events.size(), events.data(), waitAll, milliseconds > 0 ? milliseconds : INFINITE ) );
       if ( ret >= WAIT_OBJECT_0 && ret < ( WAIT_OBJECT_0 + events.size() ) )
         return ( ret - WAIT_OBJECT_0 );
       else if ( ret == WAIT_TIMEOUT )
@@ -213,6 +223,7 @@ namespace neko {
       SnapshotPainter snapshotPainter_;
     public:
       RenderWindowHandler();
+      inline HWND getWindow() const throw() { return window_; }
       void changeTargetResolution( const size2i targetResolution );
       void setWindow( RenderWindowEventRecipient* callback, HWND window );
     private:
@@ -299,9 +310,93 @@ namespace neko {
       }
     };
 
+#ifndef NEKO_SIDELIBRARY_BUILD
+
+    enum class KnownIcon
+    {
+      MainIcon,
+      ConsoleIcon
+    };
+
+    inline void setWindowIcon( HWND window, KnownIcon icon )
+    {
+      HICON ld = nullptr;
+      if ( icon == KnownIcon::MainIcon )
+        ld = LoadIconW( g_instance, MAKEINTRESOURCEW( IDI_MAINICON ) );
+      if ( ld )
+      {
+        SendMessageW( window, WM_SETICON, ICON_BIG, (LPARAM)ld );
+        SendMessageW( window, WM_SETICON, ICON_SMALL, (LPARAM)ld );
+      }
+    }
+
+#endif
+
+    inline void createDirectory( const wstring& path )
+    {
+      wstring unicp = L"\\\\?\\" + path;
+      if ( !CreateDirectoryW( unicp.c_str(), nullptr ) )
+        NEKO_WINAPI_EXCEPT( "CreateDirectoryW failed" );
+    }
+
+    inline void ensureDirectory( const wstring& path )
+    {
+      auto attribs = ::GetFileAttributesW( path.c_str() );
+      if ( attribs == INVALID_FILE_ATTRIBUTES || !( attribs & FILE_ATTRIBUTE_DIRECTORY ) )
+      {
+        createDirectory( path );
+      }
+    }
+
+#ifdef _DEBUG
+    const wchar_t c_gameName[] = L"nekoengineDebug";
+#else
+    const wchar_t c_gameName[] = L"nekoengineRetail";
+#endif
+
+    inline wstring getGameDocumentsPath()
+    {
+      PWSTR folder;
+      if ( ::SHGetKnownFolderPath( FOLDERID_Documents, 0, nullptr, &folder ) != S_OK )
+        NEKO_EXCEPT( "SHGetKnownFolderPath failed" );
+      wchar_t fullpath[MAX_PATH];
+      swprintf_s( fullpath, MAX_PATH, L"%s\\%s\\", folder, c_gameName );
+      CoTaskMemFree( folder );
+      return fullpath;
+    }
+
+    inline void setCurrentDirectory( const wstring& path )
+    {
+      ::SetCurrentDirectoryW( path.c_str() );
+    }
+
     inline void sleep( uint32_t milliseconds )
     {
       ::SleepEx( milliseconds, TRUE );
+    }
+
+    inline bool getCursorPosition( const HWND window, POINT& position )
+    {
+      if ( !GetCursorPos( &position ) )
+        return false;
+      if ( !ScreenToClient( window, &position ) )
+        return false;
+      return true;
+    }
+
+    inline int64_t unixTimestamp()
+    {
+      constexpr int64_t c_unixTimeStart = 0x019DB1DED53E8000;
+      constexpr int64_t c_ticksPerSecond = 10000000;
+
+      FILETIME ft;
+      GetSystemTimeAsFileTime( &ft );
+
+      LARGE_INTEGER li;
+      li.LowPart = ft.dwLowDateTime;
+      li.HighPart = ft.dwHighDateTime;
+
+      return ( li.QuadPart - c_unixTimeStart ) / c_ticksPerSecond;
     }
 
     //! UTF-8 to wide string conversion.
@@ -339,9 +434,10 @@ namespace neko {
       HANDLE file_;
       uint64_t size_;
     public:
-      FileReader( const utf8String& filename ): file_( INVALID_HANDLE_VALUE )
+      FileReader( const utf8String& filename ): FileReader( utf8ToWide( filename ) ) {}
+      FileReader( const wstring& filename ): file_( INVALID_HANDLE_VALUE )
       {
-        file_ = CreateFileW( utf8ToWide( filename ).c_str(), GENERIC_READ, FILE_SHARE_READ,
+        file_ = CreateFileW( filename.c_str(), GENERIC_READ, FILE_SHARE_READ,
           nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
 
         if ( file_ == INVALID_HANDLE_VALUE )
@@ -434,10 +530,10 @@ namespace neko {
     protected:
       HANDLE file_;
     public:
-      FileWriter( const utf8String& filename, const bool append = false ): file_( INVALID_HANDLE_VALUE )
+      FileWriter( const utf8String& filename, const bool append = false ): FileWriter( utf8ToWide( filename ) ) {}
+      FileWriter( const wstring& filename, const bool append = false ): file_( INVALID_HANDLE_VALUE )
       {
-        file_ = CreateFileW( utf8ToWide( filename ).c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr,
-          append ? OPEN_ALWAYS : CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+        file_ = CreateFileW( filename.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr, append ? OPEN_ALWAYS : CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
 
         if ( file_ == INVALID_HANDLE_VALUE )
           NEKO_EXCEPT( "File creation failed" );
@@ -497,19 +593,26 @@ namespace neko {
 
     //! Check whether a file exists at the specified path.
     //! A directory is not seen as a file.
-    inline bool fileExists( const utf8String& path )
+    inline bool fileExists( const wstring& path )
     {
-      DWORD attributes = GetFileAttributesW( utf8ToWide( path ).c_str() );
+      DWORD attributes = GetFileAttributesW( path.c_str() );
       return ( attributes != INVALID_FILE_ATTRIBUTES && !( attributes & FILE_ATTRIBUTE_DIRECTORY ) );
     }
 
+    //! Check whether a file exists at the specified path.
+    //! A directory is not seen as a file.
+    inline bool fileExists( const utf8String& path )
+    {
+      return fileExists( utf8ToWide( path ) );
+    }
+
     //! Get a full path to the current directory.
-    inline utf8String getCurrentDirectory()
+    inline wstring getCurrentDirectory()
     {
       wchar_t currentDirectory[MAX_PATH];
       if ( !GetCurrentDirectoryW( MAX_PATH, currentDirectory ) )
         NEKO_EXCEPT( "Current directory fetch failed" );
-      return wideToUtf8( currentDirectory );
+      return currentDirectory;
     }
 
     //! Get current date and time.

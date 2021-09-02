@@ -8,6 +8,46 @@
 #include "fontmanager.h"
 #include "console.h"
 #include "messaging.h"
+#include "gui.h"
+
+#pragma comment( lib, "opengl32.lib" )
+
+#ifdef _DEBUG
+# pragma comment( lib, "glbindingd.lib" )
+# pragma comment( lib, "glbinding-auxd.lib" )
+# pragma comment( lib, "sfml-main-d.lib" )
+# pragma comment( lib, "sfml-system-d.lib" )
+# pragma comment( lib, "sfml-window-d.lib" )
+# ifndef NEKO_NO_GUI
+#  pragma comment( lib, "MyGUIEngine_d.lib" )
+# endif
+# ifndef NEKO_NO_ANIMATION
+#  pragma comment( lib, "ozz_animation_d.lib" )
+#  pragma comment( lib, "ozz_animation_fbx_d.lib" )
+#  pragma comment( lib, "ozz_animation_tools_d.lib" )
+#  pragma comment( lib, "ozz_animation_offline_d.lib" )
+#  pragma comment( lib, "ozz_base_d.lib" )
+#  pragma comment( lib, "ozz_geometry_d.lib" )
+#  pragma comment( lib, "ozz_options_d.lib" )
+# endif
+#else
+# pragma comment( lib, "glbinding.lib" )
+# pragma comment( lib, "sfml-main.lib" )
+# pragma comment( lib, "sfml-system.lib" )
+# pragma comment( lib, "sfml-window.lib" )
+# ifndef NEKO_NO_GUI
+#  pragma comment( lib, "MyGUIEngine.lib" )
+# endif
+# ifndef NEKO_NO_ANIMATION
+#  pragma comment( lib, "ozz_animation_r.lib" )
+#  pragma comment( lib, "ozz_animation_fbx_r.lib" )
+#  pragma comment( lib, "ozz_animation_tools_r.lib" )
+#  pragma comment( lib, "ozz_animation_offline_r.lib" )
+#  pragma comment( lib, "ozz_base_r.lib" )
+#  pragma comment( lib, "ozz_geometry_r.lib" )
+#  pragma comment( lib, "ozz_options_r.lib" )
+# endif
+#endif
 
 namespace neko {
 
@@ -15,21 +55,25 @@ namespace neko {
 
   // Gfx
 
-  const char cWindowTitle[] = "nekoengine//render";
+#ifdef _DEBUG
+  const char c_windowTitle[] = "Panzer Pandemonium [debug]";
+#else
+  const char c_windowTitle[] = "Panzer Pandemonium [release]";
+#endif
 
-  NEKO_DECLARE_CONVAR( vid_screenwidth,
-    "Screen width. Changes are applied when the renderer is restarted.", 1280 );
-  NEKO_DECLARE_CONVAR( vid_screenheight, "Screen height. Changes are applied when the renderer is restarted.", 720 );
+  NEKO_DECLARE_CONVAR( vid_screenwidth, "Screen width. Changes are applied when the renderer is restarted.", 1920 );
+  NEKO_DECLARE_CONVAR( vid_screenheight, "Screen height. Changes are applied when the renderer is restarted.", 1080 );
   NEKO_DECLARE_CONVAR( vid_vsync, "Whether to print OpenGL debug log output.", true );
-  NEKO_DECLARE_CONVAR( gl_debuglog,
-    "OpenGL debug log output level. 0 = none, 1 = some, 2 = debug context", 2 );
+  NEKO_DECLARE_CONVAR( gl_debuglog, "OpenGL debug log output level. 0 = none, 1 = some, 2 = debug context", 2 );
 
   Gfx::Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
-    loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ),
-    messaging_( move( messaging ) ), director_( move( director ) )
+  loader_( move( loader ) ), fonts_( move( fonts ) ), console_( move( console ) ),
+  messaging_( move( messaging ) ), director_( move( director ) )
   {
-    assert( loader_ && fonts_ && director_  && messaging_ && console_ );
+    assert( loader_ && fonts_ && director_ && messaging_ && console_ );
     preInitialize();
+    input_ = make_shared<GfxInput>( console_ );
+    gui_ = make_shared<GUI>();
   }
 
   void Gfx::printInfo()
@@ -57,7 +101,12 @@ namespace neko {
 
     auto gfx = static_cast<Gfx*>( const_cast<void*>( userParam ) );
 
-    if ( id == 1281 || id == 1285 || id == 0 )
+    if ( id == 0
+      || id == 1281
+      || id == 1282
+      || id == 1285
+      // || id == 131076
+      )
       DebugBreak();
 
     if ( !gfx )
@@ -109,7 +158,9 @@ namespace neko {
     if ( g_CVar_gl_debuglog.as_i() > 1 )
       settings.attributeFlags |= sf::ContextSettings::Attribute::Debug;
 
-    window_ = make_unique<sf::Window>( videoMode, cWindowTitle, sf::Style::Default, settings );
+    window_ = make_unique<sf::Window>( videoMode, c_windowTitle, sf::Style::Default, settings );
+
+    platform::setWindowIcon( window_->getSystemHandle(), platform::KnownIcon::MainIcon );
 
     window_->setVerticalSyncEnabled( g_CVar_vid_vsync.as_b() ); // vsync
     window_->setFramerateLimit( 0 ); // no sleep till Brooklyn
@@ -137,29 +188,43 @@ namespace neko {
     printInfo();
   }
 
-  void Gfx::postInitialize()
+  void Gfx::postInitialize( Engine& engine )
   {
     renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
     renderer_->preInitialize();
+    target_ = renderer_->createSceneNode( nullptr );
 
     setOpenGLDebugLogging( g_CVar_gl_debuglog.as_i() > 0 );
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
-    camera_ = make_unique<Camera>( realResolution, vec3( 0.0f, 0.0f, 0.0f ) );
+    camera_ = make_unique<ArcballCamera>( renderer_.get(), realResolution, target_,
+      vec3( 5.0f, 3.0f, 5.0f ), // vecOffset
+      60.0f, // fov
+      true, // reverse
+      10.0f, // sens
+      5.0f, // mindist
+      50.0f, // maxdist
+      2.0f, // rotdecel
+      5.0f, // zoomaccel
+      2.0f ); // zoomdecel
 
     resize( window_->getSize().x, window_->getSize().y );
 
     renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
-  }
 
-  void Gfx::preUpdate( GameTime time )
-  {
-    renderer_->prepare( time );
+    auto documentsPath = platform::wideToUtf8( engine.env().documentsPath_ );
+    gui_->initialize( this, documentsPath, *window_.get() );
+    gui_->poop();
+
+    input_->initialize( window_->getSystemHandle() );
+
+    messaging_->listen( this );
   }
 
   void Gfx::resize( size_t width, size_t height )
   {
     viewport_.size_ = vec2i( width, height );
+    input_->setWindowSize( viewport_.size_ );
 
     console_->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
 
@@ -167,10 +232,14 @@ namespace neko {
     camera_->setViewport( realResolution );
 
     glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
+
+    gui_->resize( static_cast<int>( width ), static_cast<int>( height ) );
   }
 
   void Gfx::processEvents()
   {
+    input_->update();
+
     sf::Event evt;
     while ( window_->pollEvent( evt ) )
     {
@@ -195,17 +264,61 @@ namespace neko {
       {
         if ( evt.key.code == sf::Keyboard::F5 )
           messaging_->send( M_Debug_ReloadScript );
+        if ( evt.key.code == sf::Keyboard::F6 )
+        {
+          messaging_->send( M_Debug_ReloadShaders );
+          flags_.reloadShaders = true;
+        }
+        if ( evt.key.code == sf::Keyboard::F7 )
+          messaging_->send( M_Debug_PauseTime );
+        if ( evt.key.code == sf::Keyboard::F9 )
+        {
+          messaging_->send( M_Debug_ToggleWireframe );
+          g_CVar_dbg_wireframe.toggle();
+        }
       }
     }
   }
 
-  void Gfx::tick( GameTime tick, GameTime time )
+  void Gfx::onMessage( const Message& msg )
   {
-    camera_->update( tick, time );
+    logicLock_.lock();
+    logicLock_.unlock();
   }
 
-  void Gfx::postUpdate( GameTime delta, GameTime time )
+  void Gfx::update( GameTime time, GameTime delta, Engine& engine )
   {
+    if ( flags_.reloadShaders )
+    {
+      renderer_->shaders().shutdown();
+      renderer_->shaders().initialize();
+      flags_.reloadShaders = false;
+    }
+
+    renderer_->prepare( time );
+    char asd[256];
+    sprintf_s( asd, 256, "Launches: %i\nTime wasted: %.0f seconds", engine.stats().i_launches.load(), engine.stats().f_timeWasted.load() + (float)time );
+    gui_->setshit( asd );
+
+    /*char asd[256];
+    sprintf_s( asd, 256, "[%s,%s,%s,%s,%s]\nmouse x %lli y %lli z %lli",
+      input_->mouseButtons_[0] ? "true" : "false",
+      input_->mouseButtons_[1] ? "true" : "false",
+      input_->mouseButtons_[2] ? "true" : "false",
+      input_->mouseButtons_[3] ? "true" : "false",
+      input_->mouseButtons_[4] ? "true" : "false",
+      input_->movement_.x, input_->movement_.y, input_->movement_.z );
+    gui_->setshit( asd );*/
+
+    if ( input_->mousebtn( 2 ) )
+      camera_->applyInputPanning( input_->movement() );
+    else if ( input_->mousebtn( 1 ) )
+      camera_->applyInputRotation( input_->movement() );
+
+    camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
+
+    camera_->update( delta, time );
+
     // activate as current context
     window_->setActive( true );
 
@@ -216,7 +329,11 @@ namespace neko {
       window_->setActive( true );
     }
 
-    renderer_->draw( camera_ );
+#ifndef NEKO_NO_GUI
+    renderer_->draw( time, *camera_.get(), gui_->platform() );
+#else
+    renderer_->draw( time, *camera_.get(), nullptr );
+#endif
 
     window_->display();
   }
@@ -235,6 +352,18 @@ namespace neko {
 
   void Gfx::shutdown()
   {
+    messaging_->remove( this );
+
+    if ( target_ )
+    {
+      renderer_->destroySceneNode( target_ );
+      target_ = nullptr;
+    }
+
+    input_->shutdown();
+
+    gui_->shutdown();
+
     camera_.reset();
 
     platform::RenderWindowHandler::get().setWindow( nullptr, nullptr );
@@ -251,32 +380,34 @@ namespace neko {
     renderer_->prepare( 0.0 );
   }
 
-  void Gfx::restart()
+  void Gfx::restart( Engine& engine )
   {
     shutdown();
     preInitialize();
-    postInitialize();
+    postInitialize( engine );
   }
 
   Gfx::~Gfx()
   {
     shutdown();
+    input_.reset();
   }
 
   const string c_gfxThreadName = "nekoRenderer";
 
-  ThreadedRenderer::ThreadedRenderer( ThreadedLoaderPtr loader, FontManagerPtr fonts,
-    MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
-    loader_( move( loader ) ), fonts_( move( fonts ) ),
-    messaging_( move( messaging ) ), director_( move( director ) ),
-    console_( move( console ) ), thread_( c_gfxThreadName, threadProc, this )
+  ThreadedRenderer::ThreadedRenderer( EnginePtr engine, ThreadedLoaderPtr loader,
+  FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
+  engine_( move( engine ) ), loader_( move( loader ) ), fonts_( move( fonts ) ),
+  messaging_( move( messaging ) ), director_( move( director ) ), lastTime_( 0.0 ),
+  console_( move( console ) ), thread_( c_gfxThreadName, threadProc, this )
   {
   }
 
   void ThreadedRenderer::initialize()
   {
     gfx_ = make_shared<Gfx>( loader_, fonts_, messaging_, director_, console_ );
-    gfx_->postInitialize();
+    gfx_->postInitialize( *engine_.get() );
+    lastTime_ = 0.0;
   }
 
   void ThreadedRenderer::run( platform::Event& wantStop )
@@ -290,19 +421,25 @@ namespace neko {
       {
         restartEvent_.reset();
         console_->printf( Console::srcGfx, "Restarting renderer" );
+        gfx_->logicLock_.lock();
         gfx_->jsRestart();
+        gfx_->logicLock_.unlock();
         console_->printf( Console::srcGfx, "Restart done" );
         restartedEvent_.set();
         continue;
       }
 
+      gfx_->logicLock_.lock();
+
       gfx_->processEvents();
 
-      gfx_->preUpdate( 0.0f );
+      auto time = engine_->renderTime().load();
+      auto delta = ( time - lastTime_ );
+      lastTime_ = time;
 
-      gfx_->tick( 0.0f, 0.0f );
+      gfx_->update( time, delta, *engine_.get() );
 
-      gfx_->postUpdate( 0.0f, 0.0f );
+      gfx_->logicLock_.unlock();
 
       platform::sleep( 1 );
     }

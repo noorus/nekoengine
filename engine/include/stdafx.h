@@ -14,24 +14,20 @@
 # define _SCL_SECURE_NO_WARNINGS
 #endif
 
-#ifdef NEKO_TEST_WINVISTACOMPAT
-# define NTDDI_VERSION NTDDI_VISTASP4
-# define _WIN32_WINNT _WIN32_WINNT_VISTA
-#else
-# define NTDDI_VERSION NTDDI_WIN10
-# define _WIN32_WINNT _WIN32_WINNT_WIN10
-#endif
+#define NTDDI_VERSION NTDDI_WIN10
+#define _WIN32_WINNT _WIN32_WINNT_WIN10
+
 #include <sdkddkver.h>
 
-#include <windows.h>          // Windows
-#include <shellapi.h>         // ShellAPI
-#include <shlobj.h>           // ShellAPI OLE Objects
-#include <commctrl.h>         // Common Controls          (comctl32.lib)
-#include <richedit.h>         // RichEdit
-#include <time.h>             // Time
-//#include <psapi.h>            // Process Status API       (psapi.lib)
-//#include <dbghelp.h>          // Debug Help Library       (dbghelp.lib)
-#include <avrt.h>             // AVRT                     (avrt.lib)
+#include <windows.h>
+#include <shellapi.h>
+#include <shlobj.h>
+#include <commctrl.h>
+#include <richedit.h>
+#include <ctime>
+//#include <psapi.h>
+//#include <dbghelp.h>
+#include <avrt.h>
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -46,15 +42,15 @@
 # error Unknown platform!
 #endif
 
-#include <stdio.h>
+#include <cstdio>
 #include <malloc.h>
 #include <memory.h>
-#include <wchar.h>
+#include <cwchar>
 #define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #include <eh.h>
 #include <intrin.h>
-#include <assert.h>
+#include <cassert>
 
 #undef min
 #undef max
@@ -97,21 +93,25 @@
 #include <SFML/Window.hpp>
 
 // FMOD
-#include <fmod.hpp>
-#include <fmod_errors.h>
-#include <fmod_studio.hpp>
-#include <fsbank.h>
-#include <fsbank_errors.h>
+#ifndef NEKO_NO_AUDIO
+# include <fmod.hpp>
+# include <fmod_errors.h>
+# include <fmod_studio.hpp>
+# include <fsbank.h>
+# include <fsbank_errors.h>
+#endif
 
 #pragma warning( push )
 #pragma warning( disable: 4251 )
 
 // V8
-#include <libplatform/libplatform.h>
-#include <v8.h>
+#ifndef NEKO_NO_SCRIPTING
+# include <libplatform/libplatform.h>
+# include <v8.h>
+#endif
 
-#ifndef NEKO_NO_ICU
 // ICU
+#ifndef NEKO_NO_ICU
 # include <unicode/utypes.h>
 # include <unicode/uchar.h>
 # include <unicode/locid.h>
@@ -145,6 +145,39 @@
 // Harfbuzz
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
+
+// Nil
+#include <nil.h>
+
+// MyGUI
+#ifndef NEKO_NO_GUI
+# pragma warning( push )
+# pragma warning( disable: 4275 )
+# include <MYGUI/MyGUI.h>
+# pragma warning( pop )
+#endif
+
+// JSON
+#include <json.hpp>
+
+// FBX
+#include <fbxsdk.h>
+
+// OZZ
+#ifndef NEKO_NO_ANIMATION
+# include <ozz/animation/runtime/animation.h>
+# include <ozz/animation/runtime/local_to_model_job.h>
+# include <ozz/animation/runtime/sampling_job.h>
+# include <ozz/animation/runtime/skeleton.h>
+# include <ozz/base/log.h>
+# include <ozz/base/maths/math_ex.h>
+# include <ozz/base/maths/simd_math.h>
+# include <ozz/base/maths/soa_transform.h>
+# include <ozz/base/maths/vec_float.h>
+# include <ozz/animation/offline/animation_builder.h>
+# include <ozz/animation/offline/raw_animation.h>
+# include <ozz/animation/offline/fbx/fbx.h>
+#endif
 
 // Local types
 #include "neko_types.h"

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{81900d20-e35b-48fb-8f6d-f9521559462b}</ProjectGuid>
+    <RootNamespace>tankengine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_d</TargetName>
+    <IncludePath>C:\Code\boost_1_72_0;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>C:\Code\boost_1_72_0;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NEKO_SIDELIBRARY_BUILD;_CRT_SECURE_NO_WARNINGS;_DEBUG;TANKENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\icu\common\;$(ProjectDir)include;$(SolutionDir)extern\steamworks\sdk\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4819</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)extern\steamworks\sdk\redistributable_bin\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>discord_game_sdk.dll.lib;steam_api64.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>$(SolutionDir)lib\$(TargetName).lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NEKO_SIDELIBRARY_BUILD;_CRT_SECURE_NO_WARNINGS;NDEBUG;TANKENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\icu\common\;$(ProjectDir)include;$(SolutionDir)extern\steamworks\sdk\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4819</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)extern\steamworks\sdk\redistributable_bin\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>discord_game_sdk.dll.lib;steam_api64.lib;icui18n.dll.lib;icuuc.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>$(SolutionDir)lib\$(TargetName).lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\extern\discord\cpp\achievement_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\activity_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\application_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\core.h" />
+    <ClInclude Include="..\extern\discord\cpp\discord.h" />
+    <ClInclude Include="..\extern\discord\cpp\event.h" />
+    <ClInclude Include="..\extern\discord\cpp\ffi.h" />
+    <ClInclude Include="..\extern\discord\cpp\image_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\lobby_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\network_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\overlay_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\relationship_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\storage_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\store_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\types.h" />
+    <ClInclude Include="..\extern\discord\cpp\user_manager.h" />
+    <ClInclude Include="..\extern\discord\cpp\voice_manager.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamapplist.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamapps.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamappticket.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamclient.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamcontroller.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamfriends.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgamecoordinator.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgameserver.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgameserverstats.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamhtmlsurface.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamhttp.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteaminput.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteaminventory.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammasterserverupdater.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammatchmaking.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammusic.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammusicremote.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworking.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingmessages.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingsockets.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingutils.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamparentalsettings.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamps3overlayrenderer.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamremoteplay.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamremotestorage.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamscreenshots.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamugc.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamuser.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamuserstats.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamutils.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamvideo.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\matchmakingtypes.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamclientpublic.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamdatagram_tickets.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamencryptedappticket.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamhttpenums.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamnetworkingtypes.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamps3params.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamtypes.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamuniverse.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_common.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_flat.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_internal.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_gameserver.h" />
+    <ClInclude Include="..\shared\include\tankengine.h" />
+    <ClInclude Include="include\framework.h" />
+    <ClInclude Include="include\discord.h" />
+    <ClInclude Include="include\stdafx.h" />
+    <ClInclude Include="include\steam.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\extern\discord\cpp\achievement_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\activity_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\application_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\core.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\image_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\lobby_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\network_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\overlay_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\relationship_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\storage_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\store_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\types.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\user_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\extern\discord\cpp\voice_manager.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\shared\src\exception.cpp" />
+    <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\engine.cpp" />
+    <ClCompile Include="src\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\discord.cpp" />
+    <ClCompile Include="src\steam.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

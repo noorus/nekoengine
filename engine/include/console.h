@@ -95,6 +95,7 @@ namespace neko {
     virtual void forceSet( int value );
     virtual void forceSet( float value );
     virtual void forceSet( const string& value );
+    virtual void toggle();
   };
 
   using ConCmdPtr = unique_ptr<ConCmd>;
@@ -114,7 +115,7 @@ namespace neko {
       srcEngine,      //!< Message from the engine
       srcGfx,         //!< Message from the graphics subsystem
       srcSound,       //!< Message from the sound subsystem
-      srcFonts,       //!< Message from the font subsystem
+      srcLoader,      //!< Message from the loader subsystem
       srcScripting,   //!< Message from the scripting subsystem
       srcInput,       //!< Message from the input subsystem
       srcGame,        //!< Message from the game logic
@@ -160,7 +161,7 @@ namespace neko {
     void unregisterSource( Source source );
     //! Automatic completion search for given command line.
     void autoComplete( const string& line, CVarList& matches );
-    void start( const EngineInfo& info );
+    void start( const EngineInfo& info, const Environment& env );
     void stop();
     void queueCommand( const string& commandLine );
     //! Queues a command for execution on next update call.
