@@ -41,14 +41,14 @@ class DemoScene extends Scene
       0, 2, 1, 1, 2, 3
     ];
     this._mesh = new mesh(verts, indices);*/
-    this._mesh = new mesh("plane", vec2(3), vec2(3), vec3(0, 1, 0));
+    this._mesh = new mesh("plane", vec2(10), vec2(20), vec3(0, 1, 0));
     this._ctr = 0;
     Console.print(this._mesh);
     Console.print("creating model");
     this._models = [
       new model({
         mesh: this._mesh,
-        scale: vec3(3, 3, 3),
+        scale: vec3(1, 1, 1),
         translate: vec3(0, 0, 0)
       })
     ]

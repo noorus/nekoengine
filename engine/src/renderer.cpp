@@ -17,6 +17,7 @@ namespace neko {
   NEKO_DECLARE_CONVAR( vid_msaa, "Main buffer multisample antialiasing multiplier.", 8 );
   NEKO_DECLARE_CONVAR( dbg_shownormals, "Whether to visualize vertex normals with lines.", false );
   NEKO_DECLARE_CONVAR( dbg_showtangents, "Whether to visualize vertex tangents with lines.", false );
+  NEKO_DECLARE_CONVAR( dbg_wireframe, "Whether to render in wireframe mode.", false );
   NEKO_DECLARE_CONVAR( vid_hdr, "Toggle HDR processing.", true );
   NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 2.2f );
   NEKO_DECLARE_CONVAR( vid_exposure, "Testing.", 1.0f );
@@ -505,9 +506,11 @@ namespace neko {
 
   void Renderer::sceneDraw( GameTime time, Camera& camera )
   {
-    glEnable( GL_DEPTH_TEST );
-    glDepthFunc( GL_LESS );
-    glDepthMask( GL_TRUE );
+    glDepthMask( GL_TRUE ); // Enable depth buffer writes
+    glDisable( GL_SCISSOR_TEST );
+    glDisable( GL_STENCIL_TEST );
+
+    glPolygonMode( GL_FRONT_AND_BACK, g_CVar_dbg_wireframe.as_b() ? GL_LINE : GL_FILL );
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -515,10 +518,14 @@ namespace neko {
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glDisable( GL_LINE_SMOOTH );
-    glDisable( GL_POLYGON_SMOOTH );
+    glEnable( GL_LINE_SMOOTH );
+    glEnable( GL_POLYGON_SMOOTH );
 
     glEnable( GL_MULTISAMPLE );
+
+    glEnable( GL_CULL_FACE );
+    glCullFace( GL_BACK );
+    glFrontFace( GL_CCW );
 
     shaders_->world()->time = (float)time;
     setCameraUniform( camera, shaders_->world()->camera );
@@ -573,11 +580,6 @@ namespace neko {
       }
 #endif
     };
-
-    // This breaks lighting on our solid PBS spheres. Wat?
-    glEnable( GL_CULL_FACE );
-    glCullFace( GL_BACK );
-    glFrontFace( GL_CCW );
 
     {
       auto& pipeline = useMaterial( 1 );
@@ -640,21 +642,13 @@ namespace neko {
     if ( !mainbuffer_->available() || !intermediate_->available() )
       return;
 
-    glDisable( GL_DEPTH_TEST );
-    glDisable( GL_CULL_FACE );
-
-    glEnable( GL_MULTISAMPLE );
-
-    // Smoothing can generate sub-fragments and cause visible ridges between triangles.
-    // Use a framebuffer for AA instead.
-    glDisable( GL_LINE_SMOOTH );
-    glDisable( GL_POLYGON_SMOOTH );
-
     // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
     glBindVertexArray( builtin_.emptyVAO_ );
 
     // Draw the scene inside the framebuffer.
     mainbuffer_->prepare( 0, { 0, 1 } );
+    glDepthFunc( GL_LESS );
+    glEnable( GL_DEPTH_TEST );
     mainbuffer_->begin();
     sceneDraw( time, camera );
     mainbuffer_->end();
@@ -662,9 +656,24 @@ namespace neko {
     mainbuffer_->blitColorTo( 0, 0, *intermediate_.get() );
     mainbuffer_->blitColorTo( 1, 1, *intermediate_.get() );
 
+    // Draw the fullscreen quad
+
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+
+    glDisable( GL_DEPTH_TEST );
+    glDisable( GL_CULL_FACE );
+    glDisable( GL_MULTISAMPLE );
+
+    // Smoothing can generate sub-fragments and cause visible ridges between triangles.
+    // Use a framebuffer for AA instead.
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_POLYGON_SMOOTH );
+
     // Framebuffer has been unbound, now draw to the default context, the window.
     glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
     builtin_.screenQuad_->begin();
     auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
@@ -701,6 +710,8 @@ namespace neko {
     glBindTextureUnit( 0, 0 );
     glBindTextureUnit( 1, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
+
+    glFinish();
   }
 
   Renderer::~Renderer()

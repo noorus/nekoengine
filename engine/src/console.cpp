@@ -109,6 +109,11 @@ namespace neko {
     value_ = oldValue;
   }
 
+  void ConVar::toggle()
+  {
+    set( ( value_.i > 0 ) ? 0 : 1 );
+  }
+
   void ConVar::forceSet( int value )
   {
     value_.i = value;

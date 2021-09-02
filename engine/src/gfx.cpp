@@ -269,6 +269,13 @@ namespace neko {
           messaging_->send( M_Debug_ReloadShaders );
           flags_.reloadShaders = true;
         }
+        if ( evt.key.code == sf::Keyboard::F7 )
+          messaging_->send( M_Debug_PauseTime );
+        if ( evt.key.code == sf::Keyboard::F9 )
+        {
+          messaging_->send( M_Debug_ToggleWireframe );
+          g_CVar_dbg_wireframe.toggle();
+        }
       }
     }
   }

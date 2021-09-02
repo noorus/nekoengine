@@ -18,7 +18,9 @@ namespace neko {
     M_Extern_SteamOverlay,
     // Debug commands
     M_Debug_ReloadScript,
-    M_Debug_ReloadShaders
+    M_Debug_ReloadShaders,
+    M_Debug_PauseTime,
+    M_Debug_ToggleWireframe
   };
 
   struct Message {

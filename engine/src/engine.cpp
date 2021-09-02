@@ -193,6 +193,9 @@ namespace neko {
       case M_Debug_ReloadScript:
         signal_ = Signal_Restart;
         break;
+      case M_Debug_PauseTime:
+        state_.timePaused = !state_.timePaused;
+        break;
     }
   }
 
@@ -236,7 +239,7 @@ namespace neko {
 
   bool Engine::paused()
   {
-    if ( state_.focusLost || state_.windowMove || state_.steamOverlay )
+    if ( state_.focusLost || state_.windowMove || state_.steamOverlay || state_.timePaused )
       return true;
     return false;
   }

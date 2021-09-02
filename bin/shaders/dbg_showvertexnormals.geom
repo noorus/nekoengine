@@ -29,7 +29,7 @@ out VertexData
 
 uniform mat4 model;
 
-const float c_linemagnitude = 1.0;
+const float c_linemagnitude = 0.5;
 
 void lineForVertex( mat4 projection, int index )
 {

@@ -24,6 +24,8 @@ namespace MyGUI {
 
 namespace neko {
 
+  NEKO_EXTERN_CONVAR( dbg_wireframe );
+
   struct GLInformation
   {
     int32_t versionMajor; //!< Major GL version

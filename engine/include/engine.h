@@ -75,7 +75,8 @@ namespace neko {
       bool focusLost;
       bool windowMove;
       bool steamOverlay;
-      State(): focusLost( false ), windowMove( false ), steamOverlay( false ) {}
+      bool timePaused;
+      State(): focusLost( false ), windowMove( false ), steamOverlay( false ), timePaused( false ) {}
     } state_;
     Stats stats_;
     platform::PerformanceClock clock_;

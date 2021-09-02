@@ -95,6 +95,7 @@ namespace neko {
     virtual void forceSet( int value );
     virtual void forceSet( float value );
     virtual void forceSet( const string& value );
+    virtual void toggle();
   };
 
   using ConCmdPtr = unique_ptr<ConCmd>;
