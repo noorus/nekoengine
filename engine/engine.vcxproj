@@ -218,6 +218,7 @@
     <ClCompile Include="src\loader_unity.cpp" />
     <ClCompile Include="src\locator.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\material.cpp" />
     <ClCompile Include="src\memory.cpp" />
     <ClCompile Include="src\meshgenerator.cpp" />
     <ClCompile Include="src\meshmanager.cpp" />

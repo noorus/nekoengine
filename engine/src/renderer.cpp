@@ -260,13 +260,14 @@ namespace neko {
     shaders_ = make_shared<shaders::Shaders>( console_ );
     shaders_->initialize();
 
+    materials_ = make_shared<MaterialManager>( this, loader_ );
     meshes_ = make_shared<MeshManager>( console_ );
 #ifndef NEKO_NO_SCRIPTING
     models_ = make_shared<ModelManager>( console_ );
 #endif
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
-    builtin_.placeholderTexture_ = createTextureWithData( 2, 2, PixFmtColorRGBA8,
+    builtin_.placeholderTexture_ = createTextureWithData( "int_placeholder", 2, 2, PixFmtColorRGBA8,
       (const void*)BuiltinData::placeholderImage2x2.data() );
     builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
     util::generateTangentsAndBitangents( BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
@@ -278,16 +279,8 @@ namespace neko {
 
   void Renderer::initialize( size_t width, size_t height )
   {
-    materials_.push_back( make_shared<Material>( Material::UnlitSimple ) );
-    materials_.push_back( make_shared<Material>( Material::WorldGround ) );
-    materials_.push_back( make_shared<Material>( Material::WorldPBR ) );
-    loader_->addLoadTask( { LoadTask( materials_[0], { R"(uvtest_diffuse.png)" } ) } );
-    loader_->addLoadTask( { LoadTask( materials_[1], { R"(SGT_Tile_3_AlbedoSmoothness.png)", R"(SGT_Tile_3_Height.png)", R"(SGT_Tile_3_MetallicSmoothness.png)", R"(SGT_Tile_3_Normal.png)" } ) } );
-    loader_->addLoadTask( { LoadTask( materials_[2], {
-      R"(M_Tank_Pz35_Blue_AlbedoTransparency.png)",
-      R"(M_Tank_Pz35_MetallicSmoothness.png)",
-      R"(M_Tank_Pz35_Normal.png)",
-      R"(M_Tank_Pz35_Blue_AlbedoTransparency.png)" } ) } );
+    materials_->loadFile( "materials.json" );
+
     loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
 
     // loader_->addLoadTask( { LoadTask( R"(data\meshes\SCA_Aircraft_Flight.anim)"
@@ -381,23 +374,13 @@ namespace neko {
 #endif
   }
 
-  MaterialPtr Renderer::createTextureWithData( size_t width, size_t height, PixelFormat format,
+  MaterialPtr Renderer::createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format,
   const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
-    MaterialPtr mat = make_shared<Material>( Material::UnlitSimple );
-    MaterialLayer layer;
-    layer.image_.format_ = format;
-    layer.image_.width_ = (unsigned int)width;
-    layer.image_.height_ = (unsigned int)height;
-    layer.texture_ = make_shared<Texture>( this,
-      layer.image_.width_, layer.image_.height_, layer.image_.format_,
-      data, wrapping, filtering );
-    mat->layers_.push_back( move( layer ) );
-    mat->loaded_ = true;
-    return move( mat );
+    return materials_->createTextureWithData( name, width, height, format, data, wrapping, filtering );
   }
 
-  shaders::Pipeline& Renderer::useMaterial( size_t index )
+  shaders::Pipeline& Renderer::useMaterial( const utf8String& name )
   {
     GLuint empties[4] = { 0, 0, 0, 0 };
     static bool inited = false;
@@ -407,27 +390,27 @@ namespace neko {
         it = builtin_.placeholderTexture_->layers_[0].texture_->handle();
       inited = true;
     }
-    if ( index >= materials_.size() || !materials_[index]->uploaded() )
+    auto material = materials_->get( name );
+    if ( !material || !material->uploaded() )
     {
       glBindTextures( 0, 4, empties );
       return shaders_->usePipeline( "mat_unlit" );
     }
-    const auto& mat = materials_[index];
-    if ( mat->type_ == Material::UnlitSimple )
+    if ( material->type_ == Material::UnlitSimple )
     {
-      glBindTextureUnit( 0, mat->layers_[0].texture_->handle() );
+      glBindTextureUnit( 0, material->layers_[0].texture_->handle() );
       auto& pipeline = shaders_->usePipeline( "mat_unlit" );
       pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
       pipeline.setUniform( "tex", 0 );
       return pipeline;
     }
-    if ( mat->type_ == Material::WorldGround )
+    if ( material->type_ == Material::WorldGround )
     {
       GLuint units[4] = {
-        mat->layers_[0].texture_->handle(),
-        mat->layers_[1].texture_->handle(),
-        mat->layers_[2].texture_->handle(),
-        mat->layers_[3].texture_->handle() };
+        material->layers_[0].texture_->handle(),
+        material->layers_[1].texture_->handle(),
+        material->layers_[2].texture_->handle(),
+        material->layers_[3].texture_->handle() };
       glBindTextures( 0, 4, units );
       auto& pipeline = shaders_->usePipeline( "mat_ground" );
       pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
@@ -437,16 +420,25 @@ namespace neko {
       pipeline.setUniform( "texNormal", 3 );
       return pipeline;
     }
-    if ( mat->type_ == Material::WorldUntexturedPBS )
+    if ( material->type_ == Material::WorldUntexturedPBS )
     {
+      auto color = vec4( 1.0f );
+      auto roughness = 0.3f;
+      auto metallic = 1.0f;
+      auto& pipeline = shaders_->usePipeline( "mat_untexturedpbs" );
+      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+      pipeline.setUniform( "matAlbedo", color );
+      pipeline.setUniform( "matRoughness", roughness );
+      pipeline.setUniform( "matMetallic", metallic );
+      return pipeline;
     }
-    if ( mat->type_ == Material::WorldPBR )
+    if ( material->type_ == Material::WorldPBR )
     {
       GLuint units[4] = {
-        mat->layers_[0].texture_->handle(),
-        mat->layers_[1].texture_->handle(),
-        mat->layers_[2].texture_->handle(),
-        mat->layers_[3].texture_->handle()
+        material->layers_[0].texture_->handle(),
+        material->layers_[1].texture_->handle(),
+        material->layers_[2].texture_->handle(),
+        material->layers_[3].texture_->handle()
       };
       glBindTextures( 0, 4, units );
       auto& pipeline = shaders_->usePipeline( "mat_worldpbr" );
@@ -458,16 +450,6 @@ namespace neko {
       return pipeline;
     }
     return shaders_->usePipeline( "mat_unlit" );
-  }
-
-  shaders::Pipeline& Renderer::useUntexturedPBS( vec4 color, float roughness, float metallic )
-  {
-    auto& pipeline = shaders_->usePipeline( "mat_untexturedpbs" );
-    pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
-    pipeline.setUniform( "matAlbedo", color );
-    pipeline.setUniform( "matRoughness", roughness );
-    pipeline.setUniform( "matMetallic", metallic );
-    return pipeline;
   }
 
   void Renderer::setCameraUniform( Camera& camera, uniforms::Camera& uniform )
@@ -582,12 +564,12 @@ namespace neko {
     };
 
     {
-      auto& pipeline = useMaterial( 1 );
+      auto& pipeline = useMaterial( "demo_ground" );
       fn_drawModels( pipeline );
     }
 
     {
-      auto& pipeline = useUntexturedPBS( vec4( 1.0f ), 0.3f, 1.0f );
+      auto& pipeline = useMaterial( "demo_unit" );
       builtin_.unitSphere_->drawOnce( pipeline, vec3( -3.0f, 1.0f, -3.0f ) );
       builtin_.unitSphere_->drawOnce( pipeline, vec3( -3.0f, 1.0f,  3.0f ) );
       builtin_.unitSphere_->drawOnce( pipeline, vec3(  3.0f, 1.0f, -3.0f ) );
@@ -595,7 +577,7 @@ namespace neko {
     }
 
     {
-      auto& pipeline = useMaterial( 0 );
+      auto& pipeline = useMaterial( "demo_uvtest" );
       for ( auto node : sceneGraph_ )
         sceneDrawEnterNode( node, pipeline );
     }
@@ -731,6 +713,8 @@ namespace neko {
     meshes_->teardown();
 
     meshes_->destroyFreed();
+
+    materials_.reset();
 
     shaders_->shutdown();
     shaders_.reset();

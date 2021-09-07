@@ -158,8 +158,7 @@ namespace neko {
     void implDeleteRenderbuffer( GLuint handle );
     GLuint implCreateFramebuffer( size_t width, size_t height );
     void implDeleteFramebuffer( GLuint handle );
-    shaders::Pipeline& useMaterial( size_t index );
-    shaders::Pipeline& useUntexturedPBS( vec4 color, float roughness, float metallic );
+    shaders::Pipeline& useMaterial( const utf8String& name );
   protected:
     GLInformation info_;
     ConsolePtr console_;
@@ -171,7 +170,7 @@ namespace neko {
     ModelManagerPtr models_;
 #endif
     platform::RWLock loadLock_;
-    MaterialVector materials_;
+    MaterialManagerPtr materials_;
     DirectorPtr director_;
     void uploadModelsEnterNode( SceneNode* node );
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
@@ -185,7 +184,7 @@ namespace neko {
     Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
     void preInitialize();
     void initialize( size_t width, size_t height );
-    MaterialPtr createTextureWithData( size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
+    MaterialPtr createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
     inline MeshManager& meshes() throw() { return *( meshes_.get() ); }
     void prepare( GameTime time );
     void uploadTextures();

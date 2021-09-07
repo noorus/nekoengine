@@ -61,7 +61,7 @@ namespace neko::loaders {
           if ( accessor.sparse.isSparse )
           {
             // "WARN: this bufferView has at least one sparse accessor to it. We are going to load the data as patched by this sparse accessor, not the original data"
-            sparse_accessor = a_i;
+            sparse_accessor = (int)a_i;
             break;
           }
         }
@@ -217,7 +217,7 @@ namespace neko::loaders {
             if ( accessor.type != TINYGLTF_TYPE_VEC3 )
               NEKO_EXCEPT( "GLTF position accessor is not a vec3" );
             pos_acc = accessor.bufferView;
-            pos_count = accessor.count;
+            pos_count = (int)accessor.count;
           }
           else if ( attribute.first == "NORMAL" )
           {
