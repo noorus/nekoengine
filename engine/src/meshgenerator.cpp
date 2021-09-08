@@ -194,13 +194,13 @@ namespace neko {
         Real s = ( static_cast<Real>( i ) / static_cast<Real>( width - 1 ) );
         Real t = ( static_cast<Real>( j ) / static_cast<Real>( height - 1 ) );
 
-        Real value = 0.5f; // ( math::sin( (Real)i * 0.3f ) + math::cos( (Real)j * 0.3f ) ) * 0.5f;
+        Real value = ( math::sin( (Real)i * 0.5f ) + math::cos( (Real)j * 0.5f ) ) + 0.5f;
 
         verts[vertidx].position = vec3(
           ( s * twidth ) - ( twidth * 0.5f ),
           value * scale.z,
           ( t * theight ) - ( theight * 0.5f ) );
-        verts[vertidx].texcoord = vec2( s, t );
+        verts[vertidx].texcoord = vec2( s, t ) * 8.0f;
         verts[vertidx].normal = vec3( numbers::zero );
         verts[vertidx].tangent = vec4( numbers::zero );
         verts[vertidx].bitangent = vec3( numbers::zero );

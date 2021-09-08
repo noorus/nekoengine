@@ -118,11 +118,13 @@ void main()
 
   vec3 viewdir = normalize( world.camera.position.xyz - vs_out.worldpos );
 
+  float roughness = 1.0 - Smoothness * 0.5;
+
   vec3 Lo = vec3(0.0);
   for (int i = 0; i < c_pointLightCount; i++)
   {
     if ( world.pointLights[i].dummy.r > 0.1 )
-      Lo += pointLight( world.pointLights[i], vs_out.worldpos, viewdir, Albedo, Smoothness, Height, Metallic, Normal );
+      Lo += pointLight( world.pointLights[i], vs_out.worldpos, viewdir, Albedo, roughness, Height, Metallic, Normal );
   }
 
   vec3 ambient = processing.ambient.rgb * Albedo * vec3(0.06);

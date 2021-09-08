@@ -3,17 +3,26 @@
 #include "renderer.h"
 #include "fontmanager.h"
 #include "gfx_types.h"
-#include <ozz/animation/offline/fbx/fbx.h>
+
+#ifndef NEKO_NO_ANIMATION
+# include <ozz/animation/offline/fbx/fbx.h>
+#endif
 
 namespace neko {
 
   class SceneNode;
 
+#ifndef NEKO_NO_ANIMATION
   struct OzzAnimationEntry
   {
     unique_ptr<ozz::animation::offline::RawAnimation> animation_;
     map<utf8String, size_t> boneTrackMap_;
   };
+#else
+  struct OzzAnimationEntry
+  {
+  };
+#endif
 
   using AnimationEntryPtr = shared_ptr<OzzAnimationEntry>;
 
@@ -41,9 +50,9 @@ namespace neko {
     void dumpUnityYaml( UnityYamlNode& node, size_t level = 0 );
     void loadUnityAnimation( const vector<uint8_t>& data, AnimationEntryPtr& into );
 
-    void loadGLTFModel( const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, SceneNode* out );
-
 #endif
+
+    void loadGLTFModel( const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, SceneNode* out );
 
 #ifndef NEKO_NO_FBX
     class FbxLoader {
@@ -127,7 +136,9 @@ namespace neko {
     vector<SceneNode*> finishedModels_;
     FontVector finishedFonts_;
     AnimationVector finishedAnimations_;
+#ifndef NEKO_NO_FBX
     loaders::FbxLoader fbxLoader_;
+#endif
     void handleNewTasks();
   private:
     static bool threadProc( platform::Event& running, platform::Event& wantStop, void* argument );

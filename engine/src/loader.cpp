@@ -195,6 +195,7 @@ namespace neko {
                 memcpy( dstRow, srcRow, (size_t)width * 4 );
               }
               task.textureLoad.material_->layers_.push_back( move( layer ) );
+              task.textureLoad.material_->wantWrapping_ = Texture::Repeat;
             }
             else
               NEKO_EXCEPT( "PNG decode failed" );
@@ -329,6 +330,7 @@ namespace neko {
         finishedModels_.push_back( task.modelLoad.node_ );
         finishedTasksLock_.unlock();
       }
+#ifndef NEKO_NO_ANIMATION
       else if ( task.type_ == LoadTask::Load_Animation )
       {
         auto path = c_animationsBaseDirectory + task.animationLoad.path_;
@@ -340,6 +342,7 @@ namespace neko {
         finishedAnimations_.push_back( task.animationLoad.animation_ );
         finishedTasksLock_.unlock();
       }
+#endif
     }
 
     if ( !finishedMaterials_.empty() )

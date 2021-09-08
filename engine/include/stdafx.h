@@ -162,7 +162,9 @@
 #include <json.hpp>
 
 // FBX
-#include <fbxsdk.h>
+#ifndef NEKO_NO_FBX
+# include <fbxsdk.h>
+#endif
 
 // OZZ
 #ifndef NEKO_NO_ANIMATION

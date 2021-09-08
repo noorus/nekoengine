@@ -274,7 +274,7 @@ namespace neko {
     util::generateTangentsAndBitangents( BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
     builtin_.cube_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::worldUnitCube3D, BuiltinData::cubeIndices );
 
-    auto unitSphere = Locator::meshGenerator().makeSphere( 1.0f, vec2u( 64, 64 ) );
+    auto unitSphere = Locator::meshGenerator().makeSphere( 1.0f, vec2u( 32, 32 ) );
     builtin_.unitSphere_ = meshes_->createStatic( GL_TRIANGLE_STRIP, unitSphere.first, unitSphere.second );
   }
 
@@ -566,20 +566,32 @@ namespace neko {
       shaders_->world()->pointLights[i].dummy = vec4( 0.0f );
     }
 
-    vec3 lightpos[2] = {
-      vec3( math::sin( (Real)time * 1.2f ) * 3.0f, 4.0f, math::cos( (Real)time * 1.2f ) * 3.0f ),
-      vec3( math::sin( (Real)time ) * 3.0f, 1.0f, math::cos( (Real)time ) * 3.0f )
+    auto rot = ( numbers::pi * 2.0f ) / 3.0f;
+
+    vec3 lightpos[4] = {
+      vec3( math::sin( (Real)time * 1.7f ) * 3.0f, 4.5f, math::cos( (Real)time * 1.2f ) * 3.0f ),
+      vec3( math::sin( (Real)time ) * 3.0f, 1.0f, math::cos( (Real)time ) * 3.0f ),
+      vec3( math::sin( (Real)time + rot ) * 3.0f, 1.0f, math::cos( (Real)time + rot ) * 3.0f ),
+      vec3( math::sin( (Real)time + ( rot * 2.0f ) ) * 3.0f, 1.0f, math::cos( (Real)time + ( rot * 2.0f ) ) * 3.0f )
     };
 
     shaders_->world()->pointLights[0].position = vec4( lightpos[0], 1.0f );
-    shaders_->world()->pointLights[0].color = vec4( 60.0f, 60.0f, 60.0f, 1.0f );
+    shaders_->world()->pointLights[0].color = vec4( 50.0f, 50.0f, 50.0f, 1.0f );
     shaders_->world()->pointLights[0].dummy = vec4( 1.0f );
 
     shaders_->world()->pointLights[1].position = vec4( lightpos[1], 1.0f );
-    shaders_->world()->pointLights[1].color = vec4( math::sin( (Real)time * 0.3f ) * 30.0f + 20.0f, 0.0f, math::cos( (Real)time * 0.4f ) * 30.0f + 20.0f, 1.0f );
+    shaders_->world()->pointLights[1].color = vec4( 25.0f, 0.0f, 0.0f, 1.0f );
     shaders_->world()->pointLights[1].dummy = vec4( 1.0f );
 
-    shaders_->processing()->ambient = vec4( 0.05f, 0.05f, 0.05f, 1.0f );
+    shaders_->world()->pointLights[2].position = vec4( lightpos[2], 1.0f );
+    shaders_->world()->pointLights[2].color = vec4( 0.0f, 20.0f, 0.0f, 1.0f );
+    shaders_->world()->pointLights[2].dummy = vec4( 1.0f );
+
+    shaders_->world()->pointLights[3].position = vec4( lightpos[3], 1.0f );
+    shaders_->world()->pointLights[3].color = vec4( 0.0f, 0.0f, 30.0f, 1.0f );
+    shaders_->world()->pointLights[3].dummy = vec4( 1.0f );
+
+    shaders_->processing()->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
 
     auto fn_drawModels = [&]( shaders::Pipeline& pipeline ) -> void
     {
@@ -664,9 +676,13 @@ namespace neko {
     lightpoints[0].color = shaders_->world()->pointLights[0].color;
     lightpoints[1].pos = lightpos[1];
     lightpoints[1].color = shaders_->world()->pointLights[1].color;
+    lightpoints[2].pos = lightpos[2];
+    lightpoints[2].color = shaders_->world()->pointLights[2].color;
+    lightpoints[3].pos = lightpos[3];
+    lightpoints[3].color = shaders_->world()->pointLights[3].color;
     g_pointrender->buffer().unlock();
 
-    g_pointrender->draw( *shaders_.get(), 2, 0 );
+    g_pointrender->draw( *shaders_.get(), 4, 0 );
   }
 
   /*
