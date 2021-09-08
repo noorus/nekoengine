@@ -327,8 +327,10 @@
     <None Include="..\bin\shaders\dbg_showvertextangents.vert" />
     <None Include="..\bin\shaders\inc.buffers.glsl" />
     <None Include="..\bin\shaders\inc.colorutils.glsl" />
+    <None Include="..\bin\shaders\inc.smaa.glsl" />
     <None Include="..\bin\shaders\mainframebuf2d.frag" />
-    <None Include="..\bin\shaders\mainframebuf2d.vert" />
+    <None Include="..\bin\shaders\passthrough2d.frag" />
+    <None Include="..\bin\shaders\passthrough2d.vert" />
     <None Include="..\bin\shaders\mat_ground.frag" />
     <None Include="..\bin\shaders\mat_ground.vert" />
     <None Include="..\bin\shaders\mat_unlitdefault.frag" />
@@ -337,6 +339,12 @@
     <None Include="..\bin\shaders\mat_untexturedpbs.vert" />
     <None Include="..\bin\shaders\mat_worldpbr.frag" />
     <None Include="..\bin\shaders\mat_worldpbr.vert" />
+    <None Include="..\bin\shaders\smaa_blend.frag" />
+    <None Include="..\bin\shaders\smaa_blend.vert" />
+    <None Include="..\bin\shaders\smaa_edge.frag" />
+    <None Include="..\bin\shaders\smaa_edge.vert" />
+    <None Include="..\bin\shaders\smaa_weight.frag" />
+    <None Include="..\bin\shaders\smaa_weight.vert" />
     <None Include="..\bin\shaders\mygui3d.frag" />
     <None Include="..\bin\shaders\mygui3d.vert" />
     <None Include="..\bin\shaders\pointlight.frag" />

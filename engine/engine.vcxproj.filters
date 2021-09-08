@@ -532,7 +532,7 @@
     <None Include="..\bin\shaders\mainframebuf2d.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\shaders\mainframebuf2d.vert">
+    <None Include="..\bin\shaders\passthrough2d.vert">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\shaders\mat_unlitdefault.frag">
@@ -572,6 +572,30 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\shaders\mat_untexturedpbs.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\inc.smaa.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\smaa_blend.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\smaa_blend.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\smaa_edge.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\smaa_edge.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\smaa_weight.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\smaa_weight.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\passthrough2d.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

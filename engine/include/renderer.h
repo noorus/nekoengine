@@ -172,14 +172,24 @@ namespace neko {
     platform::RWLock loadLock_;
     MaterialManagerPtr materials_;
     DirectorPtr director_;
+    vec2 resolution_;
     void uploadModelsEnterNode( SceneNode* node );
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
     void sceneDraw( GameTime time, Camera& camera );
     void clearErrors();
     void setCameraUniform( Camera& camera, uniforms::Camera& uniform );
+    TexturePtr loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering );
   protected:
     FramebufferPtr mainbuffer_; //!< Multisampled primary scene render buffer
     FramebufferPtr intermediate_; //!< Intermediate non-multisampled buffer for postprocessing
+    struct SMAAContext {
+      FramebufferPtr albedo_;
+      FramebufferPtr edge_;
+      FramebufferPtr blend_;
+      TexturePtr areaDataTexture_;
+      TexturePtr searchDataTexture_;
+      void recreate( Renderer* renderer, vec2i resolution );
+    } smaa_;
   public:
     Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
     void preInitialize();

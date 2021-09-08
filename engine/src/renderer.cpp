@@ -277,16 +277,45 @@ namespace neko {
     builtin_.unitSphere_ = meshes_->createStatic( GL_TRIANGLE_STRIP, unitSphere.first, unitSphere.second );
   }
 
+  TexturePtr Renderer::loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering )
+  {
+    vector<uint8_t> input, output;
+    platform::FileReader( filepath ).readFullVector( input );
+    unsigned int w, h;
+    if ( lodepng::decode( output, w, h, input.data(), input.size(), LCT_RGBA, 8 ) != 0 )
+      NEKO_EXCEPT( "Lodepng image load failed" );
+    return make_shared<Texture>( this, w, h, PixFmtColorR8, output.data(), wrapping, filtering );
+  }
+
+  void Renderer::SMAAContext::recreate( Renderer* renderer, vec2i resolution )
+  {
+    if ( !albedo_ )
+      albedo_ = make_shared<Framebuffer>( renderer, 1, PixFmtColorRGBA8, false, 1 );
+    if ( !edge_ )
+      edge_ = make_shared<Framebuffer>( renderer, 1, PixFmtColorRGBA8, false, 1 );
+    if ( !blend_ )
+      blend_ = make_shared<Framebuffer>( renderer, 1, PixFmtColorRGBA8, false, 1 );
+
+    albedo_->recreate( resolution.x, resolution.y );
+    edge_->recreate( resolution.x, resolution.y );
+    blend_->recreate( resolution.x, resolution.y );
+
+    areaDataTexture_ = renderer->loadPNGTexture( R"(data\smaa_area.png)", Texture::ClampEdge, Texture::Linear );
+    searchDataTexture_ = renderer->loadPNGTexture( R"(data\smaa_search.png)", Texture::ClampEdge, Texture::Linear );
+  }
+
   void Renderer::initialize( size_t width, size_t height )
   {
-    materials_->loadFile( "materials.json" );
+    resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
+
+    materials_->loadFile( R"(data\materials.json)" );
 
     loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
 
     // loader_->addLoadTask( { LoadTask( R"(data\meshes\SCA_Aircraft_Flight.anim)"
 
-    mainbuffer_ = make_shared<Framebuffer>( this, 2, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
-    intermediate_ = make_shared<Framebuffer>( this, 2, 1 );
+    mainbuffer_ = make_shared<Framebuffer>( this, 2, PixFmtColorRGBA16f, true, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
+    intermediate_ = make_shared<Framebuffer>( this, 2, PixFmtColorRGBA16f, false, 1 );
 
     g_pointrender = make_unique<PointRenderBuffer>();
 
@@ -295,9 +324,13 @@ namespace neko {
 
   void Renderer::reset( size_t width, size_t height )
   {
+    resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
+
     assert( mainbuffer_ && intermediate_ );
     mainbuffer_->recreate( width, height );
     intermediate_->recreate( width, height );
+
+    smaa_.recreate( this, vec2i( (int)width, (int)height ) );
   }
 
   void Renderer::uploadTextures()
@@ -312,7 +345,10 @@ namespace neko {
         continue;
       for ( auto& layer : mat->layers_ )
       {
-        layer.texture_ = make_shared<Texture>( this, layer.image_.width_, layer.image_.height_, layer.image_.format_, layer.image_.data_.data(), Texture::Repeat, Texture::Mipmapped );
+        layer.texture_ = make_shared<Texture>( this,
+          layer.image_.width_, layer.image_.height_,
+          layer.image_.format_, layer.image_.data_.data(),
+          mat->wantWrapping_, mat->wantFiltering_ );
       }
     }
   }
@@ -640,7 +676,8 @@ namespace neko {
 
     // Draw the fullscreen quad
 
-    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    // glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    smaa_.albedo_->beginSimple();
 
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_CULL_FACE );
@@ -653,17 +690,9 @@ namespace neko {
 
     // Framebuffer has been unbound, now draw to the default context, the window.
     glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-    builtin_.screenQuad_->begin();
-    auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
-    pipeline.setUniform( "texMain", 0 );
-    pipeline.setUniform( "texGBuffer", 1 );
-    pipeline.setUniform( "hdr", g_CVar_vid_hdr.as_b() );
-    pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
-    pipeline.setUniform( "exposure", g_CVar_vid_exposure.as_f() );
 
     /*auto pgm = pipeline.getProgramStage( shaders::Shader_Fragment );
     auto pal = gl::glGetUniformLocation( pgm, "palette" );
@@ -680,9 +709,62 @@ namespace neko {
     gl::glProgramUniform3fv( pgm, pal, 8, (GLfloat*)vals );
     pipeline.setUniform( "paletteSize", 8 );*/
 
-    glBindTextureUnit( 0, intermediate_->texture( 0 )->handle() );
-    glBindTextureUnit( 1, intermediate_->texture( 1 )->handle() );
-    builtin_.screenQuad_->draw();
+    {
+      builtin_.screenQuad_->begin();
+      auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
+      pipeline.setUniform( "texMain", 0 );
+      pipeline.setUniform( "texGBuffer", 1 );
+      pipeline.setUniform( "hdr", g_CVar_vid_hdr.as_b() );
+      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+      pipeline.setUniform( "exposure", g_CVar_vid_exposure.as_f() );
+      glBindTextureUnit( 0, intermediate_->texture( 0 )->handle() );
+      glBindTextureUnit( 1, intermediate_->texture( 1 )->handle() );
+      builtin_.screenQuad_->draw();
+    }
+
+    smaa_.albedo_->end();
+
+    {
+      // edge detection pass
+      smaa_.edge_->beginSimple();
+      shaders_->usePipeline( "smaa_edge" ).setUniform( "resolution", resolution_ ).setUniform( "albedo_tex", 0 );
+      glBindTextureUnit( 0, smaa_.albedo_->texture( 0 )->handle() );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+      smaa_.edge_->end();
+    }
+
+    /*{
+      glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+      shaders_->usePipeline( "passthrough2d" ).setUniform( "texMain", 0 );
+      glBindTextureUnit( 0, smaa_.edge_->texture( 0 )->handle() );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+    }*/
+
+    {
+      // weights blending pass
+      smaa_.blend_->beginSimple();
+      shaders_->usePipeline( "smaa_weight" ).setUniform( "resolution", resolution_ ).setUniform( "edges_tex", 0 ).setUniform( "area_tex", 1 ).setUniform( "search_tex", 2 );
+      glBindTextureUnit( 0, smaa_.edge_->texture( 0 )->handle() );
+      glBindTextureUnit( 1, smaa_.areaDataTexture_->handle() );
+      glBindTextureUnit( 2, smaa_.searchDataTexture_->handle() );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+      smaa_.blend_->end();
+    }
+    {
+      // neighborhood blending pass
+      glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+      shaders_->usePipeline( "smaa_blend" ).setUniform( "resolution", resolution_ ).setUniform( "albedo_tex", 0 ).setUniform( "blend_tex", 1 );
+      //shaders_->usePipeline( "passthrough2d" ).setUniform( "texMain", 0 ).setUniform( "texSecondary", 1 );
+      glBindTextureUnit( 0, smaa_.albedo_->texture( 0 )->handle() );
+      glBindTextureUnit( 1, smaa_.blend_->texture( 0 )->handle() );
+      //glEnable( GL_FRAMEBUFFER_SRGB );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+      //glDisable( GL_FRAMEBUFFER_SRGB );
+    }
 
 #ifndef NEKO_NO_GUI
     if ( gui )

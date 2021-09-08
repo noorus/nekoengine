@@ -33,6 +33,8 @@ namespace neko {
     } type_ = UnlitSimple;
     utf8String name_;
     bool loaded_ = false;
+    Texture::Wrapping wantWrapping_ = Texture::Repeat;
+    Texture::Filtering wantFiltering_ = Texture::Mipmapped;
     MaterialLayers layers_;
     inline const bool uploaded() const throw()
     {

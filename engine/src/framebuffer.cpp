@@ -7,9 +7,9 @@ namespace neko {
 
   using namespace gl;
 
-  Framebuffer::Framebuffer( Renderer* renderer, size_t colorBufferCount, int multisamples ):
+  Framebuffer::Framebuffer( Renderer* renderer, size_t colorBufferCount, PixelFormat colorBufferFormat, bool depthBuffer, int multisamples ):
   renderer_( renderer ), width_( 0 ), height_( 0 ), handle_( 0 ), colorbufcount_( colorBufferCount ),
-  available_( false ), multisamples_( multisamples ), savedViewport_{ 0 }
+  available_( false ), multisamples_( multisamples ), savedViewport_{ 0 }, depth_( depthBuffer ), format_( colorBufferFormat )
   {
     assert( renderer_ );
     colorBuffers_.resize( colorBufferCount );
@@ -52,7 +52,9 @@ namespace neko {
     {
       colorBuffers_.push_back( make_shared<Texture>( renderer_, width_, height_, PixFmtColorRGBA16f, nullptr, Texture::ClampEdge, Texture::Nearest, multisamples_ ) );
     }
-    depthBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepth32f, multisamples_ );
+
+    if ( depth_ )
+      depthBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, PixFmtDepth32f, multisamples_ );
 
     assert( colorBuffers_.size() < 32 );
     array<GLenum, 32> drawBuffers;
@@ -63,7 +65,9 @@ namespace neko {
     }
 
     glNamedFramebufferDrawBuffers( handle_, (GLsizei)colorBuffers_.size(), drawBuffers.data() );
-    glNamedFramebufferRenderbuffer( handle_, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_->handle() );
+
+    if ( depth_ )
+      glNamedFramebufferRenderbuffer( handle_, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_->handle() );
   }
 
   void Framebuffer::blitColorTo( size_t sourceIndex, size_t destIndex, Framebuffer& target )
@@ -120,6 +124,13 @@ namespace neko {
     glNamedFramebufferDrawBuffers( handle_, (GLsizei)colorWriteIndexes.size(), drawBuffers.data() );
   }
 
+  void Framebuffer::beginSimple()
+  {
+    glNamedFramebufferReadBuffer( handle_, CONVGLENUM( GL_COLOR_ATTACHMENT0, 0 ) );
+    glNamedFramebufferDrawBuffer( handle_, CONVGLENUM( GL_COLOR_ATTACHMENT0, 0 ) );
+    begin();
+  }
+
   void Framebuffer::begin()
   {
     const GLfloat clearDepth = 0.0f;
@@ -129,7 +140,8 @@ namespace neko {
     glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
     for ( int i = 0; i < colorBuffers_.size(); i++ )
       glClearNamedFramebufferfv( handle_, GL_COLOR, i, glm::value_ptr( clearColor_ ) );
-    glClearNamedFramebufferfv( handle_, GL_DEPTH, 0, &clearDepth );
+    if ( depth_ )
+      glClearNamedFramebufferfv( handle_, GL_DEPTH, 0, &clearDepth );
 
     glViewport( 0, 0, (GLsizei)width_, (GLsizei)height_ );
   }

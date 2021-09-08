@@ -149,7 +149,7 @@ namespace neko {
 
     sf::ContextSettings settings;
     settings.depthBits = 24;
-    settings.stencilBits = 8;
+    settings.stencilBits = 0; // 8;
     settings.antialiasingLevel = 0;
     settings.majorVersion = c_glVersion[0];
     settings.minorVersion = c_glVersion[1];

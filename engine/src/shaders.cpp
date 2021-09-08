@@ -76,9 +76,11 @@ namespace neko {
       // Includes
       loadInclude( "inc.buffers.glsl" );
       loadInclude( "inc.colorutils.glsl" );
+      loadInclude( "inc.smaa.glsl" );
 
       // Default pipelines
-      createSimplePipeline( "mainframebuf2d", "mainframebuf2d.vert", "mainframebuf2d.frag", { "hdr", "exposure", "gamma", "texMain", "texGBuffer" } );
+      createSimplePipeline( "mainframebuf2d", "passthrough2d.vert", "mainframebuf2d.frag", { "hdr", "exposure", "gamma", "texMain", "texGBuffer" } );
+      createSimplePipeline( "passthrough2d", "passthrough2d.vert", "passthrough2d.frag", { "texMain", "texSecondary" } );
       createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag", { "yscale", "tex" } );
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
       createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
@@ -87,6 +89,9 @@ namespace neko {
       createSimplePipeline( "mat_ground", "mat_ground.vert", "mat_ground.frag", { "model", "gamma", "texAlbedoSmoothness", "texHeight", "texMetallicSmoothness", "texNormal" } );
       createSimplePipeline( "mat_untexturedpbs", "mat_untexturedpbs.vert", "mat_untexturedpbs.frag", { "model", "gamma", "matAlbedo", "matRoughness", "matMetallic" } );
       createSimplePipeline( "pointlight", "pointlight.vert", "pointlight.geom", "pointlight.frag", { "model" } );
+      createSimplePipeline( "smaa_edge", "smaa_edge.vert", "smaa_edge.frag", { "resolution", "albedo_tex" } );
+      createSimplePipeline( "smaa_weight", "smaa_weight.vert", "smaa_weight.frag", { "resolution", "edges_tex", "area_tex", "search_tex" } );
+      createSimplePipeline( "smaa_blend", "smaa_blend.vert", "smaa_blend.frag", { "resolution", "albedo_tex", "blend_tex" } );
     }
 
     // Shader
