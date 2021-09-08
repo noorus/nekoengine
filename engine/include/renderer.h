@@ -190,6 +190,10 @@ namespace neko {
       TexturePtr searchDataTexture_;
       void recreate( Renderer* renderer, vec2i resolution );
     } smaa_;
+    struct GaussianBlurContext {
+      FramebufferPtr buffers_[2];
+      void recreate( Renderer* renderer, vec2i resolution );
+    } gaussblur_;
   public:
     Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
     void preInitialize();

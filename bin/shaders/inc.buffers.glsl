@@ -42,14 +42,8 @@ namespace neko::uniforms {
     PointLight pointLights[c_pointLightCount];
   } NEKO_UNIFORM_INSTANCE( world );
 
-  const int c_gaussianBlurSamples = 21;
-
   NEKO_DECLARE_UNIFORMBLOCK( 1, Processing )
   {
-    float gaussianKernel[c_gaussianBlurSamples];
-    float gaussianZ;
-    float d0;
-    float d1;
     vec4 ambient;
   } NEKO_UNIFORM_INSTANCE( processing );
 

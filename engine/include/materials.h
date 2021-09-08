@@ -12,6 +12,10 @@ namespace neko {
     TexturePtr texture_;
   public:
     inline const bool hasHostCopy() const { return !image_.data_.empty(); }
+    inline void deleteHostCopy()
+    {
+      image_.data_.clear();
+    }
     inline const bool uploaded() const throw() { return ( texture_.get() != nullptr ); }
     MaterialLayer() {}
     // move constructor

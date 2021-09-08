@@ -17,27 +17,6 @@ out vec4 out_color;
 #define COLORUTILS_TONEMAPPING
 #include "inc.colorutils.glsl"
 
-vec3 gaussianBlurredSample( sampler2D txtr, vec2 coord )
-{
-  const int ksize = ( c_gaussianBlurSamples - 1 ) / 2;
-
-  vec2 texelSize = 1.0 / textureSize( txtr, 0 );
-
-  vec3 color = vec3( 0.0 );
-  for ( int i = -ksize; i <= ksize; ++i )
-  {
-    for ( int j = -ksize; j <= ksize; ++j )
-    {
-      vec2 samplecoord = coord + ( vec2( float( i ), float( j ) ) * texelSize );
-      color += processing.gaussianKernel[ksize + j]
-        * processing.gaussianKernel[ksize + i]
-        * texture( txtr, samplecoord ).rgb;
-    }
-  }
-
-  return ( color / ( processing.gaussianZ * processing.gaussianZ ) );
-}
-
 void main()
 {
   vec3 hdrcolor = texture( texMain, texcoord ).rgb;
@@ -45,9 +24,9 @@ void main()
   vec3 result = vec3( 0.0 );
   if ( hdr )
   {
-    vec3 bloomcolor = texture( texGBuffer, texcoord ).rgb; // gaussianBlurredSample( texGBuffer, texcoord );
+    vec3 bloomcolor = texture( texGBuffer, texcoord ).rgb;
     hdrcolor += bloomcolor;
-    result = tonemap_lumaBasedReinhard( hdrcolor );
+    result = tonemap_linear( hdrcolor );
   }
   else
   {

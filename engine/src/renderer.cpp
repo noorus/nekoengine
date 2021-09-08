@@ -21,6 +21,7 @@ namespace neko {
   NEKO_DECLARE_CONVAR( vid_hdr, "Toggle HDR processing.", true );
   NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 2.2f );
   NEKO_DECLARE_CONVAR( vid_exposure, "Testing.", 1.0f );
+  NEKO_DECLARE_CONVAR( vid_smaa, "Antialiasing.", true );
 
   namespace BuiltinData {
 
@@ -304,6 +305,16 @@ namespace neko {
     searchDataTexture_ = renderer->loadPNGTexture( R"(data\smaa_search.png)", Texture::ClampEdge, Texture::Linear );
   }
 
+  void Renderer::GaussianBlurContext::recreate( Renderer* renderer, vec2i resolution )
+  {
+    for ( size_t i = 0; i < 2; ++i )
+    {
+      if ( !buffers_[i] )
+        buffers_[i] = make_shared<Framebuffer>( renderer, 1, PixFmtColorRGBA16f, false, 1 );
+      buffers_[i]->recreate( resolution.x, resolution.y );
+    }
+  }
+
   void Renderer::initialize( size_t width, size_t height )
   {
     resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
@@ -331,6 +342,7 @@ namespace neko {
     intermediate_->recreate( width, height );
 
     smaa_.recreate( this, vec2i( (int)width, (int)height ) );
+    gaussblur_.recreate( this, vec2i( (int)width, (int)height ) );
   }
 
   void Renderer::uploadTextures()
@@ -349,6 +361,7 @@ namespace neko {
           layer.image_.width_, layer.image_.height_,
           layer.image_.format_, layer.image_.data_.data(),
           mat->wantWrapping_, mat->wantFiltering_ );
+        layer.deleteHostCopy();
       }
     }
   }
@@ -559,11 +572,11 @@ namespace neko {
     };
 
     shaders_->world()->pointLights[0].position = vec4( lightpos[0], 1.0f );
-    shaders_->world()->pointLights[0].color = vec4( 100.0f, 100.0f, 100.0f, 1.0f );
+    shaders_->world()->pointLights[0].color = vec4( 60.0f, 60.0f, 60.0f, 1.0f );
     shaders_->world()->pointLights[0].dummy = vec4( 1.0f );
 
     shaders_->world()->pointLights[1].position = vec4( lightpos[1], 1.0f );
-    shaders_->world()->pointLights[1].color = vec4( math::sin( (Real)time * 0.3f ) * 30.0f + 50.0f, 0.0f, math::cos( (Real)time * 0.4f ) * 30.0f + 50.0f, 1.0f );
+    shaders_->world()->pointLights[1].color = vec4( math::sin( (Real)time * 0.3f ) * 30.0f + 20.0f, 0.0f, math::cos( (Real)time * 0.4f ) * 30.0f + 20.0f, 1.0f );
     shaders_->world()->pointLights[1].dummy = vec4( 1.0f );
 
     shaders_->processing()->ambient = vec4( 0.05f, 0.05f, 0.05f, 1.0f );
@@ -638,6 +651,7 @@ namespace neko {
     if ( g_CVar_dbg_showtangents.as_b() )
     {
       auto& pipeline = shaders_->usePipeline( "dbg_showvertextangents" );
+      fn_drawModels( pipeline );
       for ( auto node : sceneGraph_ )
         sceneDrawEnterNode( node, pipeline );
     }
@@ -655,46 +669,9 @@ namespace neko {
     g_pointrender->draw( *shaders_.get(), 2, 0 );
   }
 
-  void Renderer::draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui )
-  {
-    if ( !mainbuffer_->available() || !intermediate_->available() )
-      return;
-
-    // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
-    glBindVertexArray( builtin_.emptyVAO_ );
-
-    // Draw the scene inside the framebuffer.
-    mainbuffer_->prepare( 0, { 0, 1 } );
-    glDepthFunc( GL_LESS );
-    glEnable( GL_DEPTH_TEST );
-    mainbuffer_->begin();
-    sceneDraw( time, camera );
-    mainbuffer_->end();
-
-    mainbuffer_->blitColorTo( 0, 0, *intermediate_.get() );
-    mainbuffer_->blitColorTo( 1, 1, *intermediate_.get() );
-
-    // Draw the fullscreen quad
-
-    // glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-    smaa_.albedo_->beginSimple();
-
-    glDisable( GL_DEPTH_TEST );
-    glDisable( GL_CULL_FACE );
-    glDisable( GL_MULTISAMPLE );
-
-    // Smoothing can generate sub-fragments and cause visible ridges between triangles.
-    // Use a framebuffer for AA instead.
-    glDisable( GL_LINE_SMOOTH );
-    glDisable( GL_POLYGON_SMOOTH );
-
-    // Framebuffer has been unbound, now draw to the default context, the window.
-    glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-    /*auto pgm = pipeline.getProgramStage( shaders::Shader_Fragment );
+  /*
+  stylized palettized dithering
+    auto pgm = pipeline.getProgramStage( shaders::Shader_Fragment );
     auto pal = gl::glGetUniformLocation( pgm, "palette" );
     vec3 vals[8] = {
       { 1.0f, 0.0f, 0.0f },
@@ -707,10 +684,73 @@ namespace neko {
       { 0.5f, 0.5f, 0.5f }
     };
     gl::glProgramUniform3fv( pgm, pal, 8, (GLfloat*)vals );
-    pipeline.setUniform( "paletteSize", 8 );*/
+    pipeline.setUniform( "paletteSize", 8 );
+  */
+
+  void prepareGLStateForPost()
+  {
+  }
+
+  void Renderer::draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui )
+  {
+    if ( !mainbuffer_->available() || !intermediate_->available() )
+      return;
+
+    bool do_smaa = g_CVar_vid_smaa.as_b();
+
+    // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
+    glBindVertexArray( builtin_.emptyVAO_ );
+
+    // Draw the scene inside the framebuffer.
+    mainbuffer_->prepare( 0, { 0, 1 } );
+    glDepthFunc( GL_LESS );
+    glEnable( GL_DEPTH_TEST );
+    mainbuffer_->begin();
+    sceneDraw( time, camera );
+    mainbuffer_->end();
+
+    // The intermediate is necessary as non-multisampled drawops
+    // cannot use multisampled surfaces as texture sources.
+    mainbuffer_->blitColorTo( 0, 0, *intermediate_.get() );
+    mainbuffer_->blitColorTo( 1, 1, *intermediate_.get() );
+
+    glDisable( GL_DEPTH_TEST );
+    glDisable( GL_CULL_FACE );
+    glDisable( GL_MULTISAMPLE );
+
+    // Smoothing can generate sub-fragments and cause visible ridges between triangles.
+    // Use a framebuffer for AA instead.
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_POLYGON_SMOOTH );
+
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+    GLuint brightness_blurred_out = 0;
+    {
+      // ping-pong gaussian blur for the brightness texture
+      auto& pipeline = shaders_->usePipeline( "gaussblur2d" );
+      bool horizontal = true, first = true;
+      int count = 10;
+      for ( int i = 0; i < 10; ++i )
+      {
+        gaussblur_.buffers_[horizontal]->beginSimple();
+        pipeline.setUniform( "horizontal", horizontal );
+        pipeline.setUniform( "tex_image", 0 );
+        glBindTextureUnit( 0, first ? intermediate_->texture( 1 )->handle() : gaussblur_.buffers_[!horizontal]->texture( 0 )->handle() );
+        builtin_.screenQuad_->begin();
+        builtin_.screenQuad_->draw();
+        gaussblur_.buffers_[horizontal]->end();
+        horizontal = !horizontal;
+        if ( first )
+          first = false;
+      }
+      brightness_blurred_out = gaussblur_.buffers_[!horizontal]->texture( 0 )->handle();
+    }
 
     {
-      builtin_.screenQuad_->begin();
+      // mergedown:
+      // apply bloom over main scene and tonemap down to [0-255]
+      smaa_.albedo_->beginSimple();
       auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
       pipeline.setUniform( "texMain", 0 );
       pipeline.setUniform( "texGBuffer", 1 );
@@ -718,52 +758,54 @@ namespace neko {
       pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
       pipeline.setUniform( "exposure", g_CVar_vid_exposure.as_f() );
       glBindTextureUnit( 0, intermediate_->texture( 0 )->handle() );
-      glBindTextureUnit( 1, intermediate_->texture( 1 )->handle() );
-      builtin_.screenQuad_->draw();
-    }
-
-    smaa_.albedo_->end();
-
-    {
-      // edge detection pass
-      smaa_.edge_->beginSimple();
-      shaders_->usePipeline( "smaa_edge" ).setUniform( "resolution", resolution_ ).setUniform( "albedo_tex", 0 );
-      glBindTextureUnit( 0, smaa_.albedo_->texture( 0 )->handle() );
+      glBindTextureUnit( 1, brightness_blurred_out );
       builtin_.screenQuad_->begin();
       builtin_.screenQuad_->draw();
-      smaa_.edge_->end();
+      smaa_.albedo_->end();
     }
 
-    /*{
+    if ( do_smaa )
+    {
+      {
+        // smaa: edge detection pass
+        smaa_.edge_->beginSimple();
+        shaders_->usePipeline( "smaa_edge" ).setUniform( "resolution", resolution_ ).setUniform( "albedo_tex", 0 );
+        glBindTextureUnit( 0, smaa_.albedo_->texture( 0 )->handle() );
+        builtin_.screenQuad_->begin();
+        builtin_.screenQuad_->draw();
+        smaa_.edge_->end();
+      }
+      {
+        // smaa: weights blending pass
+        smaa_.blend_->beginSimple();
+        shaders_->usePipeline( "smaa_weight" ).setUniform( "resolution", resolution_ ).setUniform( "edges_tex", 0 ).setUniform( "area_tex", 1 ).setUniform( "search_tex", 2 );
+        glBindTextureUnit( 0, smaa_.edge_->texture( 0 )->handle() );
+        glBindTextureUnit( 1, smaa_.areaDataTexture_->handle() );
+        glBindTextureUnit( 2, smaa_.searchDataTexture_->handle() );
+        builtin_.screenQuad_->begin();
+        builtin_.screenQuad_->draw();
+        smaa_.blend_->end();
+      }
+      {
+        // smaa: neighborhood blending pass
+        // output to window
+        glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+        shaders_->usePipeline( "smaa_blend" ).setUniform( "resolution", resolution_ ).setUniform( "albedo_tex", 0 ).setUniform( "blend_tex", 1 );
+        glBindTextureUnit( 0, smaa_.albedo_->texture( 0 )->handle() );
+        glBindTextureUnit( 1, smaa_.blend_->texture( 0 )->handle() );
+        //glEnable( GL_FRAMEBUFFER_SRGB );
+        builtin_.screenQuad_->begin();
+        builtin_.screenQuad_->draw();
+        //glDisable( GL_FRAMEBUFFER_SRGB );
+      }
+    }
+    else
+    {
       glBindFramebuffer( GL_FRAMEBUFFER, 0 );
       shaders_->usePipeline( "passthrough2d" ).setUniform( "texMain", 0 );
-      glBindTextureUnit( 0, smaa_.edge_->texture( 0 )->handle() );
-      builtin_.screenQuad_->begin();
-      builtin_.screenQuad_->draw();
-    }*/
-
-    {
-      // weights blending pass
-      smaa_.blend_->beginSimple();
-      shaders_->usePipeline( "smaa_weight" ).setUniform( "resolution", resolution_ ).setUniform( "edges_tex", 0 ).setUniform( "area_tex", 1 ).setUniform( "search_tex", 2 );
-      glBindTextureUnit( 0, smaa_.edge_->texture( 0 )->handle() );
-      glBindTextureUnit( 1, smaa_.areaDataTexture_->handle() );
-      glBindTextureUnit( 2, smaa_.searchDataTexture_->handle() );
-      builtin_.screenQuad_->begin();
-      builtin_.screenQuad_->draw();
-      smaa_.blend_->end();
-    }
-    {
-      // neighborhood blending pass
-      glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-      shaders_->usePipeline( "smaa_blend" ).setUniform( "resolution", resolution_ ).setUniform( "albedo_tex", 0 ).setUniform( "blend_tex", 1 );
-      //shaders_->usePipeline( "passthrough2d" ).setUniform( "texMain", 0 ).setUniform( "texSecondary", 1 );
       glBindTextureUnit( 0, smaa_.albedo_->texture( 0 )->handle() );
-      glBindTextureUnit( 1, smaa_.blend_->texture( 0 )->handle() );
-      //glEnable( GL_FRAMEBUFFER_SRGB );
       builtin_.screenQuad_->begin();
       builtin_.screenQuad_->draw();
-      //glDisable( GL_FRAMEBUFFER_SRGB );
     }
 
 #ifndef NEKO_NO_GUI

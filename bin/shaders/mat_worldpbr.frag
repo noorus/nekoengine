@@ -144,9 +144,10 @@ void main()
   vec3 color = ambient + Lo;
 
   float brightness = bt709LumaExtract( color );
-  vec3 bloomColor = color * vec3(0.05) * brightness;
-  bloomColor += vec3(smoothstep(0.1, 0.5, brightness)) * color;
-  out_gbuffer = vec4( bloomColor, 1.0 );
+  if ( brightness > 1.0 )
+    out_gbuffer = vec4( color, 1.0 );
+  else
+    out_gbuffer = vec4( 0.0, 0.0, 0.0, 1.0 );
 
   out_color = vec4( color, 1.0 );
 }

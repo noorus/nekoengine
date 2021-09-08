@@ -325,6 +325,7 @@
     <None Include="..\bin\shaders\dbg_showvertextangents.frag" />
     <None Include="..\bin\shaders\dbg_showvertextangents.geom" />
     <None Include="..\bin\shaders\dbg_showvertextangents.vert" />
+    <None Include="..\bin\shaders\gaussblur2d.frag" />
     <None Include="..\bin\shaders\inc.buffers.glsl" />
     <None Include="..\bin\shaders\inc.colorutils.glsl" />
     <None Include="..\bin\shaders\inc.smaa.glsl" />

@@ -52,27 +52,6 @@ namespace neko {
       world_ = make_unique<PersistentBuffer<neko::uniforms::World>>();
       processing_ = make_unique<PersistentBuffer<neko::uniforms::Processing>>();
 
-      // Generate the gaussian blur kernel
-      {
-        auto& buf = processing_->buffer();
-        const float sigma = 15.0f;
-        auto normpdf = []( float x, float sigma ) -> float
-        {
-          return 0.39894f * exp( -0.5f * x * x / ( sigma * sigma ) ) / sigma;
-        };
-        const int ksize = ( ( neko::uniforms::c_gaussianBlurSamples - 1 ) / 2 );
-        for ( int i = 0; i <= ksize; ++i )
-        {
-          buf.data()->gaussianKernel[ksize + i]
-            = buf.data()->gaussianKernel[ksize - i]
-            = normpdf( (float)i, sigma );
-        }
-        float z = 0.0f;
-        for ( int i = 0; i < neko::uniforms::c_gaussianBlurSamples; ++i )
-          z += buf.data()->gaussianKernel[i];
-        buf.data()->gaussianZ = z;
-      }
-
       // Includes
       loadInclude( "inc.buffers.glsl" );
       loadInclude( "inc.colorutils.glsl" );
@@ -81,6 +60,7 @@ namespace neko {
       // Default pipelines
       createSimplePipeline( "mainframebuf2d", "passthrough2d.vert", "mainframebuf2d.frag", { "hdr", "exposure", "gamma", "texMain", "texGBuffer" } );
       createSimplePipeline( "passthrough2d", "passthrough2d.vert", "passthrough2d.frag", { "texMain", "texSecondary" } );
+      createSimplePipeline( "gaussblur2d", "passthrough2d.vert", "gaussblur2d.frag", { "tex_image", "horizontal" } );
       createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag", { "yscale", "tex" } );
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
       createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
