@@ -44,6 +44,35 @@ namespace neko {
       std::transform( str.begin(), str.end(), str.begin(), ::towlower );
     }
 
+    inline utf8String beautifyDuration( chrono::seconds input_seconds, bool verbose = false )
+    {
+      using days = chrono::duration<int, std::ratio<86400>>;
+      auto d = duration_cast<days>( input_seconds );
+      input_seconds -= d;
+      auto h = duration_cast<chrono::hours>( input_seconds );
+      input_seconds -= h;
+      auto m = duration_cast<chrono::minutes>( input_seconds );
+      input_seconds -= m;
+      auto s = duration_cast<chrono::seconds>( input_seconds );
+
+      auto dc = d.count();
+      auto hc = h.count();
+      auto mc = m.count();
+      auto sc = s.count();
+
+      std::stringstream ss;
+      if ( dc )
+        ss << dc << ( verbose ? " days" : "d" );
+      if ( dc || hc )
+        ss << ' ' << hc << ( verbose ? " hours" : "h" );
+      if ( dc || hc || mc )
+        ss << ' ' << mc << ( verbose ? " minutes" : "m" );
+      if ( dc || hc || mc || sc )
+        ss << ' ' << sc << ( verbose ? " seconds" : "s" );
+
+      return ss.str();
+    }
+
     inline size_t utf8_surrogate_len( const char* character )
     {
       size_t result = 0;

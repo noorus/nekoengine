@@ -297,7 +297,10 @@ namespace neko {
 
     renderer_->prepare( time );
     char asd[256];
-    sprintf_s( asd, 256, "Launches: %i\nTime wasted: %.0f seconds", engine.stats().i_launches.load(), engine.stats().f_timeWasted.load() + (float)time );
+    auto secondseWasted = chrono::seconds( static_cast<int>( engine.stats().f_timeWasted.load() + (float)time ) );
+    sprintf_s( asd, 256,
+      "Launches: %i\nTime wasted: %s", engine.stats().i_launches.load(),
+      utils::beautifyDuration( secondseWasted ).c_str() );
     gui_->setshit( asd );
 
     /*char asd[256];

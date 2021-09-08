@@ -98,6 +98,10 @@ namespace neko {
   using moodycamel::ReaderWriterQueue;
   using gsl::span;
 
+  namespace chrono {
+    using namespace std::chrono;
+  }
+
   using std::move;
   using std::pair;
   using std::make_pair;

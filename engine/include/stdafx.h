@@ -77,6 +77,7 @@
 #include <variant>
 #include <any>
 #include <optional>
+#include <chrono>
 
 // GSL
 #include <gsl/gsl>
