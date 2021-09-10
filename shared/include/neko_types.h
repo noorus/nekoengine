@@ -156,6 +156,11 @@ namespace neko {
     constexpr Real ten = 10.0f;
     constexpr Real fifteen = 15.0f;
     constexpr Real pi = std::numbers::pi_v<float>;
+    constexpr Real e = std::numbers::e_v<float>;
+    constexpr Real ln2 = std::numbers::ln2_v<float>;
+    constexpr Real ln10 = std::numbers::ln10_v<float>;
+    constexpr Real sqrt2 = std::numbers::sqrt2_v<float>;
+    constexpr Real g = 9.80665f; // standard gravity m/s
   }
   using vec2 = glm::fvec2;
   using vec3 = glm::fvec3;

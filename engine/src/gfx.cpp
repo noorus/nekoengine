@@ -333,9 +333,9 @@ namespace neko {
     }
 
 #ifndef NEKO_NO_GUI
-    renderer_->draw( time, *camera_.get(), gui_->platform() );
+    renderer_->draw( time, delta, *camera_.get(), gui_->platform() );
 #else
-    renderer_->draw( time, *camera_.get(), nullptr );
+    renderer_->draw( time, delta, *camera_.get(), nullptr );
 #endif
 
     window_->display();

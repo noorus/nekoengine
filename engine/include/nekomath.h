@@ -43,6 +43,15 @@ namespace neko {
     using glm::radians;
     using glm::degrees;
 
+    static std::random_device rd;
+    static std::mt19937_64 reng( rd() );
+    static std::uniform_real_distribution<Real> rdist( 0.0f, 1.0f );
+
+    inline Real rand()
+    {
+      return rdist( reng );
+    }
+
     //! \fn inline Real round( Real value )
     //! \brief Rounds to the nearest non-decimal value.
     //! \param value The value.

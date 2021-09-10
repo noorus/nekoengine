@@ -302,6 +302,7 @@
     <ClInclude Include="include\MyGUI_NekoPlatform.h" />
     <ClInclude Include="include\MyGUI_NekoRTTexture.h" />
     <ClInclude Include="include\nekomath.h" />
+    <ClInclude Include="include\nekosimd.h" />
     <ClInclude Include="include\renderbuffer.h" />
     <ClInclude Include="include\renderer.h" />
     <ClInclude Include="include\scripting.h" />

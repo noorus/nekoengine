@@ -9,6 +9,7 @@
 #include "fontmanager.h"
 #include "lodepng.h"
 #include "gfx.h"
+#include "nekosimd.h"
 
 namespace neko {
 
@@ -100,7 +101,7 @@ namespace neko {
 
   class PointRenderBuffer {
   protected:
-    const GLuint c_maxVertices = 32;
+    const GLuint c_maxVertices = 256;
     unique_ptr<SmarterBuffer<VertexPointRender>> buffer_;
     GLuint vao_;
   public:
@@ -535,7 +536,87 @@ namespace neko {
       sceneDrawEnterNode( child, pipeline );
   }
 
-  void Renderer::sceneDraw( GameTime time, Camera& camera )
+  class Particles {
+  private:
+    static constexpr size_t c_particleCount = 256;
+    neko_avx_align vec4 positions_[c_particleCount];
+    neko_avx_align vec4 velocities_[c_particleCount];
+    neko_avx_align vec4 acceleration_[c_particleCount];
+    neko_avx_align float masses_[c_particleCount];
+    vec4 colors_[c_particleCount];
+    bool gravity_ = true;
+    unique_ptr<PointRenderBuffer> buffer_;
+    GameTime ctr;
+    // position.w can be age if:
+    // - velocity.w is kept 1
+    // - acceleration.w is kept 1
+  public:
+    Particles()
+    {
+      buffer_ = make_unique<PointRenderBuffer>();
+      reset();
+    }
+    void reset()
+    {
+      ctr = 0.0;
+      for ( size_t i = 0; i < c_particleCount; ++i )
+      {
+        positions_[i] = vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+        acceleration_[i] = vec4( 0.0f );
+        auto deg = ( ( numbers::pi * numbers::two ) / static_cast<Real>( c_particleCount ) ) * static_cast<Real>( i );
+        velocities_[i] = vec4( math::sin( deg ) * math::rand() * 0.1f, math::rand() * 1.5f + 0.5f, math::cos( deg ) * math::rand() * 0.1f, 0.0f );
+        masses_[i] = math::rand() * 2.5f;
+        colors_[i] = vec4( math::rand() * 0.8f + 0.2f, math::rand() * 0.8f + 0.2f, math::rand() * 0.8f + 0.2f, 1.0f );
+      }
+    }
+    void update( GameTime ddelta )
+    {
+      ctr += ddelta;
+      if ( ctr > 3.0 )
+        reset();
+      simd::vec8f delta( static_cast<float>( ddelta ) );
+      static const float s_gravity[8] = {
+        0.0f, gravity_ ? -numbers::g : 0.0f, 0.0f, 0.0f,
+        0.0f, gravity_ ? -numbers::g : 0.0f, 0.0f, 0.0f
+      };
+      simd::vec8f gravity( s_gravity );
+      for ( size_t i = 0; i < ( c_particleCount / 8 ); ++i )
+      {
+        simd::vec8f mass_packed( &masses_[i * 8] );
+        simd::vec8f mass[4];
+        mass_packed.unpack8x4( mass[0], mass[1], mass[2], mass[3] );
+        for ( size_t j = 0; j < 4; ++j )
+        {
+          size_t components_index = ( ( i * 8 ) + ( j * 2 ) );
+          simd::vec8f acceleration( &acceleration_[components_index][0] );
+          simd::vec8f forces = mass[j] * gravity * 0.1f;
+          acceleration = acceleration + ( forces / mass[j] );
+          simd::vec8f velocity( &velocities_[components_index][0] );
+          velocity = simd::vec8f::fma( acceleration, delta, velocity );
+          simd::vec8f position( &positions_[components_index][0] );
+          position = position + velocity;
+          position.storeNontemporal( &positions_[components_index][0] );
+          velocity.storeNontemporal( &velocities_[components_index][0] );
+        }
+      }
+    }
+    void draw( shaders::Shaders& shaders )
+    {
+      buffer_->buffer().lock();
+      auto points = buffer_->buffer().buffer().data();
+      for ( size_t i = 0; i < c_particleCount; ++i )
+      {
+        points[i].pos = positions_[i];
+        points[i].color = colors_[i];
+      }
+      buffer_->buffer().unlock();
+      buffer_->draw( shaders, c_particleCount, 0 );
+    }
+  };
+
+  static unique_ptr<Particles> g_particles;
+
+  void Renderer::sceneDraw( GameTime time, GameTime delta, Camera& camera )
   {
     glDepthMask( GL_TRUE ); // Enable depth buffer writes
     glDisable( GL_SCISSOR_TEST );
@@ -683,6 +764,12 @@ namespace neko {
     g_pointrender->buffer().unlock();
 
     g_pointrender->draw( *shaders_.get(), 4, 0 );
+
+    if ( !g_particles )
+      g_particles = make_unique<Particles>();
+
+    g_particles->update( delta );
+    g_particles->draw( *shaders_.get() );
   }
 
   /*
@@ -707,7 +794,7 @@ namespace neko {
   {
   }
 
-  void Renderer::draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui )
+  void Renderer::draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui )
   {
     if ( !mainbuffer_->available() || !intermediate_->available() )
       return;
@@ -722,7 +809,7 @@ namespace neko {
     glDepthFunc( GL_LESS );
     glEnable( GL_DEPTH_TEST );
     mainbuffer_->begin();
-    sceneDraw( time, camera );
+    sceneDraw( time, delta, camera );
     mainbuffer_->end();
 
     // The intermediate is necessary as non-multisampled drawops
@@ -841,6 +928,7 @@ namespace neko {
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
 
+    g_particles.reset();
     g_pointrender.reset();
 
     intermediate_.reset();

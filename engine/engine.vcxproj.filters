@@ -497,6 +497,9 @@
     <ClInclude Include="..\extern\tinygltf\tiny_gltf.h">
       <Filter>Header Files\extern\tinygltf</Filter>
     </ClInclude>
+    <ClInclude Include="include\nekosimd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="engine.manifest" />

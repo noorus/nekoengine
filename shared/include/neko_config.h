@@ -34,6 +34,6 @@
 #undef NEKO_NO_GUI
 
 // Define to disable the OZZ animation system stuff. Will probably break momentarily.
-#undef NEKO_NO_ANIMATION
+#define NEKO_NO_ANIMATION
 
-#undef NEKO_NO_FBX
+#define NEKO_NO_FBX

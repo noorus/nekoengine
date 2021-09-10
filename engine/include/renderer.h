@@ -175,7 +175,7 @@ namespace neko {
     vec2 resolution_;
     void uploadModelsEnterNode( SceneNode* node );
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
-    void sceneDraw( GameTime time, Camera& camera );
+    void sceneDraw( GameTime time, GameTime delta, Camera& camera );
     void clearErrors();
     void setCameraUniform( Camera& camera, uniforms::Camera& uniform );
     TexturePtr loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering );
@@ -205,7 +205,7 @@ namespace neko {
     void uploadModels();
     void jsRestart();
     inline shaders::Shaders& shaders() throw() { return *( shaders_.get() ); }
-    void draw( GameTime time, Camera& camera, MyGUI::NekoPlatform* gui );
+    void draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui );
     void reset( size_t width, size_t height );
     ~Renderer();
   };
