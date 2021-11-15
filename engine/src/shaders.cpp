@@ -156,8 +156,6 @@ namespace neko {
       }
     }
 
-    static const char* const c_includeSearchPath = "/";
-
     void Shaders::compileShader( Shader& shader, const string_view source )
     {
       if ( shader.type() >= Max_Shader_Type )
@@ -168,8 +166,7 @@ namespace neko {
 
       auto src = (const GLchar*)source.data();
       glShaderSource( shader.id(), 1, &src, nullptr );
-      glCompileShaderIncludeARB( shader.id(), 1, &c_includeSearchPath, nullptr );
-      // glCompileShader( shader.id() );
+      glCompileShader( shader.id() );
 
       GLint compiled = 0;
       glGetShaderiv( shader.id(), GL_COMPILE_STATUS, &compiled );
@@ -206,23 +203,65 @@ namespace neko {
         program.uniforms_[uni.c_str()] = glGetUniformLocation( program.id(), uni.c_str() );
     }
 
-    utf8String Shaders::loadSource( const utf8String& filename )
+    utf8String Shaders::loadSource( const utf8String& filename, int includeDepth )
     {
+      if ( includeDepth > 3 )
+      {
+        NEKO_EXCEPT( "Maximum include depth exceeded; circular dependency?" );
+      }
+
       utf8String source;
       platform::FileReader file( rootFilePath_ + platform::utf8ToWide( filename ) );
-      source.resize( file.size() + 1 );
+      source.resize( file.size() );
       file.read( &source[0], (uint32_t)file.size() );
-      source[file.size()] = '\0';
-      return move( source );
+      stringstream ss( source );
+      utf8String line;
+      utf8String out;
+      int ifdefDepth = 0;
+      bool skip = false;
+      const std::regex rgx( "^[ ]*#[ ]*include[ ]+[\"<](.*)[\">].*" );
+      while ( std::getline( ss, line ) )
+      {
+        if ( line.find( "#ifdef __cplusplus" ) != line.npos )
+        {
+          ifdefDepth++;
+          skip = true;
+        }
+        else if ( line.find( "#else" ) != line.npos && ifdefDepth > 0 )
+        {
+          skip = false;
+        }
+        else if ( line.find( "#endif" ) != line.npos && ifdefDepth > 0 )
+        {
+          ifdefDepth--;
+          skip = false;
+        }
+        else if ( !skip )
+        {
+          std::smatch matches;
+          if ( std::regex_search( line, matches, rgx ) )
+          {
+            if ( includes_.find( matches[1].str() ) == includes_.end() )
+              NEKO_EXCEPT( "Include not found: " + matches[1].str() )
+            out.append( includes_.at( matches[1].str() ) + "\n" );
+          }
+          else
+          {
+            out.append( line + "\n" );
+          }
+        }
+      }
+
+      OutputDebugStringA( out.c_str() );
+
+      return move( out );
     }
 
     void Shaders::loadInclude( utf8String filename )
     {
-      // https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_shading_language_include.txt
       auto source = loadSource( filename );
-      filename = "/" + filename;
       source[source.length() - 1] = '\n';
-      glNamedStringARB( gl::GL_SHADER_INCLUDE_ARB, (GLint)filename.length(), filename.c_str(), (GLint)source.length(), source.c_str() );
+      includes_[filename] = source;
     }
 
     void Shaders::buildSeparableProgram( const utf8String& name,

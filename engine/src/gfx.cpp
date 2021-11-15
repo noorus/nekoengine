@@ -83,6 +83,7 @@ namespace neko {
     console_->print( Console::srcGfx, "GL Renderer: " + info_.renderer_ );
   }
 
+  // 8: (Intel) Redundant state change in glBindFramebuffer API call, FBO 0, "", already bound.
   // 131185: Buffer detailed info...
   // -> Information on buffer object creation, hinting and memory placement
   // 131218: Program/shader state performance warning...
@@ -90,7 +91,7 @@ namespace neko {
   // 131154: Pixel-path performance warning: Pixel transfer is synchronized with 3D rendering.
   // -> Basically just means that we're not using NV-specific (?) multithreaded texture uploads
   // -> https://on-demand.gputechconf.com/gtc/2012/presentations/S0356-GTC2012-Texture-Transfers.pdf
-  const std::array<GLuint, 4> c_ignoredGlDebugMessages = { 131185, 131218, 131204, 131154 };
+  const std::array<GLuint, 5> c_ignoredGlDebugMessages = { 8, 131185, 131218, 131204, 131154 };
 
   void Gfx::openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
     const GLchar* message, const void* userParam )
@@ -101,13 +102,16 @@ namespace neko {
 
     auto gfx = static_cast<Gfx*>( const_cast<void*>( userParam ) );
 
+  #ifdef _DEBUG
     if ( id == 0
+      // || id == 8
       || id == 1281
       || id == 1282
       || id == 1285
       // || id == 131076
       )
       DebugBreak();
+  #endif
 
     if ( !gfx )
       return;

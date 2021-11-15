@@ -11,6 +11,10 @@
 #include "gfx.h"
 #include "nekosimd.h"
 
+// Intel graphics drivers shit the bed every time when freeing stuff on exit.
+// Set this to force an ExitProcess() instead when debugging on an Intel chip in order to not waste time.
+#define INTEL_SUCKS
+
 namespace neko {
 
   using namespace gl;
@@ -135,7 +139,7 @@ namespace neko {
 
   static unique_ptr<PointRenderBuffer> g_pointrender;
 
-  void glStartupFetchAndCheck( GLInformation& info )
+  void glStartupFetchAndCheck( GLInformation& info, Console& console )
   {
     auto glbAuxStr = []( GLenum e ) -> utf8String
     {
@@ -200,6 +204,21 @@ namespace neko {
       NEKO_EXCEPT( description.str() );
     }
 
+    utf8String extensions;
+    const auto extcount = glvGetI32NoThrow( GL_NUM_EXTENSIONS );
+    for ( int32_t i = 0; i < extcount; ++i )
+    {
+      const auto ext = glGetStringi( GL_EXTENSIONS, i );
+      if ( ext )
+      {
+        char asd[64];
+        sprintf_s( asd, 64, "%s ", reinterpret_cast<const char*>( ext ) );
+        extensions.append( asd );
+      }
+    }
+
+    console.printf( Console::srcGfx, "Extensions: %s", extensions.c_str() );
+
     // Max buffer sizes
     glvGetI64( GL_MAX_TEXTURE_SIZE, info.maxTextureSize );
     glvGetI64( GL_MAX_RENDERBUFFER_SIZE, info.maxRenderbufferSize );
@@ -214,7 +233,7 @@ namespace neko {
       info.maxFramebufferHeight = info.maxTextureSize;
     }
 
-    // Maximum anistropic filtering level
+    // Maximum anisotropic filtering level
     if ( !glvGetFloat( GL_MAX_TEXTURE_MAX_ANISOTROPY, info.maxAnisotropy, true ) )
       info.maxAnisotropy = 1.0f;
 
@@ -246,7 +265,7 @@ namespace neko {
     assert( loader_ && fonts_ && director_ && console_ );
 
     clearErrors();
-    glStartupFetchAndCheck( info_ );
+    glStartupFetchAndCheck( info_, *console_.get() );
 
     console_->printf( Console::srcGfx, "Buffer alignments are %i/texture %i/uniform",
       info_.textureBufferAlignment, info_.uniformBufferAlignment );
@@ -892,7 +911,6 @@ namespace neko {
       {
         // smaa: neighborhood blending pass
         // output to window
-        glBindFramebuffer( GL_FRAMEBUFFER, 0 );
         shaders_->usePipeline( "smaa_blend" ).setUniform( "resolution", resolution_ ).setUniform( "albedo_tex", 0 ).setUniform( "blend_tex", 1 );
         glBindTextureUnit( 0, smaa_.albedo_->texture( 0 )->handle() );
         glBindTextureUnit( 1, smaa_.blend_->texture( 0 )->handle() );
@@ -904,7 +922,6 @@ namespace neko {
     }
     else
     {
-      glBindFramebuffer( GL_FRAMEBUFFER, 0 );
       shaders_->usePipeline( "passthrough2d" ).setUniform( "texMain", 0 );
       glBindTextureUnit( 0, smaa_.albedo_->texture( 0 )->handle() );
       builtin_.screenQuad_->begin();
@@ -925,6 +942,7 @@ namespace neko {
 
   Renderer::~Renderer()
   {
+#ifndef INTEL_SUCKS
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
 
@@ -949,6 +967,9 @@ namespace neko {
 
     if ( builtin_.emptyVAO_ )
       glDeleteVertexArrays( 1, &builtin_.emptyVAO_ );
+#else
+    ExitProcess( 0 );
+#endif
   }
 
 }
