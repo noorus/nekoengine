@@ -552,37 +552,16 @@ namespace neko {
       return;
     }
 
-#ifdef NEKO_NO_ICU
-    NEKO_EXCEPT( "Cannot execute a console file because ICU was not compiled in." );
-#else
-
     TextFileReader reader( filename );
-    auto str = unicodePiece( reader.readFullAssumeUtf8().c_str() );
-    auto content = unicodeString::fromUTF8( str );
+    const auto source = reader.readFullAssumeUtf8();
+    stringstream ss( source );
 
-    // FIXME This will just crash and burn if there's a > ASCII character in the Unicode string.
-    string line;
-    line.reserve( 128 );
-    for ( int32_t i = 0; i < content.length(); ++i )
+    utf8String line;
+    while ( std::getline( ss, line ) )
     {
-      if ( content[i] != 0 && content[i] != LF && content[i] != CR )
-      {
-        line.append( 1, (const char)content[i] );
-      }
-      else if ( content[i] == LF )
-      {
-        if ( !line.empty() )
-          execute( line, true );
-        line.clear();
-      }
-      else if ( content[i] == 0 )
-        break;
+      if ( !line.empty() )
+        execute( line, true );
     }
-
-    if ( !line.empty() )
-      execute( line, true );
-
-#endif
   }
 
   ConVar* Console::getVariable( const string_view name )
