@@ -252,8 +252,6 @@ namespace neko {
         }
       }
 
-      OutputDebugStringA( out.c_str() );
-
       return move( out );
     }
 
