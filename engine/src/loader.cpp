@@ -7,8 +7,6 @@
 #include "console.h"
 
 #include "tinytiffreader.hxx"
-#include <ktx.h>
-#pragma comment( lib, "ktx.lib" )
 
 #include "tinyexr.h"
 
@@ -150,35 +148,7 @@ namespace neko {
           MaterialLayer layer;
           vector<uint8_t> rawData;
           auto ext = utils::extractExtension( path );
-          /*if ( ext == L"ktx2" )
-          {
-            ktxTexture2* ktx;
-            auto ret = ktxTexture2_CreateFromMemory( input.data(), input.size(), KTX_TEXTURE_CREATE_NO_FLAGS, &ktx );
-            if ( ktx && ret == KTX_SUCCESS )
-            {
-              Locator::console().printf( Console::srcLoader, "ktx: libktx loaded %s, %ix%i depth %i %id %i faces",
-                target.c_str(), ktx->baseWidth, ktx->baseHeight, ktx->baseDepth, ktx->numDimensions, ktx->numFaces );
-              GLuint gl_id = 0;
-              auto gl_tgt = gl::GLenum::GL_NONE;
-              auto gl_err = gl::GLenum::GL_NONE;
-              ret = ktxTexture_GLUpload( (ktxTexture*)ktx, &gl_id, (unsigned int*)&gl_tgt, (unsigned int*)&gl_err );
-              if ( ret != KTX_SUCCESS )
-                NEKO_OPENGL_EXCEPT( "ktxTexture_GLUpload failed", gl_err );
-              //layer.preuploaded_ = gl_id;
-              layer.image_.width_ = ktx->baseWidth;
-              layer.image_.height_ = ktx->baseHeight;
-              layer.image_.format_ = PixFmtColorRGBA16f;
-              layer.image_.data_.resize( ktxTexture_GetDataSize( (ktxTexture*)ktx ) );
-              auto source = ktxTexture_GetData( ktx );
-              memcpy( layer.image_.data_.data(), source, layer.image_.data_.size() );
-              //layer.image_.uploadedFormat_ = gl_tgt;
-              task.textureLoad.material_->layers_.push_back( move( layer ) );
-              ktxTexture_Destroy( (ktxTexture*)ktx );
-            }
-            else
-              NEKO_EXCEPT( "KTX creation failed" );
-          }
-          else*/ if ( ext == L"png" )
+          if ( ext == L"png" )
           {
             if ( lodepng::decode( rawData, width, height, input.data(), input.size(), LCT_RGBA, 8 ) == 0 )
             {

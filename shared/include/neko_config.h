@@ -28,7 +28,7 @@
 #undef NEKO_NO_SCRIPTING
 
 // Define to disable audio & drop FMOD SDK requirement.
-#undef NEKO_NO_AUDIO
+#define NEKO_NO_AUDIO
 
 // Define to disable the GUI & drop MyGUI SDK requirement.
 #undef NEKO_NO_GUI

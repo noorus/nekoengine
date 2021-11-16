@@ -158,13 +158,14 @@ namespace neko {
       ShaderVector shaders_;
       ProgramVector programs_;
       PipelineMap pipelines_;
+      map<utf8String, utf8String> includes_;
       unique_ptr<PersistentBuffer<neko::uniforms::World>> world_;
       unique_ptr<PersistentBuffer<neko::uniforms::Processing>> processing_;
       void dumpLog( const GLuint& target, const bool isProgram );
       void loadInclude( utf8String filename );
       void compileShader( Shader& shader, const string_view source );
       void linkSingleProgram( Program& program, Shader& shader, const vector<utf8String>& uniforms );
-      utf8String loadSource( const utf8String& filename );
+      utf8String loadSource( const utf8String& filename, int includeDepth = 0 );
       void buildSeparableProgram( const utf8String& name, const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program, const vector<utf8String>& uniforms );
     public:
       Shaders( ConsolePtr console );

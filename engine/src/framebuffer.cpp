@@ -50,7 +50,7 @@ namespace neko {
 
     for ( int i = 0; i < colorbufcount_; i++ )
     {
-      colorBuffers_.push_back( make_shared<Texture>( renderer_, width_, height_, PixFmtColorRGBA16f, nullptr, Texture::ClampEdge, Texture::Nearest, multisamples_ ) );
+      colorBuffers_.push_back( make_shared<Texture>( renderer_, width_, height_, format_, nullptr, Texture::ClampEdge, Texture::Nearest, multisamples_ ) );
     }
 
     if ( depth_ )
@@ -60,7 +60,7 @@ namespace neko {
     array<GLenum, 32> drawBuffers;
     for ( unsigned int i = 0; i < colorBuffers_.size(); ++i )
     {
-      drawBuffers[i] = CONVGLENUM(GL_COLOR_ATTACHMENT0, i);
+      drawBuffers[i] = CONVGLENUM( GL_COLOR_ATTACHMENT0, i );
       glNamedFramebufferTexture( handle_, drawBuffers[i], colorBuffers_[i]->handle(), 0 );
     }
 

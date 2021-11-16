@@ -33,7 +33,8 @@ namespace neko {
 
   const wchar_t c_icuData[] = L"icudtl.dat";
   const wchar_t c_snapshotData[] = L"snapshot_blob.bin";
-  const wchar_t c_v8BaseDirectory[] = LR"(\v8\)";
+  const wchar_t c_v8BaseDirectory[] = LR"(\data\v8\)";
+  const wchar_t c_scriptsDirectory[] = LR"(\scripts\)";
 
   Scripting::Scripting( EnginePtr engine ):
     Subsystem( move( engine ) ),
@@ -65,7 +66,7 @@ namespace neko {
   void Scripting::initialize()
   {
     global_ = make_shared<ScriptingContext>( this, this,
-      platform::wideToUtf8( rootDirectory_ + LR"(\scripts\)" ) );
+      platform::wideToUtf8( rootDirectory_ + c_scriptsDirectory ) );
   }
 
   void Scripting::postInitialize()

@@ -1,5 +1,4 @@
 #version 450 core
-#extension GL_ARB_shading_language_include : require
 
 uniform sampler2D tex_image;
 uniform bool horizontal;

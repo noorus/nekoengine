@@ -91,7 +91,7 @@ inline int runMain( const std::vector<std::wstring>& arguments )
     {
       i++;
       if ( i < arguments.size() )
-        console->execute( platform::wideToUtf8( arguments[i] ) );
+        console->executeFile( platform::wideToUtf8( arguments[i] ) );
     }
     else
       console->printf( Console::srcEngine, R"(Unknown command line "%S")", arguments[i].c_str() );
