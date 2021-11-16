@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "gfx_types.h"
 
-#include <ktx.h>
-
 namespace neko {
 
   using namespace gl;
