@@ -319,6 +319,7 @@
     <Manifest Include="engine.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\data\materials.json" />
     <None Include="..\bin\scripts\initialization.js" />
     <None Include="..\bin\shaders\dbg_showvertexnormals.frag" />
     <None Include="..\bin\shaders\dbg_showvertexnormals.geom" />

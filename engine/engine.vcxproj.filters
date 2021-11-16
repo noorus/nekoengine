@@ -109,6 +109,9 @@
     <Filter Include="Header Files\extern\tinygltf">
       <UniqueIdentifier>{9098ca5c-5991-40a6-b6da-a08566101fb7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Data">
+      <UniqueIdentifier>{3ff94752-9950-4867-bdbe-da41a44d8721}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -603,6 +606,9 @@
     </None>
     <None Include="..\bin\shaders\gaussblur2d.frag">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\materials.json">
+      <Filter>Data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
