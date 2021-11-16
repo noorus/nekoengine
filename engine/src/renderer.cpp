@@ -96,6 +96,8 @@ namespace neko {
 
   }
 
+  const auto c_bufferFormat = PixFmtColorRGBA16f;
+
 #pragma pack( push, 1 )
   struct VertexPointRender {
     vec3 pos;
@@ -330,7 +332,7 @@ namespace neko {
     for ( size_t i = 0; i < 2; ++i )
     {
       if ( !buffers_[i] )
-        buffers_[i] = make_shared<Framebuffer>( renderer, 1, PixFmtColorRGBA16f, false, 1 );
+        buffers_[i] = make_shared<Framebuffer>( renderer, 1, c_bufferFormat, false, 1 );
       buffers_[i]->recreate( resolution.x, resolution.y );
     }
   }
@@ -345,8 +347,8 @@ namespace neko {
 
     // loader_->addLoadTask( { LoadTask( R"(data\meshes\SCA_Aircraft_Flight.anim)"
 
-    mainbuffer_ = make_shared<Framebuffer>( this, 2, PixFmtColorRGBA16f, true, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
-    intermediate_ = make_shared<Framebuffer>( this, 2, PixFmtColorRGBA16f, false, 1 );
+    mainbuffer_ = make_shared<Framebuffer>( this, 2, c_bufferFormat, true, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
+    intermediate_ = make_shared<Framebuffer>( this, 2, c_bufferFormat, false, 1 );
 
     g_pointrender = make_unique<PointRenderBuffer>();
 
