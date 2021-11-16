@@ -12,15 +12,19 @@ layout ( location = 2 ) in vec2 vbo_texcoord;
 
 uniform mat4 model;
 
-out vec3 out_normal;
-out vec2 out_texcoord;
+out VertexData {
+  vec3 normal;
+  vec2 texcoord;
+  vec3 fragpos;
+} vs_out;
 
 void main()
 {
   mat4 modelViewProjection = world.camera.projection * world.camera.view * model;
 
-  gl_Position = modelViewProjection * vec4( vbo_position, 1.0 );
+  gl_Position = modelViewProjection * vec4( vbo_position.xyz, 1.0 );
 
-  out_normal = vbo_normal;
-  out_texcoord = vbo_texcoord;
+  vs_out.normal = mat3( model ) * vec3( vbo_normal.x, vbo_normal.y, vbo_normal.z );
+  vs_out.texcoord = vbo_texcoord;
+  vs_out.fragpos = vec3( model * vec4( vbo_position, 1.0 ) );
 }
