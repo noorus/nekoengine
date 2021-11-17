@@ -13,7 +13,7 @@
 namespace neko {
 
   const char* c_fileLogFormat = "[%0#*.2f][%s] %s\r\n";
-  const int c_sprintfBufferSize = 8192;
+  const int c_consolePrintfBufferSize = 16384;
 
   CVarList Console::precreated_;
 
@@ -345,48 +345,48 @@ namespace neko {
     }
   }
 
+  thread_local char tls_consolePrintfBuffer[c_consolePrintfBufferSize];
+  thread_local char tls_consolePrintBuffer[c_consolePrintfBufferSize + 32];
+
   void Console::print( Source source, const char* str )
   {
     auto &src = sources_[source];
     auto time = ( engine_ ? (float)engine_->time() : 0.0f );
 
-    char fullbuf[c_sprintfBufferSize + 128];
-    sprintf_s( fullbuf, c_sprintfBufferSize + 128, c_fileLogFormat, 8, time, src.name.c_str(), str );
+    sprintf_s( tls_consolePrintBuffer, c_consolePrintfBufferSize + 32, c_fileLogFormat, 8, time, src.name.c_str(), str );
 
     if ( fileOut_ )
-      fileOut_->write( fullbuf );
+      fileOut_->write( tls_consolePrintBuffer );
 
     listenerLock_.lockShared();
     for ( auto listener : listeners_ )
-      listener->onConsolePrint( this, src.color, fullbuf );
+      listener->onConsolePrint( this, src.color, tls_consolePrintBuffer );
     listenerLock_.unlockShared();
 
 #ifdef _DEBUG
-    platform::outputDebugString( fullbuf );
+    platform::outputDebugString( tls_consolePrintBuffer );
 #endif
   }
 
   void Console::printf( Source source, const char* str, ... )
   {
     va_list va_alist;
-    char buffer[c_sprintfBufferSize];
     va_start( va_alist, str );
-    _vsnprintf_s( buffer, c_sprintfBufferSize, str, va_alist );
+    _vsnprintf_s( tls_consolePrintfBuffer, c_consolePrintfBufferSize, str, va_alist );
     va_end( va_alist );
 
-    print( source, buffer );
+    print( source, tls_consolePrintfBuffer );
   }
 
   void Console::errorPrintf( const char* str, ... )
   {
     va_list va_alist;
-    char buffer[c_sprintfBufferSize];
     va_start( va_alist, str );
-    _vsnprintf_s( buffer, c_sprintfBufferSize, str, va_alist );
+    _vsnprintf_s( tls_consolePrintfBuffer, c_consolePrintfBufferSize, str, va_alist );
     va_end( va_alist );
 
     utf8String fullStr = "Fatal: ";
-    fullStr.append( buffer );
+    fullStr.append( tls_consolePrintfBuffer );
     utf8String tmp;
     tmp.reserve( 1024 );
     for ( size_t i = 0; i <= fullStr.size(); ++i )
