@@ -13,7 +13,7 @@
 
 // Intel graphics drivers shit the bed every time when freeing stuff on exit.
 // Set this to force an ExitProcess() instead when debugging on an Intel chip in order to not waste time.
-#define INTEL_SUCKS
+#undef INTEL_SUCKS
 
 namespace neko {
 
@@ -27,6 +27,7 @@ namespace neko {
   NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 2.2f );
   NEKO_DECLARE_CONVAR( vid_exposure, "Testing.", 1.0f );
   NEKO_DECLARE_CONVAR( vid_smaa, "Antialiasing.", true );
+  NEKO_DECLARE_CONVAR( gl_dump, "Dump OpenGL extensions on startup.", false );
 
   namespace BuiltinData {
 
@@ -141,7 +142,7 @@ namespace neko {
 
   static unique_ptr<PointRenderBuffer> g_pointrender;
 
-  void glStartupFetchAndCheck( GLInformation& info, Console& console )
+  void glStartupFetchAndCheck( GLInformation& info, Console& console, bool dumpExts )
   {
     auto glbAuxStr = []( GLenum e ) -> utf8String
     {
@@ -206,20 +207,42 @@ namespace neko {
       NEKO_EXCEPT( description.str() );
     }
 
-    utf8String extensions;
-    const auto extcount = glvGetI32NoThrow( GL_NUM_EXTENSIONS );
-    for ( int32_t i = 0; i < extcount; ++i )
+    if ( dumpExts )
     {
-      const auto ext = glGetStringi( GL_EXTENSIONS, i );
-      if ( ext )
+      struct GLVendor
       {
-        char asd[64];
-        sprintf_s( asd, 64, "%s ", reinterpret_cast<const char*>( ext ) );
-        extensions.append( asd );
-      }
-    }
+        utf8String prefix;
+        utf8String name;
+        utf8String extensions;
+      };
 
-    console.printf( Console::srcGfx, "Extensions: %s", extensions.c_str() );
+      GLVendor vendors[5] = {
+        { "_ARB", "ARB", "" },
+        { "_NV", "NVIDIA", "" },
+        { "_AMD", "AMD", "" },
+        { "_INTEL", "Intel", "" },
+        { "_", "Other", "" }
+      };
+
+      const auto extcount = glvGetI32NoThrow( GL_NUM_EXTENSIONS );
+      for ( int32_t i = 0; i < extcount; ++i )
+      {
+        const auto extb = glGetStringi( GL_EXTENSIONS, i );
+        if ( !extb )
+          continue;
+        const string ext( reinterpret_cast<const char*>( extb ) );
+        for ( auto& vendor : vendors )
+          if ( ext.find( vendor.prefix ) != ext.npos )
+          {
+            vendor.extensions.append( vendor.extensions.empty() ? ext : ( " " + ext ) );
+            break;
+          }
+      }
+
+      for ( auto& vendor : vendors )
+        if ( !vendor.extensions.empty() )
+          console.printf( Console::srcGfx, "%s Extensions: %s", vendor.name.c_str(), vendor.extensions.c_str() );
+    }
 
     // Max buffer sizes
     glvGetI64( GL_MAX_TEXTURE_SIZE, info.maxTextureSize );
@@ -267,7 +290,7 @@ namespace neko {
     assert( loader_ && fonts_ && director_ && console_ );
 
     clearErrors();
-    glStartupFetchAndCheck( info_, *console_.get() );
+    glStartupFetchAndCheck( info_, *console_.get(), g_CVar_gl_dump.as_b() );
 
     console_->printf( Console::srcGfx, "Buffer alignments are %i/texture %i/uniform",
       info_.textureBufferAlignment, info_.uniformBufferAlignment );
