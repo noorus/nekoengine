@@ -146,7 +146,7 @@ int APIENTRY wWinMain( HINSTANCE instance, HINSTANCE previous, LPWSTR cmdline, i
   UNREFERENCED_PARAMETER( show );
 
   // Enable leak checking in debug builds
-#if defined( _DEBUG ) || defined( DEBUG )
+#if defined( _DEBUG ) && !defined( INTEL_SUCKS )
   _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
 

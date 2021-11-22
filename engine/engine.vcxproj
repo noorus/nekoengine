@@ -230,6 +230,7 @@
     <ClCompile Include="src\MyGUI_NekoRTTexture.cpp" />
     <ClCompile Include="src\MyGUI_NekoTexture.cpp" />
     <ClCompile Include="src\MyGUI_NekoVertexBuffer.cpp" />
+    <ClCompile Include="src\particles.cpp" />
     <ClCompile Include="src\renderbuffer.cpp" />
     <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\rendersynccontext.cpp" />
@@ -259,6 +260,7 @@
     <ClInclude Include="..\extern\tinytiff\tinytiff_defs.h" />
     <ClInclude Include="..\extern\tinytiff\tinytiff_tools.hxx" />
     <ClInclude Include="..\extern\tinytiff\tinytiff_version.h" />
+    <ClInclude Include="..\shared\include\math_aabb.h" />
     <ClInclude Include="..\shared\include\neko_algorithm.h" />
     <ClInclude Include="..\shared\include\neko_compilerdef.h" />
     <ClInclude Include="..\shared\include\neko_config.h" />
@@ -303,6 +305,7 @@
     <ClInclude Include="include\MyGUI_NekoRTTexture.h" />
     <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\nekosimd.h" />
+    <ClInclude Include="include\particles.h" />
     <ClInclude Include="include\renderbuffer.h" />
     <ClInclude Include="include\renderer.h" />
     <ClInclude Include="include\scripting.h" />
@@ -330,29 +333,19 @@
     <None Include="..\bin\shaders\gaussblur2d.frag" />
     <None Include="..\bin\shaders\inc.buffers.glsl" />
     <None Include="..\bin\shaders\inc.colorutils.glsl" />
-    <None Include="..\bin\shaders\inc.smaa.glsl" />
+    <None Include="..\bin\shaders\inc.math.glsl" />
     <None Include="..\bin\shaders\mainframebuf2d.frag" />
+    <None Include="..\bin\shaders\particle.frag" />
+    <None Include="..\bin\shaders\particle_billboard.geom" />
+    <None Include="..\bin\shaders\particle_billboard.vert" />
+    <None Include="..\bin\shaders\particle_world.geom" />
+    <None Include="..\bin\shaders\particle_world.vert" />
     <None Include="..\bin\shaders\passthrough2d.frag" />
     <None Include="..\bin\shaders\passthrough2d.vert" />
-    <None Include="..\bin\shaders\mat_ground.frag" />
-    <None Include="..\bin\shaders\mat_ground.vert" />
     <None Include="..\bin\shaders\mat_unlitdefault.frag" />
     <None Include="..\bin\shaders\mat_unlitdefault.vert" />
-    <None Include="..\bin\shaders\mat_untexturedpbs.frag" />
-    <None Include="..\bin\shaders\mat_untexturedpbs.vert" />
-    <None Include="..\bin\shaders\mat_worldpbr.frag" />
-    <None Include="..\bin\shaders\mat_worldpbr.vert" />
-    <None Include="..\bin\shaders\smaa_blend.frag" />
-    <None Include="..\bin\shaders\smaa_blend.vert" />
-    <None Include="..\bin\shaders\smaa_edge.frag" />
-    <None Include="..\bin\shaders\smaa_edge.vert" />
-    <None Include="..\bin\shaders\smaa_weight.frag" />
-    <None Include="..\bin\shaders\smaa_weight.vert" />
-    <None Include="..\bin\shaders\mygui3d.frag" />
-    <None Include="..\bin\shaders\mygui3d.vert" />
-    <None Include="..\bin\shaders\pointlight.frag" />
-    <None Include="..\bin\shaders\pointlight.geom" />
-    <None Include="..\bin\shaders\pointlight.vert" />
+    <None Include="..\bin\shaders\gui.frag" />
+    <None Include="..\bin\shaders\gui.vert" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="engine.rc" />

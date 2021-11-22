@@ -252,6 +252,11 @@ namespace neko {
       return glm::toQuat( glm::yawPitchRoll( yaw, pitch, roll ) );
     }
 
+    inline quaternion quaternionFrom( Radians angle, vec3 axis )
+    {
+      return angleAxis( angle, axis );
+    }
+
     //! \fn inline T interpolateLinear( const T& v1, const T& v2, const Real interp )
     //! Linear interpolation between v1..v2 at interp[0..1]
     template <typename T>

@@ -63,7 +63,7 @@ namespace MyGUI {
 
   void NekoRenderManager::doRenderRtt( IVertexBuffer* buffer, ITexture* texture, size_t count )
   {
-    auto& pipeline = shaders_->usePipeline( "mygui3d" );
+    auto& pipeline = shaders_->usePipeline( "gui" );
     pipeline.setUniform( "yscale", -1.0f );
     doRender( buffer, texture, count );
     pipeline.setUniform( "yscale", 1.0f );

@@ -37,3 +37,7 @@
 #define NEKO_NO_ANIMATION
 
 #define NEKO_NO_FBX
+
+// Intel graphics drivers shit the bed every time when freeing stuff on exit.
+// Set this to force an ExitProcess() instead when debugging on an Intel chip in order to not waste time.
+#define INTEL_SUCKS

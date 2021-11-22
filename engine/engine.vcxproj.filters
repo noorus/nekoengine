@@ -303,6 +303,9 @@
     <ClCompile Include="src\material.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
+    <ClCompile Include="src\particles.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -503,6 +506,12 @@
     <ClInclude Include="include\nekosimd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\particles.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\include\math_aabb.h">
+      <Filter>Header Files\shared</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="engine.manifest" />
@@ -547,58 +556,10 @@
     <None Include="..\bin\shaders\mat_unlitdefault.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\shaders\mat_worldpbr.frag">
+    <None Include="..\bin\shaders\gui.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\shaders\mat_worldpbr.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\mygui3d.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\mygui3d.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\pointlight.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\pointlight.geom">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\pointlight.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\mat_ground.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\mat_ground.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\mat_untexturedpbs.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\mat_untexturedpbs.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\inc.smaa.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\smaa_blend.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\smaa_blend.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\smaa_edge.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\smaa_edge.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\smaa_weight.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\smaa_weight.vert">
+    <None Include="..\bin\shaders\gui.vert">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\shaders\passthrough2d.frag">
@@ -609,6 +570,24 @@
     </None>
     <None Include="..\bin\data\materials.json">
       <Filter>Data</Filter>
+    </None>
+    <None Include="..\bin\shaders\particle.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\particle_world.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\particle_world.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\particle_billboard.geom">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\particle_billboard.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\inc.math.glsl">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

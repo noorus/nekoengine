@@ -9,7 +9,6 @@ in VertexData {
 } vs_out;
 
 layout ( location = 0 ) out vec4 out_color;
-layout ( location = 1 ) out vec4 out_gbuffer;
 
 uniform float gamma;
 uniform sampler2D tex;
@@ -27,5 +26,4 @@ void main()
   vec3 color = ambient + Lo;
 
   out_color = vec4( color, alpha );
-  out_gbuffer = vec4( 0.0, 0.0, 0.0, alpha );
 }

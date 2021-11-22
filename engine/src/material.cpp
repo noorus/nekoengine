@@ -17,9 +17,7 @@ namespace neko {
 
   const map<utf8String, Material::Type> c_materialTypes = {
     { "unlit", Material::Type::UnlitSimple },
-    { "ground", Material::Type::WorldGround },
-    { "pbr", Material::Type::WorldPBR },
-    { "pbs", Material::Type::WorldUntexturedPBS }
+    { "worldparticle", Material::Type::WorldParticle }
   };
 
   MaterialPtr MaterialManager::createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )

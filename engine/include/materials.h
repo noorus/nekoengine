@@ -31,9 +31,7 @@ namespace neko {
     enum Type
     {
       UnlitSimple,
-      WorldGround,
-      WorldPBR,
-      WorldUntexturedPBS
+      WorldParticle
     } type_ = UnlitSimple;
     utf8String name_;
     bool loaded_ = false;

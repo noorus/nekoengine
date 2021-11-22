@@ -15,6 +15,7 @@ namespace neko {
   {
     VBOPtr ptr = make_shared<VBO>( type, mappable );
     vbos_[type].push_back( ptr );
+
     return move( ptr );
   }
 

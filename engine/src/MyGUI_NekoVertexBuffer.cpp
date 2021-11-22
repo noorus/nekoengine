@@ -49,7 +49,7 @@ namespace MyGUI {
   void NekoVertexBuffer::draw( int count )
   {
     glBindVertexArray( vao_ );
-    auto& pipeline = renderer_->shaders().usePipeline( "mygui3d" );
+    auto& pipeline = renderer_->shaders().usePipeline( "gui" );
     pipeline.setUniform( "tex", 0 );
     pipeline.setUniform( "yscale", 1.0f );
     glDrawArrays( GL_TRIANGLES, 0, count );

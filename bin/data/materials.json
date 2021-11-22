@@ -7,23 +7,10 @@
     ]
   },
   {
-    "type": "ground",
-    "name": "demo_ground",
+    "type": "worldparticle",
+    "name": "demo_sakura",
     "layers": [
-      "SGT_Tile_3_AlbedoSmoothness.png",
-      "SGT_Tile_3_Height.png",
-      "SGT_Tile_3_MetallicSmoothness.png",
-      "SGT_Tile_3_Normal.png"
-    ]
-  },
-  {
-    "type": "pbr",
-    "name": "demo_unit",
-    "layers": [
-      "M_Tank_Pz35_Blue_AlbedoTransparency.png",
-      "M_Tank_Pz35_MetallicSmoothness.png",
-      "M_Tank_Pz35_Normal.png",
-      "M_Tank_Pz35_Blue_AlbedoTransparency.png"
+      "sakura.png"
     ]
   }
 ]

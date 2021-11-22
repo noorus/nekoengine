@@ -182,14 +182,6 @@ namespace neko {
   protected:
     FramebufferPtr mainbuffer_; //!< Multisampled primary scene render buffer
     FramebufferPtr intermediate_; //!< Intermediate non-multisampled buffer for postprocessing
-    struct SMAAContext {
-      FramebufferPtr albedo_;
-      FramebufferPtr edge_;
-      FramebufferPtr blend_;
-      TexturePtr areaDataTexture_;
-      TexturePtr searchDataTexture_;
-      void recreate( Renderer* renderer, vec2i resolution );
-    } smaa_;
     struct GaussianBlurContext {
       FramebufferPtr buffers_[2];
       void recreate( Renderer* renderer, vec2i resolution );

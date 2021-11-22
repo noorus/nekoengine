@@ -55,23 +55,18 @@ namespace neko {
       // Includes
       loadInclude( "inc.buffers.glsl" );
       loadInclude( "inc.colorutils.glsl" );
-      loadInclude( "inc.smaa.glsl" );
+      loadInclude( "inc.math.glsl" );
 
       // Default pipelines
       createSimplePipeline( "mainframebuf2d", "passthrough2d.vert", "mainframebuf2d.frag", { "hdr", "exposure", "gamma", "texMain", "texGBuffer" } );
       createSimplePipeline( "passthrough2d", "passthrough2d.vert", "passthrough2d.frag", { "texMain", "texSecondary" } );
       createSimplePipeline( "gaussblur2d", "passthrough2d.vert", "gaussblur2d.frag", { "tex_image", "horizontal" } );
-      createSimplePipeline( "mygui3d", "mygui3d.vert", "mygui3d.frag", { "yscale", "tex" } );
+      createSimplePipeline( "gui", "gui.vert", "gui.frag", { "yscale", "tex" } );
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
       createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
       createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "gamma", "tex" } );
-      createSimplePipeline( "mat_worldpbr", "mat_worldpbr.vert", "mat_worldpbr.frag", { "model", "gamma", "texAlbedoTransparency", "texMetalSmoothness", "texNormal", "texTeamColor" } );
-      createSimplePipeline( "mat_ground", "mat_ground.vert", "mat_ground.frag", { "model", "gamma", "texAlbedoSmoothness", "texHeight", "texMetallicSmoothness", "texNormal" } );
-      createSimplePipeline( "mat_untexturedpbs", "mat_untexturedpbs.vert", "mat_untexturedpbs.frag", { "model", "gamma", "matAlbedo", "matRoughness", "matMetallic" } );
-      createSimplePipeline( "pointlight", "pointlight.vert", "pointlight.geom", "pointlight.frag", { "model" } );
-      createSimplePipeline( "smaa_edge", "smaa_edge.vert", "smaa_edge.frag", { "resolution", "albedo_tex" } );
-      createSimplePipeline( "smaa_weight", "smaa_weight.vert", "smaa_weight.frag", { "resolution", "edges_tex", "area_tex", "search_tex" } );
-      createSimplePipeline( "smaa_blend", "smaa_blend.vert", "smaa_blend.frag", { "resolution", "albedo_tex", "blend_tex" } );
+      createSimplePipeline( "particle_world", "particle_world.vert", "particle_world.geom", "particle.frag", { "model", "tex" } );
+      createSimplePipeline( "particle_billboard", "particle_billboard.vert", "particle_billboard.geom", "particle.frag", { "model", "tex" } );
     }
 
     // Shader

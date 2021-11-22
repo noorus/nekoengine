@@ -301,10 +301,10 @@ namespace neko {
 
     renderer_->prepare( time );
     char asd[256];
-    auto secondseWasted = chrono::seconds( static_cast<int>( engine.stats().f_timeWasted.load() + (float)time ) );
+    auto secondsWasted = chrono::seconds( static_cast<int>( engine.stats().f_timeWasted.load() + (float)time ) );
     sprintf_s( asd, 256,
       "Launches: %i\nTime wasted: %s", engine.stats().i_launches.load(),
-      utils::beautifyDuration( secondseWasted ).c_str() );
+      utils::beautifyDuration( secondsWasted ).c_str() );
     gui_->setshit( asd );
 
     /*char asd[256];
