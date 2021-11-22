@@ -115,12 +115,16 @@ namespace neko {
 
   }
 
-  void implAddPlane( vector<Vertex3D>& verts, vector<GLuint>& indices, GLuint& offset, vec2 dimensions, vec2u segments, vec3 normal, vec4 color, vec3 position = vec3( 0.0f ) )
+  void implAddPlane( vector<Vertex3D>& verts, vector<GLuint>& indices, vec2 dimensions, vec2u segments, vec3 normal, vec4 color, vec3 position = vec3( 0.0f ) )
   {
-    verts.resize( verts.size() + ( ( segments.x + 1 ) * ( segments.y + 1 ) ) );
-    indices.resize( indices.size() + ( segments.x * segments.y * 6 ) );
+    const auto prevverts = verts.size();
+    const auto previndices = indices.size();
+    verts.resize( prevverts + ( ( segments.x + 1 ) * ( segments.y + 1 ) ) );
+    indices.resize( previndices + ( segments.x * segments.y * 6 ) );
 
-    auto vx = glm::perp( vec3( 1.0f, 0.0f, 0.0f ), normal );
+    auto offset = static_cast<GLuint>( prevverts );
+
+    auto vx = math::perpendicular( normal );
     auto vy = glm::cross( normal, vx );
 
     auto delta1 = vec3( dimensions.x / (Real)segments.x * vx );
@@ -135,7 +139,7 @@ namespace neko {
           normal,
           vec2( (Real)i, (Real)j ), // vec2( i / (Real)segments.x, j / (Real)segments.y ),
           color };
-        verts[i * ( segments.y + 1 ) + j] = move( v );
+        verts[prevverts + ( i * ( segments.y + 1 ) + j )] = move( v );
       }
 
     bool reverse = ( glm::dot( glm::cross( delta1, delta2 ), normal ) > 0.0f );
@@ -144,7 +148,7 @@ namespace neko {
     {
       for ( auto j = 0; j < segments.y; ++j )
       {
-        auto base = ( i * segments.y + j ) * 6;
+        auto base = previndices + ( ( i * segments.y + j ) * 6 );
         indices[base + 0] = offset;
         indices[base + 1] = offset + ( reverse ? segments.y + 1 : 1 );
         indices[base + 2] = offset + ( reverse ? 1 : segments.y + 1 );
@@ -163,7 +167,22 @@ namespace neko {
     vector<GLuint> indices;
     GLuint offset = 0;
 
-    implAddPlane( verts, indices, offset, dimensions, segments, normal, color );
+    implAddPlane( verts, indices, dimensions, segments, normal, color );
+
+    return make_pair( verts, indices );
+  }
+
+  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makeBox( vec3 dimensions, vec2u segments, vec4 color )
+  {
+    vector<Vertex3D> verts;
+    vector<GLuint> indices;
+
+    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.y ), segments, vec3( 1.0f, 0.0f, 0.0f ), color, vec3( dimensions.x * 0.5f, 0.0f, 0.0f ) );
+    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.y ), segments, vec3( -1.0f, 0.0f, 0.0f ), color, vec3( -dimensions.x * 0.5f, 0.0f, 0.0f ) );
+    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.x ), segments, vec3( 0.0f, 1.0f, 0.0f ), color, vec3( 0.0f, dimensions.y * 0.5f, 0.0f ) );
+    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.x ), segments, vec3( 0.0f, -1.0f, 0.0f ), color, vec3( 0.0f, -dimensions.y * 0.5f, 0.0f ) );
+    implAddPlane( verts, indices, vec2( dimensions.y, dimensions.x ), segments, vec3( 0.0f, 0.0f, 1.0f ), color, vec3( 0.0f, 0.0f, dimensions.z * 0.5f ) );
+    implAddPlane( verts, indices, vec2( dimensions.y, dimensions.x ), segments, vec3( 0.0f, 0.0f, -1.0f ), color, vec3( 0.0f, 0.0f, -dimensions.z * 0.5f ) );
 
     return make_pair( verts, indices );
   }

@@ -53,12 +53,11 @@ namespace neko {
 
   using namespace gl;
 
-  // Gfx
-
+  const char c_windowTitle[] = "nekoengine//render"
 #ifdef _DEBUG
-  const char c_windowTitle[] = "Panzer Pandemonium [debug]";
+    " [debug]";
 #else
-  const char c_windowTitle[] = "Panzer Pandemonium [release]";
+    " [release]";
 #endif
 
   NEKO_DECLARE_CONVAR( vid_screenwidth, "Screen width. Changes are applied when the renderer is restarted.", 1920 );
@@ -154,7 +153,7 @@ namespace neko {
     sf::ContextSettings settings;
     settings.depthBits = 24;
     settings.stencilBits = 0; // 8;
-    settings.antialiasingLevel = 0;
+    settings.antialiasingLevel = 16;
     settings.majorVersion = c_glVersion[0];
     settings.minorVersion = c_glVersion[1];
     settings.attributeFlags = sf::ContextSettings::Attribute::Core;

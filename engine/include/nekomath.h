@@ -37,6 +37,7 @@ namespace neko {
     using glm::normalize;
     using glm::dot;
     using glm::length;
+    using glm::length2;
     using glm::cross;
     using glm::inverse;
     using glm::angleAxis;
@@ -202,6 +203,15 @@ namespace neko {
     constexpr T manhattan( T x1, T y1, T x2, T y2 )
     {
       return ( abs( x2 - x1 ) + abs( y2 - y1 ) );
+    }
+
+    inline vec3 perpendicular( const vec3 v )
+    {
+      const Real sqz = static_cast<Real>( 1e-06 * 1e-06 );
+      auto perp = cross( v, vec3( 1.0f, 0.0f, 0.0f ) );
+      if ( length2( perp ) < sqz )
+        perp = cross( v, vec3( 0.0f, 1.0f, 0.0f ) );
+      return normalize( perp );
     }
 
     //! \fn inline T projection( T v, T normal )

@@ -159,6 +159,30 @@ namespace neko {
               valueParsed = true;
             }
           }
+          else if ( _stricmp( *name, "box" ) == 0 )
+          {
+            if ( args.Length() != 3 )
+            {
+              isolate->ThrowException( util::staticStr( isolate, "Mesh constructor 'box' requires arguments: vec3 dimensions, vec2 segments" ) );
+              return;
+            }
+            auto dimensions = extractVector3( 1, args );
+            auto segments = extractVector2( 2, args );
+            if ( !dimensions || !segments )
+            {
+              isolate->ThrowException( util::staticStr( isolate, "Mesh constructor 'box' requires arguments: vec3 dimensions, vec2 segments" ) );
+              return;
+            }
+            vec2i segmentsRounded = glm::round( segments->v() );
+            if ( segmentsRounded.x > 0 && segmentsRounded.y > 0 )
+            {
+              auto retPair = Locator::meshGenerator().makeBox( dimensions->v(), segmentsRounded );
+              mesh.vbo_->pushVertices( move( retPair.first ) );
+              mesh.ebo_->storage_.insert( mesh.ebo_->storage_.end(), retPair.second.begin(), retPair.second.end() );
+              mesh.ebo_->dirty_ = true;
+              valueParsed = true;
+            }
+          }
         }
       }
 

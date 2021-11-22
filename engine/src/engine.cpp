@@ -18,7 +18,7 @@ namespace neko {
 
   const char* c_engineName = "Nekoengine Alpha";
   const char* c_engineLogName = "nekoengine";
-  const uint32_t c_engineVersion[3] = { 0, 1, 1 };
+  const uint32_t c_engineVersion[3] = { 0, 1, 2 };
 
 #ifdef NEKO_USE_DISCORD
   const int64_t c_discordAppId = 862843623824556052;
