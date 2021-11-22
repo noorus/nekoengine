@@ -48,12 +48,12 @@
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <GenerateManifest>true</GenerateManifest>
-    <TargetName>panzer</TargetName>
+    <TargetName>engine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <TargetName>panzer_d</TargetName>
+    <TargetName>engine_d</TargetName>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -351,6 +351,7 @@
     <ResourceCompile Include="engine.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\embed\console_icon_v1.ico" />
     <Image Include="..\embed\panz_icon_v1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

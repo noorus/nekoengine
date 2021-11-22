@@ -318,11 +318,19 @@ namespace neko {
       ConsoleIcon
     };
 
-    inline void setWindowIcon( HWND window, KnownIcon icon )
+    inline HICON getIcon( KnownIcon icon )
     {
       HICON ld = nullptr;
       if ( icon == KnownIcon::MainIcon )
         ld = LoadIconW( g_instance, MAKEINTRESOURCEW( IDI_MAINICON ) );
+      else if ( icon == KnownIcon::ConsoleIcon )
+        ld = LoadIconW( g_instance, MAKEINTRESOURCEW( IDI_CONSOLEICON ) );
+      return ld;
+    }
+
+    inline void setWindowIcon( HWND window, KnownIcon icon )
+    {
+      HICON ld = getIcon( icon );
       if ( ld )
       {
         SendMessageW( window, WM_SETICON, ICON_BIG, (LPARAM)ld );

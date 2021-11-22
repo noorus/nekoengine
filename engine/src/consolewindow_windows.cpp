@@ -69,7 +69,7 @@ namespace neko {
       cls.cbSize = sizeof( WNDCLASSEXW );
       cls.lpfnWndProc = wndProc_;
       cls.hInstance = instance_;
-      cls.hIcon = nullptr;
+      cls.hIcon = platform::getIcon( KnownIcon::ConsoleIcon );
       cls.lpszClassName = wideClass.c_str();
       class_ = RegisterClassExW( &cls );
       if ( !class_ )
