@@ -6,6 +6,7 @@ in VertexData {
   vec3 normal;
   vec2 texcoord;
   vec3 fragpos;
+  vec4 color;
 } vs_out;
 
 layout ( location = 0 ) out vec4 out_color;
@@ -23,7 +24,7 @@ void main()
   float alpha = texture( tex, tc ).a;
 
   vec3 ambient = processing.ambient.rgb * Lo;
-  vec3 color = ambient + Lo;
+  vec3 diffuse = ambient + Lo;
 
-  out_color = vec4( color, alpha );
+  out_color = vs_out.color * vec4( diffuse, alpha );
 }
