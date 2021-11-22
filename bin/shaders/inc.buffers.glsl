@@ -1,5 +1,5 @@
-#ifndef WORLD_INCLUDE_GLSL
-#define WORLD_INCLUDE_GLSL
+#ifndef BUFFERS_INCLUDE_GLSL
+#define BUFFERS_INCLUDE_GLSL
 
 #ifdef __cplusplus
 
@@ -30,6 +30,10 @@ namespace neko::uniforms {
     vec4 position;
     mat4 projection;
     mat4 view;
+    float nearDist;
+    float farDist;
+    float exposure;
+    float d0;
   };
 
   NEKO_DECLARE_UNIFORMBLOCK( 0, World )
@@ -45,6 +49,10 @@ namespace neko::uniforms {
   NEKO_DECLARE_UNIFORMBLOCK( 1, Processing )
   {
     vec4 ambient;
+    float gamma;
+    float d0;
+    float d1;
+    float d2;
   } NEKO_UNIFORM_INSTANCE( processing );
 
 #ifdef __cplusplus

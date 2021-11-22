@@ -172,17 +172,17 @@ namespace neko {
     return make_pair( verts, indices );
   }
 
-  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makeBox( vec3 dimensions, vec2u segments, vec4 color )
+  pair<vector<Vertex3D>, vector<GLuint>> MeshGenerator::makeBox( vec3 dimensions, vec2u segments, bool inverted, vec4 color )
   {
     vector<Vertex3D> verts;
     vector<GLuint> indices;
 
-    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.y ), segments, vec3( 1.0f, 0.0f, 0.0f ), color, vec3( dimensions.x * 0.5f, 0.0f, 0.0f ) );
-    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.y ), segments, vec3( -1.0f, 0.0f, 0.0f ), color, vec3( -dimensions.x * 0.5f, 0.0f, 0.0f ) );
-    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.x ), segments, vec3( 0.0f, 1.0f, 0.0f ), color, vec3( 0.0f, dimensions.y * 0.5f, 0.0f ) );
-    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.x ), segments, vec3( 0.0f, -1.0f, 0.0f ), color, vec3( 0.0f, -dimensions.y * 0.5f, 0.0f ) );
-    implAddPlane( verts, indices, vec2( dimensions.y, dimensions.x ), segments, vec3( 0.0f, 0.0f, 1.0f ), color, vec3( 0.0f, 0.0f, dimensions.z * 0.5f ) );
-    implAddPlane( verts, indices, vec2( dimensions.y, dimensions.x ), segments, vec3( 0.0f, 0.0f, -1.0f ), color, vec3( 0.0f, 0.0f, -dimensions.z * 0.5f ) );
+    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.y ), segments, vec3( 1.0f, 0.0f, 0.0f ), color, vec3( ( inverted ? -dimensions.x : dimensions.x ) * 0.5f, 0.0f, 0.0f ) );
+    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.y ), segments, vec3( -1.0f, 0.0f, 0.0f ), color, vec3( ( inverted ? dimensions.x : -dimensions.x ) * 0.5f, 0.0f, 0.0f ) );
+    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.x ), segments, vec3( 0.0f, 1.0f, 0.0f ), color, vec3( 0.0f, ( inverted ? -dimensions.y : dimensions.y ) * 0.5f, 0.0f ) );
+    implAddPlane( verts, indices, vec2( dimensions.z, dimensions.x ), segments, vec3( 0.0f, -1.0f, 0.0f ), color, vec3( 0.0f, ( inverted ? dimensions.y : -dimensions.y ) * 0.5f, 0.0f ) );
+    implAddPlane( verts, indices, vec2( dimensions.y, dimensions.x ), segments, vec3( 0.0f, 0.0f, 1.0f ), color, vec3( 0.0f, 0.0f, ( inverted ? -dimensions.z : dimensions.z ) * 0.5f ) );
+    implAddPlane( verts, indices, vec2( dimensions.y, dimensions.x ), segments, vec3( 0.0f, 0.0f, -1.0f ), color, vec3( 0.0f, 0.0f, ( inverted ? dimensions.z : -dimensions.z ) * 0.5f ) );
 
     return make_pair( verts, indices );
   }

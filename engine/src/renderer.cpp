@@ -275,6 +275,9 @@ namespace neko {
 
     auto unitSphere = Locator::meshGenerator().makeSphere( 1.0f, vec2u( 32, 32 ) );
     builtin_.unitSphere_ = meshes_->createStatic( GL_TRIANGLE_STRIP, unitSphere.first, unitSphere.second );
+
+    auto skybox = Locator::meshGenerator().makeBox( vec3( 1.0f ), vec2u( 1 ), true, vec4( 1.0f ) );
+    builtin_.skybox_ = meshes_->createStatic( GL_TRIANGLES, skybox.first, skybox.second );
   }
 
   TexturePtr Renderer::loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering )
@@ -441,11 +444,14 @@ namespace neko {
     return shaders_->usePipeline( "mat_unlit" );
   }
 
-  void Renderer::setCameraUniform( Camera& camera, uniforms::Camera& uniform )
+  void Renderer::setCameraUniforms( Camera& camera, uniforms::Camera& uniform )
   {
     uniform.position = vec4( camera.position(), 1.0f );
     uniform.projection = camera.projection();
     uniform.view = camera.view();
+    uniform.nearDist = camera.near();
+    uniform.farDist = camera.far();
+    uniform.exposure = camera.exposure();
   }
 
   void dumpSceneGraph( SceneNode& root, int level = 0 )
@@ -515,10 +521,10 @@ namespace neko {
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    setGLDrawState( true, true, true );
+    camera.exposure( g_CVar_vid_exposure.as_f() );
 
     shaders_->world()->time = (float)time;
-    setCameraUniform( camera, shaders_->world()->camera );
+    setCameraUniforms( camera, shaders_->world()->camera );
 
     for (int i = 0; i < neko::uniforms::c_pointLightCount; i++ )
     {
@@ -526,6 +532,9 @@ namespace neko {
     }
 
     shaders_->processing()->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
+    shaders_->processing()->gamma = g_CVar_vid_gamma.as_f();
+
+    setGLDrawState( true, true, true );
 
     auto fn_drawModels = [&]( shaders::Pipeline& pipeline ) -> void
     {
@@ -558,12 +567,12 @@ namespace neko {
 #endif
     };
 
-    if ( false ) {
+    {
       auto& pipeline = useMaterial( "demo_uvtest" );
       fn_drawModels( pipeline );
     }
 
-    {
+    if ( false){
       auto& pipeline = useMaterial( "demo_uvtest" );
       for ( auto node : sceneGraph_ )
         sceneDrawEnterNode( node, pipeline );
@@ -589,7 +598,7 @@ namespace neko {
 
     glDisable( GL_LINE_SMOOTH );
 
-    {
+    if ( false ){
       setGLDrawState( true, true, false );
       if ( !g_sakura )
         g_sakura = make_unique<SakuraSystem>( aabb( vec3( -8.0f, -2.0f, -8.0f ), vec3( 8.0f, 10.0f, 8.0f ) ) );
@@ -597,6 +606,21 @@ namespace neko {
       g_sakura->update( delta );
       const auto partmat = materials_->get( "demo_sakura" );
       g_sakura->draw( *shaders_.get(), *partmat );
+    }
+
+    {
+      setGLDrawState( true, true, true );
+      glDepthFunc( GL_LEQUAL );
+      auto& pipeline = shaders_->usePipeline( "mat_skybox" );
+      pipeline.setUniform( "tex", 0 );
+      auto mat = materials_->get( "demo_skybox" );
+      if ( mat && mat->uploaded() )
+      {
+        const GLuint hndl = mat->layers_[0].texture_->handle();
+        glBindTextures( 0, 1, &hndl );
+        builtin_.skybox_->drawOnce( pipeline, vec3( 0.0f ) );
+      }
+      glDepthFunc( GL_LESS );
     }
   }
 

@@ -466,7 +466,7 @@ namespace neko {
   class MeshGenerator {
   public:
     pair<vector<Vertex3D>, vector<GLuint>> makePlane( vec2 dimensions, vec2u segments, vec3 normal, vec4 color = vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
-    pair<vector<Vertex3D>, vector<GLuint>> makeBox( vec3 dimensions, vec2u segments, vec4 color = vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
+    pair<vector<Vertex3D>, vector<GLuint>> makeBox( vec3 dimensions, vec2u segments, bool inverted = false, vec4 color = vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
     pair<vector<Vertex3D>, vector<GLuint>> makeSphere( Real diameter, vec2u segments, vec4 color = vec4( 1.0f, 1.0f, 1.0f, 1.0f ) );
     pair<vector<Vertex3D>, vector<GLuint>> makeTerrain( vec2i size, vec3 dimensions );
   };

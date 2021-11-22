@@ -7,6 +7,9 @@ namespace neko {
   class SceneManager;
   class SceneNode;
 
+# undef near
+# undef far
+
   class Camera {
   protected:
     vec2 resolution_;
@@ -14,6 +17,9 @@ namespace neko {
     mat4 view_;
     mat4 projection_;
     Real fov_;
+    Real near_;
+    Real far_;
+    Real exposure_;
     SceneManager* manager_;
     SceneNode* node_;
   public:
@@ -25,6 +31,10 @@ namespace neko {
     inline const mat4& view() const throw() { return view_; }
     inline const mat4& projection() const throw() { return projection_; }
     inline const vec3& position() const throw() { return position_; }
+    inline Real near() const throw() { return near_; }
+    inline Real far() const throw() { return far_; }
+    inline Real exposure() const throw() { return exposure_; }
+    void exposure( Real exp );
   };
 
   struct CameraValueState {

@@ -145,6 +145,7 @@ namespace neko {
       GLuint emptyVAO_;
       StaticMeshPtr cube_;
       StaticMeshPtr unitSphere_;
+      StaticMeshPtr skybox_;
       StaticData(): emptyVAO_( 0 ) {}
     } builtin_;
     GLuint implCreateTexture2D( size_t width, size_t height,
@@ -177,7 +178,7 @@ namespace neko {
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
     void sceneDraw( GameTime time, GameTime delta, Camera& camera );
     void clearErrors();
-    void setCameraUniform( Camera& camera, uniforms::Camera& uniform );
+    void setCameraUniforms( Camera& camera, uniforms::Camera& uniform );
     TexturePtr loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering );
   protected:
     FramebufferPtr mainbuffer_; //!< Multisampled primary scene render buffer

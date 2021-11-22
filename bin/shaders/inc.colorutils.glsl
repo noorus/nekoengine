@@ -10,7 +10,7 @@ float bt709LumaExtract( vec3 linearColor )
 
 vec3 gammaCorrect( vec3 color )
 {
-  return pow( color, vec3( 1.0 / gamma ) );
+  return pow( color, vec3( 1.0 / processing.gamma ) );
 }
 
 float saturate( float v )
@@ -21,8 +21,8 @@ float saturate( float v )
 vec3 util_unpackNormalDXT5nm( vec4 packednormal )
 {
   vec3 normal;
-  normal.xy = packednormal.wy * 2 - 1;
-  normal.z = sqrt( 1 - saturate( dot( normal.xy, normal.xy ) ) );
+  normal.xy = packednormal.wy * 2.0 - 1.0;
+  normal.z = sqrt( 1.0 - saturate( dot( normal.xy, normal.xy ) ) );
   return normal;
 }
 
@@ -30,8 +30,8 @@ vec3 util_unpackNormalRGorAG( vec4 packednormal )
 {
   packednormal.x *= packednormal.w;
   vec3 normal;
-  normal.xy = packednormal.xy * 2 - 1;
-  normal.z = sqrt( 1 - saturate( dot( normal.xy, normal.xy ) ) );
+  normal.xy = packednormal.xy * 2.0 - 1.0;
+  normal.z = sqrt( 1.0 - saturate( dot( normal.xy, normal.xy ) ) );
   return normal;
 }
 
@@ -41,6 +41,7 @@ vec3 util_unpackUnityNormal( vec4 packednormal )
   return vec3( unpacked.x, -unpacked.y, unpacked.z );
 }
 
+// this function only compiles in a fragment shader
 vec3 util_normalToWorld( vec3 tangentNormal, vec2 texcoord, vec3 worldpos, vec3 vertNormal )
 {
   vec3 Q1 = dFdx( worldpos );
@@ -60,14 +61,14 @@ vec3 util_normalToWorld( vec3 tangentNormal, vec2 texcoord, vec3 worldpos, vec3 
 
 vec3 tonemap_linear( vec3 color )
 {
-  color = clamp( exposure * color, 0.0, 1.0 );
+  color = clamp( world.camera.exposure * color, 0.0, 1.0 );
   color = gammaCorrect( color );
   return color;
 }
 
 vec3 tonemap_simpleReinhard( vec3 color )
 {
-  color *= exposure / ( 1.0 + color / exposure );
+  color *= world.camera.exposure / ( 1.0 + color / world.camera.exposure );
   color = gammaCorrect( color );
   return color;
 }
@@ -114,7 +115,7 @@ vec3 tonemap_uncharted2( vec3 color )
   float E = 0.02;
   float F = 0.30;
   float W = 11.2;
-  color *= exposure;
+  color *= world.camera.exposure;
   color = ( ( color * ( A * color + C * B ) + D * E ) / ( color * ( A * color + B ) + D * F ) ) - E / F;
   float white = ( ( W * ( A * W + C * B ) + D * E ) / ( W * ( A * W + B ) + D * F ) ) - E / F;
   color /= white;

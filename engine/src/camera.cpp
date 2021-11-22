@@ -6,7 +6,8 @@
 
 namespace neko {
 
-  Camera::Camera( SceneManager* manager, vec2 resolution, Degrees fov ): manager_( manager ), fov_( fov )
+  Camera::Camera( SceneManager* manager, vec2 resolution, Degrees fov )
+      : manager_( manager ), fov_( fov ), near_( 0.1f ), far_( 100.0f ), exposure_( 1.0f )
   {
     setViewport( resolution );
     node_ = manager_->createSceneNode();
@@ -21,7 +22,7 @@ namespace neko {
   {
     resolution_ = resolution;
 #if 1
-    projection_ = glm::perspectiveFovRH( glm::radians( fov_ ), resolution.x, resolution.y, 1.0f, 100.0f ); // glm::infinitePerspective( glm::radians( fov_ ), resolution_.x / resolution_.y, 0.01f );
+    projection_ = glm::perspectiveFovRH( glm::radians( fov_ ), resolution.x, resolution.y, near_, far_ ); // glm::infinitePerspective( glm::radians( fov_ ), resolution_.x / resolution_.y, 0.01f );
 #else
     auto suhde = resolution_.x / resolution_.y;
     auto diam = 10.0f;
@@ -32,6 +33,11 @@ namespace neko {
       ( diam * 0.5f ),
       0.01f, 1000.0f );
 #endif
+  }
+
+  void Camera::exposure( Real exp )
+  {
+    exposure_ = exp;
   }
 
   /*void Camera::update( GameTime time )

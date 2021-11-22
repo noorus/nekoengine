@@ -13,17 +13,17 @@ layout ( location = 0 ) out vec4 out_color;
 
 uniform sampler2D tex;
 
+#define COLORUTILS_TONEMAPPING
 #include "inc.colorutils.glsl"
+#include "inc.math.glsl"
 
 void main()
 {
-  vec2 tc = vec2( vs_out.texcoord.x, vs_out.texcoord.y );
-
-  vec3 Lo = texture( tex, tc ).rgb;
-  float alpha = texture( tex, tc ).a;
+  vec2 tc = util_posToSphericalUV( normalize( vs_out.fragpos ) );
+  vec3 Lo = texture( tex, tc * vec2( 1, -1 ) ).rgb;
 
   vec3 ambient = processing.ambient.rgb * Lo;
   vec3 diffuse = ambient + Lo;
 
-  out_color = vs_out.color * vec4( diffuse, alpha );
+  out_color = vec4( tonemap_linear( diffuse ), 1.0 );
 }
