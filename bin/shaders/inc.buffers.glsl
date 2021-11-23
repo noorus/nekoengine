@@ -49,10 +49,9 @@ namespace neko::uniforms {
   NEKO_DECLARE_UNIFORMBLOCK( 1, Processing )
   {
     vec4 ambient;
+    vec2 resolution;
     float gamma;
     float d0;
-    float d1;
-    float d2;
   } NEKO_UNIFORM_INSTANCE( processing );
 
 #ifdef __cplusplus

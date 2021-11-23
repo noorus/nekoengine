@@ -27,4 +27,23 @@ vec2 util_posToSphericalUV( vec3 worldpos )
   return uv;
 }
 
+float sdf_circle( vec2 pos )
+{
+  return length( pos );
+}
+
+float sdf_square( vec2 pos )
+{
+  vec2 a = pow( abs( pos ), vec2( 1.0 ) );
+  return pow( a.x + a.y, 1.0 );
+}
+
+float sdf_heart( vec2 pos, float scale )
+{
+  pos *= vec2( 2.2, -3.2 );
+  float xterm = pow( pos.x, 2.0 );
+  float yterm = pow( ( pos.y * 1.0 ) - sqrt( abs( pos.x * 0.6 ) ), 2.2 );
+  return ( xterm + yterm ) * scale;
+}
+
 #endif

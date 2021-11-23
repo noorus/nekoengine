@@ -533,6 +533,7 @@ namespace neko {
 
     shaders_->processing()->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
     shaders_->processing()->gamma = g_CVar_vid_gamma.as_f();
+    shaders_->processing()->resolution = resolution_;
 
     setGLDrawState( true, true, true );
 
@@ -573,7 +574,8 @@ namespace neko {
       fn_drawModels( pipeline );
     }
 
-    if ( false ) {
+    if ( false )
+    {
       auto& pipeline = useMaterial( "demo_uvtest" );
       for ( auto node : sceneGraph_ )
         sceneDrawEnterNode( node, pipeline );
@@ -622,6 +624,14 @@ namespace neko {
         builtin_.skybox_->drawOnce( pipeline, vec3( 0.0f ) );
       }
       glDepthFunc( GL_LESS );
+    }
+
+    if ( true )
+    {
+      setGLDrawState( false, false, true );
+      auto& pipeline = shaders_->usePipeline( "mat_screentone" );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
     }
   }
 

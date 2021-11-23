@@ -337,6 +337,8 @@
     <None Include="..\bin\shaders\inc.colorutils.glsl" />
     <None Include="..\bin\shaders\inc.math.glsl" />
     <None Include="..\bin\shaders\mainframebuf2d.frag" />
+    <None Include="..\bin\shaders\mat_screentone.frag" />
+    <None Include="..\bin\shaders\mat_screentone.vert" />
     <None Include="..\bin\shaders\mat_skybox.frag" />
     <None Include="..\bin\shaders\mat_skybox.vert" />
     <None Include="..\bin\shaders\particle.frag" />

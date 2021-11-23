@@ -69,6 +69,7 @@ namespace neko {
       createSimplePipeline( "particle_world", "particle_world.vert", "particle_world.geom", "particle.frag", { "model", "tex" } );
       createSimplePipeline( "particle_billboard", "particle_billboard.vert", "particle_billboard.geom", "particle.frag", { "model", "tex" } );
       createSimplePipeline( "mat_skybox", "mat_skybox.vert", "mat_skybox.frag", { "model", "gamma", "exposure", "tex" } );
+      createSimplePipeline( "mat_screentone", "mat_screentone.vert", "mat_screentone.frag", { "model" } );
     }
 
     // Shader
