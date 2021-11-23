@@ -567,12 +567,13 @@ namespace neko {
 #endif
     };
 
+    if ( false )
     {
       auto& pipeline = useMaterial( "demo_uvtest" );
       fn_drawModels( pipeline );
     }
 
-    if ( false){
+    if ( false ) {
       auto& pipeline = useMaterial( "demo_uvtest" );
       for ( auto node : sceneGraph_ )
         sceneDrawEnterNode( node, pipeline );
@@ -598,7 +599,7 @@ namespace neko {
 
     glDisable( GL_LINE_SMOOTH );
 
-    if ( false ){
+    {
       setGLDrawState( true, true, false );
       if ( !g_sakura )
         g_sakura = make_unique<SakuraSystem>( aabb( vec3( -8.0f, -2.0f, -8.0f ), vec3( 8.0f, 10.0f, 8.0f ) ) );

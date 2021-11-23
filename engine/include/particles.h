@@ -22,7 +22,7 @@ namespace neko {
     vec3 size;
     vec4 color;
   };
-#pragma pack( pop )
+# pragma pack( pop )
 
   class PointRenderBuffer
   {
@@ -45,15 +45,58 @@ namespace neko {
       gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
     }
     inline SmarterBuffer<VertexPointRender>& buffer() { return *buffer_.get(); }
-    void draw( shaders::Pipeline& pipeline, GLsizei count, GLint base = 0 )
+    void draw( shaders::Pipeline& pipeline, GLsizei count, GLint base = 0, gl::GLenum mode = gl::GL_POINTS )
     {
       gl::glBindVertexArray( vao_ );
       mat4 mdl( 1.0f );
       pipeline.setUniform( "model", mdl );
-      gl::glDrawArrays( gl::GL_POINTS, base, count );
+      gl::glDrawArrays( mode, base, count );
       gl::glBindVertexArray( 0 );
     }
     ~PointRenderBuffer()
+    {
+      gl::glDeleteVertexArrays( 1, &vao_ );
+      buffer_.reset();
+    }
+  };
+
+# pragma pack( push, 1 )
+  struct VertexLineRender
+  {
+    vec3 pos;
+    vec4 color;
+    VertexLineRender( const vec3& p, const vec4& c ): pos( p ), color( c ) {}
+  };
+# pragma pack( pop )
+
+  class LineRenderBuffer
+  {
+  protected:
+    const GLuint c_maxVertices = 256;
+    unique_ptr<SmarterBuffer<VertexLineRender>> buffer_;
+    GLuint vao_;
+
+  public:
+    LineRenderBuffer()
+    {
+      buffer_ = make_unique<SmarterBuffer<VertexLineRender>>( c_maxVertices );
+      gl::glCreateVertexArrays( 1, &vao_ );
+      neko::AttribWriter attribs;
+      attribs.add( gl::GL_FLOAT, 3 ); // vec3 position
+      attribs.add( gl::GL_FLOAT, 4 ); // vec4 color
+      attribs.write( vao_ );
+      gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
+    }
+    inline SmarterBuffer<VertexLineRender>& buffer() { return *buffer_.get(); }
+    void draw( shaders::Pipeline& pipeline, GLsizei count, GLint base = 0, gl::GLenum mode = gl::GL_POINTS )
+    {
+      gl::glBindVertexArray( vao_ );
+      mat4 mdl( 1.0f );
+      pipeline.setUniform( "model", mdl );
+      gl::glDrawArrays( mode, base, count );
+      gl::glBindVertexArray( 0 );
+    }
+    ~LineRenderBuffer()
     {
       gl::glDeleteVertexArrays( 1, &vao_ );
       buffer_.reset();
@@ -125,7 +168,7 @@ namespace neko {
         }
       }
     }
-    void draw( shaders::Shaders& shaders, const Material& mat )
+    virtual void draw( shaders::Shaders& shaders, const Material& mat )
     {
       if ( !mat.uploaded() || mat.layers_.empty() || !mat.layers_[0].texture_ )
         return;
@@ -161,10 +204,12 @@ namespace neko {
     neko_avx_align vec3 axes_[c_particleCount];
     neko_avx_align float rot_[c_particleCount];
     aabb box_;
+    unique_ptr<LineRenderBuffer> boxviz_;
   public:
     SakuraSystem( const aabb& box );
     virtual void resetParticle( size_t index );
     virtual void update( GameTime delta );
+    virtual void draw( shaders::Shaders& shaders, const Material& mat );
   };
 
 }

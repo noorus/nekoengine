@@ -63,6 +63,7 @@ namespace neko {
       createSimplePipeline( "gaussblur2d", "passthrough2d.vert", "gaussblur2d.frag", { "tex_image", "horizontal" } );
       createSimplePipeline( "gui", "gui.vert", "gui.frag", { "yscale", "tex" } );
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
+      createSimplePipeline( "dbg_line", "dbg_line.vert", "dbg_line.frag", { "model" } );
       createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
       createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "gamma", "tex" } );
       createSimplePipeline( "particle_world", "particle_world.vert", "particle_world.geom", "particle.frag", { "model", "tex" } );
