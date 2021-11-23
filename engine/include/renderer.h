@@ -143,7 +143,6 @@ namespace neko {
       MaterialPtr placeholderTexture_;
       StaticMeshPtr screenQuad_;
       GLuint emptyVAO_;
-      StaticMeshPtr cube_;
       StaticMeshPtr unitSphere_;
       StaticMeshPtr skybox_;
       StaticData(): emptyVAO_( 0 ) {}
