@@ -640,8 +640,6 @@ namespace neko {
     glBindTextureUnit( 0, 0 );
     glBindTextureUnit( 1, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
-
-    glFinish();
   }
 
   Renderer::~Renderer()
