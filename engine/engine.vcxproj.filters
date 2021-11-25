@@ -607,6 +607,12 @@
     <None Include="..\bin\shaders\mat_screentone.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\bin\shaders\text.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\text.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="engine.rc">

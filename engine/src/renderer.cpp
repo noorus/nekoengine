@@ -12,6 +12,7 @@
 #include "nekosimd.h"
 #include "particles.h"
 #include "math_aabb.h"
+#include "text.h"
 
 namespace neko {
 
@@ -471,10 +472,18 @@ namespace neko {
       glDisable( GL_CULL_FACE );
   }
 
+  static unique_ptr<DynamicText> g_font;
+
   void Renderer::sceneDraw( GameTime time, GameTime delta, Camera& camera )
   {
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    if ( !g_font )
+    {
+      g_font = make_unique<DynamicText>( loader_, meshes_, fonts_ );
+      g_font->setText( "nekoengine", vec2( 0.0f ) );
+    }
 
     camera.exposure( g_CVar_vid_exposure.as_f() );
 
@@ -581,7 +590,7 @@ namespace neko {
       glDepthFunc( GL_LESS );
     }
 
-    if ( true )
+    if ( false )
     {
       setGLDrawState( false, false, true );
       auto& pipeline = shaders_->usePipeline( "mat_screentone" );
@@ -612,6 +621,16 @@ namespace neko {
     glDisable( GL_POLYGON_SMOOTH );
 
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+    {
+      auto& pipeline = shaders_->usePipeline( "text" );
+      mat4 mdl( 1.0f );
+      mdl = glm::translate( mdl, vec3( 0.0f ) );
+      mdl = glm::scale( mdl, vec3( 0.01f ) );
+      pipeline.setUniform( "model", mdl );
+      pipeline.setUniform( "tex", 0 );
+      g_font->draw( this );
+    }
 
 #ifndef NEKO_NO_GUI
     if ( gui )

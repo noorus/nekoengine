@@ -79,8 +79,7 @@
       <MinimalRebuild>
       </MinimalRebuild>
       <ShowIncludes>false</ShowIncludes>
-      <DisableSpecificWarnings>
-      </DisableSpecificWarnings>
+      <DisableSpecificWarnings>26812</DisableSpecificWarnings>
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <GuardEHContMetadata>false</GuardEHContMetadata>
       <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
@@ -352,6 +351,8 @@
     <None Include="..\bin\shaders\mat_unlitdefault.vert" />
     <None Include="..\bin\shaders\gui.frag" />
     <None Include="..\bin\shaders\gui.vert" />
+    <None Include="..\bin\shaders\text.frag" />
+    <None Include="..\bin\shaders\text.vert" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="engine.rc" />

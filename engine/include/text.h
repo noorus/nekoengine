@@ -7,31 +7,41 @@
 #include "input.h"
 #include "camera.h"
 #include "gui.h"
+#include "fontmanager.h"
+#include "loader.h"
 
 namespace neko {
 
-  /*class DynamicText {
+  class DynamicText {
   public:
     DynamicMeshPtr mesh_;
     FontPtr font_;
     MaterialPtr material_;
+    utf8String text_;
+    vec2 pen_;
+    bool meshGenerated_;
   public:
-    DynamicText( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontManagerPtr fontmgr )
+    DynamicText( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontManagerPtr fontmgr ): meshGenerated_( false )
     {
       font_ = fontmgr->createFont();
       loader->addLoadTask( { LoadTask( font_, R"(LuckiestGuy.ttf)", 32.0f ) } );
-      mesh_ = meshmgr->createDynamic( GL_TRIANGLES, VBO_3D, true, false );
+      mesh_ = meshmgr->createDynamic( gl::GL_TRIANGLES, VBO_3D, true, false );
     }
-    inline bool fontLoaded()
+    void setText( const utf8String& text, vec2 pen )
     {
-      return font_ && font_->loaded_;
+      text_ = text;
+      pen_ = pen;
+      meshGenerated_ = false;
+      regenerate();
     }
-    void addText( const utf8String& str, vec2 pen )
+    void regenerate()
     {
+      if ( meshGenerated_ || !font_->loaded_ )
+        return;
       uint32_t prev_codepoint = 0;
-      for ( size_t i = 0; i < str.length(); ++i )
+      for ( size_t i = 0; i < text_.length(); ++i )
       {
-        auto codepoint = utils::utf8_to_utf32( &str[i] );
+        auto codepoint = utils::utf8_to_utf32( &text_[i] );
         auto glyph = font_->impl_->getGlyph( codepoint );
         if ( !glyph )
         {
@@ -43,10 +53,10 @@ namespace neko {
         if ( i > 0 )
           kerning = glyph->getKerning( prev_codepoint );
         prev_codepoint = codepoint;
-        pen.x += kerning;
+        pen_.x += kerning;
         auto p0 = vec2(
-          ( pen.x + glyph->offset.x ),
-          (int)( pen.y + glyph->offset.y ) );
+          ( pen_.x + glyph->offset.x ),
+          (int)( pen_.y + glyph->offset.y ) );
         auto p1 = vec2(
           ( p0.x + glyph->width ),
           (int)( p0.y - glyph->height )
@@ -65,33 +75,36 @@ namespace neko {
         };
         mesh_->pushIndices( move( indices ) );
         mesh_->pushVertices( move( vertices ) );
-        pen.x += glyph->advance.x;
+        pen_.x += glyph->advance.x;
       }
+      meshGenerated_ = true;
     }
-    void updateTexture( Renderer* rndr )
+    /*void updateTexture()
     {
-      material_ = rndr->createTextureWithData( font_->impl_->atlas_->width_, font_->impl_->atlas_->height_,
-        PixFmtColorR8, (const void*)font_->impl_->atlas_->data_.data(), Texture::ClampBorder, Texture::Mipmapped );
-      /*platform::FileWriter writer("debug.png");
+      platform::FileWriter writer("debug.png");
       vector<uint8_t> buffer;
       lodepng::encode( buffer, font_->impl_->atlas_->data_, font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, LCT_GREY, 8 );
       writer.writeBlob( buffer.data(), buffer.size() );
-    }
-    void begin()
+    }*/
+    void draw( Renderer* rndr )
     {
+      regenerate();
+      if ( !meshGenerated_ )
+        return;
+      if ( !material_ )
+      {
+        material_ = rndr->createTextureWithData( "font", font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, PixFmtColorR8, (const void*)font_->impl_->atlas_->data_.data(), Texture::ClampBorder, Texture::Mipmapped );
+      }
       mesh_->begin();
-    }
-    void draw()
-    {
-      glBindTextureUnit( 0, material_->layers_[0].texture_->handle() );
+      gl::glBindTextureUnit( 0, material_->layers_[0].texture_->handle() );
       mesh_->draw();
-      glBindTextureUnit( 0, 0 );
+      gl::glBindTextureUnit( 0, 0 );
     }
     ~DynamicText()
     {
       //
     }
-  };*/
+  };
 
   /*if ( g_testText && g_textAdded )
   {
