@@ -12,8 +12,6 @@ namespace neko {
 #define HRESf 64.f
 #define DPI   72
 
-    const Real c_resolutionMultiplier = 4.0f;
-
     GraphicalFont::GraphicalFont( FontManagerPtr manager, size_t width, size_t height, size_t depth ):
       manager_( move( manager ) ), face_( nullptr ),
       hinting_( true ), filtering_( true ), kerning_( true ),
@@ -66,7 +64,7 @@ namespace neko {
       if ( err )
         NEKO_FREETYPE_EXCEPT( "FreeType font charmap selection failed", err );
 
-      auto calcWidth = (signed long)( size_ * c_resolutionMultiplier * HRESf );
+      auto calcWidth = (signed long)( size_ * HRESf );
       const unsigned int horizRes = ( DPI * HRES );
       const unsigned int vertRes = ( DPI );
       err = FT_Set_Char_Size( face_, calcWidth, 0, horizRes, vertRes );
@@ -117,9 +115,9 @@ namespace neko {
         underline_thickness = 1.0f;
 
       auto metrics = face_->size->metrics;
-      ascender_ = ( metrics.ascender >> 6 ) / c_resolutionMultiplier;
-      descender_ = ( metrics.descender >> 6 ) / c_resolutionMultiplier;
-      size_ = ( metrics.height >> 6 ) / c_resolutionMultiplier;
+      ascender_ = ( metrics.ascender >> 6 );
+      descender_ = ( metrics.descender >> 6 );
+      size_ = ( metrics.height >> 6 );
       linegap_ = ( size_ - ascender_ + descender_ );
     }
 

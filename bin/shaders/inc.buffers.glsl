@@ -52,6 +52,7 @@ namespace neko::uniforms {
     vec2 resolution;
     float gamma;
     float d0;
+    mat4 textproj;
   } NEKO_UNIFORM_INSTANCE( processing );
 
 #ifdef __cplusplus

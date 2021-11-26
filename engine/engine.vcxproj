@@ -352,7 +352,8 @@
     <None Include="..\bin\shaders\gui.frag" />
     <None Include="..\bin\shaders\gui.vert" />
     <None Include="..\bin\shaders\text.frag" />
-    <None Include="..\bin\shaders\text.vert" />
+    <None Include="..\bin\shaders\text_2d.vert" />
+    <None Include="..\bin\shaders\text_3d.vert" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="engine.rc" />

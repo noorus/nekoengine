@@ -457,10 +457,9 @@ namespace neko {
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    glEnable( GL_LINE_SMOOTH );
-    glEnable( GL_POLYGON_SMOOTH );
-
-    glEnable( GL_MULTISAMPLE );
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_POLYGON_SMOOTH );
+    glDisable( GL_MULTISAMPLE );
 
     if ( facecull )
     {
@@ -482,7 +481,7 @@ namespace neko {
     if ( !g_font )
     {
       g_font = make_unique<DynamicText>( loader_, meshes_, fonts_ );
-      g_font->setText( "nekoengine", vec2( 0.0f ) );
+      g_font->setText( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class.", vec2( 100.0f, 200.0f ) );
     }
 
     camera.exposure( g_CVar_vid_exposure.as_f() );
@@ -498,6 +497,7 @@ namespace neko {
     shaders_->processing()->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
     shaders_->processing()->gamma = g_CVar_vid_gamma.as_f();
     shaders_->processing()->resolution = resolution_;
+    shaders_->processing()->textproj = glm::ortho( 0.0f, resolution_.x, resolution_.y, 0.0f );
 
     setGLDrawState( true, true, true );
 
@@ -623,10 +623,10 @@ namespace neko {
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
     {
-      auto& pipeline = shaders_->usePipeline( "text" );
+      auto& pipeline = shaders_->usePipeline( "text2d" );
       mat4 mdl( 1.0f );
       mdl = glm::translate( mdl, vec3( 0.0f ) );
-      mdl = glm::scale( mdl, vec3( 0.01f ) );
+      mdl = glm::scale( mdl, vec3( 1.0f ) );
       pipeline.setUniform( "model", mdl );
       pipeline.setUniform( "tex", 0 );
       g_font->draw( this );
@@ -649,6 +649,7 @@ namespace neko {
     glBindVertexArray( builtin_.emptyVAO_ );
 
     g_sakura.reset();
+    g_font.reset();
 
     intermediate_.reset();
     mainbuffer_.reset();
