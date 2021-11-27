@@ -2,34 +2,25 @@
 
 #include "inc.buffers.glsl"
 
-uniform sampler2D texMain;
-uniform sampler2D texGBuffer;
+in VertexData {
+  vec2 texcoord;
+} vs_out;
 
-uniform bool hdr;
+layout ( location = 0 ) out vec4 out_color;
+
+uniform sampler2D texMain;
+
 uniform float gamma;
 uniform float exposure;
-
-in vec2 texcoord;
-
-out vec4 out_color;
 
 #define COLORUTILS_TONEMAPPING
 #include "inc.colorutils.glsl"
 
 void main()
 {
-  vec3 hdrcolor = texture( texMain, texcoord ).rgb;
+  vec3 hdrcolor = texture( texMain, vs_out.texcoord ).rgb;
 
-  vec3 result = vec3( 0.0 );
-  if ( hdr )
-  {
-    vec3 bloomcolor = texture( texGBuffer, texcoord ).rgb;
-    hdrcolor += bloomcolor;
-    result = tonemap_linear( hdrcolor );
-  }
-  else
-  {
-    result = pow( hdrcolor, vec3( 1.0 / gamma ) );
-  }
+  vec3 result = tonemap_linear( hdrcolor );
+
   out_color = vec4( result, 1.0 );
 }

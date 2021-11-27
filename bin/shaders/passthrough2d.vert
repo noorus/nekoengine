@@ -7,10 +7,12 @@ out gl_PerVertex{
 layout ( location = 0 ) in vec2 vbo_position;
 layout ( location = 1 ) in vec2 vbo_texcoord;
 
-out vec2 out_texcoord;
+out VertexData {
+  vec2 texcoord;
+} vs_out;
 
 void main()
 {
   gl_Position = vec4( vbo_position.x, vbo_position.y, 0.0, 1.0 );
-  out_texcoord = vbo_texcoord;
+  vs_out.texcoord = vbo_texcoord;
 }

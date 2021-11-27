@@ -179,13 +179,6 @@ namespace neko {
     void clearErrors();
     void setCameraUniforms( Camera& camera, uniforms::Camera& uniform );
     TexturePtr loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering );
-  protected:
-    FramebufferPtr mainbuffer_; //!< Multisampled primary scene render buffer
-    FramebufferPtr intermediate_; //!< Intermediate non-multisampled buffer for postprocessing
-    struct GaussianBlurContext {
-      FramebufferPtr buffers_[2];
-      void recreate( Renderer* renderer, vec2i resolution );
-    } gaussblur_;
   public:
     Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
     void preInitialize();

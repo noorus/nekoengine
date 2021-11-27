@@ -18,7 +18,7 @@
 
 // -- Platform/Store integrations --
 #undef NEKO_USE_DISCORD
-#define NEKO_USE_STEAM
+#undef NEKO_USE_STEAM
 
 // -- Feature switches --
 // The game/engine isn't meant to work properly without these, but it is
@@ -40,4 +40,4 @@
 
 // Intel graphics drivers shit the bed every time when freeing stuff on exit.
 // Set this to force an ExitProcess() instead when debugging on an Intel chip in order to not waste time.
-#define INTEL_SUCKS
+#undef INTEL_SUCKS

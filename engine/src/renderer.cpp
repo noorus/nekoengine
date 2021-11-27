@@ -246,16 +246,6 @@ namespace neko {
     return make_shared<Texture>( this, w, h, PixFmtColorR8, output.data(), wrapping, filtering );
   }
 
-  void Renderer::GaussianBlurContext::recreate( Renderer* renderer, vec2i resolution )
-  {
-    for ( size_t i = 0; i < 2; ++i )
-    {
-      if ( !buffers_[i] )
-        buffers_[i] = make_shared<Framebuffer>( renderer, 1, c_bufferFormat, false, 1 );
-      buffers_[i]->recreate( resolution.x, resolution.y );
-    }
-  }
-
   void Renderer::initialize( size_t width, size_t height )
   {
     resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
@@ -264,21 +254,12 @@ namespace neko {
 
     loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
 
-    mainbuffer_ = make_shared<Framebuffer>( this, 2, c_bufferFormat, true, math::clamp( g_CVar_vid_msaa.as_i(), 1, 16 ) );
-    intermediate_ = make_shared<Framebuffer>( this, 2, c_bufferFormat, false, 1 );
-
     reset( width, height );
   }
 
   void Renderer::reset( size_t width, size_t height )
   {
     resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
-
-    assert( mainbuffer_ && intermediate_ );
-    mainbuffer_->recreate( width, height );
-    intermediate_->recreate( width, height );
-
-    gaussblur_.recreate( this, vec2i( (int)width, (int)height ) );
   }
 
   void Renderer::uploadTextures()
@@ -475,24 +456,13 @@ namespace neko {
 
   void Renderer::sceneDraw( GameTime time, GameTime delta, Camera& camera )
   {
-    glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    if ( !g_font )
-    {
-      g_font = make_unique<DynamicText>( loader_, meshes_, fonts_ );
-      g_font->setText( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class.", vec2( 100.0f, 200.0f ) );
-    }
-
     camera.exposure( g_CVar_vid_exposure.as_f() );
 
     shaders_->world()->time = (float)time;
     setCameraUniforms( camera, shaders_->world()->camera );
 
-    for (int i = 0; i < neko::uniforms::c_pointLightCount; i++ )
-    {
-      shaders_->world()->pointLights[i].dummy = vec4( 0.0f );
-    }
+    for ( auto& pointLight : shaders_->world()->pointLights )
+      pointLight.dummy = vec4( 0.0f );
 
     shaders_->processing()->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
     shaders_->processing()->gamma = g_CVar_vid_gamma.as_f();
@@ -601,14 +571,15 @@ namespace neko {
 
   void Renderer::draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui )
   {
-    if ( !mainbuffer_->available() || !intermediate_->available() )
-      return;
+    glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
     glBindVertexArray( builtin_.emptyVAO_ );
 
     glDepthFunc( GL_LESS );
     glEnable( GL_DEPTH_TEST );
+
     sceneDraw( time, delta, camera );
 
     glDisable( GL_DEPTH_TEST );
@@ -623,6 +594,12 @@ namespace neko {
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
     {
+      if ( !g_font )
+      {
+        g_font = make_unique<DynamicText>( loader_, meshes_, fonts_ );
+        g_font->setText( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class.", vec2( 100.0f, 100.0f ) );
+      }
+
       auto& pipeline = shaders_->usePipeline( "text2d" );
       mat4 mdl( 1.0f );
       mdl = glm::translate( mdl, vec3( 0.0f ) );
@@ -650,9 +627,6 @@ namespace neko {
 
     g_sakura.reset();
     g_font.reset();
-
-    intermediate_.reset();
-    mainbuffer_.reset();
 
 #ifndef NEKO_NO_SCRIPTING
     models_->teardown();

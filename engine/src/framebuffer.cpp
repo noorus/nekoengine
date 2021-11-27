@@ -13,7 +13,7 @@ namespace neko {
   {
     assert( renderer_ );
     colorBuffers_.resize( colorBufferCount );
-    clearColor_ = vec4( 30.0f / 255.0f, 30.0f / 255.0f, 35.0f / 255.0f, 1.0f );
+    clearColor_ = vec4( 0.0f, 1.0f, 0.0f, 1.0f );
   }
 
   //! Called by Framebuffer::create()
