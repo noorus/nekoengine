@@ -19,7 +19,13 @@ namespace neko {
   //! Called by Framebuffer::create()
   GLuint Renderer::implCreateFramebuffer( size_t width, size_t height )
   {
-    assert( width <= (size_t)info_.maxFramebufferWidth && height <= (size_t)info_.maxFramebufferHeight );
+    if ( width > (size_t)info_.maxFramebufferWidth || height > (size_t)info_.maxFramebufferHeight )
+      console_->printf( Console::srcGfx,
+        "Warning: Requested framebuffer width or height (%i, %i) exceeds maximum supported values (%i, %i)",
+        width, height, info_.maxFramebufferWidth, info_.maxFramebufferHeight );
+
+    width = math::min( width, (size_t)info_.maxFramebufferWidth );
+    height = math::min( height, (size_t)info_.maxFramebufferHeight );
 
     GLuint handle = 0;
     glCreateFramebuffers( 1, &handle );
@@ -138,10 +144,10 @@ namespace neko {
     glGetIntegerv( GL_VIEWPORT, savedViewport_ );
 
     glBindFramebuffer( GL_FRAMEBUFFER, handle_ );
-    for ( int i = 0; i < colorBuffers_.size(); i++ )
+    /* for ( int i = 0; i < colorBuffers_.size(); i++ )
       glClearNamedFramebufferfv( handle_, GL_COLOR, i, glm::value_ptr( clearColor_ ) );
     if ( depth_ )
-      glClearNamedFramebufferfv( handle_, GL_DEPTH, 0, &clearDepth );
+      glClearNamedFramebufferfv( handle_, GL_DEPTH, 0, &clearDepth );*/
 
     glViewport( 0, 0, (GLsizei)width_, (GLsizei)height_ );
   }

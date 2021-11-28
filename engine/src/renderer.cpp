@@ -254,12 +254,15 @@ namespace neko {
 
     loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
 
+    fboMain_ = make_unique<Framebuffer>( this, 2, c_bufferFormat, true, 0 );
+
     reset( width, height );
   }
 
   void Renderer::reset( size_t width, size_t height )
   {
     resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
+    fboMain_->recreate( width, height );
   }
 
   void Renderer::uploadTextures()
@@ -569,22 +572,38 @@ namespace neko {
     }
   }
 
+  void Renderer::implClearAndPrepare()
+  {
+    // set the clear color
+    glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+    // enable depth writes or there is no depth clearing
+    glDepthMask( TRUE );
+    // reset depth func
+    glDepthFunc( GL_LESS );
+    // finally, clear buffers
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+  }
+
   void Renderer::draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui )
   {
-    glClearColor( 1.0f, 0.0f, 0.0f, 1.0f );
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    if ( !fboMain_ || !fboMain_->available() )
+      return;
 
     // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
     glBindVertexArray( builtin_.emptyVAO_ );
 
-    glDepthFunc( GL_LESS );
-    glEnable( GL_DEPTH_TEST );
-
+    fboMain_->prepare( 0, { 0, 1 } );
+    fboMain_->begin();
+    implClearAndPrepare(); // 1 - clear the main fbo
     sceneDraw( time, delta, camera );
+    fboMain_->end();
+
+    implClearAndPrepare(); // 2 - clear the window
 
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_CULL_FACE );
     glDisable( GL_MULTISAMPLE );
+    glDisable( GL_STENCIL_TEST );
 
     // Smoothing can generate sub-fragments and cause visible ridges between triangles.
     // Use a framebuffer for AA instead.
@@ -592,6 +611,18 @@ namespace neko {
     glDisable( GL_POLYGON_SMOOTH );
 
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+    {
+      setGLDrawState( false, false, true );
+      auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
+      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
+      pipeline.setUniform( "exposure", g_CVar_vid_exposure.as_f() );
+      pipeline.setUniform( "texMain", 0 );
+      const GLuint hndl = fboMain_->texture( 0 )->handle();
+      glBindTextures( 0, 1, &hndl );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+    }
 
     {
       if ( !g_font )
@@ -627,6 +658,8 @@ namespace neko {
 
     g_sakura.reset();
     g_font.reset();
+
+    fboMain_.reset();
 
 #ifndef NEKO_NO_SCRIPTING
     models_->teardown();

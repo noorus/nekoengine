@@ -22,5 +22,5 @@ void main()
 
   vec3 result = tonemap_linear( hdrcolor );
 
-  out_color = vec4( result, 1.0 );
+  out_color = vec4( result.rgb, 1.0 );
 }

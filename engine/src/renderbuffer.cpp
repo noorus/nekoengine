@@ -17,7 +17,13 @@ namespace neko {
   //! Called by Renderbuffer::Renderbuffer()
   GLuint Renderer::implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format, int samples )
   {
-    assert( width <= (size_t)info_.maxRenderbufferSize && height <= (size_t)info_.maxRenderbufferSize );
+    if ( width > (size_t)info_.maxRenderbufferSize || height > (size_t)info_.maxRenderbufferSize )
+      console_->printf( Console::srcGfx,
+        "Warning: Requested renderbuffer width or height (%i, %i) exceeds maximum supported value (%i)",
+        width, height, info_.maxRenderbufferSize );
+
+    width = math::min( width, (size_t)info_.maxRenderbufferSize );
+    height = math::min( height, (size_t)info_.maxRenderbufferSize );
 
     GLuint handle = 0;
     glCreateRenderbuffers( 1, &handle );

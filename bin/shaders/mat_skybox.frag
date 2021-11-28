@@ -13,8 +13,6 @@ layout ( location = 0 ) out vec4 out_color;
 
 uniform sampler2D tex;
 
-#define COLORUTILS_TONEMAPPING
-#include "inc.colorutils.glsl"
 #include "inc.math.glsl"
 
 void main()
@@ -25,5 +23,5 @@ void main()
   vec3 ambient = processing.ambient.rgb * Lo;
   vec3 diffuse = ambient + Lo;
 
-  out_color = vec4( tonemap_linear( diffuse ), 1.0 );
+  out_color = vec4( diffuse, 1.0 );
 }

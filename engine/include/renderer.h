@@ -173,6 +173,8 @@ namespace neko {
     MaterialManagerPtr materials_;
     DirectorPtr director_;
     vec2 resolution_;
+    unique_ptr<Framebuffer> fboMain_;
+    void implClearAndPrepare();
     void uploadModelsEnterNode( SceneNode* node );
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
     void sceneDraw( GameTime time, GameTime delta, Camera& camera );
