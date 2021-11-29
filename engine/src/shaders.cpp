@@ -71,6 +71,7 @@ namespace neko {
       createSimplePipeline( "text2d", "text_2d.vert", "text.frag", { "model", "tex" } );
       createSimplePipeline( "text3d", "text_3d.vert", "text.frag", { "model", "tex" } );
       createSimplePipeline( "mainframebuf2d", "passthrough2d.vert", "mainframebuf2d.frag", { "exposure", "gamma", "texMain" } );
+      createSimplePipeline( "passthrough2d", "passthrough2d.vert", "passthrough2d.frag", { "tex" } );
     }
 
     // Shader

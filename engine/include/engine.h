@@ -90,11 +90,10 @@ namespace neko {
     void onMessage( const Message& msg ) override;
     //! TankEngine log callback.
     void onDiscordDebugPrint( const utf8String& message ) override;
-    void onDiscordUserImage( const tank::DcSnowflake id, tank::Image& image ) override;
-    void onSteamUserImage( const tank::SteamSnowflake id, tank::Image& image ) override;
     void onSteamDebugPrint( const utf8String& message ) override;
     void onSteamOverlayToggle( bool enabled ) override;
     void onSteamStatsUpdated( tank::StateUpdateIndex index ) override;
+    void onAccountUpdated( const tank::Account& user ) override;
   public:
     inline const EngineInfo& info() const throw() { return info_; }
     inline ConsolePtr console() throw() { return console_; }
@@ -113,6 +112,7 @@ namespace neko {
     inline const utf8String& listFlags();
     const tank::GameInstallationState& installationInfo();
     inline const Stats& stats() const throw() { return stats_; }
+    inline tank::TankEngine* tanklib() { return tanklib_.engine_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console, const Environment& env );

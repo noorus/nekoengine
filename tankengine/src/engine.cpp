@@ -14,7 +14,7 @@ namespace tank {
     if ( steamAppID )
     {
       Steam::baseInitialize();
-      steam_ = std::make_unique<Steam>( steamAppID, host_ );
+      steam_ = std::make_unique<Steam>( steamAppID, host_, this );
       steam_->initialize();
     }
     if ( discordAppID )
@@ -27,6 +27,42 @@ namespace tank {
       // Get current dir?
       // g_emptyGameInstallation.
     }
+  }
+
+  Account* TankEngine::accountBySteamID( SteamSnowflake id, bool create )
+  {
+    if ( me_.steamId_ == id )
+      return &me_;
+    for ( const auto& account : accounts_ )
+    {
+      if ( account.second && account.second->steamId_ == id )
+        return account.second.get();
+    }
+    static uint64_t ctr = 0;
+    if ( create )
+    {
+      ctr++;
+      accounts_[ctr] = std::make_unique<Account>();
+      auto ret = accounts_[ctr].get();
+      ret->id_ = ctr;
+      ret->steamId_ = id;
+      return ret;
+    }
+    return nullptr;
+  }
+
+  Account* TankEngine::accountMe()
+  {
+    return &me_;
+  }
+
+  Account* TankEngine::account( uint64_t id )
+  {
+    if ( me_.id_ == id )
+      return &me_;
+    if ( accounts_.find( id ) != accounts_.end() )
+      return accounts_[id].get();
+    return nullptr;
   }
 
   void TankEngine::update( double gameTime, double delta )

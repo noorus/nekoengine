@@ -13,6 +13,7 @@
 #include "particles.h"
 #include "math_aabb.h"
 #include "text.h"
+#include "tankengine.h"
 
 namespace neko {
 
@@ -225,8 +226,10 @@ namespace neko {
 #endif
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
+
     builtin_.placeholderTexture_ = createTextureWithData( "int_placeholder", 2, 2, PixFmtColorRGBA8,
       (const void*)BuiltinData::placeholderImage2x2.data() );
+
     builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
 
     auto unitSphere = Locator::meshGenerator().makeSphere( 1.0f, vec2u( 32, 32 ) );
@@ -408,6 +411,12 @@ namespace neko {
       dumpSceneGraph( *child, level + 1 );
   }
 
+  void Renderer::setUserData( uint64_t id, const utf8String name, tank::Image& image )
+  {
+    userData_.name_ = name;
+    userData_.image_ = createTextureWithData( "tankacc_" + id, image.width_, image.height_, PixFmtColorRGBA8, image.buffer_.data() );
+  }
+
   void Renderer::sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline )
   {
     if ( node->mesh_ && node->mesh_->mesh_ )
@@ -468,9 +477,6 @@ namespace neko {
       pointLight.dummy = vec4( 0.0f );
 
     shaders_->processing()->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
-    shaders_->processing()->gamma = g_CVar_vid_gamma.as_f();
-    shaders_->processing()->resolution = resolution_;
-    shaders_->processing()->textproj = glm::ortho( 0.0f, resolution_.x, resolution_.y, 0.0f );
 
     setGLDrawState( true, true, true );
 
@@ -592,6 +598,10 @@ namespace neko {
     // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
     glBindVertexArray( builtin_.emptyVAO_ );
 
+    shaders_->processing()->gamma = g_CVar_vid_gamma.as_f();
+    shaders_->processing()->resolution = resolution_;
+    shaders_->processing()->textproj = glm::ortho( 0.0f, resolution_.x, resolution_.y, 0.0f );
+
     fboMain_->prepare( 0, { 0, 1 } );
     fboMain_->begin();
     implClearAndPrepare(); // 1 - clear the main fbo
@@ -620,6 +630,17 @@ namespace neko {
       pipeline.setUniform( "texMain", 0 );
       const GLuint hndl = fboMain_->texture( 0 )->handle();
       glBindTextures( 0, 1, &hndl );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+    }
+
+    if ( userData_.image_ && userData_.image_->uploaded() )
+    {
+      setGLDrawState( false, false, true );
+      auto& pipeline = shaders_->usePipeline( "passthrough2d" );
+      pipeline.setUniform( "tex", 0 );
+      GLuint handle = userData_.image_->textureHandle( 0 );
+      glBindTextures( 0, 1, &handle );
       builtin_.screenQuad_->begin();
       builtin_.screenQuad_->draw();
     }

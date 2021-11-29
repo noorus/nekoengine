@@ -50,6 +50,13 @@ namespace tank {
     size_t width_;
     size_t height_;
     std::vector<uint8_t> buffer_;
+    Image()
+        : width_( 0 ), height_( 0 ) {}
+    Image( const Image& other ): width_( other.width_ ), height_( other.height_ )
+    {
+      buffer_.resize( other.buffer_.size() );
+      memcpy( buffer_.data(), other.buffer_.data(), buffer_.size() );
+    }
   };
 
   using SteamSnowflake = uint64_t;
@@ -70,14 +77,21 @@ namespace tank {
     float f_ = 0.0f;
   };
 
+  struct Account
+  {
+    uint64_t id_;
+    SteamSnowflake steamId_;
+    utf8String steamName_;
+    unique_ptr<Image> steamImage_;
+  };
+
   class TankHost {
   public:
     virtual void onDiscordDebugPrint( const utf8String& message ) = 0;
-    virtual void onDiscordUserImage( const DcSnowflake id, Image& image ) = 0;
-    virtual void onSteamUserImage( const SteamSnowflake id, Image& image ) = 0;
     virtual void onSteamDebugPrint( const utf8String& message ) = 0;
     virtual void onSteamOverlayToggle( bool enabled ) = 0;
     virtual void onSteamStatsUpdated( StateUpdateIndex index ) = 0;
+    virtual void onAccountUpdated( const Account& user ) = 0;
   };
 
   class TankEngine {
@@ -85,6 +99,8 @@ namespace tank {
     unique_ptr<Discord> discord_;
     unique_ptr<Steam> steam_;
     TankHost* host_;
+    map<uint64_t, unique_ptr<Account>> accounts_;
+    Account me_;
   public:
     TankEngine( TankHost* host );
     virtual void initialize( int64_t discordAppID, uint32_t steamAppID );
@@ -101,6 +117,9 @@ namespace tank {
     virtual void steamStatAdd( const utf8String& name, float value );
     virtual void uploadStats();
     virtual const map<utf8String, SteamStat>& steamStats();
+    virtual Account* accountBySteamID( SteamSnowflake id, bool create = false );
+    virtual Account* accountMe();
+    virtual Account* account( uint64_t id );
     ~TankEngine();
   };
 

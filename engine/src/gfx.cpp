@@ -287,6 +287,11 @@ namespace neko {
   void Gfx::onMessage( const Message& msg )
   {
     logicLock_.lock();
+    if ( msg.code == M_Extern_TankAccountUpdated )
+    {
+      auto id = (size_t)( msg.arguments[0] );
+      updateAccounts_.push( id );
+    }
     logicLock_.unlock();
   }
 
@@ -307,16 +312,6 @@ namespace neko {
       utils::beautifyDuration( secondsWasted ).c_str() );
     gui_->setshit( asd );
 
-    /*char asd[256];
-    sprintf_s( asd, 256, "[%s,%s,%s,%s,%s]\nmouse x %lli y %lli z %lli",
-      input_->mouseButtons_[0] ? "true" : "false",
-      input_->mouseButtons_[1] ? "true" : "false",
-      input_->mouseButtons_[2] ? "true" : "false",
-      input_->mouseButtons_[3] ? "true" : "false",
-      input_->mouseButtons_[4] ? "true" : "false",
-      input_->movement_.x, input_->movement_.y, input_->movement_.z );
-    gui_->setshit( asd );*/
-
     if ( input_->mousebtn( 2 ) )
       camera_->applyInputPanning( input_->movement() );
     else if ( input_->mousebtn( 1 ) )
@@ -328,6 +323,17 @@ namespace neko {
 
     // activate as current context
     window_->setActive( true );
+
+    while ( !updateAccounts_.empty() )
+    {
+      auto id = updateAccounts_.front();
+      updateAccounts_.pop();
+      auto account = engine.tanklib()->account( id );
+      if ( !account )
+        continue;
+      if ( account->id_ == engine.tanklib()->accountMe()->id_ && account->steamImage_ )
+        renderer_->setUserData( account->id_, account->steamName_, *account->steamImage_ );
+    }
 
     if ( flags_.resized )
     {

@@ -2,15 +2,16 @@
 
 #include "inc.buffers.glsl"
 
-uniform sampler2D texMain;
-uniform sampler2D texSecondary;
+in VertexData {
+  vec2 texcoord;
+} vs_out;
 
-in vec2 texcoord;
+layout ( location = 0 ) out vec4 out_color;
 
-out vec4 out_color;
+uniform sampler2D tex;
 
 void main()
 {
-  vec3 smpl = texture( texMain, texcoord ).rgb;
-  out_color = vec4( smpl, 1.0 );
+  vec4 diffuse = texture( tex, vs_out.texcoord ).rgba;
+  out_color = diffuse;
 }

@@ -47,6 +47,11 @@ namespace neko {
           return false;
       return true;
     }
+    inline GLuint textureHandle( size_t index ) const
+    {
+      assert( index < layers_.size() && layers_[index].uploaded() );
+      return layers_[index].texture_->handle();
+    }
   };
 
   using MaterialPtr = shared_ptr<Material>;

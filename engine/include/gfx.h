@@ -52,6 +52,7 @@ namespace neko {
     RendererPtr renderer_;
     Viewport viewport_;
     Image lastCapture_;
+    std::queue<uint64_t> updateAccounts_;
     platform::RWLock logicLock_;
     void preInitialize();
     void printInfo();

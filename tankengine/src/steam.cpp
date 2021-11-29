@@ -8,11 +8,13 @@
 namespace tank {
 
   TankHost* Steam::host_ = nullptr;
+  TankEngine* Steam::eng_ = nullptr;
 
-  Steam::Steam( uint32_t applicationID, TankHost* host ):
-    appID_( applicationID )
+  Steam::Steam( uint32_t applicationID, TankHost* host, TankEngine* engine ):
+  appID_( applicationID )
   {
     host_ = host;
+    eng_ = engine;
   }
 
   extern "C" void Steam::staticSteamAPIWarningHook( int severity, const char* message )
@@ -150,7 +152,6 @@ namespace tank {
     auto acc = user.id_.ConvertToUint64();
     state_.userImages_[acc] = move( img );
     state_.updated_.bits.images = true;
-    host_->onSteamUserImage( acc, state_.userImages_[acc] );
   }
 
   void Steam::refreshStats()
@@ -231,6 +232,11 @@ namespace tank {
       {
         sprintf_s( asd, 1024, "self: %s (%I64u)", state_.localUser_.name_.c_str(), state_.localUser_.id_.ConvertToUint64() );
         host_->onSteamDebugPrint( asd );
+        auto acc = eng_->accountMe();
+        acc->steamId_ = state_.localUser_.id_.ConvertToUint64();
+        acc->steamName_ = state_.localUser_.name_;
+        host_->onAccountUpdated( *acc );
+        fetchImage( state_.localUser_ );
       }
       if ( state_.updated_.bits.friends )
       {
@@ -242,6 +248,16 @@ namespace tank {
       }
       if ( state_.updated_.bits.images )
       {
+        for ( auto& img : state_.userImages_ )
+        {
+          auto acc = eng_->accountBySteamID( img.first, true );
+          if ( !acc->steamImage_ )
+          {
+            acc->steamImage_ = std::make_unique<Image>();
+            *acc->steamImage_ = img.second;
+            host_->onAccountUpdated( *acc );
+          }
+        }
       }
       if ( state_.updated_.bits.stats )
       {

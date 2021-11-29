@@ -204,16 +204,6 @@ namespace neko {
     console_->printf( Console::srcEngine, "Discord: %s", message.c_str() );
   }
 
-  void Engine::onDiscordUserImage( const tank::DcSnowflake id, tank::Image& image )
-  {
-    console_->printf( Console::srcEngine, "Discord: Got user image %llu %ix%i", id, image.width_, image.height_ );
-  }
-
-  void Engine::onSteamUserImage( const tank::SteamSnowflake id, tank::Image& image )
-  {
-    console_->printf( Console::srcEngine, "Steam: Got user image %llu %ix%i", id, image.width_, image.height_ );
-  }
-
   void Engine::onSteamDebugPrint( const utf8String& message )
   {
     console_->printf( Console::srcEngine, "Steam: %s", message.c_str() );
@@ -235,6 +225,12 @@ namespace neko {
       tanklib_.engine_->steamStatIncrement( "dev_launches" );
     stats_.i_launches.store( tanklib_.engine_->steamStats().at( "dev_launches" ).i_ );
     stats_.f_timeWasted.store( tanklib_.engine_->steamStats().at( "dev_debugTime" ).f_ );
+  }
+
+  void Engine::onAccountUpdated( const tank::Account& user )
+  {
+    if ( user.steamId_ && user.steamImage_ )
+      messaging_->send( M_Extern_TankAccountUpdated, 1, static_cast<size_t>( user.id_ ) );
   }
 
   bool Engine::paused()

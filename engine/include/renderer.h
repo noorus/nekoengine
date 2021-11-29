@@ -10,6 +10,7 @@
 #include "modelmanager.h"
 #include "scripting.h"
 #include "shaders.h"
+#include "tankengine.h"
 
 namespace MyGUI {
 #ifndef NEKO_NO_GUI
@@ -145,6 +146,7 @@ namespace neko {
       GLuint emptyVAO_;
       StaticMeshPtr unitSphere_;
       StaticMeshPtr skybox_;
+      StaticMeshPtr unitQuad_;
       StaticData(): emptyVAO_( 0 ) {}
     } builtin_;
     GLuint implCreateTexture2D( size_t width, size_t height,
@@ -174,6 +176,11 @@ namespace neko {
     DirectorPtr director_;
     vec2 resolution_;
     unique_ptr<Framebuffer> fboMain_;
+    struct UserData
+    {
+      utf8String name_;
+      MaterialPtr image_;
+    } userData_;
     void implClearAndPrepare();
     void uploadModelsEnterNode( SceneNode* node );
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
@@ -190,6 +197,7 @@ namespace neko {
     void prepare( GameTime time );
     void uploadTextures();
     void uploadModels();
+    void setUserData( uint64_t id, const utf8String name, tank::Image& image );
     void jsRestart();
     inline shaders::Shaders& shaders() throw() { return *( shaders_.get() ); }
     void draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui );

@@ -44,7 +44,7 @@ namespace neko {
     inline vec3i movement() const { return movement_; }
     inline bool mousebtn( size_t index ) const
     {
-      assert( index >= 0 && index < 6 );
+      assert( index >= 0 && index < 5 );
       return mouseButtons_[index];
     }
     void resetMovement();
