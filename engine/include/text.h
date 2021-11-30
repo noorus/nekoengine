@@ -40,7 +40,7 @@ namespace neko {
         return;
       uint32_t prev_codepoint = 0;
       vec2 position = pen_;
-      position.y -= font_->impl_->ascender_;
+      position.y += font_->impl_->ascender_ + font_->impl_->descender_;
       for ( size_t i = 0; i < text_.length(); ++i )
       {
         if ( text_[i] == '\n' )

@@ -115,9 +115,9 @@ namespace neko {
         underline_thickness = 1.0f;
 
       auto metrics = face_->size->metrics;
-      ascender_ = ( metrics.ascender >> 6 );
-      descender_ = ( metrics.descender >> 6 );
-      size_ = ( metrics.height >> 6 );
+      ascender_ = static_cast<Real>( metrics.ascender >> 6 );
+      descender_ = static_cast<Real>( metrics.descender >> 6 );
+      size_ = static_cast<Real>( metrics.height >> 6 );
       linegap_ = ( size_ - ascender_ + descender_ );
     }
 
