@@ -5,7 +5,7 @@
 #include "shaders.h"
 #include "renderer.h"
 #include "camera.h"
-#include "fontmanager.h"
+#include "font.h"
 #include "console.h"
 #include "messaging.h"
 #include "gui.h"

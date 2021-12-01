@@ -44,24 +44,24 @@ namespace neko {
 
   void GfxInput::onMouseEnabled( nil::Device* device, nil::Mouse* instance )
   {
-    console_->printf( Console::srcInput, "Mouse enabled: %s", device->getName().c_str() );
+    // console_->printf( Console::srcInput, "Mouse enabled: %s", device->getName().c_str() );
     instance->addListener( this );
   }
 
   void GfxInput::onMouseDisabled( nil::Device* device, nil::Mouse* instance )
   {
-    console_->printf( Console::srcInput, "Mouse disabled: %s", device->getName().c_str() );
+    // console_->printf( Console::srcInput, "Mouse disabled: %s", device->getName().c_str() );
   }
 
   void GfxInput::onKeyboardEnabled( nil::Device* device, nil::Keyboard* instance )
   {
-    console_->printf( Console::srcInput, "Keyboard enabled: %s", device->getName().c_str() );
+    // console_->printf( Console::srcInput, "Keyboard enabled: %s", device->getName().c_str() );
     instance->addListener( this );
   }
 
   void GfxInput::onKeyboardDisabled( nil::Device* device, nil::Keyboard* instance )
   {
-    console_->printf( Console::srcInput, "Keyboard disabled: %s", device->getName().c_str() );
+    // console_->printf( Console::srcInput, "Keyboard disabled: %s", device->getName().c_str() );
   }
 
   void GfxInput::onControllerEnabled( nil::Device* device, nil::Controller* instance )

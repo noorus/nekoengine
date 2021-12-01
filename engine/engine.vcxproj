@@ -194,8 +194,7 @@
     <ClCompile Include="src\dynamicmesh.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\fontmanager.cpp" />
-    <ClCompile Include="src\font_textbuffer.cpp" />
-    <ClCompile Include="src\font_textureatlas.cpp" />
+    <ClCompile Include="src\text.cpp" />
     <ClCompile Include="src\font_textured.cpp" />
     <ClCompile Include="src\framebuffer.cpp" />
     <ClCompile Include="src\gfx.cpp" />
@@ -246,6 +245,7 @@
     <ClCompile Include="src\subsystem.cpp" />
     <ClCompile Include="src\surface.cpp" />
     <ClCompile Include="src\texture.cpp" />
+    <ClCompile Include="src\textureatlas.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extern\lodepng\lodepng.h" />
@@ -276,7 +276,7 @@
     <ClInclude Include="include\consolewindow_windows.h" />
     <ClInclude Include="include\director.h" />
     <ClInclude Include="include\engine.h" />
-    <ClInclude Include="include\fontmanager.h" />
+    <ClInclude Include="include\font.h" />
     <ClInclude Include="include\forwards.h" />
     <ClInclude Include="include\framebuffer.h" />
     <ClInclude Include="include\gfx.h" />
@@ -314,6 +314,7 @@
     <ClInclude Include="include\surface.h" />
     <ClInclude Include="include\text.h" />
     <ClInclude Include="include\texture.h" />
+    <ClInclude Include="include\textureatlas.h" />
     <ClInclude Include="include\utilities.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

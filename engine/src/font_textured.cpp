@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "locator.h"
-#include "fontmanager.h"
+#include "font.h"
 #include "neko_exception.h"
 #include "console.h"
 
@@ -17,15 +17,11 @@ namespace neko {
       hinting_( true ), filtering_( true ), kerning_( true ),
       ascender_( 0.0f ), descender_( 0.0f ), size_( 0.0f ),
       outline_thickness_( 0.0f ), padding_( 0 ),
-      rendermode_( RENDER_NORMAL )
+      rendermode_( RenderMode::Normal ),
+      lcd_weights{ 0x10, 0x40, 0x70, 0x40, 0x10 }
     {
       // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
       // FT_LCD_FILTER_DEFAULT is (0x10, 0x40, 0x70, 0x40, 0x10)
-      lcd_weights[0] = 0x10;
-      lcd_weights[1] = 0x40;
-      lcd_weights[2] = 0x70;
-      lcd_weights[3] = 0x40;
-      lcd_weights[4] = 0x10;
 
       atlas_ = make_shared<TextureAtlas>( width, height, depth );
     }
@@ -71,7 +67,6 @@ namespace neko {
       if ( err )
         NEKO_FREETYPE_EXCEPT( "FreeType font character point size setting failed", err );
 
-      // I have absolutely no idea what this is but seems important.
       FT_Matrix matrix = {
         (int)( ( 1.0 / HRES ) * 0x10000L ),
         (int)( ( 0.0 ) * 0x10000L ),
@@ -139,25 +134,23 @@ namespace neko {
 
       atlas_->setRegion( region.x, region.y, 4, 4, data, 0 );
 
-      TextureGlyph glyph;
+      TexturedGlyph glyph;
       glyph.codepoint = -1;
       glyph.coords[0].x = ( region.x + 2 ) / (Real)atlas_->width_;
       glyph.coords[0].y = ( region.y + 2 ) / (Real)atlas_->height_;
       glyph.coords[1].x = ( region.x + 3 ) / (Real)atlas_->width_;
       glyph.coords[1].y = ( region.y + 3 ) / (Real)atlas_->height_;
 
-      glyphs_.push_back( move( glyph ) );
+      glyphs_[0] = move( glyph );
     }
 
-    void GraphicalFont::loadGlyph( uint32_t codepoint )
+    void GraphicalFont::loadGlyph( Codepoint codepoint )
     {
       auto ftlib = manager_->library();
       auto glyphIndex = FT_Get_Char_Index( face_, (FT_ULong)codepoint );
 
       FT_Int32 flags = 0;
-      flags |= (
-        ( rendermode_ != RENDER_NORMAL && rendermode_ != RENDER_SIGNED_DISTANCE_FIELD )
-        ? FT_LOAD_NO_BITMAP : FT_LOAD_RENDER );
+      flags |= ( ( rendermode_ != RenderMode::Normal && rendermode_ != RenderMode::SDF ) ? FT_LOAD_NO_BITMAP : FT_LOAD_RENDER );
       flags |= ( hinting_ ? FT_LOAD_FORCE_AUTOHINT : ( FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT ) );
 
       if ( atlas_->depth_ == 3 )
@@ -176,7 +169,7 @@ namespace neko {
       FT_GlyphSlot slot = nullptr;
       FT_Bitmap bitmap;
       vec2i glyphCoords;
-      if ( rendermode_ == RENDER_NORMAL || rendermode_ == RENDER_SIGNED_DISTANCE_FIELD )
+      if ( rendermode_ == RenderMode::Normal || rendermode_ == RenderMode::SDF )
       {
         slot = face_->glyph;
         bitmap = slot->bitmap;
@@ -196,11 +189,11 @@ namespace neko {
         if ( err )
           NEKO_FREETYPE_EXCEPT( "FreeType get glyph failed", err );
 
-        if ( rendermode_ == RENDER_OUTLINE_EDGE )
+        if ( rendermode_ == RenderMode::OutlineEdge )
           err = FT_Glyph_Stroke( &ftglyph, stroker, 1 );
-        else if ( rendermode_ == RENDER_OUTLINE_POSITIVE )
+        else if ( rendermode_ == RenderMode::OutlineOuter )
           err = FT_Glyph_StrokeBorder( &ftglyph, stroker, 0, 1 );
-        else if ( rendermode_ == RENDER_OUTLINE_NEGATIVE )
+        else if ( rendermode_ == RenderMode::OutlineInner )
           err = FT_Glyph_StrokeBorder( &ftglyph, stroker, 1, 1 );
 
         if ( err )
@@ -223,7 +216,7 @@ namespace neko {
       }
 
       vec4i padding( 0, 0, 0, 0 );
-      if ( rendermode_ == RENDER_SIGNED_DISTANCE_FIELD )
+      if ( rendermode_ == RenderMode::SDF )
       {
         padding.x = 1;
         padding.y = 1;
@@ -254,7 +247,7 @@ namespace neko {
         src_ptr += bitmap.pitch;
       }
 
-      if ( rendermode_ == RENDER_SIGNED_DISTANCE_FIELD )
+      if ( rendermode_ == RenderMode::SDF )
       {
         // TODO make_distance_mapb
       }
@@ -262,7 +255,7 @@ namespace neko {
       atlas_->setRegion( x, y, tgt_w, tgt_h, buffer, tgt_w * atlas_->depth_ );
       Locator::memory().free( Memory::Sector::Graphics, buffer );
 
-      TextureGlyph glyph;
+      TexturedGlyph glyph;
       glyph.codepoint = codepoint;
       glyph.width = tgt_w;
       glyph.height = tgt_h;
@@ -278,7 +271,7 @@ namespace neko {
       glyph.advance.x = (Real)slot->advance.x / HRESf;
       glyph.advance.y = (Real)slot->advance.y / HRESf;
 
-      glyphs_.push_back( move( glyph ) );
+      glyphs_[codepoint] = move( glyph );
 
       if ( ftglyph )
         FT_Done_Glyph( ftglyph );
@@ -286,28 +279,43 @@ namespace neko {
       generateKerning();
     }
 
+    TexturedGlyph* GraphicalFont::getGlyph( Codepoint codepoint )
+    {
+      {
+        const auto& glyph = glyphs_.find( codepoint );
+        if ( glyph != glyphs_.end() )
+          return &( ( *glyph ).second );
+      }
+      loadGlyph( codepoint );
+      {
+        const auto& glyph = glyphs_.find( codepoint );
+        if ( glyph != glyphs_.end() )
+          return &( ( *glyph ).second );
+      }
+      return nullptr;
+    }
+
     void GraphicalFont::generateKerning()
     {
-      assert( !glyphs_.empty() );
-
-      for ( size_t i = 1; i < glyphs_.size(); ++i )
+      for ( auto& glyphp : glyphs_ )
       {
-        auto glyph = &glyphs_[i];
-        auto index = FT_Get_Char_Index( face_, glyph->codepoint );
-        glyph->kerning.clear();
+        if ( glyphp.first == 0 )
+          continue;
 
-        for ( size_t j = 1; j < glyphs_.size(); ++j )
+        auto& glyph = glyphp.second;
+        auto index = FT_Get_Char_Index( face_, glyph.codepoint );
+        glyph.kerning.clear();
+
+        for ( auto& other : glyphs_ )
         {
-          auto prev_glyph = &glyphs_[j];
-          auto prev_index = FT_Get_Char_Index( face_, prev_glyph->codepoint );
-
+          if ( other.first == 0 )
+            continue;
+          const auto& prev_glyph = other.second;
+          const auto prev_index = FT_Get_Char_Index( face_, prev_glyph.codepoint );
           FT_Vector kerning;
           FT_Get_Kerning( face_, prev_index, index, FT_KERNING_UNFITTED, &kerning );
           if ( kerning.x )
-          {
-            Kerning k = { prev_glyph->codepoint, kerning.x / (Real)( HRESf * HRESf ) };
-            glyph->kerning.push_back( move( k ) );
-          }
+            glyph.kerning[prev_glyph.codepoint] = ( kerning.x / (Real)( HRESf * HRESf ) );
         }
       }
     }

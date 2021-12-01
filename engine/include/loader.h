@@ -1,7 +1,7 @@
 #pragma once
 #include "utilities.h"
 #include "renderer.h"
-#include "fontmanager.h"
+#include "font.h"
 #include "gfx_types.h"
 
 #ifndef NEKO_NO_ANIMATION

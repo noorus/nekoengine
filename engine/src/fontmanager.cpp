@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "locator.h"
-#include "fontmanager.h"
+#include "font.h"
 #include "neko_exception.h"
 #include "console.h"
 #include "engine.h"

@@ -189,12 +189,6 @@
     <ClCompile Include="src\js_math.cpp">
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
-    <ClCompile Include="src\font_textbuffer.cpp">
-      <Filter>Source Files\gfx\fonts</Filter>
-    </ClCompile>
-    <ClCompile Include="src\font_textureatlas.cpp">
-      <Filter>Source Files\gfx\fonts</Filter>
-    </ClCompile>
     <ClCompile Include="src\font_textured.cpp">
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
@@ -306,6 +300,12 @@
     <ClCompile Include="src\particles.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
+    <ClCompile Include="src\textureatlas.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\text.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -392,7 +392,7 @@
     <ClInclude Include="include\js_console.h">
       <Filter>Header Files\scripting</Filter>
     </ClInclude>
-    <ClInclude Include="include\fontmanager.h">
+    <ClInclude Include="include\font.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="include\materials.h">
@@ -511,6 +511,9 @@
     </ClInclude>
     <ClInclude Include="..\shared\include\math_aabb.h">
       <Filter>Header Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="include\textureatlas.h">
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

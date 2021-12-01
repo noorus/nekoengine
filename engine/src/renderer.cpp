@@ -6,7 +6,7 @@
 #include "camera.h"
 #include "loader.h"
 #include "engine.h"
-#include "fontmanager.h"
+#include "font.h"
 #include "lodepng.h"
 #include "gfx.h"
 #include "nekosimd.h"
