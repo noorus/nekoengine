@@ -464,7 +464,8 @@ namespace neko {
       glDisable( GL_CULL_FACE );
   }
 
-  static unique_ptr<DynamicText> g_font;
+  static FontPtr g_font;
+  static unique_ptr<Text> g_text;
 
   void Renderer::sceneDraw( GameTime time, GameTime delta, Camera& camera )
   {
@@ -646,10 +647,12 @@ namespace neko {
     }
 
     {
-      if ( !g_font )
+      if ( !g_text )
       {
-        g_font = make_unique<DynamicText>( loader_, meshes_, fonts_ );
-        g_font->setText( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class.", vec2( 100.0f, 100.0f ) );
+        g_font = fonts_->createFont();
+        loader_->addLoadTask( { LoadTask( g_font, R"(SourceHanSansJP-Bold.otf)", 24.0f ) } );
+        g_text = make_unique<Text>( loader_, meshes_, g_font );
+        g_text->set( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class.", vec2( 100.0f, 100.0f ) );
       }
 
       auto& pipeline = shaders_->usePipeline( "text2d" );
@@ -658,7 +661,7 @@ namespace neko {
       mdl = glm::scale( mdl, vec3( 1.0f ) );
       pipeline.setUniform( "model", mdl );
       pipeline.setUniform( "tex", 0 );
-      g_font->draw( this );
+      g_text->draw( this );
     }
 
 #ifndef NEKO_NO_GUI
@@ -678,7 +681,7 @@ namespace neko {
     glBindVertexArray( builtin_.emptyVAO_ );
 
     g_sakura.reset();
-    g_font.reset();
+    g_text.reset();
 
     fboMain_.reset();
 

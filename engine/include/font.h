@@ -4,8 +4,22 @@
 #include "forwards.h"
 #include "gfx_types.h"
 #include "textureatlas.h"
+#include "materials.h"
 
 namespace neko {
+
+  using Codepoint = uint32_t;
+
+  struct Glyph
+  {
+    Codepoint codepoint;
+    size_t width;
+    size_t height;
+    Glyph()
+        : codepoint( -1 ), width( 0 ), height( 0 )
+    {
+    }
+  };
 
   namespace fonts {
 
@@ -17,19 +31,14 @@ namespace neko {
       SDF
     };
 
-    using Codepoint = uint32_t;
-
-    struct TexturedGlyph {
-      Codepoint codepoint;
-      size_t width;
-      size_t height;
+    struct TexturedGlyph: public Glyph {
       vec2i offset;
       vec2 advance;
       vec2 coords[2];
       map<Codepoint, Real> kerning;
       RenderMode rendermode;
       Real outline_thickness;
-      TexturedGlyph(): codepoint( -1 ), width( 0 ), height( 0 ),
+      TexturedGlyph():
         rendermode( RenderMode::Normal ), outline_thickness( 0.0f ),
         offset( 0, 0 ), advance( 0.0f, 0.0f )
       {
@@ -46,13 +55,17 @@ namespace neko {
 
     using TexturedGlyphMap = map<Codepoint, TexturedGlyph>;
 
-    class GraphicalFont {
+    class GraphicalFont
+    {
+      friend class FontManager;
+      friend class ThreadedLoader;
     private:
       void postInit();
       void initEmptyGlyph();
       void generateKerning();
       void forceUCS2Charmap();
-    public:
+
+    protected:
       FT_Face face_;
       TexturedGlyphMap glyphs_;
       TextureAtlasPtr atlas_;
@@ -71,12 +84,17 @@ namespace neko {
       Real underline_thickness;
       int padding_;
       unique_ptr<utils::DumbBuffer> data_;
+      MaterialPtr material_;
     public:
       GraphicalFont( FontManagerPtr manager, size_t width, size_t height, size_t depth );
       ~GraphicalFont();
       void loadGlyph( Codepoint codepoint );
       TexturedGlyph* getGlyph( Codepoint codepoint );
       void loadFace( vector<uint8_t>& source, Real pointSize );
+      bool use( Renderer* renderer, GLuint textureUnit );
+      inline Real size() const { return size_; }
+      inline Real ascender() const { return ascender_; }
+      inline Real descender() const { return descender_; }
     };
 
     using GraphicalFontPtr = unique_ptr<GraphicalFont>;
@@ -84,18 +102,29 @@ namespace neko {
 
   }
 
-  struct Font {
-    struct Specs {
+  class Font
+  {
+    friend class FontManager;
+    friend class ThreadedLoader;
+  public:
+    struct Specs
+    {
       vec2i atlasSize_;
       Real pointSize_;
     };
+  protected:
     bool loaded_;
     fonts::GraphicalFontPtr impl_;
     FontManager* manager_;
+
+  public:
     Font( FontManager* manager ): loaded_( false ), manager_( manager ) {}
-    inline Real size() const { return impl_->size_; }
-    inline Real ascender() const { return impl_->ascender_; }
-    inline Real descender() const { return impl_->descender_; }
+    inline bool loaded() const { return loaded_; }
+    inline Real size() const { return impl_->size(); }
+    inline Real ascender() const { return impl_->ascender(); }
+    inline Real descender() const { return impl_->descender(); }
+    inline fonts::TexturedGlyph* glyph( Codepoint codepoint ) { return impl_->getGlyph( codepoint ); }
+    inline bool use( Renderer* renderer, GLuint textureUnit ) { return impl_->use( renderer, textureUnit ); }
   };
 
   using FontPtr = shared_ptr<Font>;

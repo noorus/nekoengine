@@ -7,29 +7,28 @@
 
 namespace neko {
 
-  DynamicText::DynamicText( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontManagerPtr fontmgr ): meshGenerated_( false )
+  Text::Text( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontPtr font ): dirty_( false ), font_( font )
   {
-    font_ = fontmgr->createFont();
-    loader->addLoadTask( { LoadTask( font_, R"(SourceHanSansJP-Bold.otf)", 24.0f ) } );
     mesh_ = meshmgr->createDynamic( gl::GL_TRIANGLES, VBO_3D, true, false );
   }
 
-  DynamicText::~DynamicText()
+  Text::~Text()
   {
   }
 
-  void DynamicText::setText( const utf8String& text, vec2 pen )
+  void Text::set( const utf8String& text, vec2 pen )
   {
     text_ = text;
     pen_ = pen;
-    meshGenerated_ = false;
+    dirty_ = true;
     regenerate();
   }
 
-  void DynamicText::regenerate()
+  void Text::regenerate()
   {
-    if ( meshGenerated_ || !font_->loaded_ )
+    if ( !dirty_ || !font_->loaded() )
       return;
+
     uint32_t previousCodepoint = 0;
     vec2 position = pen_;
 
@@ -43,11 +42,12 @@ namespace neko {
       {
         position.x = pen_.x;
         position.y += ascender; // font_->impl_->descender_ + font_->impl_->ascender_ + 2.0f;
+        previousCodepoint = 0;
         continue;
       }
       auto codepoint = utils::utf8_to_utf32( &text_[i] );
-      auto glyph = font_->impl_->getGlyph( codepoint );
-      Real kerning = ( i > 0 ? glyph->getKerning( previousCodepoint ) : 0.0f );
+      auto glyph = font_->glyph( codepoint );
+      Real kerning = ( previousCodepoint > 0 ? glyph->getKerning( previousCodepoint ) : 0.0f );
       previousCodepoint = codepoint;
       position.x -= kerning;
       auto p0 = vec2(
@@ -70,25 +70,18 @@ namespace neko {
       mesh_->pushVertices( move( vertices ) );
       position.x += glyph->advance.x;
     }
-    meshGenerated_ = true;
+
+    dirty_ = false;
   }
 
-  void DynamicText::draw( Renderer* renderer )
+  void Text::draw( Renderer* renderer )
   {
     regenerate();
-    if ( !meshGenerated_ )
+    if ( dirty_ )
       return;
-    if ( !material_ )
-    {
-      material_ = renderer->createTextureWithData( "font", font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, PixFmtColorR8, (const void*)font_->impl_->atlas_->data_.data(), Texture::ClampBorder, Texture::Nearest );
-      /*platform::FileWriter writer( "debug.png" );
-        vector<uint8_t> buffer;
-        lodepng::encode( buffer, font_->impl_->atlas_->data_, font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, LCT_GREY, 8 );
-        writer.writeBlob( buffer.data(), buffer.size() );*/
-    }
 
     mesh_->begin();
-    gl::glBindTextureUnit( 0, material_->layers_[0].texture_->handle() );
+    font_->use( renderer, 0 );
     mesh_->draw();
     gl::glBindTextureUnit( 0, 0 );
   }

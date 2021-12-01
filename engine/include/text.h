@@ -12,20 +12,19 @@
 
 namespace neko {
 
-  class DynamicText {
+  class Text {
   public:
     DynamicMeshPtr mesh_;
     FontPtr font_;
-    MaterialPtr material_;
     utf8String text_;
     vec2 pen_;
-    bool meshGenerated_;
+    bool dirty_;
   public:
-    DynamicText( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontManagerPtr fontmgr );
-    void setText( const utf8String& text, vec2 pen );
+    Text( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontPtr font );
+    void set( const utf8String& text, vec2 pen );
     void regenerate();
     void draw( Renderer* renderer );
-    ~DynamicText();
+    ~Text();
   };
 
 }

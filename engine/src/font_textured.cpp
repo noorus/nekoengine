@@ -3,6 +3,7 @@
 #include "font.h"
 #include "neko_exception.h"
 #include "console.h"
+#include "renderer.h"
 
 namespace neko {
 
@@ -318,6 +319,29 @@ namespace neko {
             glyph.kerning[prev_glyph.codepoint] = ( kerning.x / (Real)( HRESf * HRESf ) );
         }
       }
+    }
+
+    bool GraphicalFont::use( Renderer* renderer, GLuint textureUnit )
+    {
+      if ( !material_ )
+      {
+        char matname[128];
+        sprintf_s( matname, 128, "font/%s/%i", face_->family_name, static_cast<int>( size_ * 100.0f ) );
+        material_ = renderer->createTextureWithData(
+          matname, atlas_->width_, atlas_->height_,
+          PixFmtColorR8, atlas_->data_.data(),
+          Texture::ClampBorder, Texture::Nearest );
+        /*platform::FileWriter writer( "debug.png" );
+        vector<uint8_t> buffer;
+        lodepng::encode( buffer, font_->impl_->atlas_->data_, font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, LCT_GREY, 8 );
+        writer.writeBlob( buffer.data(), buffer.size() );*/
+      }
+      if ( material_ )
+      {
+        gl::glBindTextureUnit( 0, material_->layers_[0].texture_->handle() );
+        return true;
+      }
+      return false;
     }
 
   }
