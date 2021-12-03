@@ -5,6 +5,7 @@
 #include "locator.h"
 #include "memory.h"
 #include "neko_exception.h"
+#include "filesystem.h"
 
 namespace neko {
 
@@ -211,9 +212,9 @@ namespace neko {
       }
 
       utf8String source;
-      platform::FileReader file( rootFilePath_ + platform::utf8ToWide( filename ) );
-      source.resize( file.size() );
-      file.read( &source[0], (uint32_t)file.size() );
+      auto file = Locator::fileSystem().openFile( rootFilePath_ + platform::utf8ToWide( filename ) );
+      source.resize( file->size() );
+      file->read( &source[0], (uint32_t)file->size() );
       stringstream ss( source );
       utf8String line;
       utf8String out;

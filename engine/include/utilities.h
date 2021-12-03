@@ -2,6 +2,7 @@
 #include "neko_types.h"
 #include "neko_platform.h"
 #include "locator.h"
+#include "filesystem.h"
 
 namespace neko {
 
@@ -251,15 +252,14 @@ namespace neko {
   //! Simple text file reader that will read the full text file to memory and skip an utf-8 BOM.
   class TextFileReader {
   protected:
-    platform::FileReader impl_;
+    FileReaderPtr impl_;
   public:
-    TextFileReader( const utf8String& filename ): TextFileReader( platform::utf8ToWide( filename ) ) {}
-    TextFileReader( const wstring& filename ): impl_( filename )
+    TextFileReader( FileReaderPtr reader ): impl_( reader )
     {
     }
     inline utf8String readFullAssumeUtf8()
     {
-      auto str = impl_.readFullString();
+      auto str = impl_->readFullString();
       if ( str.length() < 3 )
         return str;
 

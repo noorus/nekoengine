@@ -6,6 +6,7 @@
 #include "engine.h"
 #include "locator.h"
 #include "memory.h"
+#include "filesystem.h"
 
 using namespace neko;
 
@@ -40,6 +41,9 @@ inline int runMain( const std::vector<std::wstring>& arguments )
 
   platform::initialize();
   platform::prepareProcess();
+
+  FileSystemPtr globalFileSystem = make_shared<FileSystem>();
+  Locator::provideFileSystem( globalFileSystem );
 
   ConsolePtr console = make_shared<Console>();
   Locator::provideConsole( console );

@@ -14,6 +14,7 @@
 #include "math_aabb.h"
 #include "text.h"
 #include "tankengine.h"
+#include "filesystem.h"
 
 namespace neko {
 
@@ -242,7 +243,7 @@ namespace neko {
   TexturePtr Renderer::loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering )
   {
     vector<uint8_t> input, output;
-    platform::FileReader( filepath ).readFullVector( input );
+    Locator::fileSystem().openFile( filepath )->readFullVector( input );
     unsigned int w, h;
     if ( lodepng::decode( output, w, h, input.data(), input.size(), LCT_RGBA, 8 ) != 0 )
       NEKO_EXCEPT( "Lodepng image load failed" );

@@ -2,6 +2,7 @@
 #include "gui.h"
 #include "lodepng.h"
 #include "gfx.h"
+#include "filesystem.h"
 
 namespace neko {
 
@@ -73,7 +74,7 @@ namespace neko {
   {
     vector<uint8_t> input, output;
     unsigned int wo, ho;
-    platform::FileReader( c_guiBaseDirectory + filename ).readFullVector( input );
+    Locator::fileSystem().openFile( c_guiBaseDirectory + filename )->readFullVector( input );
 
     if ( lodepng::decode( output, wo, ho, input.data(), input.size(), LCT_RGBA, 8 ) != 0 )
       NEKO_EXCEPT( "Lodepng image load failed" );

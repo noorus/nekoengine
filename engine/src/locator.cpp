@@ -8,5 +8,6 @@ namespace neko {
   MessagingPtr Locator::messagingService_;
   DirectorPtr Locator::directorService_;
   MeshGeneratorPtr Locator::meshGeneratorService_;
+  FileSystemPtr Locator::fileSystemService_;
 
 }

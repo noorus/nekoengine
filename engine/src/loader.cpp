@@ -5,6 +5,7 @@
 #include "gfx_types.h"
 #include "renderer.h"
 #include "console.h"
+#include "filesystem.h"
 
 #include "tinytiffreader.hxx"
 
@@ -144,7 +145,7 @@ namespace neko {
 
           vector<uint8_t> input;
           unsigned int width, height;
-          platform::FileReader( path ).readFullVector( input );
+          Locator::fileSystem().openFile( path )->readFullVector( input );
           MaterialLayer layer;
           vector<uint8_t> rawData;
           auto ext = utils::extractExtension( path );
@@ -273,7 +274,7 @@ namespace neko {
         auto path = c_fontsBaseDirectory + task.fontfaceLoad.path_;
 
         vector<uint8_t> input;
-        platform::FileReader( path ).readFullVector( input );
+        Locator::fileSystem().openFile( path )->readFullVector( input );
         task.fontfaceLoad.font_->manager_->loadFont( task.fontfaceLoad.font_, task.fontfaceLoad.specs_, input );
         finishedTasksLock_.lock();
         finishedFonts_.push_back( task.fontfaceLoad.font_ );
@@ -289,7 +290,7 @@ namespace neko {
         if ( ext == L"gltf" )
         {
           vector<uint8_t> input;
-          platform::FileReader( path ).readFullVector( input );
+          Locator::fileSystem().openFile( path )->readFullVector( input );
           loaders::loadGLTFModel( input, platform::wideToUtf8( filename ), platform::wideToUtf8( filepath ), task.modelLoad.node_ );
         }
         else

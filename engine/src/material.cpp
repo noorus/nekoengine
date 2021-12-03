@@ -7,6 +7,7 @@
 #include "neko_exception.h"
 #include "console.h"
 #include "loader.h"
+#include "filesystem.h"
 
 namespace neko {
 
@@ -76,7 +77,7 @@ namespace neko {
 
   void MaterialManager::loadFile( const utf8String& filename )
   {
-    auto input = move( platform::FileReader( filename ).readFullString() );
+    auto input = move( Locator::fileSystem().openFile( filename )->readFullString() );
     loadJSON( input );
   }
 

@@ -60,4 +60,7 @@ namespace neko {
   class MeshGenerator;
   using MeshGeneratorPtr = shared_ptr<MeshGenerator>;
 
+  class FileSystem;
+  using FileSystemPtr = shared_ptr<FileSystem>;
+
 }

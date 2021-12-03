@@ -193,6 +193,7 @@
     <ClCompile Include="src\director.cpp" />
     <ClCompile Include="src\dynamicmesh.cpp" />
     <ClCompile Include="src\engine.cpp" />
+    <ClCompile Include="src\filesystem.cpp" />
     <ClCompile Include="src\fontmanager.cpp" />
     <ClCompile Include="src\text.cpp" />
     <ClCompile Include="src\font_textured.cpp" />
@@ -276,6 +277,7 @@
     <ClInclude Include="include\consolewindow_windows.h" />
     <ClInclude Include="include\director.h" />
     <ClInclude Include="include\engine.h" />
+    <ClInclude Include="include\filesystem.h" />
     <ClInclude Include="include\font.h" />
     <ClInclude Include="include\forwards.h" />
     <ClInclude Include="include\framebuffer.h" />

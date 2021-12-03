@@ -4,6 +4,7 @@
 #include "neko_exception.h"
 #include "neko_algorithm.h"
 #include "engine.h"
+#include "filesystem.h"
 
 // Don't ask
 // Don't touch
@@ -552,7 +553,7 @@ namespace neko {
       return;
     }
 
-    TextFileReader reader( filename );
+    TextFileReader reader( Locator::fileSystem().openFile( filename ) );
     const auto source = reader.readFullAssumeUtf8();
     stringstream ss( source );
 

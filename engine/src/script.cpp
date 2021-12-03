@@ -5,6 +5,7 @@
 #include "js_util.h"
 #include "neko_platform.h"
 #include "console.h"
+#include "filesystem.h"
 
 namespace neko {
 
@@ -45,7 +46,7 @@ namespace neko {
 
     utf8String source;
     {
-      TextFileReader reader( filename_ );
+      TextFileReader reader( Locator::fileSystem().openFile( filename_ ) );
       source = move( reader.readFullAssumeUtf8() );
     }
 
