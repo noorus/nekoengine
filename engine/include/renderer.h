@@ -86,10 +86,10 @@ namespace neko {
     void rotate( const quaternion& rotation );
     void needUpdate();
     inline void name( const utf8String& name ) { name_ = name; }
-    inline const utf8String& name() const throw() { return name_; }
-    inline const vec3& translation() const throw() { return translate_; }
-    inline const vec3& scaling() const throw() { return scale_; }
-    inline const quaternion& rotation() const throw() { return rotate_; }
+    inline const utf8String& name() const noexcept { return name_; }
+    inline const vec3& translation() const noexcept { return translate_; }
+    inline const vec3& scaling() const noexcept { return scale_; }
+    inline const quaternion& rotation() const noexcept { return rotate_; }
     vec3 convertLocalToWorldPosition( const vec3& localPosition );
     vec3 convertWorldToLocalPosition( const vec3& worldPosition );
     quaternion convertLocalToWorldOrientation( const quaternion& localOrientation );
@@ -178,7 +178,7 @@ namespace neko {
     struct DrawCtx
     {
       unique_ptr<Framebuffer> fboMain_;
-      inline bool ready() const throw( )
+      inline bool ready() const noexcept
       {
         return ( fboMain_ && fboMain_->available() );
       }
@@ -200,13 +200,13 @@ namespace neko {
     void preInitialize();
     void initialize( size_t width, size_t height );
     MaterialPtr createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
-    inline MeshManager& meshes() throw() { return *( meshes_.get() ); }
+    inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
     void prepare( GameTime time );
     void uploadTextures();
     void uploadModels();
     void setUserData( uint64_t id, const utf8String name, tank::Image& image );
     void jsRestart();
-    inline shaders::Shaders& shaders() throw() { return *( shaders_.get() ); }
+    inline shaders::Shaders& shaders() noexcept { return *( shaders_.get() ); }
     void draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui );
     void reset( size_t width, size_t height );
     ~Renderer();

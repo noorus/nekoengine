@@ -95,8 +95,8 @@ namespace neko {
     void tick( GameTime tick, GameTime time );
     void process();
     ~ScriptingContext();
-    inline v8::Isolate* isolate() const throw() { return isolate_; }
-    inline v8::Global<v8::Context>& ctx() throw() { return ctx_; }
+    inline v8::Isolate* isolate() const noexcept { return isolate_; }
+    inline v8::Global<v8::Context>& ctx() noexcept { return ctx_; }
     inline js::DynamicObjectsRegistry<js::Vector2, vec2>& vec2reg() { return vec2Registry_; }
     inline js::DynamicObjectsRegistry<js::Vector3, vec3>& vec3reg() { return vec3Registry_; }
     inline js::DynamicObjectsRegistry<js::Quaternion, quaternion>& quatreg() { return quatRegistry_; }
@@ -128,7 +128,7 @@ namespace neko {
     virtual void tick( GameTime tick, GameTime time ) override;
     virtual void postUpdate( GameTime delta, GameTime tick ) override;
     virtual ~Scripting();
-    inline ScriptingContextPtr getContext() throw() { return global_; }
+    inline ScriptingContextPtr getContext() noexcept { return global_; }
   };
 
 }

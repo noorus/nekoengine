@@ -223,7 +223,7 @@ namespace neko {
       SnapshotPainter snapshotPainter_;
     public:
       RenderWindowHandler();
-      inline HWND getWindow() const throw() { return window_; }
+      inline HWND getWindow() const noexcept { return window_; }
       void changeTargetResolution( const size2i targetResolution );
       void setWindow( RenderWindowEventRecipient* callback, HWND window );
     private:
@@ -408,7 +408,7 @@ namespace neko {
     }
 
     //! UTF-8 to wide string conversion.
-    inline wstring utf8ToWide( const utf8String& in ) throw()
+    inline wstring utf8ToWide( const utf8String& in ) noexcept
     {
       int length = MultiByteToWideChar( CP_UTF8, 0, in.c_str(), -1, nullptr, 0 );
       if ( length == 0 )
@@ -419,7 +419,7 @@ namespace neko {
     }
 
     //! Wide string to UTF-8 conversion.
-    inline utf8String wideToUtf8( const wstring& in ) throw()
+    inline utf8String wideToUtf8( const wstring& in ) noexcept
     {
       int length = WideCharToMultiByte( CP_UTF8, 0, in.c_str(), -1, nullptr, 0, 0, FALSE );
       if ( length == 0 )
@@ -540,13 +540,13 @@ namespace neko {
     }
 
     //! Outputs a global debug string.
-    inline void outputDebugString( const char* str ) throw()
+    inline void outputDebugString( const char* str ) noexcept
     {
       OutputDebugStringA( str );
     }
 
     //! Outputs a global debug string.
-    inline void outputDebugString( const utf8String& str ) throw()
+    inline void outputDebugString( const utf8String& str ) noexcept
     {
       OutputDebugStringW( utf8ToWide( str ).c_str() );
     }

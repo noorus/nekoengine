@@ -23,7 +23,7 @@ namespace neko {
     Exception( const string& description, gl::GLenum gle, const string& source );
 #endif
     virtual const string& getFullDescription() const;
-    virtual const char* what() const throw() override;
+    virtual const char* what() const noexcept override;
   };
 
 #if defined(NEKO_EXCEPT)

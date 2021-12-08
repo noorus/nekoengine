@@ -33,7 +33,7 @@ namespace neko {
     const float cNativeDPI = 96.0f;
 
     //! Get generic window text as widestring
-    inline wstring getWindowText( HWND wnd ) throw( )
+    inline wstring getWindowText( HWND wnd ) noexcept
     {
       wstring str;
       auto length = (int)GetWindowTextLengthW( wnd );

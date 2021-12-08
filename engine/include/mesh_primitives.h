@@ -45,8 +45,8 @@ namespace neko {
       gl::glNamedBufferStorage( id_, count_ * sizeof( T ), nullptr, c_glStoreFlags );
     }
     inline GLuint id() const { return id_; }
-    inline size_t size() const throw() { return count_; }
-    inline size_t bytesize() const throw() { return ( count_ * sizeof( T ) ); }
+    inline size_t size() const noexcept { return count_; }
+    inline size_t bytesize() const noexcept { return ( count_ * sizeof( T ) ); }
     inline span<T> lock( gl::GLintptr offset = 0, gl::GLint count = 0 )
     {
       if ( count < 1 )

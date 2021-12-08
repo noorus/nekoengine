@@ -21,11 +21,11 @@ namespace neko {
   protected:
     explicit Surface( Renderer* renderer, size_t width, size_t height, PixelFormat format );
   public:
-    inline size_t width() const throw() { return width_; }
-    inline size_t height() const throw() { return height_; }
-    inline PixelFormat format() const throw() { return format_; }
+    inline size_t width() const noexcept { return width_; }
+    inline size_t height() const noexcept { return height_; }
+    inline PixelFormat format() const noexcept { return format_; }
     //! Get the native handle for usage. Do not store it elsewhere so as to not violate RAII.
-    inline GLuint handle() const throw() { return handle_; }
+    inline GLuint handle() const noexcept { return handle_; }
   };
 
 }

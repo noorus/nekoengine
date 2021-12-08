@@ -75,7 +75,7 @@ namespace neko {
     const Image& renderWindowReadPixels() override;
     void processEvents(); //!< Process vital window events and such.
     void update( GameTime time, GameTime delta, Engine& engine );
-    inline Renderer& renderer() throw() { return *( renderer_.get() ); }
+    inline Renderer& renderer() noexcept { return *( renderer_.get() ); }
     void shutdown();
     void restart( Engine& engine );
     void jsRestart();

@@ -75,7 +75,7 @@ namespace neko {
     return fullDescription_;
   }
 
-  const char* Exception::what() const throw()
+  const char* Exception::what() const noexcept
   {
     return getFullDescription().c_str();
   }

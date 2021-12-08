@@ -205,8 +205,8 @@ namespace MyGUI {
     ~NekoPlatform();
     void initialise( neko::Renderer* renderer, NekoImageLoader* imageloader, const utf8String& logname );
     void shutdown();
-    inline NekoRenderManager* getRenderManagerPtr() const throw() { return renderManager_.get(); }
-    NekoDataManager* getDataManagerPtr() const throw() { return dataManager_.get(); }
+    inline NekoRenderManager* getRenderManagerPtr() const noexcept { return renderManager_.get(); }
+    NekoDataManager* getDataManagerPtr() const noexcept { return dataManager_.get(); }
   };
 
 }

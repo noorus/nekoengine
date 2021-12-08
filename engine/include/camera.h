@@ -27,13 +27,13 @@ namespace neko {
     virtual ~Camera();
     void setViewport( vec2 resolution );
     virtual void update( GameTime delta, GameTime time ) = 0;
-    inline const vec2& resolution() const throw() { return resolution_; }
-    inline const mat4& view() const throw() { return view_; }
-    inline const mat4& projection() const throw() { return projection_; }
-    inline const vec3& position() const throw() { return position_; }
-    inline Real near() const throw() { return near_; }
-    inline Real far() const throw() { return far_; }
-    inline Real exposure() const throw() { return exposure_; }
+    inline const vec2& resolution() const noexcept { return resolution_; }
+    inline const mat4& view() const noexcept { return view_; }
+    inline const mat4& projection() const noexcept { return projection_; }
+    inline const vec3& position() const noexcept { return position_; }
+    inline Real near() const noexcept { return near_; }
+    inline Real far() const noexcept { return far_; }
+    inline Real exposure() const noexcept { return exposure_; }
     void exposure( Real exp );
   };
 
@@ -68,8 +68,8 @@ namespace neko {
     virtual void applyInputRotation( const vec3i& mousemovement );
     virtual void applyInputPanning( const vec3i& mousemovement );
     virtual void applyInputZoom( int zoom );
-    virtual void update( GameTime delta, GameTime time );
-    virtual const vec3& getDirection() const throw() { return direction_; }
+    void update( GameTime delta, GameTime time ) override;
+    virtual const vec3& getDirection() const noexcept { return direction_; }
     virtual Real getSensitivity() { return mSensitivity; }
     virtual Real getMinDistance() { return distanceMin_; }
     virtual Real getMaxDistance() { return distanceMax_; }

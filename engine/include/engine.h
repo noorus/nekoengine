@@ -95,23 +95,21 @@ namespace neko {
     void onSteamStatsUpdated( tank::StateUpdateIndex index ) override;
     void onAccountUpdated( const tank::Account& user ) override;
   public:
-    inline const EngineInfo& info() const throw() { return info_; }
-    inline ConsolePtr console() throw() { return console_; }
-    inline Environment& env() throw() { return env_; }
-    //inline GfxPtr gfx() throw() { return gfx_; }
-    //inline InputPtr input() throw() { return input_; }
+    inline const EngineInfo& info() const noexcept { return info_; }
+    inline ConsolePtr console() noexcept { return console_; }
+    inline Environment& env() noexcept { return env_; }
 #ifndef NEKO_NO_SCRIPTING
-    inline ScriptingPtr scripting() throw() { return scripting_; }
+    inline ScriptingPtr scripting() noexcept { return scripting_; }
 #endif
-    inline GameTime time() const throw() { return time_; }
-    inline ThreadedLoaderPtr loader() throw() { return loader_; }
-    inline FontManagerPtr fonts() throw() { return fonts_; }
-    inline MessagingPtr msgs() throw() { return messaging_; }
-    inline DirectorPtr director() throw() { return director_; }
-    inline atomic<GameTime>& renderTime() throw() { return rendererTime_; }
+    inline GameTime time() const noexcept { return time_; }
+    inline ThreadedLoaderPtr loader() noexcept { return loader_; }
+    inline FontManagerPtr fonts() noexcept { return fonts_; }
+    inline MessagingPtr msgs() noexcept { return messaging_; }
+    inline DirectorPtr director() noexcept { return director_; }
+    inline atomic<GameTime>& renderTime() noexcept { return rendererTime_; }
     inline const utf8String& listFlags();
     const tank::GameInstallationState& installationInfo();
-    inline const Stats& stats() const throw() { return stats_; }
+    inline const Stats& stats() const noexcept { return stats_; }
     inline tank::TankEngine* tanklib() { return tanklib_.engine_; }
   public:
     //! Constructor.

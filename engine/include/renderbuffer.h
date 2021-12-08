@@ -16,7 +16,7 @@ namespace neko {
   protected:
     GLsizei multisamples_;
   public:
-    inline size_t samples() const throw() { return multisamples_; }
+    inline size_t samples() const noexcept { return multisamples_; }
   public:
     Renderbuffer() = delete;
     Renderbuffer( Renderer* renderer, size_t width, size_t height, PixelFormat format, int samples = 0 );

@@ -104,10 +104,10 @@ namespace tank {
   public:
     TankEngine( TankHost* host );
     virtual void initialize( int64_t discordAppID, uint32_t steamAppID );
-    virtual void changeActivity_AlphaDevelop() throw();
-    virtual const GameInstallationState& localInstallation() throw();
-    virtual const GameInstallationState& discordInstallation() throw();
-    virtual const GameInstallationState& steamInstallation() throw();
+    virtual void changeActivity_AlphaDevelop() noexcept;
+    virtual const GameInstallationState& localInstallation() noexcept;
+    virtual const GameInstallationState& discordInstallation() noexcept;
+    virtual const GameInstallationState& steamInstallation() noexcept;
     virtual void update( double gameTime, double delta );
     virtual void shutdown();
     virtual bool startedFromSteam();

@@ -11,20 +11,20 @@ namespace neko {
     ImageData image_;
     TexturePtr texture_;
   public:
-    inline const bool hasHostCopy() const { return !image_.data_.empty(); }
+    inline const bool hasHostCopy() const noexcept { return !image_.data_.empty(); }
     inline void deleteHostCopy()
     {
       image_.data_.clear();
     }
-    inline const bool uploaded() const throw() { return ( texture_.get() != nullptr ); }
+    inline const bool uploaded() const noexcept { return ( texture_.get() != nullptr ); }
     MaterialLayer() {}
     // move constructor
     MaterialLayer( MaterialLayer&& rhs ) noexcept:
     image_( move( rhs.image_ ) ), texture_( rhs.texture_ )
     {
     }
-    inline size_t width() const { return image_.width_; }
-    inline size_t height() const { return image_.height_; }
+    inline size_t width() const noexcept { return image_.width_; }
+    inline size_t height() const noexcept { return image_.height_; }
   };
 
   using MaterialLayers = vector<MaterialLayer>;
@@ -41,7 +41,7 @@ namespace neko {
     Texture::Wrapping wantWrapping_ = Texture::Repeat;
     Texture::Filtering wantFiltering_ = Texture::Mipmapped;
     MaterialLayers layers_;
-    inline const bool uploaded() const throw()
+    inline const bool uploaded() const noexcept
     {
       if ( !loaded_ )
         return false;
