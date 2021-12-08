@@ -30,65 +30,41 @@ namespace neko {
   }
 
   template <typename T>
-  class PersistentBuffer {
+  class MappedGLBuffer {
+    static constexpr glbinding::SharedBitfield<gl::BufferStorageMask, gl::MapBufferAccessMask> c_glMapFlags = ( gl::GL_MAP_WRITE_BIT | gl::GL_MAP_READ_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT );
+    static constexpr glbinding::SharedBitfield<gl::BufferStorageMask, gl::MapBufferAccessMask> c_glStoreFlags = ( c_glMapFlags | gl::GL_DYNAMIC_STORAGE_BIT );
   protected:
-    GLuint id_;
-    size_t size_;
-    span<T> buffer_;
+    GLuint id_ = 0;
+    size_t count_;
+    bool mapped_ = false;
   public:
-    PersistentBuffer( size_t count = 1 ): id_( 0 )
+    MappedGLBuffer( size_t count = 1 ): count_( count )
     {
       assert( count > 0 );
-      size_ = ( count * sizeof( T ) );
       gl::glCreateBuffers( 1, &id_ );
-      auto mapflags = ( gl::GL_MAP_WRITE_BIT | gl::GL_MAP_READ_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT );
-      auto storeflags = ( mapflags | gl::GL_DYNAMIC_STORAGE_BIT );
-      gl::glNamedBufferStorage( id_, size_, nullptr, storeflags );
-      auto buf = reinterpret_cast<T*>( gl::glMapNamedBufferRange( id_, 0, size_, mapflags ) );
-      buffer_ = span<T>( buf, size_ );
+      gl::glNamedBufferStorage( id_, count_ * sizeof( T ), nullptr, c_glStoreFlags );
     }
     inline GLuint id() const { return id_; }
-    inline span<T>& buffer() { return buffer_; }
-    ~PersistentBuffer()
+    inline size_t size() const throw() { return count_; }
+    inline size_t bytesize() const throw() { return ( count_ * sizeof( T ) ); }
+    inline span<T> lock( gl::GLintptr offset = 0, gl::GLint count = 0 )
     {
-      gl::glUnmapNamedBuffer( id_ );
-      gl::glDeleteBuffers( 1, &id_ );
-    }
-  };
-
-  template <typename T>
-  class SmarterBuffer: public nocopy {
-  protected:
-    GLuint id_;
-    size_t size_;
-    span<T> buffer_;
-  public:
-    SmarterBuffer( size_t count = 1 ): id_( 0 )
-    {
-      assert( count > 0 );
-      size_ = ( count * sizeof( T ) );
-      gl::glCreateBuffers( 1, &id_ );
-      /*auto mapflags = ( gl::GL_MAP_WRITE_BIT | gl::GL_MAP_READ_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT );
-      auto storeflags = ( mapflags | gl::GL_DYNAMIC_STORAGE_BIT );
-      gl::glNamedBufferStorage( id_, size_, nullptr, storeflags );*/
-      gl::glNamedBufferData( id_, size_, nullptr, gl::GL_STREAM_DRAW );
-    }
-    inline void lock()
-    {
-      gl::glNamedBufferData( id_, size_, nullptr, gl::GL_STREAM_DRAW );
-      auto buf = reinterpret_cast<T*>( gl::glMapNamedBuffer( id_, gl::GL_WRITE_ONLY ) );
-      buffer_ = span<T>( buf, size_ );
+      if ( count < 1 )
+        count = static_cast<GLint>( count_ );
+      auto buf = reinterpret_cast<T*>( gl::glMapNamedBufferRange( id_, offset, count * sizeof( T ), c_glMapFlags ) );
+      mapped_ = true;
+      return span<T>( buf, count_ );
     }
     inline void unlock()
     {
-      gl::glUnmapNamedBuffer( id_ );
+      auto ret = gl::glUnmapNamedBuffer( id_ );
+      assert( ret == gl::GL_TRUE );
+      mapped_ = false;
     }
-    inline GLuint id() const { return id_; }
-    inline span<T>& buffer() { return buffer_; }
-    ~SmarterBuffer()
+    ~MappedGLBuffer()
     {
-      // FIXME - Access violation. what the fuck?
-      // gl::glDeleteBuffers( 1, &id_ );
+      assert( !mapped_ );
+      gl::glDeleteBuffers( 1, &id_ );
     }
   };
 
@@ -141,13 +117,6 @@ namespace neko {
     VBO_3D, //!< 0: pos[3], 1: normal[3], 2: texcoord[2], 3: color, 4: tangent, 5: bitangent
     VBO_MyGUI, //!< 0: pos[3], 1: color[4], 1: texcoord[2]
     Max_VBOType
-  };
-
-  enum MeshAttributeIndex: GLuint
-  {
-    MeshAttrib_Position = 0,
-    MeshAttrib_Texcoord,
-    MeshAttrib_Color
   };
 
   enum MeshDataModifyHint

@@ -58,7 +58,8 @@ namespace MyGUI {
 
   void NekoRenderManager::destroyVertexBuffer( IVertexBuffer* buffer )
   {
-    delete buffer;
+    // crash, crash, crash, crash : - )
+    // delete buffer;
   }
 
   void NekoRenderManager::doRenderRtt( IVertexBuffer* buffer, ITexture* texture, size_t count )

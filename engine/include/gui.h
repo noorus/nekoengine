@@ -32,8 +32,19 @@ namespace neko {
     ~GUI();
   };
 
-  using GUIPtr = shared_ptr<GUI>;
+#else
+
+  class GUI: public nocopy {
+  public:
+    inline void initialize( Gfx* gfx, const utf8String& documentsPath, sf::Window& window ) {}
+    inline void poop() {}
+    inline void resize( int width, int height ) {}
+    inline void setshit( const utf8String& shit ) {}
+    inline void shutdown() {}
+  };
 
 #endif
+
+  using GUIPtr = shared_ptr<GUI>;
 
 }

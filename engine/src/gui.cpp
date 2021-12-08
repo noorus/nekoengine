@@ -4,6 +4,8 @@
 #include "gfx.h"
 #include "filesystem.h"
 
+#ifndef NEKO_NO_GUI
+
 namespace neko {
 
   const char c_guiBaseDirectory[] = R"(assets\gui\)";
@@ -113,3 +115,5 @@ namespace neko {
   }
 
 }
+
+#endif

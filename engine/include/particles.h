@@ -14,27 +14,17 @@
 
 namespace neko {
 
-  #pragma pack( push, 1 )
-  struct VertexPointRender
-  {
-    vec3 pos;
-    glm::f32quat orient;
-    vec3 size;
-    vec4 color;
-  };
-# pragma pack( pop )
-
-  class PointRenderBuffer
-  {
+  template <size_t Count>
+  class PointRenderBuffer {
   protected:
-    const GLuint c_maxVertices = 256;
-    unique_ptr<SmarterBuffer<VertexPointRender>> buffer_;
+    static constexpr GLuint c_maxVertices = Count;
+    unique_ptr<MappedGLBuffer<VertexPointParticle>> buffer_;
     GLuint vao_;
 
   public:
     PointRenderBuffer()
     {
-      buffer_ = make_unique<SmarterBuffer<VertexPointRender>>( c_maxVertices );
+      buffer_ = make_unique<MappedGLBuffer<VertexPointParticle>>( c_maxVertices );
       gl::glCreateVertexArrays( 1, &vao_ );
       neko::AttribWriter attribs;
       attribs.add( gl::GL_FLOAT, 3 ); // vec3 position
@@ -44,7 +34,7 @@ namespace neko {
       attribs.write( vao_ );
       gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
     }
-    inline SmarterBuffer<VertexPointRender>& buffer() { return *buffer_.get(); }
+    inline MappedGLBuffer<VertexPointParticle>& buffer() { return *buffer_.get(); }
     void draw( shaders::Pipeline& pipeline, GLsizei count, GLint base = 0, gl::GLenum mode = gl::GL_POINTS )
     {
       gl::glBindVertexArray( vao_ );
@@ -60,26 +50,17 @@ namespace neko {
     }
   };
 
-# pragma pack( push, 1 )
-  struct VertexLineRender
-  {
-    vec3 pos;
-    vec4 color;
-    VertexLineRender( const vec3& p, const vec4& c ): pos( p ), color( c ) {}
-  };
-# pragma pack( pop )
-
-  class LineRenderBuffer
-  {
+  template <size_t Count>
+  class LineRenderBuffer {
   protected:
-    const GLuint c_maxVertices = 256;
-    unique_ptr<SmarterBuffer<VertexLineRender>> buffer_;
+    const GLuint c_maxVertices = Count;
+    unique_ptr<MappedGLBuffer<VertexLine>> buffer_;
     GLuint vao_;
 
   public:
     LineRenderBuffer()
     {
-      buffer_ = make_unique<SmarterBuffer<VertexLineRender>>( c_maxVertices );
+      buffer_ = make_unique<MappedGLBuffer<VertexLine>>( c_maxVertices );
       gl::glCreateVertexArrays( 1, &vao_ );
       neko::AttribWriter attribs;
       attribs.add( gl::GL_FLOAT, 3 ); // vec3 position
@@ -87,7 +68,7 @@ namespace neko {
       attribs.write( vao_ );
       gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
     }
-    inline SmarterBuffer<VertexLineRender>& buffer() { return *buffer_.get(); }
+    inline MappedGLBuffer<VertexLine>& buffer() { return *buffer_.get(); }
     void draw( shaders::Pipeline& pipeline, GLsizei count, GLint base = 0, gl::GLenum mode = gl::GL_POINTS )
     {
       gl::glBindVertexArray( vao_ );
@@ -104,8 +85,7 @@ namespace neko {
   };
 
   template <size_t Count>
-  class Particles
-  {
+  class Particles {
   protected:
     static constexpr size_t c_particleCount = Count;
     neko_avx_align vec4 positions_[c_particleCount];
@@ -116,7 +96,7 @@ namespace neko {
     neko_avx_align vec3 sizes_[c_particleCount];
     neko_avx_align vec4 colors_[c_particleCount];
     bool gravity_ = false;
-    unique_ptr<PointRenderBuffer> buffer_;
+    unique_ptr<PointRenderBuffer<Count>> buffer_;
     GameTime time_;
     // position.w can be age if:
     // - velocity.w is kept 1
@@ -124,7 +104,7 @@ namespace neko {
   public:
     Particles()
     {
-      buffer_ = make_unique<PointRenderBuffer>();
+      buffer_ = make_unique<PointRenderBuffer<Count>>();
     }
     virtual void resetParticle( size_t index ) = 0;
     void resetSystem()
@@ -172,8 +152,7 @@ namespace neko {
     {
       if ( !mat.uploaded() || mat.layers_.empty() || !mat.layers_[0].texture_ )
         return;
-      buffer_->buffer().lock();
-      auto points = buffer_->buffer().buffer().data();
+      auto points = buffer_->buffer().lock();
       for ( size_t i = 0; i < c_particleCount; ++i )
       {
         points[i].pos = positions_[i];
@@ -204,7 +183,7 @@ namespace neko {
     neko_avx_align vec3 axes_[c_particleCount];
     neko_avx_align float rot_[c_particleCount];
     aabb box_;
-    unique_ptr<LineRenderBuffer> boxviz_;
+    unique_ptr<LineRenderBuffer<24>> boxviz_;
   public:
     SakuraSystem( const aabb& box );
     virtual void resetParticle( size_t index );

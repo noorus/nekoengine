@@ -380,7 +380,6 @@ namespace neko {
         material->layers_[0].texture_->handle() };
       glBindTextures( 0, 4, units );
       auto& pipeline = shaders_->usePipeline( "mat_unlit" );
-      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
       pipeline.setUniform( "tex", 0 );
       return pipeline;
     }
@@ -474,13 +473,14 @@ namespace neko {
   {
     camera.exposure( g_CVar_vid_exposure.as_f() );
 
-    shaders_->world()->time = (float)time;
-    setCameraUniforms( camera, shaders_->world()->camera );
-
-    for ( auto& pointLight : shaders_->world()->pointLights )
-      pointLight.dummy = vec4( 0.0f );
-
-    shaders_->processing()->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
+    {
+      auto world = shaders_->world()->lock().data();
+      world->time = (float)time;
+      setCameraUniforms( camera, world->camera );
+      for ( auto& pointLight : world->pointLights )
+        pointLight.dummy = vec4( 0.0f );
+      shaders_->world()->unlock();
+    }
 
     setGLDrawState( true, true, true );
 
@@ -603,9 +603,14 @@ namespace neko {
     // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
     glBindVertexArray( builtin_.emptyVAO_ );
 
-    shaders_->processing()->gamma = g_CVar_vid_gamma.as_f();
-    shaders_->processing()->resolution = resolution_;
-    shaders_->processing()->textproj = glm::ortho( 0.0f, resolution_.x, resolution_.y, 0.0f );
+    {
+      auto processing = shaders_->processing()->lock().data();
+      processing->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
+      processing->gamma = g_CVar_vid_gamma.as_f();
+      processing->resolution = resolution_;
+      processing->textproj = glm::ortho( 0.0f, resolution_.x, resolution_.y, 0.0f );
+      shaders_->processing()->unlock();
+    }
 
     ctx_.fboMain_->prepare( 0, { 0, 1 } );
     ctx_.fboMain_->begin();

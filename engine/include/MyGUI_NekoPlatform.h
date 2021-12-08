@@ -109,7 +109,7 @@ namespace MyGUI {
 
   private:
     neko::Renderer* renderer_;
-    unique_ptr<neko::SmarterBuffer<MyGUI::Vertex>> buffer_;
+    unique_ptr<neko::MappedGLBuffer<MyGUI::Vertex>> buffer_;
     size_t needVertexCount_;
     size_t vertexCount_;
     gl::GLuint vao_;

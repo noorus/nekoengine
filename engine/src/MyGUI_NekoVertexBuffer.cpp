@@ -20,6 +20,7 @@ namespace MyGUI {
 
   NekoVertexBuffer::~NekoVertexBuffer()
   {
+    destroy();
   }
 
   void NekoVertexBuffer::setVertexCount( size_t count )
@@ -36,8 +37,7 @@ namespace MyGUI {
   {
     if ( needVertexCount_ > vertexCount_ || vertexCount_ == 0 )
       resize();
-    buffer_->lock();
-    return buffer_->buffer().data();
+    return buffer_->lock().data();
   }
 
   void NekoVertexBuffer::unlock()
@@ -48,6 +48,7 @@ namespace MyGUI {
 
   void NekoVertexBuffer::draw( int count )
   {
+    assert( vao_ );
     glBindVertexArray( vao_ );
     auto& pipeline = renderer_->shaders().usePipeline( "gui" );
     pipeline.setUniform( "tex", 0 );
@@ -58,7 +59,7 @@ namespace MyGUI {
 
   void NekoVertexBuffer::create()
   {
-    buffer_ = make_unique<neko::SmarterBuffer<MyGUI::Vertex>>( vertexCount_ );
+    buffer_ = make_unique<neko::MappedGLBuffer<MyGUI::Vertex>>( vertexCount_ );
     glCreateVertexArrays( 1, &vao_ );
     neko::AttribWriter attribs;
     attribs.add( GL_FLOAT, 3 ); // vec3 position
@@ -70,7 +71,8 @@ namespace MyGUI {
 
   void NekoVertexBuffer::destroy()
   {
-    glDeleteVertexArrays( 1, &vao_ );
+    if ( vao_ )
+      glDeleteVertexArrays( 1, &vao_ );
     buffer_.reset();
   }
 

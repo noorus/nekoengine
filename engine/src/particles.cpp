@@ -18,7 +18,7 @@ namespace neko {
   SakuraSystem::SakuraSystem( const aabb& box ): Base(), box_( box )
   {
     resetSystem();
-    boxviz_ = make_unique<LineRenderBuffer>();
+    boxviz_ = make_unique<LineRenderBuffer<24>>();
   }
 
   void SakuraSystem::resetParticle( size_t index )
@@ -59,13 +59,14 @@ namespace neko {
   void SakuraSystem::draw( shaders::Shaders& shaders, const Material& mat )
   {
     Base::draw( shaders, mat );
-    boxviz_->buffer().lock();
-    auto verts = boxviz_->buffer().buffer().data();
+    auto verts = boxviz_->buffer().lock();
     const auto color = vec4( 0.0f, 1.0f, 0.0f, 1.0f );
     const auto mi = box_.min();
     const auto ma = box_.max();
+
     for ( size_t i = 0; i < 24; ++i )
       verts[i].color = color;
+
     size_t i = 0;
     verts[i++].pos = vec3( mi.x, mi.y, mi.z ); // mi,mi,mi
     verts[i++].pos = vec3( mi.x, mi.y, ma.z ); // to mi,mi,ma

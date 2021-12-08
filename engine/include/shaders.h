@@ -159,8 +159,8 @@ namespace neko {
       ProgramVector programs_;
       PipelineMap pipelines_;
       map<utf8String, utf8String> includes_;
-      unique_ptr<PersistentBuffer<neko::uniforms::World>> world_;
-      unique_ptr<PersistentBuffer<neko::uniforms::Processing>> processing_;
+      unique_ptr<MappedGLBuffer<neko::uniforms::World>> world_;
+      unique_ptr<MappedGLBuffer<neko::uniforms::Processing>> processing_;
       void dumpLog( const GLuint& target, const bool isProgram );
       void loadInclude( utf8String filename );
       void compileShader( Shader& shader, const string_view source );
@@ -169,8 +169,8 @@ namespace neko {
       void buildSeparableProgram( const utf8String& name, const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program, const vector<utf8String>& uniforms );
     public:
       Shaders( ConsolePtr console );
-      inline neko::uniforms::World* world() { return world_->buffer().data(); }
-      inline neko::uniforms::Processing* processing() { return processing_->buffer().data(); }
+      inline unique_ptr<MappedGLBuffer<neko::uniforms::World>>& world() { return world_; }
+      inline unique_ptr<MappedGLBuffer<neko::uniforms::Processing>>& processing() { return processing_; }
       void initialize();
       void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );
       void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );

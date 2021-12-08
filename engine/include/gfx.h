@@ -43,7 +43,9 @@ namespace neko {
     MessagingPtr messaging_;
     DirectorPtr director_;
     GfxInputPtr input_;
+#ifndef NEKO_NO_GUI
     GUIPtr gui_;
+#endif
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;

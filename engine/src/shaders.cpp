@@ -50,8 +50,8 @@ namespace neko {
       rootFilePath_ = platform::getCurrentDirectory();
       rootFilePath_.append( c_shadersBaseDirectory );
 
-      world_ = make_unique<PersistentBuffer<neko::uniforms::World>>();
-      processing_ = make_unique<PersistentBuffer<neko::uniforms::Processing>>();
+      world_ = make_unique<MappedGLBuffer<neko::uniforms::World>>();
+      processing_ = make_unique<MappedGLBuffer<neko::uniforms::Processing>>();
 
       // Includes
       loadInclude( "inc.buffers.glsl" );
@@ -64,10 +64,10 @@ namespace neko {
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
       createSimplePipeline( "dbg_line", "dbg_line.vert", "dbg_line.frag", { "model" } );
       createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
-      createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "gamma", "tex" } );
+      createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "tex" } );
       createSimplePipeline( "particle_world", "particle_world.vert", "particle_world.geom", "particle.frag", { "model", "tex" } );
       createSimplePipeline( "particle_billboard", "particle_billboard.vert", "particle_billboard.geom", "particle.frag", { "model", "tex" } );
-      createSimplePipeline( "mat_skybox", "mat_skybox.vert", "mat_skybox.frag", { "model", "gamma", "exposure", "tex" } );
+      createSimplePipeline( "mat_skybox", "mat_skybox.vert", "mat_skybox.frag", { "model", "tex" } );
       createSimplePipeline( "mat_screentone", "mat_screentone.vert", "mat_screentone.frag", { "model" } );
       createSimplePipeline( "text2d", "text_2d.vert", "text.frag", { "model", "tex" } );
       createSimplePipeline( "text3d", "text_3d.vert", "text.frag", { "model", "tex" } );

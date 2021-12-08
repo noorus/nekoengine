@@ -18,8 +18,8 @@ namespace neko {
   using GLGraphicsFormat = gl::GLenum;
   using GLWrapMode = gl::GLenum;
 
-  //! Packed structs we use with OpenGL
 #pragma pack( push, 1 )
+
   struct Vertex2D
   {
     static const size_t element_count = 4;
@@ -28,6 +28,7 @@ namespace neko {
     Vertex2D(): x( 0.0f ), y( 0.0f ), s( 0.0f ), t( 0.0f ) {}
     Vertex2D( float x_, float y_, float s_, float t_ ): x( x_ ), y( y_ ), s( s_ ), t( t_ ) {}
   };
+
   struct Vertex3D
   {
     static const size_t element_count = 19;
@@ -43,6 +44,23 @@ namespace neko {
     Vertex3D( vec3 position_, vec3 normal_, vec2 texcoord_, vec4 color_ ):
       position( move( position_ ) ), normal( move( normal_ ) ), texcoord( move( texcoord_ ) ), color( move( color_ ) ), tangent{ 0.0f }, bitangent{ 0.0f } {}
   };
+
+  struct VertexPointParticle
+  {
+    vec3 pos;
+    glm::f32quat orient;
+    vec3 size;
+    vec4 color;
+  };
+
+  struct VertexLine
+  {
+    vec3 pos;
+    vec4 color;
+    VertexLine( const vec3& p, const vec4& c )
+        : pos( p ), color( c ) {}
+  };
+
   struct PixelRGBA
   {
     uint8_t r, g, b, a;
@@ -73,7 +91,7 @@ namespace neko {
     gl::GLenum uploadedFormat_ = gl::GLenum::GL_NONE;
     ImageData() {}
     // move constructor
-    ImageData( ImageData&& rhs )
+    ImageData( ImageData&& rhs ) noexcept
     {
       width_ = rhs.width_;
       height_ = rhs.height_;
