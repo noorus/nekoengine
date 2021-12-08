@@ -52,12 +52,12 @@ namespace neko {
     vec3 rotationInput_; //!< Input accumulator for rotation
     vec3 movementInput_; //!< Input accumulator for movement
     quat rotation_; //!< Rotation velocity
-    quat mClampRotation; //!< Rotation for changed clamp variables
-    Real mClampRotProgress; //!< Slerp Progress
+    quat clampRotation_; //!< Rotation for changed clamp variables
+    Real rotationProgress_; //!< Slerp Progress
     bool clamp_;
     CameraValueState zoom_;
-    Real mRotDeceleration; //!< Rotation deceleration constant
-    Real mSensitivity; //!< Rotation sensitivity
+    Real deceleration_; //!< Rotation deceleration constant
+    Real sensitivity_; //!< Rotation sensitivity
     Real distanceMin_; //!< Minimum distance to target
     Real distanceMax_; //!< Maximum distance to target
     Radians clampTop_; //!< Minimum camera angle to Y axis
@@ -70,7 +70,7 @@ namespace neko {
     virtual void applyInputZoom( int zoom );
     void update( GameTime delta, GameTime time ) override;
     virtual const vec3& getDirection() const noexcept { return direction_; }
-    virtual Real getSensitivity() { return mSensitivity; }
+    virtual Real getSensitivity() { return sensitivity_; }
     virtual Real getMinDistance() { return distanceMin_; }
     virtual Real getMaxDistance() { return distanceMax_; }
     virtual Radians getClampTop() { return clampTop_; }

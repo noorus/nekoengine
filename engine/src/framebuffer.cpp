@@ -63,7 +63,6 @@ namespace neko {
 
     if ( depth_ )
       depthBuffer_ = make_shared<Texture>( renderer_, width_, height_, c_depthFormat, nullptr, Texture::ClampEdge, Texture::Nearest, multisamples_ );
-      //depthBuffer_ = make_shared<Renderbuffer>( renderer_, width_, height_, c_depthFormat, multisamples_ );
 
     assert( colorBuffers_.size() < 32 );
     array<GLenum, 32> drawBuffers;
@@ -77,7 +76,6 @@ namespace neko {
 
     if ( depth_ )
       glNamedFramebufferTexture( handle_, GL_DEPTH_ATTACHMENT, depthBuffer_->handle(), 0 );
-      //glNamedFramebufferRenderbuffer( handle_, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_->handle() );
   }
 
   void Framebuffer::blitColorTo( size_t sourceIndex, size_t destIndex, Framebuffer& target )
