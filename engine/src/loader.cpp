@@ -157,7 +157,7 @@ namespace neko {
               layer.image_.width_ = width;
               layer.image_.height_ = height;
               layer.image_.format_ = PixFmtColorRGBA8;
-              layer.image_.data_.reserve( rawData.size() );
+              layer.image_.data_.resize( rawData.size() );
               // flip rows
               for ( size_t i = 0; i < height; ++i )
               {
