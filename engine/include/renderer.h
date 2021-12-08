@@ -175,7 +175,14 @@ namespace neko {
     MaterialManagerPtr materials_;
     DirectorPtr director_;
     vec2 resolution_;
-    unique_ptr<Framebuffer> fboMain_;
+    struct DrawCtx
+    {
+      unique_ptr<Framebuffer> fboMain_;
+      inline bool ready() const throw( )
+      {
+        return ( fboMain_ && fboMain_->available() );
+      }
+    } ctx_;
     struct UserData
     {
       utf8String name_;

@@ -24,6 +24,7 @@ namespace neko {
   NEKO_DECLARE_CONVAR( dbg_shownormals, "Whether to visualize vertex normals with lines.", false );
   NEKO_DECLARE_CONVAR( dbg_showtangents, "Whether to visualize vertex tangents with lines.", false );
   NEKO_DECLARE_CONVAR( dbg_wireframe, "Whether to render in wireframe mode.", false );
+  NEKO_DECLARE_CONVAR( dbg_showdepth, "Whether to visualize the depth buffer.", false );
   NEKO_DECLARE_CONVAR( vid_hdr, "Toggle HDR processing.", true );
   NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 2.2f );
   NEKO_DECLARE_CONVAR( vid_exposure, "Testing.", 1.0f );
@@ -258,7 +259,7 @@ namespace neko {
 
     loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
 
-    fboMain_ = make_unique<Framebuffer>( this, 2, c_bufferFormat, true, 0 );
+    ctx_.fboMain_ = make_unique<Framebuffer>( this, 2, c_bufferFormat, true, 0 );
 
     reset( width, height );
   }
@@ -266,7 +267,7 @@ namespace neko {
   void Renderer::reset( size_t width, size_t height )
   {
     resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
-    fboMain_->recreate( width, height );
+    ctx_.fboMain_->recreate( width, height );
   }
 
   void Renderer::uploadTextures()
@@ -281,6 +282,7 @@ namespace neko {
         continue;
       for ( auto& layer : mat->layers_ )
       {
+        assert( layer.hasHostCopy() );
         layer.texture_ = make_shared<Texture>( this,
           layer.image_.width_, layer.image_.height_,
           layer.image_.format_, layer.image_.data_.data(),
@@ -594,7 +596,8 @@ namespace neko {
 
   void Renderer::draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui )
   {
-    if ( !fboMain_ || !fboMain_->available() )
+    // check that the drawcontext is ready (fbo's available etc)
+    if ( !ctx_.ready() )
       return;
 
     // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
@@ -604,11 +607,11 @@ namespace neko {
     shaders_->processing()->resolution = resolution_;
     shaders_->processing()->textproj = glm::ortho( 0.0f, resolution_.x, resolution_.y, 0.0f );
 
-    fboMain_->prepare( 0, { 0, 1 } );
-    fboMain_->begin();
+    ctx_.fboMain_->prepare( 0, { 0, 1 } );
+    ctx_.fboMain_->begin();
     implClearAndPrepare(); // 1 - clear the main fbo
     sceneDraw( time, delta, camera );
-    fboMain_->end();
+    ctx_.fboMain_->end();
 
     implClearAndPrepare(); // 2 - clear the window
 
@@ -624,18 +627,32 @@ namespace neko {
 
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
+    // Early out - if dbg_showdepth is enabled, just show the main depth buffer
+    if ( g_CVar_dbg_showdepth.as_b() )
+    {
+      setGLDrawState( false, false, true );
+      auto& pipeline = shaders_->usePipeline( "dbg_depthvis2d" );
+      pipeline.setUniform( "tex", 0 );
+      GLuint handle = ctx_.fboMain_->depth()->handle();
+      glBindTextures( 0, 1, &handle );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+      return;
+    }
+
+    // Draw the main FBO, including HDR mergedown with tonemapping
     {
       setGLDrawState( false, false, true );
       auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
-      pipeline.setUniform( "gamma", g_CVar_vid_gamma.as_f() );
-      pipeline.setUniform( "exposure", g_CVar_vid_exposure.as_f() );
-      pipeline.setUniform( "texMain", 0 );
-      const GLuint hndl = fboMain_->texture( 0 )->handle();
+      pipeline.setUniform( "tex", 0 );
+      const GLuint hndl = ctx_.fboMain_->texture( 0 )->handle();
       glBindTextures( 0, 1, &hndl );
       builtin_.screenQuad_->begin();
       builtin_.screenQuad_->draw();
     }
 
+    // below here be debug shit
+    #if 0
     if ( userData_.image_ && userData_.image_->uploaded() )
     {
       setGLDrawState( false, false, true );
@@ -646,6 +663,7 @@ namespace neko {
       builtin_.screenQuad_->begin();
       builtin_.screenQuad_->draw();
     }
+    #endif
 
     {
       if ( !g_text )
@@ -684,7 +702,7 @@ namespace neko {
     g_sakura.reset();
     g_text.reset();
 
-    fboMain_.reset();
+    ctx_.fboMain_.reset();
 
 #ifndef NEKO_NO_SCRIPTING
     models_->teardown();

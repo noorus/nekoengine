@@ -71,8 +71,9 @@ namespace neko {
       createSimplePipeline( "mat_screentone", "mat_screentone.vert", "mat_screentone.frag", { "model" } );
       createSimplePipeline( "text2d", "text_2d.vert", "text.frag", { "model", "tex" } );
       createSimplePipeline( "text3d", "text_3d.vert", "text.frag", { "model", "tex" } );
-      createSimplePipeline( "mainframebuf2d", "passthrough2d.vert", "mainframebuf2d.frag", { "exposure", "gamma", "texMain" } );
+      createSimplePipeline( "mainframebuf2d", "passthrough2d.vert", "mainframebuf2d.frag", { "tex" } );
       createSimplePipeline( "passthrough2d", "passthrough2d.vert", "passthrough2d.frag", { "tex" } );
+      createSimplePipeline( "dbg_depthvis2d", "passthrough2d.vert", "dbg_depthvis2d.frag", { "tex" } );
     }
 
     // Shader

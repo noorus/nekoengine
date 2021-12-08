@@ -60,7 +60,8 @@ namespace neko {
     PixFmtDepth16,
     PixFmtDepth24Stencil8,
     PixFmtColorR8,
-    PixFmtColorRG8
+    PixFmtColorRG8,
+    PixFmtColorR16f
   };
 
   struct ImageData: public nocopy

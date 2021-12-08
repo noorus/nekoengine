@@ -171,6 +171,15 @@ namespace neko {
   using quaternion = glm::fquat;
 #endif
 
+  constexpr vec4 rgba( int r, int g, int b, double a )
+  {
+    return vec4(
+      static_cast<Real>( r ) / 255.0f,
+      static_cast<Real>( g ) / 255.0f,
+      static_cast<Real>( b ) / 255.0f,
+      static_cast<Real>( a ) );
+  }
+
   using quat = quaternion;
   constexpr quaternion quatIdentity = quaternion( numbers::one, numbers::zero, numbers::zero, numbers::zero );
   constexpr vec3 vec3UnitX = vec3( numbers::one, numbers::zero, numbers::zero );

@@ -19,9 +19,12 @@ namespace neko {
     inline const bool uploaded() const throw() { return ( texture_.get() != nullptr ); }
     MaterialLayer() {}
     // move constructor
-    MaterialLayer( MaterialLayer&& rhs ): image_( move( rhs.image_ ) ), texture_( rhs.texture_ )
+    MaterialLayer( MaterialLayer&& rhs ) noexcept:
+    image_( move( rhs.image_ ) ), texture_( rhs.texture_ )
     {
     }
+    inline size_t width() const { return image_.width_; }
+    inline size_t height() const { return image_.height_; }
   };
 
   using MaterialLayers = vector<MaterialLayer>;
@@ -51,6 +54,11 @@ namespace neko {
     {
       assert( index < layers_.size() && layers_[index].uploaded() );
       return layers_[index].texture_->handle();
+    }
+    inline const MaterialLayer& layer( size_t index ) const
+    {
+      assert( index < layers_.size() && layers_[index].uploaded() );
+      return layers_[index];
     }
   };
 

@@ -21,8 +21,8 @@ namespace neko {
     GLuint handle_; //!< Internal GL handle.
     Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
     vector<TexturePtr> colorBuffers_;
-    RenderbufferPtr depthBuffer_;
-    // TexturePtr depthBuffer_;
+    //RenderbufferPtr depthBuffer_;
+    TexturePtr depthBuffer_;
     size_t colorbufcount_;
     int multisamples_;
     vec4 clearColor_;
@@ -43,8 +43,8 @@ namespace neko {
     void blitColorTo( size_t sourceIndex, size_t destIndex, Framebuffer& target );
     inline vector<TexturePtr>& textures() { return colorBuffers_; }
     inline TexturePtr texture( size_t index ) { return colorBuffers_.at( index ); }
-    inline RenderbufferPtr depth() { return depthBuffer_; }
-    // inline TexturePtr depth() { return depthBuffer_; }
+    // inline RenderbufferPtr depth() { return depthBuffer_; }
+    inline TexturePtr depth() { return depthBuffer_; }
     bool available() const;
     ~Framebuffer();
   };

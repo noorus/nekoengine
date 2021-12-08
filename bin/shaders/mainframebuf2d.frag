@@ -8,17 +8,14 @@ in VertexData {
 
 layout ( location = 0 ) out vec4 out_color;
 
-uniform sampler2D texMain;
-
-uniform float gamma;
-uniform float exposure;
+uniform sampler2D tex;
 
 #define COLORUTILS_TONEMAPPING
 #include "inc.colorutils.glsl"
 
 void main()
 {
-  vec3 hdrcolor = texture( texMain, vs_out.texcoord ).rgb;
+  vec3 hdrcolor = texture( tex, vs_out.texcoord ).rgb;
 
   vec3 result = tonemap_linear( hdrcolor );
 
