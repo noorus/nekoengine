@@ -3,18 +3,17 @@
 #include "font.h"
 #include "neko_exception.h"
 #include "console.h"
+#include "lodepng.h"
 #include "renderer.h"
 
 namespace neko {
 
     constexpr int c_dpi = 72;
 
-    Font::Font( FontManagerPtr manager )
-        :
+    Font::Font( FontManagerPtr manager ):
       manager_( move( manager ) ), face_( nullptr ),
-      hinting_( true ), filtering_( true ), kerning_( true ),
       ascender_( 0.0f ), descender_( 0.0f ), size_( 0.0f ),
-      outline_thickness_( 0.0f ), padding_( 0 ),
+      outline_thickness_( 0.0f ),
       rendermode_( FontRenderMode::Normal ),
       lcd_weights{ 0x10, 0x40, 0x70, 0x40, 0x10 }
     {
@@ -53,18 +52,17 @@ namespace neko {
         face_->num_charmaps,
         ( face_->face_flags & FT_FACE_FLAG_SCALABLE ) ? "yes" : "no" );
 
-      //forceUCS2Charmap( font->face_ );
+      forceUCS2Charmap();
       err = FT_Select_Charmap( face_, FT_ENCODING_UNICODE );
       if ( err )
         NEKO_FREETYPE_EXCEPT( "FreeType font charmap selection failed", err );
 
-
-      err = FT_Set_Char_Size( face_, 0, math::iround( size_ * 64.0f ), resolution_ * c_dpi, c_dpi );
+      err = FT_Set_Char_Size( face_, 0, math::iround( size_ * 64.0f ), c_dpi, c_dpi );
       if ( err )
         NEKO_FREETYPE_EXCEPT( "FreeType font character point size setting failed", err );
 
       FT_Matrix matrix = {
-        (int)( ( 1.0 / static_cast<double>( resolution_ ) ) * 0x10000L ),
+        (int)( ( 1.0 ) * 0x10000L ),
         (int)( ( 0.0 ) * 0x10000L ),
         (int)( ( 0.0 ) * 0x10000L ),
         (int)( ( 1.0 ) * 0x10000L ) };
@@ -101,11 +99,11 @@ namespace neko {
 
     void Font::postLoad()
     {
-      underline_position = math::round( face_->underline_position / (Real)( resolution_ * resolution_ ) * size_ );
+      underline_position = math::round( face_->underline_position * size_ );
       if ( underline_position > -2.0f )
         underline_position = -2.0f;
 
-      underline_thickness = math::round( face_->underline_thickness / (Real)( resolution_ * resolution_ ) * size_ );
+      underline_thickness = math::round( face_->underline_thickness * size_ );
       if ( underline_thickness < 1.0f )
         underline_thickness = 1.0f;
 
@@ -113,7 +111,7 @@ namespace neko {
       ascender_ = static_cast<Real>( metrics.ascender >> 6 );
       descender_ = static_cast<Real>( metrics.descender >> 6 );
       size_ = static_cast<Real>( metrics.height >> 6 );
-      linegap_ = ( size_ - ascender_ + descender_ );
+      linegap_ = 0.0f;
     }
 
     void Font::initEmptyGlyph()
@@ -144,21 +142,20 @@ namespace neko {
       glyphs_[0] = move( glyph );
     }
 
-    void Font::loadGlyph( Codepoint codepoint )
+    void Font::loadGlyph( Codepoint codepoint, bool hinting )
     {
       auto ftlib = manager_->library();
-      auto glyphIndex = FT_Get_Char_Index( face_, (FT_ULong)codepoint );
+      auto glyphIndex = codepoint; // FT_Get_Char_Index( face_, (FT_ULong)codepoint );
 
       FT_Int32 flags = 0;
       flags |= ( ( rendermode_ != FontRenderMode::Normal && rendermode_ != FontRenderMode::SDF ) ? FT_LOAD_NO_BITMAP : FT_LOAD_RENDER );
-      flags |= ( hinting_ ? FT_LOAD_FORCE_AUTOHINT : ( FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT ) );
+      flags |= ( hinting ? FT_LOAD_FORCE_AUTOHINT : ( FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT ) );
 
       if ( atlas_->depth_ == 3 )
       {
         FT_Library_SetLcdFilter( ftlib, FT_LCD_FILTER_LIGHT );
         flags |= FT_LOAD_TARGET_LCD;
-        if ( filtering_ )
-          FT_Library_SetLcdFilterWeights( ftlib, lcd_weights );
+        FT_Library_SetLcdFilterWeights( ftlib, lcd_weights );
       }
 
       auto err = FT_Load_Glyph( face_, glyphIndex, flags );
@@ -183,7 +180,7 @@ namespace neko {
         if ( err )
           NEKO_FREETYPE_EXCEPT( "FreeType stroker creation failed", err );
 
-        FT_Stroker_Set( stroker, (int)( outline_thickness_ * resolution_ ), FT_STROKER_LINECAP_ROUND, FT_STROKER_LINEJOIN_ROUND, 0 );
+        FT_Stroker_Set( stroker, (int)( outline_thickness_ ), FT_STROKER_LINECAP_ROUND, FT_STROKER_LINEJOIN_ROUND, 0 );
 
         err = FT_Get_Glyph( face_->glyph, &ftglyph );
         if ( err )
@@ -222,15 +219,12 @@ namespace neko {
         padding.y = 1;
       }
 
-      if ( padding_ != 0 )
-        padding += padding_;
-
       size_t src_w = bitmap.width / atlas_->depth_;
       size_t src_h = bitmap.rows;
       size_t tgt_w = src_w + padding.x + padding.z;
       size_t tgt_h = src_h + padding.y + padding.w;
 
-      auto region = atlas_->getRegion( tgt_w + 4, tgt_h + 4 );
+      auto region = atlas_->getRegion( tgt_w + 1, tgt_h + 1 );
       if ( region.x < 0 )
         NEKO_EXCEPT( "Font face texture atlas is full" );
 
@@ -260,23 +254,16 @@ namespace neko {
       glyph.width = tgt_w;
       glyph.height = tgt_h;
       glyph.rendermode = rendermode_;
-      glyph.offset = glyphCoords;
+      glyph.bearing = glyphCoords;
       glyph.coords[0].x = x / (Real)atlas_->width_;
       glyph.coords[0].y = y / (Real)atlas_->height_;
       glyph.coords[1].x = ( x + glyph.width ) / (Real)atlas_->width_;
       glyph.coords[1].y = ( y + glyph.height ) / (Real)atlas_->height_;
 
-      FT_Load_Glyph( face_, glyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_HINTING );
-      slot = face_->glyph;
-      glyph.advance.x = (Real)slot->advance.x / static_cast<Real>( resolution_ );
-      glyph.advance.y = (Real)slot->advance.y / static_cast<Real>( resolution_ );
-
       glyphs_[codepoint] = move( glyph );
 
       if ( ftglyph )
         FT_Done_Glyph( ftglyph );
-
-      generateKerning();
     }
 
     TexturedGlyph* Font::getGlyph( Codepoint codepoint )
@@ -295,31 +282,6 @@ namespace neko {
       return nullptr;
     }
 
-    void Font::generateKerning()
-    {
-      for ( auto& glyphp : glyphs_ )
-      {
-        if ( glyphp.first == 0 )
-          continue;
-
-        auto& glyph = glyphp.second;
-        auto index = FT_Get_Char_Index( face_, glyph.codepoint );
-        glyph.kerning.clear();
-
-        for ( auto& other : glyphs_ )
-        {
-          if ( other.first == 0 )
-            continue;
-          const auto& prev_glyph = other.second;
-          const auto prev_index = FT_Get_Char_Index( face_, prev_glyph.codepoint );
-          FT_Vector kerning;
-          FT_Get_Kerning( face_, prev_index, index, FT_KERNING_UNFITTED, &kerning );
-          if ( kerning.x )
-            glyph.kerning[prev_glyph.codepoint] = ( kerning.x / (Real)( static_cast<Real>( resolution_ ) * static_cast<Real>( resolution_ ) ) );
-        }
-      }
-    }
-
     bool Font::use( Renderer* renderer, GLuint textureUnit )
     {
       if ( !material_ )
@@ -330,10 +292,12 @@ namespace neko {
           matname, atlas_->width_, atlas_->height_,
           PixFmtColorR8, atlas_->data_.data(),
           Texture::ClampBorder, Texture::Nearest );
-        /*platform::FileWriter writer( "debug.png" );
+#if 0
+        platform::FileWriter writer( "debug.png" );
         vector<uint8_t> buffer;
-        lodepng::encode( buffer, font_->impl_->atlas_->data_, font_->impl_->atlas_->width_, font_->impl_->atlas_->height_, LCT_GREY, 8 );
-        writer.writeBlob( buffer.data(), buffer.size() );*/
+        lodepng::encode( buffer, atlas_->data_, atlas_->width_, atlas_->height_, LCT_GREY, 8 );
+        writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) );
+#endif
       }
       if ( material_ )
       {

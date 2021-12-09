@@ -115,6 +115,15 @@ namespace neko {
       return NEKO_MATH_FUNC_CEIL( value );
     }
 
+    //! \fn inline int iceil( Real value )
+    //! \brief Ceilings the given value.
+    //! \param value The value.
+    //! \returns Given value rounded up.
+    inline int iceil( Real value )
+    {
+      return static_cast<int>( NEKO_MATH_FUNC_CEIL( value ) );
+    }
+
     //! \fn inline Real sin( Real value )
     //! \brief Sine.
     //! \param value Value.

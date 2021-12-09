@@ -21,7 +21,7 @@ namespace neko {
     }
   };
 
-      enum class FontRenderMode
+  enum class FontRenderMode
   {
     Normal,
     OutlineEdge,
@@ -32,24 +32,15 @@ namespace neko {
 
   struct TexturedGlyph : public Glyph
   {
-    vec2i offset;
-    vec2 advance;
+    vec2i bearing;
     vec2 coords[2];
-    map<Codepoint, Real> kerning;
     FontRenderMode rendermode;
     Real outline_thickness;
-    TexturedGlyph()
-        : rendermode( FontRenderMode::Normal ), outline_thickness( 0.0f ),
-          offset( 0, 0 ), advance( 0.0f, 0.0f )
+    TexturedGlyph():
+    rendermode( FontRenderMode::Normal ), outline_thickness( 0.0f ), bearing( 0, 0 )
     {
       coords[0] = vec2( 0.0f );
       coords[1] = vec2( 0.0f );
-    }
-    inline Real getKerning( Codepoint codepoint )
-    {
-      if ( kerning.find( codepoint ) != kerning.end() )
-        return kerning[codepoint];
-      return 0.0f;
     }
   };
 
@@ -71,7 +62,6 @@ namespace neko {
   private:
     void postLoad();
     void initEmptyGlyph();
-    void generateKerning();
     void forceUCS2Charmap();
 
   protected:
@@ -83,17 +73,12 @@ namespace neko {
     Real size_;
     Real ascender_;
     Real descender_;
-    int resolution_ = 100;
     FontRenderMode rendermode_;
     uint8_t lcd_weights[5];
-    bool hinting_;
-    bool filtering_;
-    bool kerning_;
     Real outline_thickness_;
     Real linegap_;
     Real underline_position;
     Real underline_thickness;
-    int padding_;
     unique_ptr<utils::DumbBuffer> data_;
     MaterialPtr material_;
     bool loaded_ = false;
@@ -101,7 +86,7 @@ namespace neko {
   public:
     Font( FontManagerPtr manager );
     ~Font();
-    void loadGlyph( Codepoint codepoint );
+    void loadGlyph( Codepoint codepoint, bool hinting = true );
     TexturedGlyph* getGlyph( Codepoint codepoint );
     void loadFace( vector<uint8_t>& source, Real pointSize, vec3i atlasSize );
     bool use( Renderer* renderer, GLuint textureUnit );

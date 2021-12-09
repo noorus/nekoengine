@@ -189,7 +189,7 @@
     <ClCompile Include="src\js_math.cpp">
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
-    <ClCompile Include="src\font_textured.cpp">
+    <ClCompile Include="src\font.cpp">
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
     <ClCompile Include="src\staticmesh.cpp">
