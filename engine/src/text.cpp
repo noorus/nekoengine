@@ -10,10 +10,12 @@ namespace neko {
   Text::Text( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontPtr font ): dirty_( false ), font_( font )
   {
     mesh_ = meshmgr->createDynamic( gl::GL_TRIANGLES, VBO_3D, true, false );
+    hbbuf_ = hb_buffer_create();
   }
 
   Text::~Text()
   {
+    hb_buffer_destroy( hbbuf_ );
   }
 
   void Text::set( const utf8String& text, vec2 pen )
@@ -23,6 +25,17 @@ namespace neko {
     dirty_ = true;
     regenerate();
   }
+
+  /* void Text::hbgenerate()
+  {
+    hb_buffer_reset( hbbuf_ );
+    hb_buffer_set_direction( hbbuf_, direction_ );
+    hb_buffer_set_script( hbbuf_, script_ );
+    hb_buffer_set_language( hbbuf_, hb_language_from_string( language_.c_str(), language_.size() ) );
+
+    hb_buffer_add_utf8( hbbuf_, text_.c_str(), text_.size(), 0, text_.size() );
+    hb_shape( font_->hbfnt_, 0, 0 );
+  }*/
 
   void Text::regenerate()
   {
@@ -46,7 +59,7 @@ namespace neko {
         continue;
       }
       auto codepoint = utils::utf8_to_utf32( &text_[i] );
-      auto glyph = font_->glyph( codepoint );
+      auto glyph = font_->getGlyph( codepoint );
       Real kerning = ( previousCodepoint > 0 ? glyph->getKerning( previousCodepoint ) : 0.0f );
       previousCodepoint = codepoint;
       position.x -= kerning;

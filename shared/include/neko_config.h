@@ -40,4 +40,6 @@
 
 // Intel graphics drivers shit the bed every time when freeing stuff on exit.
 // Set this to force an ExitProcess() instead when debugging on an Intel chip in order to not waste time.
-#undef INTEL_SUCKS
+// EDIT: This is now a project-level preprocessor directive, don't set or unset it here.
+// Use the ShittyDebug build profile instead.
+// #define INTEL_SUCKS

@@ -62,6 +62,15 @@ namespace neko {
       return NEKO_MATH_FUNC_ROUND( value );
     }
 
+    //! \fn inline int iround( Real value )
+    //! \brief Rounds to the nearest non-decimal value, returning an integer.
+    //! \param value The value.
+    //! \returns Given value rounded to nearest integer.
+    inline int iround( Real value )
+    {
+      return static_cast<int>( NEKO_MATH_FUNC_ROUND( value ) );
+    }
+
     //! \fn inline Real sqrt( Real value )
     //! \brief Square root of given floating point value.
     //! \param value A value.

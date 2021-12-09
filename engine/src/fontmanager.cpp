@@ -70,7 +70,7 @@ namespace neko {
   {
     ScopedRWLock lock( &faceLock_ );
 
-    auto font = make_shared<Font>( this );
+    auto font = make_shared<Font>( shared_from_this() );
     fonts_.push_back( font );
 
     return move( font );
@@ -84,19 +84,17 @@ namespace neko {
 
     assert( !font->loaded_ );
 
-    font->impl_ = make_unique<fonts::GraphicalFont>( shared_from_this(),
-      specs.atlasSize_.x, specs.atlasSize_.y, atlasDepth );
-    font->impl_->loadFace( buffer, specs.pointSize_ );
+    font->loadFace( buffer, specs.pointSize_, vec3i( specs.atlasSize_, atlasDepth ) );
     font->loaded_ = true;
   }
 
   void FontManager::unloadFont( Font* font )
   {
-    if ( font && font->impl_ )
+    /* if ( font && font->impl_ )
     {
       font->impl_.reset();
       font->loaded_ = false;
-    }
+    }*/
   }
 
   void FontManager::shutdown()
