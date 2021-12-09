@@ -117,7 +117,7 @@ namespace neko {
 
     UVersionInfo icuVersion;
     u_getVersion( icuVersion );
-    console_->printf( Console::srcEngine, "Using ICU version %d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
+    console_->printf( Console::srcEngine, "Using ICU v%d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
 
     tanklib_.load( this );
     tanklib_.engine_->initialize( c_discordAppId, c_steamAppId );

@@ -144,8 +144,8 @@
 #include FT_TRUETYPE_TAGS_H
 
 // Harfbuzz
-#include <harfbuzz/hb.h>
-#include <harfbuzz/hb-ft.h>
+#include <hb.h>
+#include <hb-ft.h>
 
 // Nil
 #include <nil.h>

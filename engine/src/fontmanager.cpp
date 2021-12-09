@@ -12,7 +12,8 @@ namespace neko {
   void* ftMemoryReallocate( FT_Memory memory, long currentSize, long newSize, void* block );
   void ftMemoryFree( FT_Memory memory, void* block );
 
-  FontManager::FontManager( EnginePtr engine ): engine_( move( engine ) ), freeType_( nullptr ), ftVersion_({ 0 })
+  FontManager::FontManager( EnginePtr engine ):
+  engine_( move( engine ) ), freeType_( nullptr ), ftVersion_({ 0 }), hbVersion_({ 0 })
   {
     ftMemAllocator_.user = nullptr;
     ftMemAllocator_.alloc = ftMemoryAllocate;
@@ -30,10 +31,14 @@ namespace neko {
     FT_Add_Default_Modules( freeType_ );
 
     FT_Library_Version( freeType_, &ftVersion_.major, &ftVersion_.minor, &ftVersion_.patch );
-    engine_->console()->printf( Console::srcGfx, "FreeType version %i.%i.%i", ftVersion_.major, ftVersion_.minor, ftVersion_.patch );
+    hb_version( &hbVersion_.major, &hbVersion_.minor, &hbVersion_.patch );
+    engine_->console()->printf( Console::srcGfx,
+      "Using FreeType v%i.%i.%i, HarfBuzz v%i.%i.%i",
+      ftVersion_.major, ftVersion_.minor, ftVersion_.patch,
+      hbVersion_.major, hbVersion_.minor, hbVersion_.patch );
 
     ftVersion_.trueTypeSupport = FT_Get_TrueType_Engine_Type( freeType_ );
-    engine_->console()->printf( Console::srcGfx, "TrueType engine support: %s",
+    engine_->console()->printf( Console::srcGfx, "TrueType engine: %s",
       ftVersion_.trueTypeSupport == FT_TRUETYPE_ENGINE_TYPE_PATENTED ? "full"
       : ftVersion_.trueTypeSupport == FT_TRUETYPE_ENGINE_TYPE_UNPATENTED ? "partial"
       : "none" );

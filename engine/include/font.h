@@ -143,6 +143,12 @@ namespace neko {
       FT_Int patch;
       FT_TrueTypeEngineType trueTypeSupport;
     } ftVersion_;
+    struct HarfbuzzVersion
+    {
+      unsigned int major;
+      unsigned int minor;
+      unsigned int patch;
+    } hbVersion_;
     void uploadFonts();
   public:
     FontManager( EnginePtr engine );
