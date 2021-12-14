@@ -8,303 +8,136 @@
 
 namespace neko {
 
-    constexpr int c_dpi = 72;
+  void NewtypeLibrary::load( newtype::Host* host )
+  {
+    module_ = LoadLibraryW( L"newtype_d.dll" );
+    if ( !module_ )
+      NEKO_EXCEPT( "Newtype load failed" );
+    pfnNewtypeInitialize = reinterpret_cast<newtype::fnNewtypeInitialize>( GetProcAddress( module_, "newtypeInitialize" ) );
+    pfnNewtypeShutdown = reinterpret_cast<newtype::fnNewtypeShutdown>( GetProcAddress( module_, "newtypeShutdown" ) );
+    if ( !pfnNewtypeInitialize || !pfnNewtypeShutdown )
+      NEKO_EXCEPT( "Newtype export resolution failed" );
+    manager_ = pfnNewtypeInitialize( 1, host );
+    if ( !manager_ )
+      NEKO_EXCEPT( "TankEngine init failed" );
+  }
 
-    Font::Font( FontManagerPtr manager ):
-      manager_( move( manager ) ), face_( nullptr ),
-      ascender_( 0.0f ), descender_( 0.0f ), size_( 0.0f ),
-      outline_thickness_( 0.0f ),
-      rendermode_( FontRenderMode::Normal ),
-      lcd_weights{ 0x10, 0x40, 0x70, 0x40, 0x10 }
+  void NewtypeLibrary::unload()
+  {
+    if ( manager_ && pfnNewtypeShutdown )
+      pfnNewtypeShutdown( manager_ );
+    if ( module_ )
+      FreeLibrary( module_ );
+  }
+
+  void* FontManager::newtypeMemoryAllocate( uint32_t size )
+  {
+    return Locator::memory().alloc( Memory::Sector::Graphics, size );
+  }
+
+  void* FontManager::newtypeMemoryReallocate( void* address, uint32_t newSize )
+  {
+    return Locator::memory().realloc( Memory::Sector::Graphics, address, newSize );
+  }
+
+  void FontManager::newtypeMemoryFree( void* address )
+  {
+    Locator::memory().free( Memory::Sector::Graphics, address );
+  }
+
+  FontManager::FontManager( EnginePtr engine ): engine_( engine )
+  {
+  }
+
+  FontManager::~FontManager()
+  {
+    //
+  }
+
+  void FontManager::initialize()
+  {
+    nt_.load( this );
+    fnt_ = nt_.mgr()->createFont();
+    vector<uint8_t> input;
+    Locator::fileSystem().openFile( R"(C:\Code\nekoengine\bin\assets\fonts\SourceHanSansJP-Bold.otf)" )->readFullVector( input );
+    nt_.mgr()->loadFont( fnt_, input, 32.0f );
+    txt_ = nt_.mgr()->createText( fnt_ );
+    txt_->pen( vec3( 100.0f, 100.0f, 0.0f ) );
+    auto content = unicodeString::fromUTF8( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class." );
+    txt_->setText( content );
+  }
+
+  void FontManager::newtypeFontTextureCreated( newtype::Font& font, newtype::Texture& texture )
+  {
+    FontData data;
+    fontdata_[font.id()] = move( data );
+  }
+
+  void FontManager::newtypeFontTextureDestroyed( newtype::Font& font, newtype::Texture& texture )
+  {
+    fontdata_.erase( font.id() );
+  }
+
+  void FontManager::prepareLogic( GameTime time )
+  {
+    //
+  }
+
+  void FontManager::prepareRender( Renderer* renderer )
+  {
+    for ( auto& font : nt_.mgr()->fonts() )
     {
-      // FT_LCD_FILTER_LIGHT   is (0x00, 0x55, 0x56, 0x55, 0x00)
-      // FT_LCD_FILTER_DEFAULT is (0x10, 0x40, 0x70, 0x40, 0x10)
+      if ( !font->loaded() || !font->dirty() )
+        continue;
+      auto& data = fontdata_[font->id()];
+      data.material_ = renderer->createTextureWithData( "fonttest",
+        font->texture().dimensions().x, font->texture().dimensions().y,
+        PixFmtColorR8, font->texture().data(),
+        Texture::ClampBorder, Texture::Nearest );
+      platform::FileWriter writer( "fonttest_atlas.png" );
+      vector<uint8_t> buffer;
+      lodepng::encode( buffer,
+        font->texture().data(),
+        static_cast<unsigned int>( font->texture().dimensions().x ),
+        static_cast<unsigned int>( font->texture().dimensions().y ),
+        LCT_GREY, 8 );
+      writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) );
+      font->markClean();
     }
-
-    void Font::loadFace( vector<uint8_t>& source, Real pointSize, vec3i atlasSize )
+    if ( txt_ )
     {
-      assert( !data_.get() );
-      assert( size_ < 1.0f );
-
-      atlas_ = make_shared<TextureAtlas>( atlasSize.x, atlasSize.y, atlasSize.z );
-
-      data_ = make_unique<utils::DumbBuffer>( Memory::Sector::Graphics, source );
-      size_ = pointSize;
-
-      auto ftlib = manager_->library();
-
-      FT_Open_Args args = { 0 };
-      args.flags = FT_OPEN_MEMORY;
-      args.memory_base = data_->data();
-      args.memory_size = (FT_Long)data_->length();
-
-      auto err = FT_Open_Face( ftlib, &args, 0, &face_ );
-      if ( err || !face_ )
+      txt_->update();
+      if ( txt_->dirty() && mesh_ )
+        mesh_.reset();
+      if ( !txt_->dirty() && !mesh_ )
       {
-        NEKO_FREETYPE_EXCEPT( "FreeType font face load failed", err );
+        mesh_ = make_unique<TextRenderBuffer>(
+          static_cast<gl::GLuint>( 512 ),
+          static_cast<gl::GLuint>( 512 ) );
+        const auto& verts = mesh_->buffer().lock();
+        const auto& indcs = mesh_->indices().lock();
+        memcpy( verts.data(), txt_->mesh().vertices_.data(), verts.size() );
+        memcpy( indcs.data(), txt_->mesh().indices_.data(), indcs.size() );
+        mesh_->buffer().unlock();
+        mesh_->indices().unlock();
       }
-
-      Locator::console().printf( Console::srcGfx,
-        "Font: %s, face %d/%d, glyphs: %d, charmaps: %d, scalable? %s",
-        face_->family_name,
-        0, face_->num_faces,
-        face_->num_glyphs,
-        face_->num_charmaps,
-        ( face_->face_flags & FT_FACE_FLAG_SCALABLE ) ? "yes" : "no" );
-
-      forceUCS2Charmap();
-      err = FT_Select_Charmap( face_, FT_ENCODING_UNICODE );
-      if ( err )
-        NEKO_FREETYPE_EXCEPT( "FreeType font charmap selection failed", err );
-
-      err = FT_Set_Char_Size( face_, 0, math::iround( size_ * 64.0f ), c_dpi, c_dpi );
-      if ( err )
-        NEKO_FREETYPE_EXCEPT( "FreeType font character point size setting failed", err );
-
-      FT_Matrix matrix = {
-        (int)( ( 1.0 ) * 0x10000L ),
-        (int)( ( 0.0 ) * 0x10000L ),
-        (int)( ( 0.0 ) * 0x10000L ),
-        (int)( ( 1.0 ) * 0x10000L ) };
-
-      FT_Set_Transform( face_, &matrix, nullptr );
-
-      hbfnt_ = hb_ft_font_create_referenced( face_ );
-
-      postLoad();
-      initEmptyGlyph();
     }
+  }
 
-    Font::~Font()
+  void FontManager::draw( Renderer* renderer )
+  {
+    if ( mesh_ && fnt_ && fnt_->loaded() && !fnt_->dirty() )
     {
-      if ( hbfnt_ )
-        hb_font_destroy( hbfnt_ );
-      else if ( face_ )
-        FT_Done_Face( face_ );
+      auto& data = fontdata_[fnt_->id()];
+      mesh_->draw( renderer->shaders(), data.material_->textureHandle( 0 ) );
     }
+  }
 
-    void Font::forceUCS2Charmap()
-    {
-      assert( face_ );
-
-      for ( auto i = 0; i < face_->num_charmaps; ++i )
-      {
-        auto charmap = face_->charmaps[i];
-        if ( ( charmap->platform_id == 0 && charmap->encoding_id == 3 )
-          || ( charmap->platform_id == 3 && charmap->encoding_id == 1 ) )
-          if ( FT_Set_Charmap( face_, charmap ) == 0 )
-            return;
-      }
-    }
-
-    void Font::postLoad()
-    {
-      underline_position = math::round( face_->underline_position * size_ );
-      if ( underline_position > -2.0f )
-        underline_position = -2.0f;
-
-      underline_thickness = math::round( face_->underline_thickness * size_ );
-      if ( underline_thickness < 1.0f )
-        underline_thickness = 1.0f;
-
-      auto metrics = face_->size->metrics;
-      ascender_ = static_cast<Real>( metrics.ascender >> 6 );
-      descender_ = static_cast<Real>( metrics.descender >> 6 );
-      size_ = static_cast<Real>( metrics.height >> 6 );
-      linegap_ = 0.0f;
-    }
-
-    void Font::initEmptyGlyph()
-    {
-      auto region = atlas_->getRegion( 5, 5 );
-      if ( region.x < 0 )
-        NEKO_EXCEPT( "Font face texture atlas is full" );
-
-#pragma warning( push )
-#pragma warning( disable: 4838 )
-      static unsigned char data[4 * 4 * 3] = {
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-      };
-#pragma warning( pop )
-
-      atlas_->setRegion( region.x, region.y, 4, 4, data, 0 );
-
-      TexturedGlyph glyph;
-      glyph.codepoint = -1;
-      glyph.coords[0].x = ( region.x + 2 ) / (Real)atlas_->width_;
-      glyph.coords[0].y = ( region.y + 2 ) / (Real)atlas_->height_;
-      glyph.coords[1].x = ( region.x + 3 ) / (Real)atlas_->width_;
-      glyph.coords[1].y = ( region.y + 3 ) / (Real)atlas_->height_;
-
-      glyphs_[0] = move( glyph );
-    }
-
-    void Font::loadGlyph( Codepoint codepoint, bool hinting )
-    {
-      auto ftlib = manager_->library();
-      auto glyphIndex = codepoint; // FT_Get_Char_Index( face_, (FT_ULong)codepoint );
-
-      FT_Int32 flags = 0;
-      flags |= ( ( rendermode_ != FontRenderMode::Normal && rendermode_ != FontRenderMode::SDF ) ? FT_LOAD_NO_BITMAP : FT_LOAD_RENDER );
-      flags |= ( hinting ? FT_LOAD_FORCE_AUTOHINT : ( FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT ) );
-
-      if ( atlas_->depth_ == 3 )
-      {
-        FT_Library_SetLcdFilter( ftlib, FT_LCD_FILTER_LIGHT );
-        flags |= FT_LOAD_TARGET_LCD;
-        FT_Library_SetLcdFilterWeights( ftlib, lcd_weights );
-      }
-
-      auto err = FT_Load_Glyph( face_, glyphIndex, flags );
-      if ( err )
-        NEKO_FREETYPE_EXCEPT( "FreeType glyph loading error", err );
-
-      FT_Glyph ftglyph = nullptr;
-      FT_GlyphSlot slot = nullptr;
-      FT_Bitmap bitmap;
-      vec2i glyphCoords;
-      if ( rendermode_ == FontRenderMode::Normal || rendermode_ == FontRenderMode::SDF )
-      {
-        slot = face_->glyph;
-        bitmap = slot->bitmap;
-        glyphCoords.x = slot->bitmap_left;
-        glyphCoords.y = slot->bitmap_top;
-      }
-      else
-      {
-        FT_Stroker stroker;
-        err = FT_Stroker_New( ftlib, &stroker );
-        if ( err )
-          NEKO_FREETYPE_EXCEPT( "FreeType stroker creation failed", err );
-
-        FT_Stroker_Set( stroker, (int)( outline_thickness_ ), FT_STROKER_LINECAP_ROUND, FT_STROKER_LINEJOIN_ROUND, 0 );
-
-        err = FT_Get_Glyph( face_->glyph, &ftglyph );
-        if ( err )
-          NEKO_FREETYPE_EXCEPT( "FreeType get glyph failed", err );
-
-        if ( rendermode_ == FontRenderMode::OutlineEdge )
-          err = FT_Glyph_Stroke( &ftglyph, stroker, 1 );
-        else if ( rendermode_ == FontRenderMode::OutlineOuter )
-          err = FT_Glyph_StrokeBorder( &ftglyph, stroker, 0, 1 );
-        else if ( rendermode_ == FontRenderMode::OutlineInner )
-          err = FT_Glyph_StrokeBorder( &ftglyph, stroker, 1, 1 );
-
-        if ( err )
-          NEKO_FREETYPE_EXCEPT( "FreeType glyph stroke failed", err );
-
-        if ( atlas_->depth_ == 1 )
-          err = FT_Glyph_To_Bitmap( &ftglyph, FT_RENDER_MODE_NORMAL, nullptr, 1 );
-        else
-          err = FT_Glyph_To_Bitmap( &ftglyph, FT_RENDER_MODE_LCD, nullptr, 1 );
-
-        if ( err )
-          NEKO_FREETYPE_EXCEPT( "FreeType glyph to bitmap failed", err );
-
-        auto bitmapGlyph = (FT_BitmapGlyph)ftglyph;
-        bitmap = bitmapGlyph->bitmap;
-        glyphCoords.x = bitmapGlyph->left;
-        glyphCoords.y = bitmapGlyph->top;
-
-        FT_Stroker_Done( stroker );
-      }
-
-      vec4i padding( 0, 0, 0, 0 );
-      if ( rendermode_ == FontRenderMode::SDF )
-      {
-        padding.x = 1;
-        padding.y = 1;
-      }
-
-      size_t src_w = bitmap.width / atlas_->depth_;
-      size_t src_h = bitmap.rows;
-      size_t tgt_w = src_w + padding.x + padding.z;
-      size_t tgt_h = src_h + padding.y + padding.w;
-
-      auto region = atlas_->getRegion( tgt_w + 1, tgt_h + 1 );
-      if ( region.x < 0 )
-        NEKO_EXCEPT( "Font face texture atlas is full" );
-
-      auto x = region.x;
-      auto y = region.y;
-
-      auto buffer = (uint8_t*)Locator::memory().alloc( Memory::Sector::Graphics, tgt_w * tgt_h * atlas_->depth_ );
-      auto dst_ptr = buffer + ( padding.y * tgt_w + padding.x ) * atlas_->depth_;
-      auto src_ptr = bitmap.buffer;
-      for ( int i = 0; i < src_h; ++i )
-      {
-        memcpy( dst_ptr, src_ptr, bitmap.width );
-        dst_ptr += tgt_w * atlas_->depth_;
-        src_ptr += bitmap.pitch;
-      }
-
-      if ( rendermode_ == FontRenderMode::SDF )
-      {
-        // TODO make_distance_mapb
-      }
-
-      atlas_->setRegion( x, y, tgt_w, tgt_h, buffer, tgt_w * atlas_->depth_ );
-      Locator::memory().free( Memory::Sector::Graphics, buffer );
-
-      TexturedGlyph glyph;
-      glyph.codepoint = codepoint;
-      glyph.width = tgt_w;
-      glyph.height = tgt_h;
-      glyph.rendermode = rendermode_;
-      glyph.bearing = glyphCoords;
-      glyph.coords[0].x = x / (Real)atlas_->width_;
-      glyph.coords[0].y = y / (Real)atlas_->height_;
-      glyph.coords[1].x = ( x + glyph.width ) / (Real)atlas_->width_;
-      glyph.coords[1].y = ( y + glyph.height ) / (Real)atlas_->height_;
-
-      glyphs_[codepoint] = move( glyph );
-
-      if ( ftglyph )
-        FT_Done_Glyph( ftglyph );
-    }
-
-    TexturedGlyph* Font::getGlyph( Codepoint codepoint )
-    {
-      {
-        const auto& glyph = glyphs_.find( codepoint );
-        if ( glyph != glyphs_.end() )
-          return &( ( *glyph ).second );
-      }
-      loadGlyph( codepoint );
-      {
-        const auto& glyph = glyphs_.find( codepoint );
-        if ( glyph != glyphs_.end() )
-          return &( ( *glyph ).second );
-      }
-      return nullptr;
-    }
-
-    bool Font::use( Renderer* renderer, GLuint textureUnit )
-    {
-      if ( !material_ )
-      {
-        char matname[128];
-        sprintf_s( matname, 128, "font/%s/%i", face_->family_name, static_cast<int>( size_ * 100.0f ) );
-        material_ = renderer->createTextureWithData(
-          matname, atlas_->width_, atlas_->height_,
-          PixFmtColorR8, atlas_->data_.data(),
-          Texture::ClampBorder, Texture::Nearest );
-#if 0
-        platform::FileWriter writer( "debug.png" );
-        vector<uint8_t> buffer;
-        lodepng::encode( buffer, atlas_->data_, atlas_->width_, atlas_->height_, LCT_GREY, 8 );
-        writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) );
-#endif
-      }
-      if ( material_ )
-      {
-        gl::glBindTextureUnit( 0, material_->layers_[0].texture_->handle() );
-        return true;
-      }
-      return false;
-    }
+  void FontManager::shutdown()
+  {
+    nt_.mgr()->unloadFont( fnt_ );
+    fontdata_.clear();
+    nt_.unload();
+  }
 
 }

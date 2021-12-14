@@ -12,23 +12,6 @@
 
 namespace neko {
 
-  class Text {
-  public:
-    DynamicMeshPtr mesh_;
-    FontPtr font_;
-    unicodeString text_;
-    vec2 pen_;
-    bool dirty_;
-    utf8String language_;
-    hb_script_t script_;
-    hb_direction_t direction_;
-    hb_buffer_t* hbbuf_;
-  public:
-    Text( ThreadedLoaderPtr loader, MeshManagerPtr meshmgr, FontPtr font );
-    void set( const utf8String& text, vec2 pen );
-    void regenerate();
-    void draw( Renderer* renderer );
-    ~Text();
-  };
+
 
 }

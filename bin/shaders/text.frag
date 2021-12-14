@@ -3,7 +3,6 @@
 #include "inc.buffers.glsl"
 
 in VertexData {
-  vec3 normal;
   vec2 texcoord;
   vec3 fragpos;
   vec4 color;

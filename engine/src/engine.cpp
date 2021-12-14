@@ -310,7 +310,7 @@ namespace neko {
 #ifndef NEKO_NO_SCRIPTING
       scripting_->preUpdate( time_ );
 #endif
-      fonts_->prepare( time_ );
+      fonts_->prepareLogic( time_ );
       //gfx_->preUpdate( time_ );
 
       if ( !paused() )

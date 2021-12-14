@@ -5,131 +5,102 @@
 #include "gfx_types.h"
 #include "textureatlas.h"
 #include "materials.h"
+#include "mesh_primitives.h"
+#include <newtype.h>
+#include "shaders.h"
 
 namespace neko {
 
-  using Codepoint = uint32_t;
+  using Font = newtype::Font;
+  using FontPtr = newtype::FontPtr;
+  using FontVector = newtype::FontVector;
 
-  struct Glyph
-  {
-    Codepoint codepoint;
-    size_t width;
-    size_t height;
-    Glyph()
-        : codepoint( -1 ), width( 0 ), height( 0 )
-    {
-    }
-  };
-
-  enum class FontRenderMode
-  {
-    Normal,
-    OutlineEdge,
-    OutlineOuter,
-    OutlineInner,
-    SDF
-  };
-
-  struct TexturedGlyph : public Glyph
-  {
-    vec2i bearing;
-    vec2 coords[2];
-    FontRenderMode rendermode;
-    Real outline_thickness;
-    TexturedGlyph():
-    rendermode( FontRenderMode::Normal ), outline_thickness( 0.0f ), bearing( 0, 0 )
-    {
-      coords[0] = vec2( 0.0f );
-      coords[1] = vec2( 0.0f );
-    }
-  };
-
-  using TexturedGlyphMap = map<Codepoint, TexturedGlyph>;
-
-  class Font
-  {
-    friend class FontManager;
-    friend class ThreadedLoader;
-    friend class Text;
-
+  struct NewtypeLibrary {
   public:
-    struct Specs
-    {
-      vec2i atlasSize_;
-      Real pointSize_;
-    };
+    HMODULE module_;
+    newtype::Manager* manager_;
+    newtype::fnNewtypeInitialize pfnNewtypeInitialize;
+    newtype::fnNewtypeShutdown pfnNewtypeShutdown;
+    void load( newtype::Host* host );
+    void unload();
+    inline newtype::Manager* mgr() { return manager_; }
+  };
 
-  private:
-    void postLoad();
-    void initEmptyGlyph();
-    void forceUCS2Charmap();
-
-  protected:
-    FT_Face face_;
-    hb_font_t* hbfnt_ = nullptr;
-    TexturedGlyphMap glyphs_;
-    TextureAtlasPtr atlas_;
-    FontManagerPtr manager_;
-    Real size_;
-    Real ascender_;
-    Real descender_;
-    FontRenderMode rendermode_;
-    uint8_t lcd_weights[5];
-    Real outline_thickness_;
-    Real linegap_;
-    Real underline_position;
-    Real underline_thickness;
-    unique_ptr<utils::DumbBuffer> data_;
+  struct FontData {
     MaterialPtr material_;
-    bool loaded_ = false;
-
-  public:
-    Font( FontManagerPtr manager );
-    ~Font();
-    void loadGlyph( Codepoint codepoint, bool hinting = true );
-    TexturedGlyph* getGlyph( Codepoint codepoint );
-    void loadFace( vector<uint8_t>& source, Real pointSize, vec3i atlasSize );
-    bool use( Renderer* renderer, GLuint textureUnit );
-    inline Real size() const { return size_; }
-    inline Real ascender() const { return ascender_; }
-    inline Real descender() const { return descender_; }
-    inline bool loaded() const { return loaded_; }
   };
 
-  using FontPtr = shared_ptr<Font>;
-  using FontVector = vector<FontPtr>;
+  struct TextData {
+  };
 
-  class FontManager: public enable_shared_from_this<FontManager> {
+  class TextRenderBuffer {
   protected:
-    FontVector fonts_;
-    FT_MemoryRec_ ftMemAllocator_;
-    FT_Library freeType_;
-    platform::RWLock faceLock_;
-    EnginePtr engine_;
-    struct FreeTypeVersion {
-      FT_Int major;
-      FT_Int minor;
-      FT_Int patch;
-      FT_TrueTypeEngineType trueTypeSupport;
-    } ftVersion_;
-    struct HarfbuzzVersion
+    using BufferType = MappedGLBuffer<newtype::Vertex>;
+    using IndicesType = MappedGLBuffer<gl::GLuint>;
+    unique_ptr<BufferType> buffer_;
+    unique_ptr<IndicesType> indices_;
+    GLuint vao_;
+  public:
+    TextRenderBuffer( GLuint maxVertices, GLuint maxIndices )
     {
-      unsigned int major;
-      unsigned int minor;
-      unsigned int patch;
-    } hbVersion_;
-    void uploadFonts();
+      buffer_ = make_unique<BufferType>( maxVertices );
+      indices_ = make_unique<IndicesType>( maxIndices );
+      gl::glCreateVertexArrays( 1, &vao_ );
+      neko::AttribWriter attribs;
+      attribs.add( gl::GL_FLOAT, 3 ); // vec3 position
+      attribs.add( gl::GL_FLOAT, 2 ); // vec2 texcoord
+      attribs.add( gl::GL_FLOAT, 4 ); // vec4 color
+      attribs.write( vao_ );
+      gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
+      gl::glVertexArrayElementBuffer( vao_, indices_->id() );
+    }
+    inline BufferType& buffer() { return *buffer_.get(); }
+    inline IndicesType& indices() { return *indices_.get(); }
+    void draw( shaders::Shaders& shaders, gl::GLuint texture )
+    {
+      gl::glBindVertexArray( vao_ );
+      auto& pipeline = shaders.usePipeline( "text2d" );
+      mat4 mdl( 1.0f );
+      mdl = glm::translate( mdl, vec3( 0.0f ) );
+      mdl = glm::scale( mdl, vec3( 1.0f ) );
+      pipeline.setUniform( "model", mdl );
+      pipeline.setUniform( "tex", 0 );
+      gl::glBindTextureUnit( 0, texture );
+      gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
+      gl::glBindVertexArray( 0 );
+    }
+    ~TextRenderBuffer()
+    {
+      gl::glDeleteVertexArrays( 1, &vao_ );
+      indices_.reset();
+      buffer_.reset();
+    }
+  };
+
+  class FontManager: public enable_shared_from_this<FontManager>, public newtype::Host {
+  protected:
+    EnginePtr engine_;
+    Renderer* renderer_;
+    NewtypeLibrary nt_;
+    newtype::FontPtr fnt_;
+    newtype::TextPtr txt_;
+    map<newtype::IDType, FontData> fontdata_;
+    //map<newtype::IDType, TextData> textdata_;
+    unique_ptr<TextRenderBuffer> mesh_;
+  public:
+    void* newtypeMemoryAllocate( uint32_t size ) override;
+    void* newtypeMemoryReallocate( void* address, uint32_t newSize ) override;
+    void newtypeMemoryFree( void* address ) override;
+    void newtypeFontTextureCreated( newtype::Font& font, newtype::Texture& texture ) override;
+    void newtypeFontTextureDestroyed( newtype::Font& font, newtype::Texture& texture ) override;
   public:
     FontManager( EnginePtr engine );
     ~FontManager();
     void initialize();
-    FontPtr createFont();
-    void loadFont( FontPtr font, const Font::Specs& specs, vector<uint8_t>& buffer );
-    void unloadFont( Font* font );
     void shutdown();
-    void prepare( GameTime time );
-    inline FontVector& fonts() { return fonts_; }
-    inline FT_Library library() { return freeType_; }
+    void prepareLogic( GameTime time );
+    void prepareRender( Renderer* renderer );
+    void draw( Renderer* renderer );
   };
 
 }

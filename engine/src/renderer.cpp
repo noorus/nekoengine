@@ -329,6 +329,8 @@ namespace neko {
 
     uploadModels();
 
+    fonts_->prepareRender( this );
+
     // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point at which we try to create the VAO.
     // Thus uploading the VAOs should always come last.
     meshes_->uploadVBOs();
@@ -465,9 +467,6 @@ namespace neko {
     else
       glDisable( GL_CULL_FACE );
   }
-
-  static FontPtr g_font;
-  static unique_ptr<Text> g_text;
 
   void Renderer::sceneDraw( GameTime time, GameTime delta, Camera& camera )
   {
@@ -668,7 +667,6 @@ namespace neko {
       builtin_.screenQuad_->begin();
       builtin_.screenQuad_->draw();
     }
-    #endif
 
     {
       if ( !g_text )
@@ -687,6 +685,9 @@ namespace neko {
       pipeline.setUniform( "tex", 0 );
       g_text->draw( this );
     }
+#endif
+
+    fonts_->draw( this );
 
 #ifndef NEKO_NO_GUI
     if ( gui )
@@ -705,7 +706,6 @@ namespace neko {
     glBindVertexArray( builtin_.emptyVAO_ );
 
     g_sakura.reset();
-    g_text.reset();
 
     ctx_.fboMain_.reset();
 

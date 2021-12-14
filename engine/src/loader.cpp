@@ -273,12 +273,12 @@ namespace neko {
       {
         auto path = c_fontsBaseDirectory + task.fontfaceLoad.path_;
 
-        vector<uint8_t> input;
+        /*vector<uint8_t> input;
         Locator::fileSystem().openFile( path )->readFullVector( input );
         task.fontfaceLoad.font_->manager_->loadFont( task.fontfaceLoad.font_, task.fontfaceLoad.specs_, input );
         finishedTasksLock_.lock();
         finishedFonts_.push_back( task.fontfaceLoad.font_ );
-        finishedTasksLock_.unlock();
+        finishedTasksLock_.unlock();*/
       }
       else if ( task.type_ == LoadTask::Load_Model )
       {
