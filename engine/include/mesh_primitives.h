@@ -53,7 +53,7 @@ namespace neko {
         count = static_cast<GLint>( count_ );
       auto buf = reinterpret_cast<T*>( gl::glMapNamedBufferRange( id_, offset, count * sizeof( T ), c_glMapFlags ) );
       mapped_ = true;
-      return span<T>( buf, count_ );
+      return span<T>( buf, count );
     }
     inline void unlock()
     {
