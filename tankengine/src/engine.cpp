@@ -22,7 +22,7 @@ namespace tank {
       discord_ = std::make_unique<Discord>( discordAppID, discordAppID, steamAppID, host_ );
       discord_->initialize();
     }
-    if ( !startedFromSteam() && !startedFromDiscord() )
+    if ( !startedFromSteam() )
     {
       // Get current dir?
       // g_emptyGameInstallation.
@@ -86,14 +86,6 @@ namespace tank {
     return g_emptyGameInstallation;
   }
 
-  const GameInstallationState& TankEngine::discordInstallation() throw()
-  {
-    if ( !discord_ )
-      return g_emptyGameInstallation;
-
-    return discord_->installation();
-  }
-
   const GameInstallationState& TankEngine::steamInstallation() throw()
   {
     if ( !steam_ )
@@ -109,26 +101,19 @@ namespace tank {
     return ( !steam_->commandline().empty() );
   }
 
-  bool TankEngine::startedFromDiscord()
-  {
-    if ( !discord_ )
-      return false;
-    return false;
-  }
-
-  void TankEngine::steamStatIncrement( const utf8String& name )
+  void TankEngine::statIncrement( const utf8String& name )
   {
     if ( steam_ )
       steam_->statAdd( name, 1 );
   }
 
-  void TankEngine::steamStatAdd( const utf8String& name, int value )
+  void TankEngine::statAdd( const utf8String& name, int value )
   {
     if ( steam_ )
       steam_->statAdd( name, value );
   }
 
-  void TankEngine::steamStatAdd( const utf8String& name, float value )
+  void TankEngine::statAdd( const utf8String& name, float value )
   {
     if ( steam_ )
       steam_->statAdd( name, value );
@@ -151,7 +136,7 @@ namespace tank {
     if ( discord_ )
     {
       discord_->shutdown();
-      // discord_.reset();
+      discord_.reset();
     }
     if ( steam_ )
     {

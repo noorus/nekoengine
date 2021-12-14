@@ -8,8 +8,7 @@
 
 namespace neko {
 
-  class FileReader
-  {
+  class FileReader {
   public:
     FileReader() {}
     virtual ~FileReader()
@@ -28,8 +27,7 @@ namespace neko {
 
   using FileReaderPtr = shared_ptr<FileReader>;
 
-  class FileSystem
-  {
+  class FileSystem {
   public:
     FileSystem() {}
     FileReaderPtr openFile( const wstring& path );

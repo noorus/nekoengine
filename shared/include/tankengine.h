@@ -106,15 +106,13 @@ namespace tank {
     virtual void initialize( int64_t discordAppID, uint32_t steamAppID );
     virtual void changeActivity_AlphaDevelop() noexcept;
     virtual const GameInstallationState& localInstallation() noexcept;
-    virtual const GameInstallationState& discordInstallation() noexcept;
     virtual const GameInstallationState& steamInstallation() noexcept;
     virtual void update( double gameTime, double delta );
     virtual void shutdown();
     virtual bool startedFromSteam();
-    virtual bool startedFromDiscord();
-    virtual void steamStatIncrement( const utf8String& name );
-    virtual void steamStatAdd( const utf8String& name, int value );
-    virtual void steamStatAdd( const utf8String& name, float value );
+    virtual void statIncrement( const utf8String& name );
+    virtual void statAdd( const utf8String& name, int value );
+    virtual void statAdd( const utf8String& name, float value );
     virtual void uploadStats();
     virtual const map<utf8String, SteamStat>& steamStats();
     virtual Account* accountBySteamID( SteamSnowflake id, bool create = false );

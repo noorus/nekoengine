@@ -222,7 +222,7 @@ namespace neko {
   void Engine::onSteamStatsUpdated( tank::StateUpdateIndex index )
   {
     if ( index == 0 )
-      tanklib_.engine_->steamStatIncrement( "dev_launches" );
+      tanklib_.engine_->statIncrement( "dev_launches" );
     stats_.i_launches.store( tanklib_.engine_->steamStats().at( "dev_launches" ).i_ );
     stats_.f_timeWasted.store( tanklib_.engine_->steamStats().at( "dev_debugTime" ).f_ );
   }
@@ -361,7 +361,7 @@ namespace neko {
     }
 
     auto secondsDebugged = static_cast<float>( overallTime.stop() / 1000.0 );
-    tanklib_.engine_->steamStatAdd( "dev_debugTime", secondsDebugged );
+    tanklib_.engine_->statAdd( "dev_debugTime", secondsDebugged );
     tanklib_.engine_->uploadStats();
   }
 

@@ -79,7 +79,7 @@ namespace neko {
     {
       if ( hbfnt_ )
         hb_font_destroy( hbfnt_ );
-      if ( face_ )
+      else if ( face_ )
         FT_Done_Face( face_ );
     }
 

@@ -18,7 +18,7 @@
 
 // -- Platform/Store integrations --
 #undef NEKO_USE_DISCORD
-#undef NEKO_USE_STEAM
+#define NEKO_USE_STEAM
 
 // -- Feature switches --
 // The game/engine isn't meant to work properly without these, but it is
