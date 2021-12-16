@@ -21,8 +21,9 @@
 #ifndef TINYTIFFREADER_HXX
 #define TINYTIFFREADER_HXX
 
+extern "C" {
     #include "tinytiffreader.h"
-
+}
 #include <string>
 
 

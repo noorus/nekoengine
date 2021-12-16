@@ -1,14 +1,13 @@
 #include "stdafx.h"
 #include "loader.h"
 #include "utilities.h"
-#include "lodepng.h"
 #include "gfx_types.h"
 #include "renderer.h"
 #include "console.h"
 #include "filesystem.h"
 
+#include "lodepng.h"
 #include "tinytiffreader.hxx"
-
 #include "tinyexr.h"
 
 namespace neko {
@@ -214,7 +213,7 @@ namespace neko {
           }
           else if ( ext == L"tif" )
           {
-            auto tiff = TinyTIFFReader_open( platform::utf8ToWide( path ).c_str() );
+            auto tiff = TinyTIFFReader_open( platform::utf8ToWide( path ).c_str(), nullptr );
             if ( tiff )
             {
               layer.image_.width_ = TinyTIFFReader_getWidth( tiff );
@@ -224,13 +223,18 @@ namespace neko {
               auto spp = TinyTIFFReader_getSamplesPerPixel( tiff );
               Locator::console().printf( Console::srcLoader, "tif: tinytiff loaded %s, %ix%i %ibit %ix%s",
                 target.c_str(), layer.image_.width_, layer.image_.height_, bps, spp,
-                sf == TINYTIFF_SAMPLEFORMAT_FLOAT ? "float" : sf == TINYTIFF_SAMPLEFORMAT_INT ? "int" : "uint", spp );
+                sf == TINYTIFF_SAMPLEFORMAT_FLOAT ? "float" : sf == TINYTIFF_SAMPLEFORMAT_INT ? "int" : "uint" );
+              if ( spp == 3 )
+                layer.image_.format_ = PixFmtColorRGB8;
+              else if ( spp == 4 )
+                layer.image_.format_ = PixFmtColorRGBA8;
+              else
+                NEKO_EXCEPT( "Unsupported channel count in TIFF image" );
               vector<uint8_t> tiffSource;
               tiffSource.resize( layer.image_.width_ * layer.image_.height_ * ( bps / 8 ) );
+              layer.image_.data_.resize( layer.image_.width_ * layer.image_.height_ * spp * sizeof( uint8_t ) );
               if ( bps == 16 && sf == TINYTIFF_SAMPLEFORMAT_UINT )
               {
-                layer.image_.format_ = PixFmtColorRGBA8;
-                layer.image_.data_.resize( layer.image_.width_ * layer.image_.height_ * spp * sizeof( uint8_t ) );
                 auto data = reinterpret_cast<uint8_t*>( layer.image_.data_.data() );
                 auto source = reinterpret_cast<uint16_t*>( tiffSource.data() );
                 for ( auto s = 0; s < spp; ++s )
@@ -240,21 +244,43 @@ namespace neko {
                   {
                     NEKO_EXCEPT( "It's a fucking error" );
                   }
-                  uint16_t maxval = 0;
                   for ( unsigned int y = 0; y < layer.image_.height_; ++y )
                   {
                     for ( unsigned int x = 0; x < layer.image_.width_; ++x )
                     {
                       size_t p = ( y * layer.image_.width_ ) + x;
                       size_t d = ( ( ( y * layer.image_.width_ ) + x ) * spp ) + s;
-                      if ( source[p] > maxval )
-                        maxval = source[p];
+                      // I'm practically entirely sure that this is wrong - whatever,
+                      // fix when we actually need one of these textures
+                      data[d] = math::iround( static_cast<Real>( source[p] ) / 256.0f );
+                    }
+                  }
+                }
+              }
+              else if ( bps == 8 && sf == TINYTIFF_SAMPLEFORMAT_UINT )
+              {
+                auto data = reinterpret_cast<uint8_t*>( layer.image_.data_.data() );
+                auto source = reinterpret_cast<uint8_t*>( tiffSource.data() );
+                for ( auto s = 0; s < spp; ++s )
+                {
+                  TinyTIFFReader_getSampleData( tiff, tiffSource.data(), s );
+                  if ( TinyTIFFReader_wasError( tiff ) )
+                  {
+                    NEKO_EXCEPT( "It's a fucking error" );
+                  }
+                  for ( unsigned int y = 0; y < layer.image_.height_; ++y )
+                  {
+                    for ( unsigned int x = 0; x < layer.image_.width_; ++x )
+                    {
+                      size_t p = ( y * layer.image_.width_ ) + x;
+                      size_t d = ( ( ( y * layer.image_.width_ ) + x ) * spp ) + s;
                       data[d] = static_cast<uint8_t>( source[p] );
                     }
                   }
-                  Locator::console().printf( Console::srcLoader, "tif: maximum value was %i", maxval );
                 }
               }
+              else
+                NEKO_EXCEPT( "Unsupported bit/channel/sample format combination in TIFF image" );
               task.textureLoad.material_->layers_.push_back( move( layer ) );
               free( tiff );
             }

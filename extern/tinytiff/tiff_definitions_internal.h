@@ -88,8 +88,17 @@
 #define TIFF_SAMPLEFORMAT_IEEEFP  3
 #define TIFF_SAMPLEFORMAT_VOID  4
 
+#define TIFF_RESOLUTION_UNIT_NONE 1
+#define TIFF_RESOLUTION_UNIT_INCH 2
+#define TIFF_RESOLUTION_UNIT_CENTIMETER 3
 
+
+
+#ifdef HAVE_STRCPY_S
 #define TINYTIFF_SET_LAST_ERROR(tiff, message) strcpy_s(tiff->lastError, TIFF_LAST_ERROR_SIZE, message);
+#else
+#define TINYTIFF_SET_LAST_ERROR(tiff, message) strcpy(tiff->lastError, message);
+#endif
 
 
 #endif // TIFF_DEFINITIONS_INTERNAL_H

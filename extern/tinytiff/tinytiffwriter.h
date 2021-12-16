@@ -24,6 +24,7 @@
 #ifndef TINYTIFFWRITER_H
 #define TINYTIFFWRITER_H
 
+#include "tinytiff_export.h"
 #include "tinytiff_defs.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,6 +52,11 @@
   */
 typedef struct TinyTIFFWriterFile TinyTIFFWriterFile; // forward
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
     /** \brief returns the version number of TinyTIFFReader
       * \ingroup tinytiffreader_C
@@ -271,5 +277,9 @@ typedef struct TinyTIFFWriterFile TinyTIFFWriterFile; // forward
         This function also releases memory allocated in TinyTIFFWriter_open() in \a tiff.
      */
     TINYTIFF_EXPORT void TinyTIFFWriter_close_withdescription(TinyTIFFWriterFile* tiff, const char* imageDescription);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // TINYTIFFWRITER_H
+

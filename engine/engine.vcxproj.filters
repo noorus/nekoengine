@@ -258,12 +258,6 @@
     <ClCompile Include="src\scenenode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\extern\tinytiff\tinytiffreader.cpp">
-      <Filter>Source Files\extern\tinytiff</Filter>
-    </ClCompile>
-    <ClCompile Include="..\extern\tinytiff\tinytiffwriter.cpp">
-      <Filter>Source Files\extern\tinytiff</Filter>
-    </ClCompile>
     <ClCompile Include="src\glformats.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
@@ -308,6 +302,9 @@
     </ClCompile>
     <ClCompile Include="src\filesystem.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\tinytiff\tinytiffreader.c">
+      <Filter>Source Files\extern\tinytiff</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

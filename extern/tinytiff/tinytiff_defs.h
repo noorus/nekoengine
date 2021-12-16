@@ -19,13 +19,6 @@
 #ifndef TIFYTIFF_DEFS_H
 #define TIFYTIFF_DEFS_H
 
-#define TINYTIFF_EXPORT
-#define TINYTIFF_USE_WINAPI_FOR_FILEIO
-#define HAVE_STRCPY_S
-#define HAVE_MEMCPY_S
-#define HAVE_SPRINTF_S
-#define HAVE_STRNLEN_S
-#define HAVE_STRCAT_S
 
 #ifndef TINYTIFF_TRUE
 /** \brief a logic value of TRUE, e.g. used by TinyTIFFWriter_wasError() and TinyTIFFReader_wasError()

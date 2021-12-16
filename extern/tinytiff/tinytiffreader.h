@@ -21,6 +21,7 @@
 #ifndef TINYTIFFREADER_H
 #define TINYTIFFREADER_H
 
+#include "tinytiff_export.h"
 #include "tinytiff_defs.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,6 +51,32 @@
   */
 typedef struct TinyTIFFReaderFile TinyTIFFReaderFile; // forward
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+  typedef uint64_t( *TinyTiffStatCallback )( TinyTIFFReaderFile* tiff, const wchar_t* filename );
+  typedef int( *TinyTiffOpenCallback )( TinyTIFFReaderFile* tiff, const wchar_t* filename );
+  typedef int( *TinyTiffSeekSetCallback )( TinyTIFFReaderFile* tiff, unsigned long offset );
+  typedef int( *TinyTiffSeekCurCallback )( TinyTIFFReaderFile* tiff, unsigned long offset );
+  typedef int( *TinyTiffCloseCallback )( TinyTIFFReaderFile* tiff );
+  typedef unsigned long( *TinyTiffReadCallback )( void* ptr, unsigned long ptrsize, unsigned long size, unsigned long count, TinyTIFFReaderFile* tiff );
+  typedef long int( *TinyTiffTellCallback )( );
+  typedef int( *TinyTiffGetPosCallback )( TinyTIFFReaderFile* tiff, unsigned long* pos );
+  typedef int( *TinyTiffSetPosCallback )( TinyTIFFReaderFile* tiff, const unsigned long* pos );
+
+  typedef struct TinyTiffCustomCallbacks_t {
+    TinyTiffStatCallback cbstat;
+    TinyTiffOpenCallback cbopen;
+    TinyTiffSeekSetCallback cbseekset;
+    TinyTiffSeekCurCallback cbseekcur;
+    TinyTiffCloseCallback cbclose;
+    TinyTiffReadCallback cbread;
+    TinyTiffTellCallback cbtell;
+    TinyTiffGetPosCallback cbgetpos;
+    TinyTiffSetPosCallback cbsetpos;
+  } TinyTiffCustomCallbacks;
+
     /*! \brief open TIFF file for reading
         \ingroup tinytiffreader_C
 
@@ -59,7 +86,7 @@ typedef struct TinyTIFFReaderFile TinyTIFFReaderFile; // forward
                 permission to read it. Also if no TIFF file was detected (first twi bytes were neither 'II' nor 'MM') \c NULL is returned.
 
       */
-    TINYTIFF_EXPORT TinyTIFFReaderFile* TinyTIFFReader_open(const wchar_t* filename);
+    TINYTIFF_EXPORT TinyTIFFReaderFile* TinyTIFFReader_open(const wchar_t* filename, TinyTiffCustomCallbacks* callbacks );
 
 
     /*! \brief close a given TIFF file
@@ -170,7 +197,31 @@ typedef struct TinyTIFFReaderFile TinyTIFFReaderFile; // forward
      */
     TINYTIFF_EXPORT uint16_t TinyTIFFReader_getSamplesPerPixel(TinyTIFFReaderFile* tiff);
 
-    /*! \brief read the given sample from the current frame into the given buffer,
+    /*! \brief return the pixels per basic resolution unit in image width direction
+        \ingroup tinytiffreader_C
+
+        \param tiff TIFF file
+    */
+    TINYTIFF_EXPORT float TinyTIFFReader_getXResolution(TinyTIFFReaderFile* tiff);
+
+
+    /*! \brief return the pixels per basic resolution unit in image height direction
+        \ingroup tinytiffreader_C
+
+        \param tiff TIFF file
+    */
+    TINYTIFF_EXPORT float TinyTIFFReader_getYResolution(TinyTIFFReaderFile* tiff);
+
+
+    /*! \brief return the base unit for resolution
+        \ingroup tinytiffreader_C
+        \param tiff TIFF file
+        \return TIFF_RESOLUTION_UNIT_NONE, TIFF_RESOLUTION_UNIT_INCH or TIFF_RESOLUTION_UNIT_CENTIMETER
+    */
+    TINYTIFF_EXPORT uint16_t TinyTIFFReader_getResolutionUnit(TinyTIFFReaderFile* tiff);
+
+
+/*! \brief read the given sample from the current frame into the given buffer,
                the byteorder is transformed to the byteorder of the system!
         \ingroup tinytiffreader_C
 
@@ -195,5 +246,8 @@ typedef struct TinyTIFFReaderFile TinyTIFFReaderFile; // forward
      */
     TINYTIFF_EXPORT uint32_t TinyTIFFReader_countFrames(TinyTIFFReaderFile* tiff);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif // TINYTIFFREADER_H
