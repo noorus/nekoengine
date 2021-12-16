@@ -60,7 +60,7 @@ namespace neko {
     fnt_ = nt_.mgr()->createFont();
     vector<uint8_t> input;
     Locator::fileSystem().openFile( R"(C:\Code\nekoengine\bin\assets\fonts\SourceHanSansJP-Bold.otf)" )->readFullVector( input );
-    nt_.mgr()->loadFont( fnt_, input, 32.0f );
+    nt_.mgr()->loadFont( fnt_, input, 24.0f );
     txt_ = nt_.mgr()->createText( fnt_ );
     txt_->pen( vec3( 100.0f, 100.0f, 0.0f ) );
     auto content = unicodeString::fromUTF8( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class." );
@@ -112,12 +112,12 @@ namespace neko {
       if ( !txt_->dirty() && !mesh_ )
       {
         mesh_ = make_unique<TextRenderBuffer>(
-          static_cast<gl::GLuint>( 512 ),
-          static_cast<gl::GLuint>( 512 ) );
+          static_cast<gl::GLuint>( txt_->mesh().vertices_.size() ),
+          static_cast<gl::GLuint>( txt_->mesh().indices_.size() ) );
         const auto& verts = mesh_->buffer().lock();
         const auto& indcs = mesh_->indices().lock();
-        memcpy( verts.data(), txt_->mesh().vertices_.data(), verts.size() );
-        memcpy( indcs.data(), txt_->mesh().indices_.data(), indcs.size() );
+        memcpy( verts.data(), txt_->mesh().vertices_.data(), txt_->mesh().vertices_.size() * sizeof( newtype::Vertex ) );
+        memcpy( indcs.data(), txt_->mesh().indices_.data(), txt_->mesh().indices_.size() * sizeof( GLuint ) );
         mesh_->buffer().unlock();
         mesh_->indices().unlock();
       }

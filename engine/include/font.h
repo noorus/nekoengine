@@ -46,13 +46,13 @@ namespace neko {
       buffer_ = make_unique<BufferType>( maxVertices );
       indices_ = make_unique<IndicesType>( maxIndices );
       gl::glCreateVertexArrays( 1, &vao_ );
+      gl::glVertexArrayElementBuffer( vao_, indices_->id() );
       neko::AttribWriter attribs;
       attribs.add( gl::GL_FLOAT, 3 ); // vec3 position
       attribs.add( gl::GL_FLOAT, 2 ); // vec2 texcoord
       attribs.add( gl::GL_FLOAT, 4 ); // vec4 color
       attribs.write( vao_ );
       gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
-      gl::glVertexArrayElementBuffer( vao_, indices_->id() );
     }
     inline BufferType& buffer() { return *buffer_.get(); }
     inline IndicesType& indices() { return *indices_.get(); }
