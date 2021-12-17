@@ -124,6 +124,82 @@ namespace neko {
 
   using namespace gl;
 
+  struct TiffReaderInstance {
+    FileReaderPtr reader;
+  };
+
+  uint64_t tiff_TinyTiffStatCallback( TinyTIFFReaderFile* tiff, const wchar_t* filename )
+  {
+    return Locator::fileSystem().fileStat( Dir_Textures, filename );
+  }
+
+  void tiff_TinyTiffOpenCallback( TinyTIFFReaderFile* tiff, const wchar_t* filename )
+  {
+    auto rdr = new TiffReaderInstance();
+    rdr->reader = Locator::fileSystem().openFile( Dir_Textures, filename );
+    tiff->hFile = reinterpret_cast<HANDLE>( rdr );
+  }
+
+  int tiff_TinyTiffSeekSetCallback( TinyTIFFReaderFile* tiff, unsigned long offset )
+  {
+    auto rdr = reinterpret_cast<TiffReaderInstance*>( tiff->hFile );
+    return static_cast<int>( rdr->reader->seek( FileSeek_Beginning, offset ) );
+  }
+
+  int tiff_TinyTiffSeekCurCallback( TinyTIFFReaderFile* tiff, unsigned long offset )
+  {
+    auto rdr = reinterpret_cast<TiffReaderInstance*>( tiff->hFile );
+    return static_cast<int>( rdr->reader->seek( FileSeek_Current, offset ) );
+  }
+
+  int tiff_TinyTiffCloseCallback( TinyTIFFReaderFile* tiff )
+  {
+    auto rdr = reinterpret_cast<TiffReaderInstance*>( tiff->hFile );
+    rdr->reader.reset();
+    delete rdr;
+    return 0;
+  }
+
+  unsigned long tiff_TinyTiffReadCallback( void* ptr, unsigned long ptrsize, unsigned long size, unsigned long count, TinyTIFFReaderFile* tiff )
+  {
+    auto rdr = reinterpret_cast<TiffReaderInstance*>( tiff->hFile );
+    auto toread = size * count;
+    rdr->reader->read( ptr, toread );
+    return toread;
+  }
+
+  long int tiff_TinyTiffTellCallback( TinyTIFFReaderFile* tiff )
+  {
+    auto rdr = reinterpret_cast<TiffReaderInstance*>( tiff->hFile );
+    return rdr->reader->tell();
+  }
+
+  int tiff_TinyTiffGetPosCallback( TinyTIFFReaderFile* tiff, unsigned long* pos )
+  {
+    auto rdr = reinterpret_cast<TiffReaderInstance*>( tiff->hFile );
+    *pos = rdr->reader->tell();
+    return 0;
+  }
+
+  int tiff_TinyTiffSetPosCallback( TinyTIFFReaderFile* tiff, const unsigned long* pos )
+  {
+    auto rdr = reinterpret_cast<TiffReaderInstance*>( tiff->hFile );
+    rdr->reader->seek( FileSeek_Beginning, *pos );
+    return 0;
+  }
+
+  static TinyTiffCustomCallbacks g_tiffCallbacks = {
+    tiff_TinyTiffStatCallback,
+    tiff_TinyTiffOpenCallback,
+    tiff_TinyTiffSeekSetCallback,
+    tiff_TinyTiffSeekCurCallback,
+    tiff_TinyTiffCloseCallback,
+    tiff_TinyTiffReadCallback,
+    tiff_TinyTiffTellCallback,
+    tiff_TinyTiffGetPosCallback,
+    tiff_TinyTiffSetPosCallback
+  };
+
   // Context: Worker thread
   void ThreadedLoader::handleNewTasks()
   {
@@ -213,7 +289,7 @@ namespace neko {
           }
           else if ( ext == L"tif" )
           {
-            auto tiff = TinyTIFFReader_open( platform::utf8ToWide( path ).c_str(), nullptr );
+            auto tiff = TinyTIFFReader_open( platform::utf8ToWide( target ).c_str(), &g_tiffCallbacks );
             if ( tiff )
             {
               layer.image_.width_ = TinyTIFFReader_getWidth( tiff );

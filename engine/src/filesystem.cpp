@@ -19,10 +19,16 @@ namespace neko {
   public:
     LocalFilesystemReader( const wstring& filename ): file_( INVALID_HANDLE_VALUE )
     {
-      file_ = CreateFileW( filename.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
+      file_ = CreateFileW( filename.c_str(),
+        GENERIC_READ, FILE_SHARE_READ, nullptr,
+        OPEN_EXISTING,
+        // Practically all of our file reads are sequential for now,
+        // so let Windows know and optimize prefetch for that:
+        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
+        0 );
 
       if ( file_ == INVALID_HANDLE_VALUE )
-        NEKO_EXCEPT( "File open failed" );
+        NEKO_WINAPI_EXCEPT( "File open failed" );
 
       DWORD sizeHigh = 0;
       DWORD sizeLow = GetFileSize( file_, &sizeHigh );
@@ -103,7 +109,71 @@ namespace neko {
       if ( ReadFile( file_, (LPVOID)out.data(), (DWORD)size_, &read, nullptr ) != TRUE || read != size_ )
         NEKO_EXCEPT( "File read failed or length mismatch" );
     }
+    virtual uint32_t seek( FileSeek direction, int32_t distance )
+    {
+      auto dir = ( direction == FileSeek_Beginning ? FILE_BEGIN
+        : direction == FileSeek_Current ? FILE_CURRENT
+        : FILE_END );
+      auto ret = SetFilePointer( file_, distance, nullptr, dir );
+      if ( ret == INVALID_SET_FILE_POINTER )
+        NEKO_WINAPI_EXCEPT( "SetFilePointer (seek) failed" );
+      return ret;
+    }
+    virtual uint32_t tell()
+    {
+      auto ptr = static_cast<uint32_t>( SetFilePointer( file_, 0, nullptr, FILE_CURRENT ) );
+      if ( ptr == INVALID_SET_FILE_POINTER )
+        NEKO_WINAPI_EXCEPT( "SetFilePointer (tell) failed" );
+      return ptr;
+    }
   };
+
+  /*
+
+
+  const char c_fontsBaseDirectory[] = ;
+  const char c_texturesBaseDirectory[] = R"(assets\textures\)";
+  const char c_meshesBaseDirectory[] = R"(assets\meshes\)";
+  const char c_animationsBaseDirectory[] = R"(assets\animations\)";
+  */
+  /*
+      Dir_Fonts = 0,
+    Dir_Textures,
+    Dir_Meshes,
+    Dir_Animations
+    */
+
+  FileSystem::FileSystem()
+  {
+    rootDirs_[Dir_Fonts] = LR"(assets\fonts\)";
+    rootDirs_[Dir_Textures] = LR"(assets\textures\)";
+    rootDirs_[Dir_Meshes] = LR"(assets\meshes\)";
+    rootDirs_[Dir_Animations] = LR"(assets\animations\)";
+  }
+
+  uint64_t FileSystem::fileStat( FileDir dir, const wstring& path )
+  {
+    wstring fixedpath = rootDirs_[dir];
+    fixedpath.append( path );
+    if ( !platform::fileExists( fixedpath ) )
+      return 0;
+    struct _stat64i32 fst;
+    if ( _wstat( fixedpath.c_str(), &fst ) == 0 )
+      return fst.st_size;
+    return 0;
+  }
+
+  FileReaderPtr FileSystem::openFile( FileDir dir, const wstring& path )
+  {
+    wstring fixedpath = rootDirs_[dir];
+    fixedpath.append( path );
+    return make_shared<LocalFilesystemReader>( fixedpath );
+  }
+
+  FileReaderPtr FileSystem::openFile( FileDir dir, const utf8String& path )
+  {
+    return openFile( dir, platform::utf8ToWide( path ) );
+  }
 
   FileReaderPtr FileSystem::openFile( const wstring& path )
   {

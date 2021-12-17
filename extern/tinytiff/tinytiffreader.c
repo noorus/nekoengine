@@ -27,42 +27,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/** \defgroup tinytiffreader_internal TinyTIFFReader: Internal functions
- *  \ingroup tinytiffreader */
-
-#ifndef __WINDOWS__
-# if defined(WIN32) || defined(WIN64) || defined(_MSC_VER) || defined(_WIN32)
-#  define __WINDOWS__
-# endif
-#endif
-
-#ifndef __LINUX__
-# if defined(linux)
-#  define __LINUX__
-# endif
-#endif
-
-#ifdef __WINDOWS__
-#  ifndef __USE_LIBC_FOR_TIFFReader__
-#    define TINYTIFF_USE_WINAPI_FOR_FILEIO
-#  endif
-#endif // __WINDOWS__
-
-#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
-#  include <windows.h>
-#  define TinyTIFFReader_POSTYPE DWORD
-#else
-#  define TinyTIFFReader_POSTYPE fpos_t
-#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
-
-
-
-/** \brief maximum length of error messages in bytes \internal */
-#define TIFF_LAST_ERROR_SIZE 1024
-
-
-
-
 
 int TIFFReader_get_byteorder() {
     union {
@@ -78,32 +42,6 @@ int TIFFReader_get_byteorder() {
 
     return TIFF_ORDER_UNKNOWN;
 }
-
-typedef struct TinyTIFFReaderFrame {
-    uint32_t width;
-    uint32_t height;
-    uint16_t compression;
-
-    uint32_t rowsperstrip;
-    uint32_t* stripoffsets;
-    uint32_t* stripbytecounts;
-    uint32_t stripcount;
-    uint16_t samplesperpixel;
-    uint32_t bitspersample;
-    uint16_t planarconfiguration;
-    uint16_t sampleformat;
-    uint32_t imagelength;
-    uint8_t orientation;
-    uint8_t fillorder;
-    uint32_t photometric_interpretation;
-    uint8_t isTiled;
-
-    float xresolution;
-    float yresolution;
-    uint16_t resolutionunit;
-	
-	char* description;
-} TinyTIFFReaderFrame;
 
 static TinyTIFFReaderFrame TinyTIFFReader_getEmptyFrame() {
     TinyTIFFReaderFrame d;
@@ -138,30 +76,6 @@ static void TinyTIFFReader_freeEmptyFrame(TinyTIFFReaderFrame f) {
 	if (f.description) free(f.description);
 	f.description=NULL;
 }
-
-
-struct TinyTIFFReaderFile {
-#ifdef TINYTIFF_USE_WINAPI_FOR_FILEIO
-    HANDLE hFile;
-#else
-    FILE* file;
-#endif // TINYTIFF_USE_WINAPI_FOR_FILEIO
-
-    TinyTiffCustomCallbacks* customcallbacks;
-
-    char lastError[TIFF_LAST_ERROR_SIZE];
-    int wasError;
-
-    uint8_t systembyteorder;
-    uint8_t filebyteorder;
-
-    uint32_t firstrecord_offset;
-    uint32_t nextifd_offset;
-
-    uint64_t filesize;
-	
-    TinyTIFFReaderFrame currentFrame;
-};
 
 unsigned long TinyTIFFReader_min(unsigned long a, unsigned long b) {
     if (a<b) return a;
