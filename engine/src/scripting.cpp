@@ -65,8 +65,7 @@ namespace neko {
 
   void Scripting::initialize()
   {
-    global_ = make_shared<ScriptingContext>( this, this,
-      platform::wideToUtf8( rootDirectory_ + c_scriptsDirectory ) );
+    global_ = make_shared<ScriptingContext>( this, this );
   }
 
   void Scripting::postInitialize()

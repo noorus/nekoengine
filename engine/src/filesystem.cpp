@@ -128,46 +128,42 @@ namespace neko {
     }
   };
 
-  /*
-
-
-  const char c_fontsBaseDirectory[] = ;
-  const char c_texturesBaseDirectory[] = R"(assets\textures\)";
-  const char c_meshesBaseDirectory[] = R"(assets\meshes\)";
-  const char c_animationsBaseDirectory[] = R"(assets\animations\)";
-  */
-  /*
-      Dir_Fonts = 0,
-    Dir_Textures,
-    Dir_Meshes,
-    Dir_Animations
-    */
-
   FileSystem::FileSystem()
   {
+    rootDirs_[Dir_User] = LR"()";
+    rootDirs_[Dir_Data] = LR"(data\)";
     rootDirs_[Dir_Fonts] = LR"(assets\fonts\)";
     rootDirs_[Dir_Textures] = LR"(assets\textures\)";
     rootDirs_[Dir_Meshes] = LR"(assets\meshes\)";
     rootDirs_[Dir_Animations] = LR"(assets\animations\)";
+    rootDirs_[Dir_GUI] = LR"(assets\gui\)";
+    rootDirs_[Dir_Shaders] = LR"(shaders\)";
+    rootDirs_[Dir_Scripts] = LR"(scripts\)";
   }
 
-  uint64_t FileSystem::fileStat( FileDir dir, const wstring& path )
+  wstring FileSystem::fixPath( FileDir dir, const wstring& path )
   {
+    if ( dir == Dir_User )
+      return path;
     wstring fixedpath = rootDirs_[dir];
     fixedpath.append( path );
-    if ( !platform::fileExists( fixedpath ) )
+    return fixedpath;
+  }
+
+  uint64_t FileSystem::fileStat( FileDir dir, wstring path )
+  {
+    path = fixPath( dir, path );
+    if ( !platform::fileExists( path ) )
       return 0;
     struct _stat64i32 fst;
-    if ( _wstat( fixedpath.c_str(), &fst ) == 0 )
+    if ( _wstat( path.c_str(), &fst ) == 0 )
       return fst.st_size;
     return 0;
   }
 
-  FileReaderPtr FileSystem::openFile( FileDir dir, const wstring& path )
+  FileReaderPtr FileSystem::openFile( FileDir dir, wstring path )
   {
-    wstring fixedpath = rootDirs_[dir];
-    fixedpath.append( path );
-    return make_shared<LocalFilesystemReader>( fixedpath );
+    return make_shared<LocalFilesystemReader>( fixPath( dir, path ) );
   }
 
   FileReaderPtr FileSystem::openFile( FileDir dir, const utf8String& path )
@@ -175,14 +171,14 @@ namespace neko {
     return openFile( dir, platform::utf8ToWide( path ) );
   }
 
-  FileReaderPtr FileSystem::openFile( const wstring& path )
+  FileReaderPtr FileSystem::openFileAbsolute(const wstring& path)
   {
     return make_shared<LocalFilesystemReader>( path );
   }
 
-  FileReaderPtr FileSystem::openFile( const utf8String& path )
+  FileReaderPtr FileSystem::openFileAbsolute( const utf8String& path )
   {
-    return openFile( platform::utf8ToWide( path ) );
+    return openFileAbsolute( platform::utf8ToWide( path ) );
   }
 
 }

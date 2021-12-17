@@ -22,10 +22,8 @@ namespace neko {
   using v8::Global;
 
   ScriptingContext::ScriptingContext( Scripting* owner,
-    v8::ArrayBuffer::Allocator* allocator, const utf8String& scriptDirectory,
-    Isolate* isolate ):
-    owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false ),
-    scriptDirectory_( scriptDirectory )
+    v8::ArrayBuffer::Allocator* allocator, Isolate* isolate ):
+    owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false )
   {
     assert( owner_ );
 
@@ -149,11 +147,7 @@ namespace neko {
 
     if ( scripts_.find( filename ) == scripts_.end() )
     {
-      auto filepath = utf8String( scriptDirectory_ ) + filename;
-      if ( !platform::fileExists( filepath ) )
-        NEKO_EXCEPT( "Script file not found" );
-
-      auto script = make_shared<Script>( this, filename, filepath );
+      auto script = make_shared<Script>( this, filename );
       scripts_[filename] = move( script );
     }
 
@@ -172,11 +166,7 @@ namespace neko {
 
     if ( scripts_.find( filename ) == scripts_.end() )
     {
-      auto filepath = utf8String( scriptDirectory_ ) + filename;
-      if ( !platform::fileExists( filepath ) )
-        NEKO_EXCEPT( "Script file not found" );
-
-      auto script = make_shared<Script>( this, filename, filepath );
+      auto script = make_shared<Script>( this, filename );
       scripts_[filename] = move( script );
     }
 

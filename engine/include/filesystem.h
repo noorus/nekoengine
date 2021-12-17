@@ -36,22 +36,28 @@ namespace neko {
   using FileReaderPtr = shared_ptr<FileReader>;
 
   enum FileDir {
-    Dir_Fonts = 0,
+    Dir_User = 0,
+    Dir_Data,
+    Dir_Fonts,
     Dir_Textures,
     Dir_Meshes,
-    Dir_Animations
+    Dir_Animations,
+    Dir_GUI,
+    Dir_Shaders,
+    Dir_Scripts
   };
 
   class FileSystem {
   private:
     map<FileDir, wstring> rootDirs_;
+    wstring fixPath( FileDir dir, const wstring& path );
   public:
     FileSystem();
-    uint64_t fileStat( FileDir dir, const wstring& path );
-    FileReaderPtr openFile( FileDir dir, const wstring& path );
+    uint64_t fileStat( FileDir dir, wstring path );
+    FileReaderPtr openFile( FileDir dir, wstring path );
     FileReaderPtr openFile( FileDir dir, const utf8String& path );
-    FileReaderPtr openFile( const wstring& path );
-    FileReaderPtr openFile( const utf8String& path );
+    FileReaderPtr openFileAbsolute( const wstring& path );
+    FileReaderPtr openFileAbsolute( const utf8String& path );
   };
 
 }

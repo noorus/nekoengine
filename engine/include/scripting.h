@@ -40,13 +40,12 @@ namespace neko {
     };
   private:
     utf8String name_;
-    utf8String filename_;
     Status status_;
     v8::Persistent<v8::Script> script_;
     ScriptingContext* globalContext_;
     v8::Persistent<v8::Value> retval_;
   public:
-    Script( ScriptingContext* globalCtx, const utf8String& name, const utf8String& filepath );
+    Script( ScriptingContext* globalCtx, const utf8String& name );
     inline bool compiled() const { return ( status_ == Status_Compiled ); }
     inline bool executed() const { return ( status_ == Status_Executed ); }
     bool compile( v8::Global<v8::Context>& context );
@@ -90,8 +89,7 @@ namespace neko {
   public:
     EnginePtr engine_;
     ConsolePtr console_;
-    utf8String scriptDirectory_;
-    ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, const utf8String& scriptDirectory, v8::Isolate* isolate = nullptr );
+    ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
     void tick( GameTime tick, GameTime time );
     void process();
     ~ScriptingContext();

@@ -11,8 +11,6 @@ namespace neko {
 
   using namespace gl;
 
-  const wchar_t c_shadersBaseDirectory[] = LR"(\shaders\)";
-
   namespace shaders {
 
     struct ShaderMapper
@@ -46,9 +44,6 @@ namespace neko {
       console_->printf( Console::srcGfx, "Shader compiler supported: %s", hasCompiler == GL_TRUE ? "yes" : "no" );
       if ( hasCompiler != GL_TRUE )
         NEKO_EXCEPT( "Shader compiler is not present on this platform" );
-
-      rootFilePath_ = platform::getCurrentDirectory();
-      rootFilePath_.append( c_shadersBaseDirectory );
 
       world_ = make_unique<MappedGLBuffer<neko::uniforms::World>>();
       processing_ = make_unique<MappedGLBuffer<neko::uniforms::Processing>>();
@@ -212,10 +207,7 @@ namespace neko {
         NEKO_EXCEPT( "Maximum include depth exceeded; circular dependency?" );
       }
 
-      utf8String source;
-      auto file = Locator::fileSystem().openFile( rootFilePath_ + platform::utf8ToWide( filename ) );
-      source.resize( file->size() );
-      file->read( &source[0], (uint32_t)file->size() );
+      utf8String source = Locator::fileSystem().openFile( Dir_Shaders, filename )->readFullString();
       stringstream ss( source );
       utf8String line;
       utf8String out;

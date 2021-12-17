@@ -76,7 +76,7 @@ namespace neko {
   {
     vector<uint8_t> input, output;
     unsigned int wo, ho;
-    Locator::fileSystem().openFile( c_guiBaseDirectory + filename )->readFullVector( input );
+    Locator::fileSystem().openFile( Dir_GUI, filename )->readFullVector( input );
 
     if ( lodepng::decode( output, wo, ho, input.data(), input.size(), LCT_RGBA, 8 ) != 0 )
       NEKO_EXCEPT( "Lodepng image load failed" );

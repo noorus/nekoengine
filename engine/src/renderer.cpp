@@ -244,7 +244,7 @@ namespace neko {
   TexturePtr Renderer::loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering )
   {
     vector<uint8_t> input, output;
-    Locator::fileSystem().openFile( filepath )->readFullVector( input );
+    Locator::fileSystem().openFileAbsolute( filepath )->readFullVector( input );
     unsigned int w, h;
     if ( lodepng::decode( output, w, h, input.data(), input.size(), LCT_RGBA, 8 ) != 0 )
       NEKO_EXCEPT( "Lodepng image load failed" );
@@ -255,7 +255,7 @@ namespace neko {
   {
     resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
 
-    materials_->loadFile( R"(data\materials.json)" );
+    materials_->loadFile( R"(materials.json)" );
 
     loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
 

@@ -553,7 +553,7 @@ namespace neko {
       return;
     }
 
-    TextFileReader reader( Locator::fileSystem().openFile( filename ) );
+    TextFileReader reader( Locator::fileSystem().openFile( Dir_User, filename ) );
     const auto source = reader.readFullAssumeUtf8();
     stringstream ss( source );
 

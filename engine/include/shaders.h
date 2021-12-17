@@ -154,7 +154,6 @@ namespace neko {
     class Shaders: public nocopy {
     protected:
       ConsolePtr console_;
-      wstring rootFilePath_;
       ShaderVector shaders_;
       ProgramVector programs_;
       PipelineMap pipelines_;

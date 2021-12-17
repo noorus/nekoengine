@@ -59,7 +59,7 @@ namespace neko {
     nt_.load( this );
     fnt_ = nt_.mgr()->createFont();
     vector<uint8_t> input;
-    Locator::fileSystem().openFile( R"(C:\Code\nekoengine\bin\assets\fonts\SourceHanSansJP-Bold.otf)" )->readFullVector( input );
+    Locator::fileSystem().openFile( Dir_Fonts, R"(SourceHanSansJP-Bold.otf)" )->readFullVector( input );
     nt_.mgr()->loadFont( fnt_, input, 24.0f );
     txt_ = nt_.mgr()->createText( fnt_ );
     txt_->pen( vec3( 100.0f, 100.0f, 0.0f ) );

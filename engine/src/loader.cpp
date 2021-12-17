@@ -14,11 +14,6 @@ namespace neko {
 
   const string c_loaderThreadName = "nekoLoader";
 
-  const char c_fontsBaseDirectory[] = R"(assets\fonts\)";
-  const char c_texturesBaseDirectory[] = R"(assets\textures\)";
-  const char c_meshesBaseDirectory[] = R"(assets\meshes\)";
-  const char c_animationsBaseDirectory[] = R"(assets\animations\)";
-
   ThreadedLoader::ThreadedLoader(): thread_( c_loaderThreadName, threadProc, this )
   {
   }
@@ -216,14 +211,12 @@ namespace neko {
       {
         for ( const auto& target : task.textureLoad.paths_ )
         {
-          auto path = c_texturesBaseDirectory + target;
-
           vector<uint8_t> input;
           unsigned int width, height;
-          Locator::fileSystem().openFile( path )->readFullVector( input );
+          Locator::fileSystem().openFile( Dir_Textures, target )->readFullVector( input );
           MaterialLayer layer;
           vector<uint8_t> rawData;
-          auto ext = utils::extractExtension( path );
+          auto ext = utils::extractExtension( target );
           if ( ext == L"png" )
           {
             if ( lodepng::decode( rawData, width, height, input.data(), input.size(), LCT_RGBA, 8 ) == 0 )
@@ -373,7 +366,7 @@ namespace neko {
       }
       else if ( task.type_ == LoadTask::Load_Fontface )
       {
-        auto path = c_fontsBaseDirectory + task.fontfaceLoad.path_;
+        auto path = task.fontfaceLoad.path_;
 
         /*vector<uint8_t> input;
         Locator::fileSystem().openFile( path )->readFullVector( input );
@@ -384,15 +377,15 @@ namespace neko {
       }
       else if ( task.type_ == LoadTask::Load_Model )
       {
-        auto path = c_meshesBaseDirectory + task.modelLoad.path_;
+        auto path = task.modelLoad.path_;
         auto filename = utils::extractFilename( path );
-        auto filepath = utils::extractFilepath( path );
+        auto filepath = utils::extractFilepath( R"(assets\meshes\)" + path );
         auto ext = utils::extractExtension( path );
 
         if ( ext == L"gltf" )
         {
           vector<uint8_t> input;
-          Locator::fileSystem().openFile( path )->readFullVector( input );
+          Locator::fileSystem().openFile( Dir_Meshes, path )->readFullVector( input );
           loaders::loadGLTFModel( input, platform::wideToUtf8( filename ), platform::wideToUtf8( filepath ), task.modelLoad.node_ );
         }
         else

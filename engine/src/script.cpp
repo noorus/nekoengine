@@ -21,10 +21,8 @@ namespace neko {
   using v8::FunctionTemplate;
   using v8::Value;
 
-  Script::Script( ScriptingContext* globalCtx, const utf8String& name,
-    const utf8String& filepath ):
-    globalContext_( globalCtx ), name_( name ),
-    filename_( filepath ), status_( Status_Unknown )
+  Script::Script( ScriptingContext* globalCtx, const utf8String& name ):
+  globalContext_( globalCtx ), name_( name ), status_( Status_Unknown )
   {
     //
   }
@@ -46,7 +44,7 @@ namespace neko {
 
     utf8String source;
     {
-      TextFileReader reader( Locator::fileSystem().openFile( filename_ ) );
+      TextFileReader reader( Locator::fileSystem().openFile( Dir_Scripts, name_ ) );
       source = move( reader.readFullAssumeUtf8() );
     }
 
