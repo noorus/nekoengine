@@ -11,9 +11,21 @@
 
 namespace neko {
 
-  using Font = newtype::Font;
-  using FontPtr = newtype::FontPtr;
-  using FontVector = newtype::FontVector;
+  struct FontStyleData {
+    newtype::StyleID id_;
+    MaterialPtr material_;
+  };
+
+  class Font {
+  public:
+    newtype::FontPtr font_;
+    newtype::FontFacePtr face_;
+    map<newtype::StyleID, FontStyleData> styles_;
+    bool usable( newtype::StyleID style ) const;
+  };
+
+  using FontPtr = shared_ptr<Font>;
+  using FontVector = vector<FontPtr>;
 
   struct NewtypeLibrary {
   public:
@@ -24,10 +36,6 @@ namespace neko {
     void load( newtype::Host* host );
     void unload();
     inline newtype::Manager* mgr() { return manager_; }
-  };
-
-  struct FontData {
-    MaterialPtr material_;
   };
 
   struct TextData {
@@ -82,17 +90,17 @@ namespace neko {
     EnginePtr engine_;
     Renderer* renderer_;
     NewtypeLibrary nt_;
-    newtype::FontPtr fnt_;
+    FontPtr fnt_;
     newtype::TextPtr txt_;
-    map<newtype::IDType, FontData> fontdata_;
+    map<newtype::IDType, FontPtr> ntfonts_;
     //map<newtype::IDType, TextData> textdata_;
     unique_ptr<TextRenderBuffer> mesh_;
   public:
     void* newtypeMemoryAllocate( uint32_t size ) override;
     void* newtypeMemoryReallocate( void* address, uint32_t newSize ) override;
     void newtypeMemoryFree( void* address ) override;
-    void newtypeFontTextureCreated( newtype::Font& font, newtype::Texture& texture ) override;
-    void newtypeFontTextureDestroyed( newtype::Font& font, newtype::Texture& texture ) override;
+    void newtypeFontTextureCreated( newtype::Font& font, newtype::StyleID style, newtype::Texture& texture ) override;
+    void newtypeFontTextureDestroyed( newtype::Font& font, newtype::StyleID style, newtype::Texture& texture ) override;
   public:
     FontManager( EnginePtr engine );
     ~FontManager();

@@ -84,7 +84,6 @@ namespace neko {
     } textureLoad;
     struct FontfaceLoad {
       FontPtr font_;
-      Font::Specs specs_;
       utf8String path_;
     } fontfaceLoad;
     struct ModelLoad {
@@ -103,8 +102,6 @@ namespace neko {
     LoadTask( FontPtr font, const utf8String& path, Real pointSize ): type_( Load_Fontface )
     {
       fontfaceLoad.font_ = move( font );
-      fontfaceLoad.specs_.atlasSize_ = vec2i( 1024, 1024 );
-      fontfaceLoad.specs_.pointSize_ = pointSize;
       fontfaceLoad.path_ = path;
     }
     LoadTask( SceneNode* modelRootNode, const utf8String& path ): type_( Load_Model )
