@@ -1,15 +1,15 @@
-#include "stdafx.h"
-#include "tankengine.h"
-#include "discord.h"
-#include "steam.h"
+#include "pch.h"
+#include "rainet.h"
+#include "rainet_discord.h"
+#include "rainet_steam.h"
 
-namespace tank {
+namespace rainet {
 
-  TankEngine::TankEngine( TankHost* host ): host_( host )
+  System::System( Host* host ): host_( host )
   {
   }
 
-  void TankEngine::initialize( int64_t discordAppID, uint32_t steamAppID )
+  void System::initialize( int64_t discordAppID, uint32_t steamAppID )
   {
     if ( steamAppID )
     {
@@ -29,7 +29,7 @@ namespace tank {
     }
   }
 
-  Account* TankEngine::accountBySteamID( SteamSnowflake id, bool create )
+  Account* System::accountBySteamID( SteamSnowflake id, bool create )
   {
     if ( me_.steamId_ == id )
       return &me_;
@@ -51,12 +51,12 @@ namespace tank {
     return nullptr;
   }
 
-  Account* TankEngine::accountMe()
+  Account* System::accountMe()
   {
     return &me_;
   }
 
-  Account* TankEngine::account( uint64_t id )
+  Account* System::account( uint64_t id )
   {
     if ( me_.id_ == id )
       return &me_;
@@ -65,7 +65,7 @@ namespace tank {
     return nullptr;
   }
 
-  void TankEngine::update( double gameTime, double delta )
+  void System::update( double gameTime, double delta )
   {
     if ( steam_ )
       steam_->update( gameTime, delta );
@@ -73,7 +73,7 @@ namespace tank {
       discord_->update( gameTime, delta );
   }
 
-  void TankEngine::changeActivity_AlphaDevelop() throw()
+  void System::changeActivity_AlphaDevelop() throw()
   {
     if ( discord_ )
       discord_->setActivityAlphaDevelop();
@@ -81,12 +81,12 @@ namespace tank {
 
   static GameInstallationState g_emptyGameInstallation;
 
-  const GameInstallationState& TankEngine::localInstallation() throw()
+  const GameInstallationState& System::localInstallation() throw()
   {
     return g_emptyGameInstallation;
   }
 
-  const GameInstallationState& TankEngine::steamInstallation() throw()
+  const GameInstallationState& System::steamInstallation() throw()
   {
     if ( !steam_ )
       return g_emptyGameInstallation;
@@ -94,44 +94,44 @@ namespace tank {
     return steam_->installation();
   }
 
-  bool TankEngine::startedFromSteam()
+  bool System::startedFromSteam()
   {
     if ( !steam_ )
       return false;
     return ( !steam_->commandline().empty() );
   }
 
-  void TankEngine::statIncrement( const utf8String& name )
+  void System::statIncrement( const utf8String& name )
   {
     if ( steam_ )
       steam_->statAdd( name, 1 );
   }
 
-  void TankEngine::statAdd( const utf8String& name, int value )
+  void System::statAdd( const utf8String& name, int value )
   {
     if ( steam_ )
       steam_->statAdd( name, value );
   }
 
-  void TankEngine::statAdd( const utf8String& name, float value )
+  void System::statAdd( const utf8String& name, float value )
   {
     if ( steam_ )
       steam_->statAdd( name, value );
   }
 
-  void TankEngine::uploadStats()
+  void System::uploadStats()
   {
     if ( steam_ )
       steam_->uploadStats();
   }
 
-  const map<utf8String, SteamStat>& TankEngine::steamStats()
+  const map<utf8String, SteamStat>& System::steamStats()
   {
     assert( steam_ );
     return steam_->myStats().map_;
   }
 
-  void TankEngine::shutdown()
+  void System::shutdown()
   {
     if ( discord_ )
     {
@@ -146,7 +146,7 @@ namespace tank {
     }
   }
 
-  TankEngine::~TankEngine()
+  System::~System()
   {
     //
   }

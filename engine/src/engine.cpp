@@ -33,9 +33,9 @@ namespace neko {
 #endif
 
 #ifdef _DEBUG
-  const wchar_t* c_tankLibraryName = L"tankengine_d.dll";
+  const wchar_t* c_rainetLibraryName = L"rainet_d.dll";
 #else
-  const wchar_t* c_tankLibraryName = L"tankengine.dll";
+  const wchar_t* c_rainetLibraryName = L"rainet.dll";
 #endif
 
   Engine::Engine( ConsolePtr console, const Environment& env ):
@@ -85,24 +85,24 @@ namespace neko {
     return flags;
   }
 
-  void TankLibrary::load( tank::TankHost* host )
+  void RainetLibrary::load( rainet::Host* host )
   {
-    module_ = LoadLibraryW( c_tankLibraryName );
+    module_ = LoadLibraryW( c_rainetLibraryName );
     if ( !module_ )
-      NEKO_EXCEPT( "TankEngine load failed" );
-    pfnTankInitialize = reinterpret_cast<tank::fnTankInitialize>( GetProcAddress( module_, "tankInitialize" ) );
-    pfnTankShutdown = reinterpret_cast<tank::fnTankShutdown>( GetProcAddress( module_, "tankShutdown" ) );
-    if ( !pfnTankInitialize || !pfnTankShutdown )
-      NEKO_EXCEPT( "TankEngine export resolution failed" );
-    engine_ = pfnTankInitialize( 1, host );
+      NEKO_EXCEPT( "Rainet load failed" );
+    pfnInitialize = reinterpret_cast<rainet::fnInitialize>( GetProcAddress( module_, "rainetInitialize" ) );
+    pfnShutdown = reinterpret_cast<rainet::fnShutdown>( GetProcAddress( module_, "rainetShutdown" ) );
+    if ( !pfnInitialize || !pfnShutdown )
+      NEKO_EXCEPT( "Rainet export resolution failed" );
+    engine_ = pfnInitialize( rainet::c_headerVersion, host );
     if ( !engine_ )
-      NEKO_EXCEPT( "TankEngine init failed" );
+      NEKO_EXCEPT( "Rainet init failed" );
   }
 
-  void TankLibrary::unload()
+  void RainetLibrary::unload()
   {
-    if ( engine_ && pfnTankShutdown )
-      pfnTankShutdown( engine_ );
+    if ( engine_ && pfnShutdown )
+      pfnShutdown( engine_ );
     // if ( module_ )
     //   FreeLibrary( module_ );
   }
@@ -219,7 +219,7 @@ namespace neko {
     }
   }
 
-  void Engine::onSteamStatsUpdated( tank::StateUpdateIndex index )
+  void Engine::onSteamStatsUpdated( rainet::StateUpdateIndex index )
   {
     if ( index == 0 )
       tanklib_.engine_->statIncrement( "dev_launches" );
@@ -227,7 +227,7 @@ namespace neko {
     stats_.f_timeWasted.store( tanklib_.engine_->steamStats().at( "dev_debugTime" ).f_ );
   }
 
-  void Engine::onAccountUpdated( const tank::Account& user )
+  void Engine::onAccountUpdated( const rainet::Account& user )
   {
     if ( user.steamId_ && user.steamImage_ )
       messaging_->send( M_Extern_TankAccountUpdated, 1, static_cast<size_t>( user.id_ ) );
@@ -255,7 +255,7 @@ namespace neko {
 #endif
   }
 
-  const tank::GameInstallationState& Engine::installationInfo()
+  const rainet::GameInstallationState& Engine::installationInfo()
   {
     #ifdef NEKO_USE_STEAM
     if ( tanklib_.engine_->startedFromSteam() )

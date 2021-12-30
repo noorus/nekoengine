@@ -1,8 +1,7 @@
-#include "stdafx.h"
-#include "discord.h"
-#include "neko_exception.h"
+#include "pch.h"
+#include "rainet_discord.h"
 
-namespace tank {
+namespace rainet {
 
   struct Snowflake {
   private:
@@ -72,7 +71,7 @@ namespace tank {
     });*/
   }
 
-  Discord::Discord( int64_t clientID, int64_t applicationID, uint32_t steamAppID, TankHost* host ):
+  Discord::Discord( int64_t clientID, int64_t applicationID, uint32_t steamAppID, Host* host ):
   clientID_( clientID ), appID_( applicationID ), host_( host )
   {
     SetEnvironmentVariableW( L"DISCORD_INSTANCE_ID", L"0" );
@@ -80,7 +79,7 @@ namespace tank {
     discord::Core* core = nullptr;
     auto result = discord::Core::Create( clientID_, DiscordCreateFlags_Default, &core );
     if ( result != discord::Result::Ok || !core )
-      NEKO_EXCEPT( "Discord core create failed" );
+      RAINET_EXCEPT( "Discord core create failed" );
 
     core_.reset( core );
 
@@ -187,7 +186,7 @@ namespace tank {
       return;
 
     if ( result != discord::Result::Ok )
-      NEKO_EXCEPT( "Discord callbacks run failed" );
+      RAINET_EXCEPT( "Discord callbacks run failed" );
 
     // char asd[1024];
 

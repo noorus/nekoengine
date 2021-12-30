@@ -1,21 +1,21 @@
-#include "stdafx.h"
-#include "tankengine.h"
+#include "pch.h"
+#include "rainet.h"
 
-const uint32_t c_libraryVersion = 1;
-static std::unique_ptr<tank::TankEngine> g_instance;
+const uint32_t c_libraryVersion = rainet::c_headerVersion;
+static std::unique_ptr<rainet::System> g_instance;
 
 extern "C" {
 
-  TANK_EXPORT tank::TankEngine* TANK_CALL tankInitialize( uint32_t version, tank::TankHost* host )
+  RAINET_EXPORT rainet::System* RAINET_CALL rainetInitialize( uint32_t version, rainet::Host* host )
   {
     if ( version != c_libraryVersion )
       return nullptr;
 
-    g_instance = std::make_unique<tank::TankEngine>( host );
+    g_instance = std::make_unique<rainet::System>( host );
     return g_instance.get();
   }
 
-  TANK_EXPORT void TANK_CALL tankShutdown( tank::TankEngine* engine )
+  RAINET_EXPORT void RAINET_CALL rainetShutdown( rainet::System* engine )
   {
     g_instance.reset();
   }

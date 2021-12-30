@@ -1,9 +1,9 @@
 #pragma once
 
-#include "tankengine.h"
+#include "rainet.h"
 #include "discord/cpp/discord.h"
 
-namespace tank {
+namespace rainet {
 
   struct DiscordUser {
     DcSnowflake id_;
@@ -29,7 +29,7 @@ namespace tank {
 
   class Discord {
   private:
-    TankHost* host_;
+    Host* host_;
     unique_ptr<discord::Core> core_;
     int64_t clientID_;
     int64_t appID_;
@@ -38,7 +38,7 @@ namespace tank {
   protected:
     void fetchImage( DiscordUser& user );
   public:
-    Discord( int64_t clientID, int64_t applicationID, uint32_t steamAppID, TankHost* host );
+    Discord( int64_t clientID, int64_t applicationID, uint32_t steamAppID, Host* host );
     void initialize();
     void setActivityAlphaDevelop();
     inline const GameInstallationState& installation() throw() { return installation_; }

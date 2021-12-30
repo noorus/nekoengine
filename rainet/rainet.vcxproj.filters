@@ -19,14 +19,14 @@
     <Filter Include="Header Files\discord">
       <UniqueIdentifier>{7bb9851b-3574-4caa-b429-6ffaeb123bc5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\shared">
-      <UniqueIdentifier>{43df2269-6631-445c-b32f-c5d2ec89aad0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\steam">
       <UniqueIdentifier>{26dee652-dbc5-4c1d-9f0c-c46433b29697}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\extern\discord\cpp\achievement_manager.h">
       <Filter>Header Files\discord</Filter>
     </ClInclude>
@@ -78,16 +78,16 @@
     <ClInclude Include="..\extern\discord\cpp\voice_manager.h">
       <Filter>Header Files\discord</Filter>
     </ClInclude>
-    <ClInclude Include="include\discord.h">
+    <ClInclude Include="include\rainet_discord.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\stdafx.h">
+    <ClInclude Include="include\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\shared\include\tankengine.h">
+    <ClInclude Include="..\shared\include\rainet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamapplist.h">
@@ -225,7 +225,7 @@
     <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamuniverse.h">
       <Filter>Header Files\steam</Filter>
     </ClInclude>
-    <ClInclude Include="include\steam.h">
+    <ClInclude Include="include\rainet_steam.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -278,11 +278,8 @@
     <ClCompile Include="src\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\stdafx.cpp">
+    <ClCompile Include="src\pch.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\shared\src\exception.cpp">
-      <Filter>Source Files\shared</Filter>
     </ClCompile>
     <ClCompile Include="src\engine.cpp">
       <Filter>Source Files</Filter>
@@ -290,5 +287,10 @@
     <ClCompile Include="src\steam.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="rainet.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tankengine.h"
+#include "rainet.h"
 
 #pragma warning( push )
 #pragma warning( disable : 4819 )
@@ -13,7 +13,7 @@
 #include "steam/isteammatchmaking.h"
 #pragma warning( pop )
 
-namespace tank {
+namespace rainet {
 
   struct SteamUser
   {
@@ -51,8 +51,8 @@ namespace tank {
 
   class Steam {
   private:
-    static TankHost* host_;
-    static TankEngine* eng_;
+    static Host* host_;
+    static System* eng_;
     uint32_t appID_;
     SteamState state_;
     GameInstallationState installation_;
@@ -74,7 +74,7 @@ namespace tank {
   protected:
     void fetchImage( SteamUser& user );
   public:
-    Steam( uint32_t applicationID, TankHost* host, TankEngine* engine );
+    Steam( uint32_t applicationID, Host* host, System* engine );
     static void baseInitialize();
     static void baseShutdown();
     inline const GameInstallationState& installation() throw() { return installation_; }

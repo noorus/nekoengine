@@ -5,7 +5,7 @@
 #include "console.h"
 #include "messaging.h"
 #include "director.h"
-#include "tankengine.h"
+#include "rainet.h"
 
 namespace neko {
 
@@ -21,13 +21,13 @@ namespace neko {
     utf8String compiler;
   };
 
-  struct TankLibrary {
+  struct RainetLibrary {
   public:
     HMODULE module_;
-    tank::TankEngine* engine_;
-    tank::fnTankInitialize pfnTankInitialize;
-    tank::fnTankShutdown pfnTankShutdown;
-    void load( tank::TankHost* host );
+    rainet::System* engine_;
+    rainet::fnInitialize pfnInitialize;
+    rainet::fnShutdown pfnShutdown;
+    void load( rainet::Host* host );
     void unload();
   };
 
@@ -38,7 +38,7 @@ namespace neko {
 
   //! \class Engine
   //! The main engine class that makes the world go round
-  class Engine: public enable_shared_from_this<Engine>, public nocopy, public Listener, public tank::TankHost {
+  class Engine: public enable_shared_from_this<Engine>, public nocopy, public Listener, public rainet::Host {
   public:
     //! Possible signal values interpreted by the engine's gameloop
     enum Signal {
@@ -68,7 +68,7 @@ namespace neko {
     DirectorPtr director_;
     // InputPtr input_;
     EngineInfo info_;
-    TankLibrary tanklib_;
+    RainetLibrary tanklib_;
     Environment env_;
   protected:
     struct State {
@@ -92,8 +92,8 @@ namespace neko {
     void onDiscordDebugPrint( const utf8String& message ) override;
     void onSteamDebugPrint( const utf8String& message ) override;
     void onSteamOverlayToggle( bool enabled ) override;
-    void onSteamStatsUpdated( tank::StateUpdateIndex index ) override;
-    void onAccountUpdated( const tank::Account& user ) override;
+    void onSteamStatsUpdated( rainet::StateUpdateIndex index ) override;
+    void onAccountUpdated( const rainet::Account& user ) override;
   public:
     inline const EngineInfo& info() const noexcept { return info_; }
     inline ConsolePtr console() noexcept { return console_; }
@@ -108,9 +108,9 @@ namespace neko {
     inline DirectorPtr director() noexcept { return director_; }
     inline atomic<GameTime>& renderTime() noexcept { return rendererTime_; }
     inline const utf8String& listFlags();
-    const tank::GameInstallationState& installationInfo();
+    const rainet::GameInstallationState& installationInfo();
     inline const Stats& stats() const noexcept { return stats_; }
-    inline tank::TankEngine* tanklib() { return tanklib_.engine_; }
+    inline rainet::System* tanklib() { return tanklib_.engine_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console, const Environment& env );
