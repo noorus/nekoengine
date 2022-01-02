@@ -139,11 +139,6 @@
 // JSON
 #include <json.hpp>
 
-// FBX
-#ifndef NEKO_NO_FBX
-# include <fbxsdk.h>
-#endif
-
 // OZZ
 #ifndef NEKO_NO_ANIMATION
 # include <ozz/animation/runtime/animation.h>
@@ -157,7 +152,6 @@
 # include <ozz/base/maths/vec_float.h>
 # include <ozz/animation/offline/animation_builder.h>
 # include <ozz/animation/offline/raw_animation.h>
-# include <ozz/animation/offline/fbx/fbx.h>
 #endif
 
 // Local types

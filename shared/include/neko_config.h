@@ -36,8 +36,6 @@
 // Define to disable the OZZ animation system stuff. Will probably break momentarily.
 #define NEKO_NO_ANIMATION
 
-#define NEKO_NO_FBX
-
 // Intel graphics drivers shit the bed every time when freeing stuff on exit.
 // Set this to force an ExitProcess() instead when debugging on an Intel chip in order to not waste time.
 // EDIT: This is now a project-level preprocessor directive, don't set or unset it here.

@@ -4,10 +4,6 @@
 #include "font.h"
 #include "gfx_types.h"
 
-#ifndef NEKO_NO_ANIMATION
-# include <ozz/animation/offline/fbx/fbx.h>
-#endif
-
 namespace neko {
 
   class SceneNode;
@@ -53,20 +49,6 @@ namespace neko {
 #endif
 
     void loadGLTFModel( const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, SceneNode* out );
-
-#ifndef NEKO_NO_FBX
-    class FbxLoader {
-    protected:
-      fbxsdk::FbxManager* fbxmgr_;
-      fbxsdk::FbxIOSettings* fbxio_;
-      unique_ptr<ozz::animation::offline::fbx::FbxSystemConverter> converter_;
-      void parseFBXNode( fbxsdk::FbxNode* node, SceneNode& out );
-    public:
-      FbxLoader();
-      void loadFBXScene( const vector<uint8_t>& data, const utf8String& filename, SceneNode* rootNode );
-      ~FbxLoader();
-    };
-#endif
 
   }
 
@@ -133,9 +115,6 @@ namespace neko {
     vector<SceneNode*> finishedModels_;
     FontVector finishedFonts_;
     AnimationVector finishedAnimations_;
-#ifndef NEKO_NO_FBX
-    loaders::FbxLoader fbxLoader_;
-#endif
     void handleNewTasks();
   private:
     static bool threadProc( platform::Event& running, platform::Event& wantStop, void* argument );

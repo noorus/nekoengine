@@ -276,9 +276,6 @@
     <ClCompile Include="src\loader.cpp">
       <Filter>Source Files\loader</Filter>
     </ClCompile>
-    <ClCompile Include="src\loader_fbx.cpp">
-      <Filter>Source Files\loader</Filter>
-    </ClCompile>
     <ClCompile Include="src\loader_unity.cpp">
       <Filter>Source Files\loader</Filter>
     </ClCompile>

@@ -258,27 +258,6 @@ namespace neko {
               free( exr_values );
               task.textureLoad.material_->layers_.push_back( move( layer ) );
             }
-            /*const char* miniexr_err = nullptr;
-            size_t data_size;
-            EXRVersion version;
-            auto ret = ParseEXRVersionFromMemory( &version, input.data(), input.size() );
-            if ( ret != TINYEXR_SUCCESS )
-              NEKO_EXCEPT( "ParseEXRVersionFromMemory failed" );
-            if ( version.multipart || version.non_image )
-              NEKO_EXCEPT( "EXR is multipart or non-image" );
-            EXRHeader header;
-            InitEXRHeader( &header );
-            ret = ParseEXRHeaderFromMemory( &header, &version, input.data(), input.size(), &miniexr_err );
-            if ( ret != TINYEXR_SUCCESS )
-              NEKO_EXCEPT( "ParseEXRHeaderFromMemory failed" );
-            EXRImage image;
-            InitEXRImage( &image );
-            ret = LoadEXRImageFromMemory( &image, &header, input.data(), input.size(), &miniexr_err );
-            if ( ret != TINYEXR_SUCCESS )
-              NEKO_EXCEPT( "LoadEXRImageFromMemory failed" );
-            image.
-            FreeEXRImage( &image );
-            FreeEXRHeader( &header );*/
           }
           else if ( ext == L"tif" )
           {
@@ -390,8 +369,6 @@ namespace neko {
         }
         else
           NEKO_EXCEPT( "Unsupported mesh format in load model task" );
-        //platform::FileReader( task.modelLoad.path_ ).readFullVector( input );
-        /*fbxLoader_.loadFBXScene( input, path, task.modelLoad.node_ );*/
         finishedTasksLock_.lock();
         finishedModels_.push_back( task.modelLoad.node_ );
         finishedTasksLock_.unlock();
