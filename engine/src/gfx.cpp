@@ -217,7 +217,7 @@ namespace neko {
     renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
 
     auto documentsPath = platform::wideToUtf8( engine.env().documentsPath_ );
-    gui_->initialize( this, documentsPath, *window_.get() );
+    gui_->initialize( this, documentsPath, *window_ );
     gui_->poop();
 
     input_->initialize( window_->getSystemHandle() );
@@ -416,6 +416,7 @@ namespace neko {
   {
   }
 
+  // Context: Renderer thread
   void ThreadedRenderer::initialize()
   {
     gfx_ = make_shared<Gfx>( loader_, fonts_, messaging_, director_, console_ );
@@ -423,6 +424,13 @@ namespace neko {
     lastTime_ = 0.0;
   }
 
+  // Context: Renderer thread
+  void ThreadedRenderer::shutdown()
+  {
+    gfx_.reset();
+  }
+
+  // Context: Renderer thread
   void ThreadedRenderer::run( platform::Event& wantStop )
   {
     while ( true )
@@ -466,6 +474,7 @@ namespace neko {
     myself->initialize();
     running.set();
     myself->run( wantStop );
+    myself->shutdown();
 
     platform::performanceTeardownCurrentThread();
     return true;

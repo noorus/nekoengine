@@ -9,104 +9,54 @@
 
 namespace neko {
 
-  constexpr uint32_t c_newtypeApiVersion = 1;
-
-#ifdef _DEBUG
-  const wchar_t* c_newtypeLibraryName = L"newtype_d.dll";
-#else
-  const wchar_t* c_newtypeLibraryName = L"newtype.dll";
-#endif
-
-  void NewtypeLibrary::load( newtype::Host* host )
-  {
-    module_ = LoadLibraryW( c_newtypeLibraryName );
-    if ( !module_ )
-      NEKO_EXCEPT( "Newtype load failed" );
-    pfnNewtypeInitialize = reinterpret_cast<newtype::fnNewtypeInitialize>( GetProcAddress( module_, "newtypeInitialize" ) );
-    pfnNewtypeShutdown = reinterpret_cast<newtype::fnNewtypeShutdown>( GetProcAddress( module_, "newtypeShutdown" ) );
-    if ( !pfnNewtypeInitialize || !pfnNewtypeShutdown )
-      NEKO_EXCEPT( "Newtype export resolution failed" );
-    manager_ = pfnNewtypeInitialize( c_newtypeApiVersion, host );
-    if ( !manager_ )
-      NEKO_EXCEPT( "TankEngine init failed" );
-  }
-
-  void NewtypeLibrary::unload()
-  {
-    if ( manager_ && pfnNewtypeShutdown )
-      pfnNewtypeShutdown( manager_ );
-    if ( module_ )
-      FreeLibrary( module_ );
-  }
-
-  void* FontManager::newtypeMemoryAllocate( uint32_t size )
-  {
-    return Locator::memory().alloc( Memory::Sector::Graphics, size );
-  }
-
-  void* FontManager::newtypeMemoryReallocate( void* address, uint32_t newSize )
-  {
-    return Locator::memory().realloc( Memory::Sector::Graphics, address, newSize );
-  }
-
-  void FontManager::newtypeMemoryFree( void* address )
-  {
-    Locator::memory().free( Memory::Sector::Graphics, address );
-  }
-
-  FontManager::FontManager( EnginePtr engine ): engine_( engine )
-  {
-  }
-
-  FontManager::~FontManager()
-  {
-    //
-  }
-
-  void FontManager::initialize()
+  void FontManager::initializeLogic()
   {
     nt_.load( this );
 
     engine_->console()->printf( Console::srcGfx, "Newtype reported: %s", nt_.mgr()->versionString().c_str() );
 
-    fnt_ = make_shared<Font>();
-    fnt_->font_ = nt_.mgr()->createFont();
-    ntfonts_[fnt_->font_->id()] = fnt_;
-    fnt_->font_->setUser( fnt_.get() );
+    fnt_ = make_shared<Font>( nt_.mgr() );
+    ntfonts_[fnt_->id()] = fnt_;
     vector<uint8_t> input;
     Locator::fileSystem().openFile( Dir_Fonts, R"(SourceHanSansJP-Bold.otf)" )->readFullVector( input );
-    fnt_->face_ = nt_.mgr()->loadFace( fnt_->font_, input, 0, 24.0f );
-    auto sid = nt_.mgr()->loadStyle( fnt_->face_, newtype::FontRender_Normal, 0.0f );
-    fnt_->styles_[sid].id_ = sid;
+    fnt_->loadFace( input, 0, 24.0f );
+    auto sid = fnt_->loadStyle( newtype::FontRender_Normal, 0.0f );
 
     createText( fnt_, sid );
   }
 
-  TextPtr FontManager::createText( FontPtr font, newtype::StyleID style )
+  Font::Font( newtype::Manager* manager ): mgr_( manager )
   {
-    auto txt = make_shared<Text>();
-    txt->font_ = font;
-    txt->text_ = nt_.mgr()->createText( font->face_, style );
-    txt->text_->pen( vec3( 100.0f, 100.0f, 0.0f ) );
-    auto content = unicodeString::fromUTF8( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class." );
-    txt->text_->setText( content );
-    txts_.push_back( txt );
-    return txt;
+    font_ = mgr_->createFont();
+    font_->setUser( this );
   }
 
-  void FontManager::newtypeFontTextureCreated( newtype::Font& ntfont, newtype::StyleID style, newtype::Texture& texture )
+  void Font::loadFace( span<uint8_t> buffer, newtype::FaceID faceIndex, Real size )
   {
-    auto font = reinterpret_cast<Font*>( ntfont.getUser() );
+    assert( font_ );
+    face_ = mgr_->loadFace( font_, buffer, faceIndex, size );
   }
 
-  void FontManager::newtypeFontTextureDestroyed( newtype::Font& ntfont, newtype::StyleID style, newtype::Texture& texture )
+  newtype::StyleID Font::loadStyle( newtype::FontRendering rendering, Real thickness )
   {
-    auto font = reinterpret_cast<Font*>( ntfont.getUser() );
+    assert( face_ );
+    auto sid = mgr_->loadStyle( face_, rendering, thickness );
+    styles_[sid].id_ = sid;
+    return sid;
   }
 
-  void FontManager::prepareLogic( GameTime time )
+  newtype::IDType Font::id() const
   {
-    //
+    return font_->id();
+  }
+
+  Font::~Font()
+  {
+    // Make sure to free the face ref so it gets destroyed before the font
+    // ...hopefully
+    face_.reset();
+    mgr_->unloadFont( font_ );
+    font_.reset();
   }
 
   bool Font::usable( newtype::StyleID style ) const
@@ -166,43 +116,15 @@ namespace neko {
     }
   }
 
-  void FontManager::prepareRender( Renderer* renderer )
-  {
-    for ( const auto& entry : ntfonts_ )
-    {
-      entry.second->update( renderer );
-    }
-
-    for ( const auto& txt : txts_ )
-    {
-      txt->update( renderer );
-    }
-  }
-
-  void FontManager::draw( Renderer* renderer )
-  {
-    for ( auto& txt : txts_ )
-    {
-      const auto sid = txt->text_->styleid();
-      if ( txt->mesh_
-        && txt->font_
-        && txt->font_->usable( sid ) )
-      {
-        txt->mesh_->draw( renderer->shaders(),
-          txt->font_->styles_[sid].material_->textureHandle( 0 )
-        );
-      }
-    }
-  }
-
-  void FontManager::shutdown()
+  void FontManager::shutdownRender( Renderer* renderer )
   {
     txts_.clear();
-    for ( const auto& fnt : ntfonts_ )
-    {
-      nt_.mgr()->unloadFont( fnt.second->font_ );
-      fnt.second->font_.reset();
-    }
+    fnt_.reset();
+    ntfonts_.clear();
+  }
+
+  void FontManager::shutdownLogic()
+  {
     nt_.unload();
   }
 

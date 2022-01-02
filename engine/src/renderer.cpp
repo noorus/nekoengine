@@ -699,8 +699,14 @@ namespace neko {
     glBindVertexArray( builtin_.emptyVAO_ );
   }
 
+  void Renderer::shutdown()
+  {
+    fonts_->shutdownRender( this );
+  }
+
   Renderer::~Renderer()
   {
+    shutdown();
 #ifndef INTEL_SUCKS
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );

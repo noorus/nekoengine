@@ -17,12 +17,24 @@ namespace neko {
   };
 
   class Font {
-  public:
+  private:
+    newtype::Manager* mgr_;
     newtype::FontPtr font_;
     newtype::FontFacePtr face_;
     map<newtype::StyleID, FontStyleData> styles_;
+  public:
+    Font( newtype::Manager* manager );
+    newtype::IDType id() const;
+    void loadFace( span<uint8_t> buffer, newtype::FaceID faceIndex, Real size );
+    newtype::StyleID loadStyle( newtype::FontRendering rendering, Real thickness );
     bool usable( newtype::StyleID style ) const;
+    inline newtype::FontFacePtr face() { return face_; }
+    inline const FontStyleData& style( newtype::StyleID sid )
+    {
+      return styles_[sid];
+    }
     void update( Renderer* renderer );
+    ~Font();
   };
 
   using FontPtr = shared_ptr<Font>;
@@ -61,8 +73,8 @@ namespace neko {
       attribs.write( vao_ );
       gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
     }
-    inline BufferType& buffer() { return *buffer_.get(); }
-    inline IndicesType& indices() { return *indices_.get(); }
+    inline BufferType& buffer() { return *buffer_; }
+    inline IndicesType& indices() { return *indices_; }
     void draw( shaders::Shaders& shaders, gl::GLuint texture )
     {
       gl::glBindVertexArray( vao_ );
@@ -112,8 +124,10 @@ namespace neko {
   public:
     FontManager( EnginePtr engine );
     ~FontManager();
-    void initialize();
-    void shutdown();
+    void initializeLogic();
+    void initializeRender( Renderer* renderer );
+    void shutdownLogic();
+    void shutdownRender( Renderer* renderer );
     void prepareLogic( GameTime time );
     void prepareRender( Renderer* renderer );
     TextPtr createText( FontPtr font, newtype::StyleID style );

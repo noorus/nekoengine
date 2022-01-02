@@ -137,7 +137,7 @@ namespace neko {
 
     timer.start();
     fonts_ = make_shared<FontManager>( shared_from_this() );
-    fonts_->initialize();
+    fonts_->initializeLogic();
     console_->printf( Console::srcGfx, "Font manager init took %dms", (int)timer.stop() );
 
     timer.start();
@@ -383,7 +383,7 @@ namespace neko {
     loader_.reset();
 
     if ( fonts_ )
-      fonts_->shutdown();
+      fonts_->shutdownLogic();
 
     //input_.reset();
 

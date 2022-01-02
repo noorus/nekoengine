@@ -97,6 +97,7 @@ namespace neko {
   protected:
     static bool threadProc( platform::Event& running, platform::Event& wantStop, void* argument );
     void initialize();
+    void shutdown();
     void run( platform::Event& wantStop );
   public:
     ThreadedRenderer( EnginePtr engine, ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
