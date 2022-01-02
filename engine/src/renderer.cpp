@@ -13,7 +13,6 @@
 #include "particles.h"
 #include "math_aabb.h"
 #include "text.h"
-#include "tankengine.h"
 #include "filesystem.h"
 
 namespace neko {
@@ -415,7 +414,7 @@ namespace neko {
       dumpSceneGraph( *child, level + 1 );
   }
 
-  void Renderer::setUserData( uint64_t id, const utf8String name, tank::Image& image )
+  void Renderer::setUserData( uint64_t id, const utf8String name, rainet::Image& image )
   {
     userData_.name_ = name;
     userData_.image_ = createTextureWithData( "tankacc_" + id, image.width_, image.height_, PixFmtColorRGBA8, image.buffer_.data() );

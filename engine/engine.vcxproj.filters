@@ -446,9 +446,6 @@
     <ClInclude Include="..\shared\include\neko_compilerdef.h">
       <Filter>Header Files\shared</Filter>
     </ClInclude>
-    <ClInclude Include="..\shared\include\tankengine.h">
-      <Filter>Header Files\shared</Filter>
-    </ClInclude>
     <ClInclude Include="include\input.h">
       <Filter>Header Files\input</Filter>
     </ClInclude>
@@ -517,6 +514,12 @@
     </ClInclude>
     <ClInclude Include="include\filesystem.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\newtype\include\newtype.h">
+      <Filter>Header Files\extern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\include\rainet.h">
+      <Filter>Header Files\extern</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

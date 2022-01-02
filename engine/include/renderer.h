@@ -10,7 +10,7 @@
 #include "modelmanager.h"
 #include "scripting.h"
 #include "shaders.h"
-#include "tankengine.h"
+#include "rainet.h"
 
 namespace MyGUI {
 #ifndef NEKO_NO_GUI
@@ -205,7 +205,7 @@ namespace neko {
     void prepare( GameTime time );
     void uploadTextures();
     void uploadModels();
-    void setUserData( uint64_t id, const utf8String name, tank::Image& image );
+    void setUserData( uint64_t id, const utf8String name, rainet::Image& image );
     void jsRestart();
     inline shaders::Shaders& shaders() noexcept { return *( shaders_.get() ); }
     void draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui );

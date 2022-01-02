@@ -1,16 +1,15 @@
-#include "stdafx.h"
-#include "steam.h"
-#include "neko_exception.h"
+#include "pch.h"
+#include "rainet_steam.h"
 
 #include "steam/steam_api.h"
 #include "steam/isteamclient.h"
 
-namespace tank {
+namespace rainet {
 
-  TankHost* Steam::host_ = nullptr;
-  TankEngine* Steam::eng_ = nullptr;
+  Host* Steam::host_ = nullptr;
+  System* Steam::eng_ = nullptr;
 
-  Steam::Steam( uint32_t applicationID, TankHost* host, TankEngine* engine ):
+  Steam::Steam( uint32_t applicationID, Host* host, System* engine ):
   appID_( applicationID )
   {
     host_ = host;
@@ -119,7 +118,7 @@ namespace tank {
   void Steam::baseInitialize()
   {
     if ( !SteamAPI_Init() )
-      NEKO_EXCEPT( "Steam init failed" );
+      RAINET_EXCEPT( "Steam init failed" );
   }
 
   void Steam::baseShutdown()

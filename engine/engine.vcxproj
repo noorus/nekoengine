@@ -343,6 +343,7 @@
     <ClInclude Include="..\extern\tinytiff\tinytiff_defs.h" />
     <ClInclude Include="..\extern\tinytiff\tinytiff_tools.hxx" />
     <ClInclude Include="..\extern\tinytiff\tinytiff_version.h" />
+    <ClInclude Include="..\newtype\include\newtype.h" />
     <ClInclude Include="..\shared\include\math_aabb.h" />
     <ClInclude Include="..\shared\include\neko_algorithm.h" />
     <ClInclude Include="..\shared\include\neko_compilerdef.h" />
@@ -352,7 +353,7 @@
     <ClInclude Include="..\shared\include\neko_platform_windows.h" />
     <ClInclude Include="..\shared\include\neko_pooledtypes.h" />
     <ClInclude Include="..\shared\include\neko_types.h" />
-    <ClInclude Include="..\shared\include\tankengine.h" />
+    <ClInclude Include="..\shared\include\rainet.h" />
     <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\console.h" />
     <ClInclude Include="include\consolelistener.h" />

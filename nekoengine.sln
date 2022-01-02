@@ -10,7 +10,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "engine", "engine\engine.vcx
 		{8F88E3BB-3789-4B84-A8F3-B9F98BE2F8C6} = {8F88E3BB-3789-4B84-A8F3-B9F98BE2F8C6}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tankengine", "tankengine\tankengine.vcxproj", "{81900D20-E35B-48FB-8F6D-F9521559462B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rainet", "rainet\rainet.vcxproj", "{81900D20-E35B-48FB-8F6D-F9521559462B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nil", "nil\nil.vcxproj", "{8F88E3BB-3789-4B84-A8F3-B9F98BE2F8C6}"
 EndProject

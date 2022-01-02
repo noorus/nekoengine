@@ -2,10 +2,12 @@
 
 #include "neko_types.h"
 
-#define TANK_CALL __stdcall
-#define TANK_EXPORT __declspec( dllexport )
+#define RAINET_CALL __stdcall
+#define RAINET_EXPORT __declspec( dllexport )
 
-namespace tank {
+namespace rainet {
+
+  constexpr uint32_t c_headerVersion = 2;
 
   using std::unique_ptr;
   using std::shared_ptr;
@@ -85,7 +87,7 @@ namespace tank {
     unique_ptr<Image> steamImage_;
   };
 
-  class TankHost {
+  class Host {
   public:
     virtual void onDiscordDebugPrint( const utf8String& message ) = 0;
     virtual void onSteamDebugPrint( const utf8String& message ) = 0;
@@ -94,15 +96,15 @@ namespace tank {
     virtual void onAccountUpdated( const Account& user ) = 0;
   };
 
-  class TankEngine {
+  class System {
   private:
     unique_ptr<Discord> discord_;
     unique_ptr<Steam> steam_;
-    TankHost* host_;
+    Host* host_;
     map<uint64_t, unique_ptr<Account>> accounts_;
     Account me_;
   public:
-    TankEngine( TankHost* host );
+    System( Host* host );
     virtual void initialize( int64_t discordAppID, uint32_t steamAppID );
     virtual void changeActivity_AlphaDevelop() noexcept;
     virtual const GameInstallationState& localInstallation() noexcept;
@@ -118,10 +120,18 @@ namespace tank {
     virtual Account* accountBySteamID( SteamSnowflake id, bool create = false );
     virtual Account* accountMe();
     virtual Account* account( uint64_t id );
-    ~TankEngine();
+    ~System();
   };
 
-  using fnTankInitialize = TankEngine*( TANK_CALL* )( uint32_t version, TankHost* host );
-  using fnTankShutdown = void( TANK_CALL* )( TankEngine* engine );
+  using fnInitialize = System*( RAINET_CALL* )( uint32_t version, Host* host );
+  using fnShutdown = void( RAINET_CALL* )( System* engine );
+
+#ifdef RAINET_EXPORTS
+#if defined(RAINET_EXCEPT)
+# error RAINET_EXCEPT* macro already defined!
+#else
+# define RAINET_EXCEPT(description) {throw std::exception(description);}
+#endif
+#endif
 
 }
