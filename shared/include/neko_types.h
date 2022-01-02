@@ -26,6 +26,7 @@
 #include <optional>
 #include <atomic>
 #include <numbers>
+#include <span>
 
 #undef min
 #undef max
@@ -34,8 +35,6 @@
 #pragma warning( disable : 28251 )
 #include <moodycamel/readerwriterqueue.h>
 #pragma warning( pop )
-
-#include <gsl/gsl>
 
 // GLM
 #define GLM_FORCE_XYZW_ONLY // Hide rgba, stpq unions from vector types (avoiding bloat when examined in the debugger)
@@ -96,7 +95,7 @@ namespace neko {
 
   using std::atomic;
   using moodycamel::ReaderWriterQueue;
-  using gsl::span;
+  using std::span;
 
   namespace chrono {
     using namespace std::chrono;

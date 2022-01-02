@@ -78,9 +78,7 @@
 #include <any>
 #include <optional>
 #include <chrono>
-
-// GSL
-#include <gsl/gsl>
+#include <span>
 
 // OpenGL
 #include <glbinding/gl45core/gl.h>
