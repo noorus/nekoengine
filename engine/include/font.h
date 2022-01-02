@@ -12,7 +12,7 @@
 namespace neko {
 
   struct FontStyleData {
-    newtype::StyleID id_;
+    newtype::StyleID id_ = 0;
     MaterialPtr material_;
   };
 
@@ -22,23 +22,22 @@ namespace neko {
     newtype::FontFacePtr face_;
     map<newtype::StyleID, FontStyleData> styles_;
     bool usable( newtype::StyleID style ) const;
+    void update( Renderer* renderer );
   };
 
   using FontPtr = shared_ptr<Font>;
   using FontVector = vector<FontPtr>;
 
   struct NewtypeLibrary {
-  public:
-    HMODULE module_;
-    newtype::Manager* manager_;
+  private:
+    HMODULE module_ = nullptr;
+    newtype::Manager* manager_ = nullptr;
     newtype::fnNewtypeInitialize pfnNewtypeInitialize;
     newtype::fnNewtypeShutdown pfnNewtypeShutdown;
+  public:
     void load( newtype::Host* host );
     void unload();
     inline newtype::Manager* mgr() { return manager_; }
-  };
-
-  struct TextData {
   };
 
   class TextRenderBuffer {
@@ -85,17 +84,26 @@ namespace neko {
     }
   };
 
+  using TextMeshPtr = unique_ptr<TextRenderBuffer>;
+
+  class Text {
+  public:
+    FontPtr font_;
+    newtype::TextPtr text_;
+    TextMeshPtr mesh_;
+    void update( Renderer* renderer );
+  };
+
+  using TextPtr = shared_ptr<Text>;
+
   class FontManager: public enable_shared_from_this<FontManager>, public newtype::Host {
   protected:
     EnginePtr engine_;
-    Renderer* renderer_;
     NewtypeLibrary nt_;
     FontPtr fnt_;
-    newtype::TextPtr txt_;
     map<newtype::IDType, FontPtr> ntfonts_;
-    //map<newtype::IDType, TextData> textdata_;
-    unique_ptr<TextRenderBuffer> mesh_;
-  public:
+    vector<TextPtr> txts_;
+  protected:
     void* newtypeMemoryAllocate( uint32_t size ) override;
     void* newtypeMemoryReallocate( void* address, uint32_t newSize ) override;
     void newtypeMemoryFree( void* address ) override;
@@ -108,6 +116,7 @@ namespace neko {
     void shutdown();
     void prepareLogic( GameTime time );
     void prepareRender( Renderer* renderer );
+    TextPtr createText( FontPtr font, newtype::StyleID style );
     void draw( Renderer* renderer );
   };
 

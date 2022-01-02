@@ -78,10 +78,20 @@ namespace neko {
     fnt_->face_ = nt_.mgr()->loadFace( fnt_->font_, input, 0, 24.0f );
     auto sid = nt_.mgr()->loadStyle( fnt_->face_, newtype::FontRender_Normal, 0.0f );
     fnt_->styles_[sid].id_ = sid;
-    txt_ = nt_.mgr()->createText( fnt_->face_, sid );
-    txt_->pen( vec3( 100.0f, 100.0f, 0.0f ) );
+
+    createText( fnt_, sid );
+  }
+
+  TextPtr FontManager::createText( FontPtr font, newtype::StyleID style )
+  {
+    auto txt = make_shared<Text>();
+    txt->font_ = font;
+    txt->text_ = nt_.mgr()->createText( font->face_, style );
+    txt->text_->pen( vec3( 100.0f, 100.0f, 0.0f ) );
     auto content = unicodeString::fromUTF8( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class." );
-    txt_->setText( content );
+    txt->text_->setText( content );
+    txts_.push_back( txt );
+    return txt;
   }
 
   void FontManager::newtypeFontTextureCreated( newtype::Font& ntfont, newtype::StyleID style, newtype::Texture& texture )
@@ -108,67 +118,91 @@ namespace neko {
     return ( !face_->getStyle( style )->dirty() );
   }
 
-  void FontManager::prepareRender( Renderer* renderer )
+  void Font::update( Renderer* renderer )
   {
-    for ( auto& fnt : ntfonts_ )
-    {
-      if ( !fnt.second->font_->loaded() )
-        continue;
-      for ( auto& entry : fnt.second->styles_ )
-      {
-        auto styleId = entry.first;
-        auto style = fnt.second->face_->getStyle( styleId );
-        if ( !style->dirty() )
-          continue;
-        entry.second.material_ = renderer->createTextureWithData( "fonttest",
-          style->texture().dimensions().x, style->texture().dimensions().y,
-          PixFmtColorR8, style->texture().data(),
-          Texture::ClampBorder, Texture::Nearest );
-        /* dump texture here
-        platform::FileWriter writer( "fonttest_atlas.png" );
-        vector<uint8_t> buffer;
-        lodepng::encode( buffer,
-          font->texture().data(),
-          static_cast<unsigned int>( font->texture().dimensions().x ),
-          static_cast<unsigned int>( font->texture().dimensions().y ),
-          LCT_GREY, 8 );
-        writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) ); */
-        style->markClean();
-      }
-    }
-
-    if ( !txt_ )
+    if ( !font_->loaded() )
       return;
+    for ( auto& entry : styles_ )
+    {
+      auto styleId = entry.first;
+      auto style = face_->getStyle( styleId );
+      if ( !style->dirty() )
+        continue;
+      char tmp[64];
+      sprintf_s( tmp, 64, "font/%I64i/%016I64x", font_->id(), styleId );
+      entry.second.material_ = renderer->createTextureWithData( tmp,
+        style->texture().dimensions().x, style->texture().dimensions().y,
+        PixFmtColorR8, style->texture().data(),
+        Texture::ClampBorder, Texture::Nearest );
+      /* dump texture here
+      platform::FileWriter writer( "fonttest_atlas.png" );
+      vector<uint8_t> buffer;
+      lodepng::encode( buffer,
+        font->texture().data(),
+        static_cast<unsigned int>( font->texture().dimensions().x ),
+        static_cast<unsigned int>( font->texture().dimensions().y ),
+        LCT_GREY, 8 );
+      writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) ); */
+      style->markClean();
+    }
+  }
 
-    txt_->update();
-    if ( txt_->dirty() && mesh_ )
+  void Text::update( Renderer* renderer )
+  {
+    text_->update();
+    if ( text_->dirty() && mesh_ )
       mesh_.reset();
-    if ( !txt_->dirty() && !mesh_ )
+    if ( !text_->dirty() && !mesh_ )
     {
       mesh_ = make_unique<TextRenderBuffer>(
-        static_cast<gl::GLuint>( txt_->mesh().vertices_.size() ),
-        static_cast<gl::GLuint>( txt_->mesh().indices_.size() ) );
+        static_cast<gl::GLuint>( text_->mesh().vertices_.size() ),
+        static_cast<gl::GLuint>( text_->mesh().indices_.size() ) );
       const auto& verts = mesh_->buffer().lock();
       const auto& indcs = mesh_->indices().lock();
-      memcpy( verts.data(), txt_->mesh().vertices_.data(), txt_->mesh().vertices_.size() * sizeof( newtype::Vertex ) );
-      memcpy( indcs.data(), txt_->mesh().indices_.data(), txt_->mesh().indices_.size() * sizeof( GLuint ) );
+      memcpy( verts.data(), text_->mesh().vertices_.data(), text_->mesh().vertices_.size() * sizeof( newtype::Vertex ) );
+      memcpy( indcs.data(), text_->mesh().indices_.data(), text_->mesh().indices_.size() * sizeof( GLuint ) );
       mesh_->buffer().unlock();
       mesh_->indices().unlock();
     }
   }
 
+  void FontManager::prepareRender( Renderer* renderer )
+  {
+    for ( const auto& entry : ntfonts_ )
+    {
+      entry.second->update( renderer );
+    }
+
+    for ( const auto& txt : txts_ )
+    {
+      txt->update( renderer );
+    }
+  }
+
   void FontManager::draw( Renderer* renderer )
   {
-    if ( mesh_ && fnt_ && fnt_->usable( txt_->styleid() ) )
+    for ( auto& txt : txts_ )
     {
-      mesh_->draw( renderer->shaders(), fnt_->styles_[txt_->styleid()].material_->textureHandle( 0 ) );
+      const auto sid = txt->text_->styleid();
+      if ( txt->mesh_
+        && txt->font_
+        && txt->font_->usable( sid ) )
+      {
+        txt->mesh_->draw( renderer->shaders(),
+          txt->font_->styles_[sid].material_->textureHandle( 0 )
+        );
+      }
     }
   }
 
   void FontManager::shutdown()
   {
-    nt_.mgr()->unloadFont( fnt_->font_ );
-    fnt_.reset();
+    txts_.clear();
+    for ( const auto& fnt : ntfonts_ )
+    {
+      nt_.mgr()->unloadFont( fnt.second->font_ );
+      fnt.second->font_.reset();
+    }
     nt_.unload();
   }
 
