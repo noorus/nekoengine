@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 #include "neko_platform_windows.h"
 #include "neko_exception.h"
@@ -37,19 +37,19 @@ namespace neko {
 
       SetFilePointer( file_, 0, nullptr, FILE_BEGIN );
     }
-    inline const uint64_t size() const { return size_; }
+    inline const uint64_t size() const override { return size_; }
     virtual ~LocalFilesystemReader()
     {
       if ( file_ != INVALID_HANDLE_VALUE )
         CloseHandle( file_ );
     }
-    virtual void read( void* out, uint32_t length )
+    void read( void* out, uint32_t length ) override
     {
       DWORD read = 0;
       if ( ReadFile( file_, out, length, &read, nullptr ) != TRUE || read < length )
         NEKO_EXCEPT( "File read failed or length mismatch" );
     }
-    virtual uint64_t readUint64()
+    uint64_t readUint64() override
     {
       uint64_t ret = 0;
       DWORD read = 0;
@@ -57,7 +57,7 @@ namespace neko {
         NEKO_EXCEPT( "File read failed or length mismatch" );
       return ret;
     }
-    virtual uint32_t readUint32()
+    uint32_t readUint32() override
     {
       uint32_t ret = 0;
       DWORD read = 0;
@@ -65,7 +65,7 @@ namespace neko {
         NEKO_EXCEPT( "File read failed or length mismatch" );
       return ret;
     }
-    virtual int readInt()
+    int readInt() override
     {
       int ret = 0;
       DWORD read = 0;
@@ -73,7 +73,7 @@ namespace neko {
         NEKO_EXCEPT( "File read failed or length mismatch" );
       return ret;
     }
-    virtual bool readBool()
+    bool readBool() override
     {
       uint8_t ret = 0;
       DWORD read = 0;
@@ -81,7 +81,7 @@ namespace neko {
         NEKO_EXCEPT( "File read failed or length mismatch" );
       return ( ret != 0 );
     }
-    virtual Real readReal()
+    Real readReal() override
     {
       Real ret = 0.0f;
       DWORD read = 0;
@@ -89,7 +89,7 @@ namespace neko {
         NEKO_EXCEPT( "File read failed or length mismatch" );
       return ret;
     }
-    virtual string readFullString()
+    string readFullString() override
     {
       string ret;
       auto pos = SetFilePointer( file_, 0, 0, FILE_CURRENT );
@@ -102,14 +102,14 @@ namespace neko {
         NEKO_EXCEPT( "File read failed or length mismatch" );
       return move( ret );
     }
-    virtual void readFullVector( vector<uint8_t>& out )
+    void readFullVector( vector<uint8_t>& out ) override
     {
       out.resize( size_ );
       DWORD read = 0;
       if ( ReadFile( file_, (LPVOID)out.data(), (DWORD)size_, &read, nullptr ) != TRUE || read != size_ )
         NEKO_EXCEPT( "File read failed or length mismatch" );
     }
-    virtual uint32_t seek( FileSeek direction, int32_t distance )
+    uint32_t seek( FileSeek direction, int32_t distance ) override
     {
       auto dir = ( direction == FileSeek_Beginning ? FILE_BEGIN
         : direction == FileSeek_Current ? FILE_CURRENT
@@ -119,7 +119,7 @@ namespace neko {
         NEKO_WINAPI_EXCEPT( "SetFilePointer (seek) failed" );
       return ret;
     }
-    virtual uint32_t tell()
+    uint32_t tell() override
     {
       auto ptr = static_cast<uint32_t>( SetFilePointer( file_, 0, nullptr, FILE_CURRENT ) );
       if ( ptr == INVALID_SET_FILE_POINTER )

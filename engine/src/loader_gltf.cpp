@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "loader.h"
 #include "utilities.h"
 #include "lodepng.h"
@@ -123,69 +123,34 @@ namespace neko::loaders {
     }
   };
 
-#if 0
-
-  inline vec3 gltf_toVec3( const vector<double>& v, const vec3 def = vec3( 0.0f ) )
+  constexpr vec3 gltf_toVec3( const vector<double>& v, const vec3 def = vec3( 0.0f ) )
   {
     if ( v.empty() )
       return def;
-    return vec3( static_cast<Real>( v[1] ), static_cast<Real>( v[2] ), static_cast<Real>( -v[0] ) );
+    return { static_cast<Real>( v[0] ), static_cast<Real>( v[1] ), static_cast<Real>( v[2] ) };
   }
 
-  inline quaternion gltf_toQuat( const vector<double>& v, const quaternion def = glm::quat_identity<Real, glm::defaultp>() )
+  constexpr quaternion gltf_toQuat( const vector<double>& v, const quaternion def = glm::quat_identity<Real, glm::defaultp>() )
   {
     if ( v.empty() )
       return def;
-    return quaternion( static_cast<Real>( v[3] ), static_cast<Real>( v[1] ), static_cast<Real>( v[2] ), static_cast<Real>( -v[0] ) );
+    return { static_cast<Real>( v[0] ), static_cast<Real>( v[1] ), static_cast<Real>( v[2] ), static_cast<Real>( v[3] ) };
   }
 
-  inline vec2 gltf_mesh_vec2( vec2 a )
+  constexpr vec2 gltf_mesh_vec2( vec2 a )
   {
-    return vec2( a.x, -a.y );
+    return { a.x, a.y };
   }
 
-  inline vec3 gltf_mesh_vec3( vec3 a )
+  constexpr vec3 gltf_mesh_vec3( vec3 a )
   {
-    return vec3( a.y, a.z, -a.x );
+    return { a.x, a.y, a.z };
   }
 
-  inline vec4 gltf_mesh_vec4( vec4 a )
+  constexpr vec4 gltf_mesh_vec4( vec4 a )
   {
-    return vec4( a.y, a.z, -a.x, a.w );
+    return { a.x, a.y, a.z, a.w };
   }
-
-#else
-
-  inline vec3 gltf_toVec3( const vector<double>& v, const vec3 def = vec3( 0.0f ) )
-  {
-    if ( v.empty() )
-      return def;
-    return vec3( static_cast<Real>( v[0] ), static_cast<Real>( v[1] ), static_cast<Real>( v[2] ) );
-  }
-
-  inline quaternion gltf_toQuat( const vector<double>& v, const quaternion def = glm::quat_identity<Real, glm::defaultp>() )
-  {
-    if ( v.empty() )
-      return def;
-    return quaternion( static_cast<Real>( v[0] ), static_cast<Real>( v[1] ), static_cast<Real>( v[2] ), static_cast<Real>( v[3] ) );
-  }
-
-  inline vec2 gltf_mesh_vec2( vec2 a )
-  {
-    return vec2( a.x, a.y );
-  }
-
-  inline vec3 gltf_mesh_vec3( vec3 a )
-  {
-    return vec3( a.x, a.y, a.z );
-  }
-
-  inline vec4 gltf_mesh_vec4( vec4 a )
-  {
-    return vec4( a.x, a.y, a.z, a.w );
-  }
-
-#endif
 
   void gltf_traverseTree( SceneNode* out, const tinygltf::Node& node, const vector<DumbBufferStructure>& buffers, const tinygltf::Model& model, int depth = 0 )
   {

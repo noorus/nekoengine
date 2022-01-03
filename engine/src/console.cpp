@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "console.h"
 #include "utilities.h"
 #include "neko_exception.h"

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "neko_exception.h"
 #include "engine.h"
 #include "gfx.h"

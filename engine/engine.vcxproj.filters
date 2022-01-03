@@ -129,7 +129,7 @@
     <ClCompile Include="src\consolewindow_windows.cpp">
       <Filter>Source Files\console</Filter>
     </ClCompile>
-    <ClCompile Include="src\stdafx.cpp">
+    <ClCompile Include="src\pch.cpp">
       <Filter>Source Files\junk</Filter>
     </ClCompile>
     <ClCompile Include="src\memory.cpp">
@@ -305,7 +305,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\stdafx.h">
+    <ClInclude Include="include\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_exception.h">

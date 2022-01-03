@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "gui.h"
 #include "lodepng.h"
 #include "gfx.h"

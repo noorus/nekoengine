@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 // NOTE: This is NOT the original LodePNG source!
 // Some modifications have been made to fit the nekoengine project.
@@ -33,7 +33,7 @@ The manual and changelog are in the header file "lodepng.h"
 Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for C.
 */
 
-#include "stdafx.h"
+#include "pch.h"
 #include "lodepng.h"
 #include "locator.h"
 #include "neko_exception.h"

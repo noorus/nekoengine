@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
 #include "neko_types.h"
@@ -34,7 +34,6 @@ namespace neko {
   const wchar_t c_icuData[] = L"icudtl.dat";
   const wchar_t c_snapshotData[] = L"snapshot_blob.bin";
   const wchar_t c_v8BaseDirectory[] = LR"(\data\v8\)";
-  const wchar_t c_scriptsDirectory[] = LR"(\scripts\)";
 
   Scripting::Scripting( EnginePtr engine ):
     Subsystem( move( engine ) ),

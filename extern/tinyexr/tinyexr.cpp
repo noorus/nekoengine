@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 #if defined(_WIN32)
 #ifndef NOMINMAX

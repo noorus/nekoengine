@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
 #include "scripting.h"

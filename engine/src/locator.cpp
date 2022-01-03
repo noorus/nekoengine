@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "locator.h"
 
 namespace neko {

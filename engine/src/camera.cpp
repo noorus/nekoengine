@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "camera.h"
 #include "locator.h"
 #include "console.h"

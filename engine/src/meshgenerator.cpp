@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "gfx_types.h"
 #include "meshmanager.h"
 #include "neko_exception.h"
@@ -22,49 +22,6 @@ namespace neko {
     if ( std::isnan( v.x ) || std::isnan( v.y ) || std::isnan( v.z ) || std::isnan( v.w ) )
       v = vec4( 0.0f );
   }
-
-  /*void generateTangents( vector<Vertex3D>& verts, const vector<GLuint>& indices )
-  {
-    for ( GLuint l = 0; l < indices.size(); ++l )
-      verts[indices[l]].tangent = vec4( 0.0f );
-
-    int inconsistents = 0;
-    for ( GLuint l = 0; l < indices.size(); ++l )
-    {
-      GLuint i = indices[l];
-      GLuint j = indices[( l + 1 ) % 3 + l / 3 * 3];
-      GLuint k = indices[( l + 2 ) % 3 + l / 3 * 3];
-      vec3 n = verts[i].normal;
-      vec3 v1 = verts[j].position - verts[i].position, v2 = verts[k].position - verts[i].position;
-      vec2 t1 = verts[j].texcoord - verts[i].texcoord, t2 = verts[k].texcoord - verts[i].texcoord;
-
-      // Is the texture flipped?
-      float uv2xArea = t1.x * t2.y - t1.y * t2.x;
-      if ( math::abs( uv2xArea ) < 0x1p-20 )
-        continue; // Smaller than 1/2 pixel at 1024x1024
-      float flip = uv2xArea > 0 ? 1 : -1;
-      // 'flip' or '-flip'; depends on the handedness of the space.
-      if ( verts[i].tangent.w != 0 && verts[i].tangent.w != -flip )
-        inconsistents++;
-      verts[i].tangent.w = -flip;
-
-      // Project triangle onto tangent plane
-      v1 -= n * math::dot( v1, n );
-      v2 -= n * math::dot( v2, n );
-      // Tangent is object space direction of texture coordinates
-      vec3 s = math::normalize( ( t2.y * v1 - t1.y * v2 ) * flip );
-
-      // Use angle between projected v1 and v2 as weight
-      float angle = math::acos( math::dot( v1, v2 ) / ( math::length( v1 ) * math::length( v2 ) ) );
-      verts[i].tangent += vec4( s * angle, 0 );
-    }
-
-    for ( GLuint l = 0; l < indices.size(); ++l )
-    {
-      vec4& t = verts[indices[l]].tangent;
-      t = vec4( normalize( vec3( t.x, t.y, t.z ) ), t.w );
-    }
-  }*/
 
   void generateTangentsAndBitangents( vector<Vertex3D>& verts, const vector<GLuint>& indices )
   {

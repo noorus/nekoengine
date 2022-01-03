@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef NEKO_PLATFORM_WINDOWS
 
@@ -48,7 +48,7 @@ namespace neko {
     // Window
 
     Window::Window( HINSTANCE instance, WNDPROC wndproc, void* userdata ):
-      instance_( instance ), wndProc_( wndproc ), userData_( userdata ), handle_( nullptr ), class_( 0 )
+    instance_( instance ), wndProc_( wndproc ), userData_( userdata ), handle_( nullptr ), class_( 0 )
     {
     }
 
@@ -117,7 +117,7 @@ namespace neko {
 
     // ConsoleWindow
 
-#   define WM_HIVE_CONSOLEFLUSHBUFFER (WM_USER + 1)
+#   define WM_NEKO_CONSOLEFLUSHBUFFER (WM_USER + 1)
 
     const COLORREF c_consoleBackground = RGB( 255, 255, 255 );
     const COLORREF c_consoleForeground = RGB( 10, 13, 20 );
@@ -170,7 +170,7 @@ namespace neko {
         (uint8_t)( color.z * 255.0f ) );
       linesBuffer_.push_back({ utf8ToWide( str ), clr });
       lock_.unlock();
-      PostMessageW( handle_, WM_HIVE_CONSOLEFLUSHBUFFER, 0, 0 );
+      PostMessageW( handle_, WM_NEKO_CONSOLEFLUSHBUFFER, 0, 0 );
     }
 
     void ConsoleWindow::flushBuffer()
@@ -543,7 +543,7 @@ namespace neko {
       CHARRANGE range = { -1, -1 };
       SendMessageW( log_, EM_EXSETSEL, 0, (LPARAM)&range );
       SendMessageW( log_, EM_SCROLLCARET, 0, 0 );
-      PostMessageW( handle_, WM_HIVE_CONSOLEFLUSHBUFFER, 0, 0 );
+      PostMessageW( handle_, WM_NEKO_CONSOLEFLUSHBUFFER, 0, 0 );
     }
 
     void ConsoleWindow::paintUnpauseButton( HDC hdc, RECT& rc )
@@ -716,7 +716,7 @@ namespace neko {
         PostQuitMessage( EXIT_SUCCESS );
         return 0;
       }
-      else if ( msg == WM_HIVE_CONSOLEFLUSHBUFFER )
+      else if ( msg == WM_NEKO_CONSOLEFLUSHBUFFER )
       {
         if ( !self->logState_.paused )
         {

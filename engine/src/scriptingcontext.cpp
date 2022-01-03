@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
 #include "neko_types.h"
@@ -22,8 +22,8 @@ namespace neko {
   using v8::Global;
 
   ScriptingContext::ScriptingContext( Scripting* owner,
-    v8::ArrayBuffer::Allocator* allocator, Isolate* isolate ):
-    owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false )
+  v8::ArrayBuffer::Allocator* allocator, Isolate* isolate ):
+  owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false )
   {
     assert( owner_ );
 
@@ -71,14 +71,14 @@ namespace neko {
   }
 
   #define JS_SET_GLOBAL_FUNCTION( x ) global->Set( \
-      js::util::allocStringConserve( #x, isolate_ ), \
-      v8::FunctionTemplate::New( \
-        isolate_, []( const v8::FunctionCallbackInfo<v8::Value>& args ) { \
-          auto self = static_cast<ScriptingContext*>( args.Data().As<v8::External>()->Value() ); \
-          self->js_##x( args );\
-        }, \
-        v8::External::New( isolate_, static_cast<void*>( this ) ) \
-      ) )
+    js::util::allocStringConserve( #x, isolate_ ), \
+    v8::FunctionTemplate::New( \
+      isolate_, []( const v8::FunctionCallbackInfo<v8::Value>& args ) { \
+        auto self = static_cast<ScriptingContext*>( args.Data().As<v8::External>()->Value() ); \
+        self->js_##x( args );\
+      }, \
+      v8::External::New( isolate_, static_cast<void*>( this ) ) \
+    ) )
 
   void ScriptingContext::registerTemplateGlobals( Local<ObjectTemplate>& global )
   {

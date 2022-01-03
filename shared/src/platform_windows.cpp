@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 #ifdef NEKO_PLATFORM_WINDOWS
 
@@ -196,8 +196,8 @@ namespace neko {
 
     // Thread
 
-    Thread::Thread( const string& name, Callback callback, void* argument )
-        : thread_( nullptr ), id_( 0 ), name_( name ), callback_( callback ), argument_( argument )
+    Thread::Thread( const string& name, Callback callback, void* argument ):
+    thread_( nullptr ), id_( 0 ), name_( name ), callback_( callback ), argument_( argument )
     {
     }
 
@@ -265,10 +265,10 @@ namespace neko {
 
     RenderWindowHandler* RenderWindowHandler::instance_ = nullptr;
 
-    RenderWindowHandler::RenderWindowHandler()
-        : window_( nullptr ), originalProc_( nullptr ),
-          vaspect_( 0.0f ), haspect_( 0.0f ), resolution_(), borders_(),
-          resizing_( false ), target_( nullptr )
+    RenderWindowHandler::RenderWindowHandler():
+    window_( nullptr ), originalProc_( nullptr ),
+    vaspect_( 0.0f ), haspect_( 0.0f ),
+    resizing_( false ), target_( nullptr )
     {
     }
 

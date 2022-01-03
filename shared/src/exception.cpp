@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "neko_exception.h"
 #ifdef NEKO_PLATFORM_WINDOWS
 # include "windows.h"

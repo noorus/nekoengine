@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 #define TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_USE_CPP14

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "loader.h"
 #include "utilities.h"
 #include "lodepng.h"

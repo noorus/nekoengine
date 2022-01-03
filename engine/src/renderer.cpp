@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "gfx_types.h"
 #include "renderer.h"
 #include "meshmanager.h"

@@ -109,6 +109,7 @@
       <TreatSpecificWarningsAsErrors>26479</TreatSpecificWarningsAsErrors>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)..\SDK\ozz\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -165,6 +166,7 @@
       <TreatSpecificWarningsAsErrors>26479</TreatSpecificWarningsAsErrors>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\Debug;$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)lib;$(SolutionDir)..\SDK\MyGUI\lib\Debug;$(SolutionDir)..\SDK\ozz\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -220,6 +222,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DisableSpecificWarnings>26812;4819</DisableSpecificWarnings>
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -320,7 +323,7 @@
     <ClCompile Include="src\scriptingcontext.cpp" />
     <ClCompile Include="src\shaders.cpp" />
     <ClCompile Include="src\staticmesh.cpp" />
-    <ClCompile Include="src\stdafx.cpp">
+    <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ShittyDebug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -394,7 +397,7 @@
     <ClInclude Include="include\renderer.h" />
     <ClInclude Include="include\scripting.h" />
     <ClInclude Include="include\shaders.h" />
-    <ClInclude Include="include\stdafx.h" />
+    <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\subsystem.h" />
     <ClInclude Include="include\surface.h" />
     <ClInclude Include="include\text.h" />

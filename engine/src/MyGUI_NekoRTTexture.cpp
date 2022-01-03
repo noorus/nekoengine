@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 #ifndef NEKO_NO_GUI
 
@@ -10,12 +10,8 @@ namespace MyGUI {
 
   using namespace gl;
 
-  NekoRTTexture::NekoRTTexture( unsigned int _texture )
-      : mTextureId( _texture ),
-        mWidth( 0 ),
-        mHeight( 0 ),
-        mFBOID( 0 ),
-        mRBOID( 0 )
+  NekoRTTexture::NekoRTTexture( unsigned int _texture ):
+  mTextureId( _texture ), mWidth( 0 ), mHeight( 0 ), mFBOID( 0 ), mRBOID( 0 )
   {
     NEKO_EXCEPT( "rtt texture fixme" );
 
