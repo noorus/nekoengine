@@ -52,6 +52,11 @@ namespace neko {
 
   }
 
+  struct FontLoadStyleSpec {
+    newtype::FontRendering rendering;
+    Real thickness;
+  };
+
   struct LoadTask
   {
     enum LoadType {
@@ -67,6 +72,8 @@ namespace neko {
     struct FontfaceLoad {
       FontPtr font_;
       utf8String path_;
+      Real size_;
+      vector<FontLoadStyleSpec> styles_;
     } fontfaceLoad;
     struct ModelLoad {
       SceneNode* node_;
@@ -85,6 +92,7 @@ namespace neko {
     {
       fontfaceLoad.font_ = move( font );
       fontfaceLoad.path_ = path;
+      fontfaceLoad.size_ = pointSize;
     }
     LoadTask( SceneNode* modelRootNode, const utf8String& path ): type_( Load_Model )
     {

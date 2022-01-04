@@ -11,6 +11,8 @@
 
 namespace neko {
 
+  class FontManager;
+
   struct FontStyleData {
     newtype::StyleID id_ = 0;
     MaterialPtr material_;
@@ -112,7 +114,6 @@ namespace neko {
   protected:
     EnginePtr engine_;
     NewtypeLibrary nt_;
-    FontPtr fnt_;
     map<newtype::IDType, FontPtr> ntfonts_;
     vector<TextPtr> txts_;
   protected:

@@ -119,7 +119,6 @@ namespace neko {
   void FontManager::shutdownRender( Renderer* renderer )
   {
     txts_.clear();
-    fnt_.reset();
     ntfonts_.clear();
   }
 
