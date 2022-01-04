@@ -15,7 +15,9 @@
 // _COMPILER
 // Identify the compiler.
 #ifdef _MSC_VER
-#if _MSC_VER >= 1920
+#if _MSC_VER >= 1930
+#define _COMPILER "Visual C++ 2022"
+#elif _MSC_VER >= 1920
 #define _COMPILER "Visual C++ 2019"
 #elif _MSC_VER >= 1910
 #define _COMPILER "Visual C++ 2017"
