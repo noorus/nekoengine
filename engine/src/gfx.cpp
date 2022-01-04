@@ -15,9 +15,8 @@
 #ifdef _DEBUG
 # pragma comment( lib, "glbindingd.lib" )
 # pragma comment( lib, "glbinding-auxd.lib" )
-# pragma comment( lib, "sfml-main-d.lib" )
-# pragma comment( lib, "sfml-system-d.lib" )
-# pragma comment( lib, "sfml-window-d.lib" )
+# pragma comment( lib, "sfml-system-s-d.lib" )
+# pragma comment( lib, "sfml-window-s-d.lib" )
 # ifndef NEKO_NO_GUI
 #  pragma comment( lib, "MyGUIEngine_d.lib" )
 # endif
@@ -32,9 +31,8 @@
 # endif
 #else
 # pragma comment( lib, "glbinding.lib" )
-# pragma comment( lib, "sfml-main.lib" )
-# pragma comment( lib, "sfml-system.lib" )
-# pragma comment( lib, "sfml-window.lib" )
+# pragma comment( lib, "sfml-system-s.lib" )
+# pragma comment( lib, "sfml-window-s.lib" )
 # ifndef NEKO_NO_GUI
 #  pragma comment( lib, "MyGUIEngine.lib" )
 # endif
