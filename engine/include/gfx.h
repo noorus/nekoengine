@@ -48,7 +48,7 @@ namespace neko {
     Info info_;
     unique_ptr<sf::Window> window_;
     SceneNode* target_;
-    unique_ptr<ArcballCamera> camera_;
+    unique_ptr<OrbitCamera> camera_;
     RendererPtr renderer_;
     Viewport viewport_;
     Image lastCapture_;

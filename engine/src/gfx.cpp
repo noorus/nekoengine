@@ -200,7 +200,7 @@ namespace neko {
     setOpenGLDebugLogging( g_CVar_gl_debuglog.as_i() > 0 );
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
-    camera_ = make_unique<ArcballCamera>( renderer_.get(), realResolution, target_,
+    camera_ = make_unique<OrbitCamera>( renderer_.get(), realResolution, target_,
       vec3( 5.0f, 3.0f, 5.0f ), // vecOffset
       60.0f, // fov
       true, // reverse

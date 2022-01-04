@@ -40,7 +40,7 @@ namespace neko {
     exposure_ = exp;
   }
 
-  ArcballCamera::ArcballCamera( SceneManager* manager, vec2 resolution, SceneNode* target,
+  OrbitCamera::OrbitCamera( SceneManager* manager, vec2 resolution, SceneNode* target,
     const vec3& offset, Degrees fov, bool reverse, Real sensitivity,
     Real fMinDistance, Real fMaxDistance, Real fRotationDeceleration, Real zoomAccel, Real zoomDecel )
       : Camera( manager, resolution, fov ), sensitivity_( sensitivity ),
@@ -56,7 +56,7 @@ namespace neko {
     setMaxDistance( distanceMax_ );
   }
 
-  void ArcballCamera::applyInputRotation( const vec3i& move )
+  void OrbitCamera::applyInputRotation( const vec3i& move )
   {
     if ( reverseAxes_ )
     {
@@ -70,17 +70,17 @@ namespace neko {
     }
   }
 
-  void ArcballCamera::applyInputPanning( const vec3i& move )
+  void OrbitCamera::applyInputPanning( const vec3i& move )
   {
     movementInput_ += vec3( 0.0f, -(Real)move.y, 0.0f );
   }
 
-  void ArcballCamera::applyInputZoom( int zoom )
+  void OrbitCamera::applyInputZoom( int zoom )
   {
     rotationInput_.z += -( (Real)zoom / (Real)WHEEL_DELTA );
   }
 
-  void ArcballCamera::update( GameTime delta, GameTime time )
+  void OrbitCamera::update( GameTime delta, GameTime time )
   {
     auto localX = math::normalize( vec3( -offset_.z, 0, offset_.x ) );
 
@@ -186,12 +186,12 @@ namespace neko {
     view_ = glm::lookAt( position_, target, vec3UnitY );
   }
 
-  void ArcballCamera::setSensitivity( Real sensitivity )
+  void OrbitCamera::setSensitivity( Real sensitivity )
   {
     sensitivity_ = sensitivity;
   }
 
-  void ArcballCamera::setMinDistance( Real dist )
+  void OrbitCamera::setMinDistance( Real dist )
   {
     distanceMin_ = dist;
     if ( math::length( offset_ ) < distanceMin_ )
@@ -201,7 +201,7 @@ namespace neko {
     }
   }
 
-  void ArcballCamera::setMaxDistance( Real dist )
+  void OrbitCamera::setMaxDistance( Real dist )
   {
     distanceMax_ = dist;
     if ( math::length( offset_ ) > distanceMax_ )
@@ -211,7 +211,7 @@ namespace neko {
     }
   }
 
-  void ArcballCamera::setClampTop( Radians clamp )
+  void OrbitCamera::setClampTop( Radians clamp )
   {
     clampTop_ = clamp;
     auto angle = math::angleBetween( offset_, vec3UnitY );
@@ -224,7 +224,7 @@ namespace neko {
     }
   }
 
-  void ArcballCamera::setClampBottom( Radians clamp )
+  void OrbitCamera::setClampBottom( Radians clamp )
   {
     clampBottom_ = clamp;
     auto angle = math::angleBetween( offset_, vec3UnitY );

@@ -44,7 +44,7 @@ namespace neko {
     CameraValueState( Real acceleration, Real deceleration ): acceleration_( acceleration ), deceleration_( deceleration ), velocity_( 0.0f ) {}
   };
 
-  class ArcballCamera: public Camera {
+  class OrbitCamera: public Camera {
   protected:
     SceneNode* target_; //!< Target scenenode
     vec3 offset_; //!< Offset from target
@@ -64,7 +64,7 @@ namespace neko {
     Radians clampBottom_; //!< Maximum camera angle to Y axis
     bool reverseAxes_; // Reverse rotation axes?
   public:
-    explicit ArcballCamera( SceneManager* manager, vec2 resolution, SceneNode* pgeTarget, const vec3& vecOffset, Real rFOVy, bool bReverseAxes, Real fSensitivity, Real fMinDistance, Real fMaxDistance, Real fRotationDeceleration, Real fZoomAcceleration, Real fZoomDeceleration );
+    explicit OrbitCamera( SceneManager* manager, vec2 resolution, SceneNode* pgeTarget, const vec3& vecOffset, Real rFOVy, bool bReverseAxes, Real fSensitivity, Real fMinDistance, Real fMaxDistance, Real fRotationDeceleration, Real fZoomAcceleration, Real fZoomDeceleration );
     virtual void applyInputRotation( const vec3i& mousemovement );
     virtual void applyInputPanning( const vec3i& mousemovement );
     virtual void applyInputZoom( int zoom );
