@@ -167,7 +167,8 @@ namespace neko {
     window_->setVerticalSyncEnabled( g_CVar_vid_vsync.as_b() ); // vsync
     window_->setFramerateLimit( 0 ); // no sleep till Brooklyn
 
-    window_->setActive( true );
+    if ( !window_->setActive( true ) )
+      window_->requestFocus();
 
     const auto targetResolution = size2i( 1920, 1080 );
 
@@ -320,7 +321,7 @@ namespace neko {
     camera_->update( delta, time );
 
     // activate as current context
-    window_->setActive( true );
+    auto _dummy = window_->setActive( true );
 
     while ( !updateAccounts_.empty() )
     {
@@ -337,7 +338,7 @@ namespace neko {
     {
       renderer_->reset( viewport_.size_.x, viewport_.size_.y );
       flags_.resized = false;
-      window_->setActive( true );
+      _dummy = window_->setActive( true );
     }
 
 #ifndef NEKO_NO_GUI
