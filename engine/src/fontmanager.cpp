@@ -8,8 +8,6 @@
 
 namespace neko {
 
-  constexpr uint32_t c_newtypeApiVersion = 1;
-
 #ifdef _DEBUG
   const wchar_t* c_newtypeLibraryName = L"newtype_d.dll";
 #else
@@ -25,7 +23,7 @@ namespace neko {
     pfnNewtypeShutdown = reinterpret_cast<newtype::fnNewtypeShutdown>( GetProcAddress( module_, "newtypeShutdown" ) );
     if ( !pfnNewtypeInitialize || !pfnNewtypeShutdown )
       NEKO_EXCEPT( "Newtype export resolution failed" );
-    manager_ = pfnNewtypeInitialize( c_newtypeApiVersion, host );
+    manager_ = pfnNewtypeInitialize( newtype::c_headerVersion, host );
     if ( !manager_ )
       NEKO_EXCEPT( "Newtype init failed" );
   }

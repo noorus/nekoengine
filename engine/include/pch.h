@@ -123,6 +123,7 @@
 
 #pragma warning( pop )
 
+// Newtype
 #include <newtype.h>
 
 // Nil
