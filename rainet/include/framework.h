@@ -69,9 +69,7 @@
 #include <variant>
 #include <any>
 #include <optional>
-
-// GSL
-#include <gsl/gsl>
+#include <span>
 
 #pragma warning( push )
 #pragma warning( disable : 4251 )
