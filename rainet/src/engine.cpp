@@ -5,6 +5,8 @@
 
 namespace rainet {
 
+  static GameInstallationState g_localGameInstallation;
+
   System::System( Host* host ): host_( host )
   {
   }
@@ -24,8 +26,19 @@ namespace rainet {
     }
     if ( !startedFromSteam() )
     {
-      // Get current dir?
-      // g_emptyGameInstallation.
+      g_localGameInstallation.host_ = InstallationHost::Local;
+#ifdef _DEBUG
+      g_localGameInstallation.beta_ = true;
+      g_localGameInstallation.branch_ = "local-debug";
+#else
+      g_localGameInstallation.beta_ = false;
+      g_localGameInstallation.branch_ = "local-release";
+#endif
+      g_localGameInstallation.ownership_ = GameOwnership::Owned;
+      g_localGameInstallation.buildId_ = 1;
+      g_localGameInstallation.purchaseTime_ = 0;
+      g_localGameInstallation.installed_ = true;
+      g_localGameInstallation.installPath_ = neko::platform::wideToUtf8( neko::platform::getCurrentDirectory() );
     }
   }
 
@@ -79,17 +92,15 @@ namespace rainet {
       discord_->setActivityAlphaDevelop();
   }
 
-  static GameInstallationState g_emptyGameInstallation;
-
   const GameInstallationState& System::localInstallation() throw()
   {
-    return g_emptyGameInstallation;
+    return g_localGameInstallation;
   }
 
   const GameInstallationState& System::steamInstallation() throw()
   {
     if ( !steam_ )
-      return g_emptyGameInstallation;
+      return g_localGameInstallation;
 
     return steam_->installation();
   }

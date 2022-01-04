@@ -119,8 +119,8 @@ namespace neko {
     u_getVersion( icuVersion );
     console_->printf( Console::srcEngine, "Using ICU v%d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
 
-    tanklib_.load( this );
-    tanklib_.engine_->initialize( c_discordAppId, c_steamAppId );
+    rainet_.load( this );
+    rainet_.engine_->initialize( c_discordAppId, c_steamAppId );
 
     rendererTime_.store( 0.0f );
 
@@ -157,7 +157,7 @@ namespace neko {
     console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
 #endif
 
-    tanklib_.engine_->update( 0.0, 0.0 );
+    rainet_.engine_->update( 0.0, 0.0 );
 
     //input_->postInitialize();
 
@@ -222,15 +222,15 @@ namespace neko {
   void Engine::onSteamStatsUpdated( rainet::StateUpdateIndex index )
   {
     if ( index == 0 )
-      tanklib_.engine_->statIncrement( "dev_launches" );
-    stats_.i_launches.store( tanklib_.engine_->steamStats().at( "dev_launches" ).i_ );
-    stats_.f_timeWasted.store( tanklib_.engine_->steamStats().at( "dev_debugTime" ).f_ );
+      rainet_.engine_->statIncrement( "dev_launches" );
+    stats_.i_launches.store( rainet_.engine_->steamStats().at( "dev_launches" ).i_ );
+    stats_.f_timeWasted.store( rainet_.engine_->steamStats().at( "dev_debugTime" ).f_ );
   }
 
   void Engine::onAccountUpdated( const rainet::Account& user )
   {
     if ( user.steamId_ && user.steamImage_ )
-      messaging_->send( M_Extern_TankAccountUpdated, 1, static_cast<size_t>( user.id_ ) );
+      messaging_->send( M_Extern_AccountUpdated, 1, static_cast<size_t>( user.id_ ) );
   }
 
   bool Engine::paused()
@@ -257,14 +257,9 @@ namespace neko {
 
   const rainet::GameInstallationState& Engine::installationInfo()
   {
-    #ifdef NEKO_USE_STEAM
-    if ( tanklib_.engine_->startedFromSteam() )
-      return tanklib_.engine_->steamInstallation();
-    #elif NEKO_USE_DISCORD
-    if ( tanklib_.engine_->startedFromDiscord() )
-      return tanklib_.engine_->discordInstallation();
-    #endif
-    return tanklib_.engine_->localInstallation();
+    if ( rainet_.engine_->startedFromSteam() )
+      return rainet_.engine_->steamInstallation();
+    return rainet_.engine_->localInstallation();
   }
 
   void Engine::run()
@@ -284,8 +279,8 @@ namespace neko {
     platform::PerformanceTimer overallTime;
     overallTime.start();
 
-    tanklib_.engine_->update( time_, 0.0 );
-    tanklib_.engine_->changeActivity_AlphaDevelop();
+    rainet_.engine_->update( time_, 0.0 );
+    rainet_.engine_->changeActivity_AlphaDevelop();
 
     while ( signal_ != Signal_Stop )
     {
@@ -332,7 +327,7 @@ namespace neko {
 
       //input_->postUpdate( delta, time_ );
 
-      tanklib_.engine_->update( time_, delta );
+      rainet_.engine_->update( time_, delta );
 
 #ifndef NEKO_NO_SCRIPTING
       scripting_->postUpdate( delta, time_ );
@@ -361,8 +356,8 @@ namespace neko {
     }
 
     auto secondsDebugged = static_cast<float>( overallTime.stop() / 1000.0 );
-    tanklib_.engine_->statAdd( "dev_debugTime", secondsDebugged );
-    tanklib_.engine_->uploadStats();
+    rainet_.engine_->statAdd( "dev_debugTime", secondsDebugged );
+    rainet_.engine_->uploadStats();
   }
 
   void Engine::shutdown()
@@ -394,7 +389,7 @@ namespace neko {
     messaging_.reset();
     Locator::provideMessaging( MessagingPtr() );
 
-    tanklib_.unload();
+    rainet_.unload();
 
     console_->resetEngine();
   }

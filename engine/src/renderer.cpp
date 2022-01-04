@@ -420,7 +420,7 @@ namespace neko {
   void Renderer::setUserData( uint64_t id, const utf8String name, rainet::Image& image )
   {
     userData_.name_ = name;
-    userData_.image_ = createTextureWithData( "tankacc_" + id, image.width_, image.height_, PixFmtColorRGBA8, image.buffer_.data() );
+    userData_.image_ = createTextureWithData( "rainet_avatar_" + id, image.width_, image.height_, PixFmtColorRGBA8, image.buffer_.data() );
   }
 
   void Renderer::sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline )

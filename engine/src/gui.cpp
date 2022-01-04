@@ -29,9 +29,11 @@ namespace neko {
 
     MyGUI::PointerManager::getInstance().setVisible( true );
     window.setMouseCursorVisible( false );
+
+    fetchElements();
   }
 
-  void GUI::poop()
+  void GUI::fetchElements()
   {
     //auto loginRoot = MyGUI::LayoutManager::getInstance().loadLayout( "layout_login.layout" );
     //MyGUI::ButtonPtr button = gui_->createWidget<MyGUI::Button>( "Button", 10, 10, 300, 26, MyGUI::Align::Default, "Main" );
@@ -42,28 +44,40 @@ namespace neko {
     {
       if ( root->getName() == "g_pnlBuildInfo" )
       {
-        /*auto infobox = dynamic_cast<MyGUI::TextBox*>( root->getChildAt( 0 ) );
-        auto& install = engine.installationInfo();
-        char data[256];
-        sprintf_s( data, 256, "build: %s\nbuild id: %lld\nbranch: %s\nsku: %s", install.host_ == tank::InstallationHost::Local ? "local" : install.host_ == tank::InstallationHost::Steam ? "steam" :
-                                                                                                                                                                                            "discord",
-                   install.buildId_, install.branch_.c_str(), install.ownership_ == tank::GameOwnership::Owned ? "owned" : install.ownership_ == tank::GameOwnership::TempFreeWeekend ? "free weekend" :
-                                                                                                                         install.ownership_ == tank::GameOwnership::TempFamilySharing ? "family sharing" :
-                                                                                                                                                                                        "unowned" );
-        infobox->setCaption( data );
-        // infobox->setTextColour( MyGUI::Colour( 1.0f, 1.0f, 1.0f, 1.0f ) );*/
+        elements.installationInfoBox_ = dynamic_cast<MyGUI::TextBox*>( root->getChildAt( 0 ) );
       }
       else if ( root->getName() == "g_pnlStats" )
       {
-        shit_ = dynamic_cast<MyGUI::TextBox*>( root->getChildAt( 0 ) );
+        elements.debugStatsBox_ = dynamic_cast<MyGUI::TextBox*>( root->getChildAt( 0 ) );
       }
     }
   }
 
-  void GUI::setshit( const utf8String& shit )
+  void GUI::setInstallationInfo( const rainet::GameInstallationState& install )
   {
-    if ( shit_ )
-      shit_->setCaption( shit );
+    if ( !elements.installationInfoBox_ )
+      return;
+
+    char data[256];
+    sprintf_s( data, 256,
+      "build: %s\nbuild id: %lld\nbranch: %s\nsku: %s",
+      install.host_ == rainet::InstallationHost::Local ? "local"
+        : install.host_ == rainet::InstallationHost::Steam ? "steam"
+        : "discord",
+      install.buildId_,
+      install.branch_.c_str(),
+      install.ownership_ == rainet::GameOwnership::Owned ? "owned"
+      : install.ownership_ == rainet::GameOwnership::TempFreeWeekend ? "free weekend"
+      : install.ownership_ == rainet::GameOwnership::TempFamilySharing ? "family sharing"
+      : "unowned" );
+
+    elements.installationInfoBox_->setCaption( data );
+  }
+
+  void GUI::setDebugStats( const utf8String& stats )
+  {
+    if ( elements.debugStatsBox_ )
+      elements.debugStatsBox_->setCaption( stats );
   }
 
   void GUI::resize( int width, int height )
@@ -96,6 +110,8 @@ namespace neko {
 
   void GUI::shutdown()
   {
+    elements.reset();
+
     if ( gui_ )
     {
       gui_->shutdown();

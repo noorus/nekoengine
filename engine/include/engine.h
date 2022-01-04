@@ -68,7 +68,7 @@ namespace neko {
     DirectorPtr director_;
     // InputPtr input_;
     EngineInfo info_;
-    RainetLibrary tanklib_;
+    RainetLibrary rainet_;
     Environment env_;
   protected:
     struct State {
@@ -88,7 +88,7 @@ namespace neko {
   protected:
     //! Message listener callback.
     void onMessage( const Message& msg ) override;
-    //! TankEngine log callback.
+    //! Rainet callbacks.
     void onDiscordDebugPrint( const utf8String& message ) override;
     void onSteamDebugPrint( const utf8String& message ) override;
     void onSteamOverlayToggle( bool enabled ) override;
@@ -110,7 +110,7 @@ namespace neko {
     inline const utf8String& listFlags();
     const rainet::GameInstallationState& installationInfo();
     inline const Stats& stats() const noexcept { return stats_; }
-    inline rainet::System* tanklib() { return tanklib_.engine_; }
+    inline rainet::System* rainet() { return rainet_.engine_; }
   public:
     //! Constructor.
     Engine( ConsolePtr console, const Environment& env );

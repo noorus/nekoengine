@@ -217,7 +217,7 @@ namespace neko {
 
     auto documentsPath = platform::wideToUtf8( engine.env().documentsPath_ );
     gui_->initialize( this, documentsPath, *window_ );
-    gui_->poop();
+    gui_->setInstallationInfo( engine.installationInfo() );
 
     input_->initialize( window_->getSystemHandle() );
 
@@ -286,7 +286,7 @@ namespace neko {
   void Gfx::onMessage( const Message& msg )
   {
     logicLock_.lock();
-    if ( msg.code == M_Extern_TankAccountUpdated )
+    if ( msg.code == M_Extern_AccountUpdated )
     {
       auto id = (size_t)( msg.arguments[0] );
       updateAccounts_.push( id );
@@ -304,12 +304,15 @@ namespace neko {
     }
 
     renderer_->prepare( time );
-    char asd[256];
-    auto secondsWasted = chrono::seconds( static_cast<int>( engine.stats().f_timeWasted.load() + (float)time ) );
-    sprintf_s( asd, 256,
-      "Launches: %i\nTime wasted: %s", engine.stats().i_launches.load(),
-      utils::beautifyDuration( secondsWasted ).c_str() );
-    gui_->setshit( asd );
+
+    {
+      char stats[256];
+      auto secondsWasted = chrono::seconds( static_cast<int>( engine.stats().f_timeWasted.load() + (float)time ) );
+      sprintf_s( stats, 256,
+        "Launches: %i\nTime wasted: %s", engine.stats().i_launches.load(),
+        utils::beautifyDuration( secondsWasted ).c_str() );
+      gui_->setDebugStats( stats );
+    }
 
     if ( input_->mousebtn( 2 ) )
       camera_->applyInputPanning( input_->movement() );
@@ -327,10 +330,10 @@ namespace neko {
     {
       auto id = updateAccounts_.front();
       updateAccounts_.pop();
-      auto account = engine.tanklib()->account( id );
+      auto account = engine.rainet()->account( id );
       if ( !account )
         continue;
-      if ( account->id_ == engine.tanklib()->accountMe()->id_ && account->steamImage_ )
+      if ( account->id_ == engine.rainet()->accountMe()->id_ && account->steamImage_ )
         renderer_->setUserData( account->id_, account->steamName_, *account->steamImage_ );
     }
 

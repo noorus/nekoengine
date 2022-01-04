@@ -16,7 +16,7 @@ namespace neko {
     M_Window_Close,
     // External events
     M_Extern_SteamOverlay,
-    M_Extern_TankAccountUpdated,
+    M_Extern_AccountUpdated,
     // Debug commands
     M_Debug_ReloadScript,
     M_Debug_ReloadShaders,

@@ -17,16 +17,25 @@ namespace neko {
   protected:
     unique_ptr<MyGUI::NekoPlatform> guiPlatform_;
     unique_ptr<MyGUI::Gui> gui_;
-    MyGUI::TextBox* shit_ = nullptr;
+    struct Elements {
+      MyGUI::TextBox* installationInfoBox_ = nullptr;
+      MyGUI::TextBox* debugStatsBox_ = nullptr;
+      void reset()
+      {
+        installationInfoBox_ = nullptr;
+        debugStatsBox_ = nullptr;
+      }
+    } elements;
+    void fetchElements();
   protected:
     void* loadImage( int& width, int& height, MyGUI::PixelFormat& format, const utf8String& filename );
     void saveImage( int width, int height, MyGUI::PixelFormat format, void* texture, const utf8String& filename );
   public:
     GUI();
     void initialize( Gfx* gfx, const utf8String& documentsPath, sf::Window& window );
-    void poop();
     void resize( int width, int height );
-    void setshit( const utf8String& shit );
+    void setInstallationInfo( const rainet::GameInstallationState& install );
+    void setDebugStats( const utf8String& stats );
     void shutdown();
     inline MyGUI::NekoPlatform* platform() const { return guiPlatform_.get(); }
     ~GUI();
@@ -39,7 +48,7 @@ namespace neko {
     inline void initialize( Gfx* gfx, const utf8String& documentsPath, sf::Window& window ) {}
     inline void poop() {}
     inline void resize( int width, int height ) {}
-    inline void setshit( const utf8String& shit ) {}
+    inline void setDebugStats( const utf8String& shit ) {}
     inline void shutdown() {}
   };
 
