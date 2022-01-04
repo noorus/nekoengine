@@ -8,6 +8,7 @@
 #include "mesh_primitives.h"
 #include <newtype.h>
 #include "shaders.h"
+#include "resources.h"
 
 namespace neko {
 
@@ -15,17 +16,23 @@ namespace neko {
 
   struct FontStyleData {
     newtype::StyleID id_ = 0;
-    MaterialPtr material_;
+    Material::Ptr material_;
   };
 
-  class Font {
+  class Font: public LoadedResourceBase<Font> {
+  public:
+    using Base = LoadedResourceBase<Font>;
+    using Base::Ptr;
   private:
     newtype::Manager* mgr_;
     newtype::FontPtr font_;
     newtype::FontFacePtr face_;
     map<newtype::StyleID, FontStyleData> styles_;
   public:
-    Font( newtype::Manager* manager );
+    // The constructor is public due to make_shared's peculiarities, but don't call it directly.
+    Font() = delete;
+    explicit Font( newtype::Manager* manager, const utf8String& name );
+  public:
     newtype::IDType id() const;
     void loadFace( span<uint8_t> buffer, newtype::FaceID faceIndex, Real size );
     newtype::StyleID loadStyle( newtype::FontRendering rendering, Real thickness );
@@ -39,15 +46,15 @@ namespace neko {
     ~Font();
   };
 
-  using FontPtr = shared_ptr<Font>;
+  using FontPtr = Font::Ptr;
   using FontVector = vector<FontPtr>;
 
   struct NewtypeLibrary {
   private:
     HMODULE module_ = nullptr;
     newtype::Manager* manager_ = nullptr;
-    newtype::fnNewtypeInitialize pfnNewtypeInitialize;
-    newtype::fnNewtypeShutdown pfnNewtypeShutdown;
+    newtype::fnNewtypeInitialize pfnNewtypeInitialize = nullptr;
+    newtype::fnNewtypeShutdown pfnNewtypeShutdown = nullptr;
   public:
     void load( newtype::Host* host );
     void unload();
@@ -101,21 +108,34 @@ namespace neko {
   using TextMeshPtr = unique_ptr<TextRenderBuffer>;
 
   class Text {
-  public:
+  private:
+    newtype::Manager* mgr_;
     FontPtr font_;
     newtype::TextPtr text_;
     TextMeshPtr mesh_;
+  public:
+    // The constructor is public due to make_shared's peculiarities, but don't call it directly.
+    Text() = delete;
+    explicit Text( newtype::Manager* manager, FontPtr font, newtype::StyleID style );
+  public:
+    newtype::IDType id() const;
     void update( Renderer* renderer );
+    void draw( Renderer* renderer );
   };
 
   using TextPtr = shared_ptr<Text>;
 
-  class FontManager: public enable_shared_from_this<FontManager>, public newtype::Host {
+  class FontManager: public LoadedResourceManagerBase<Font>, public enable_shared_from_this<FontManager>, public newtype::Host {
+  public:
+    using Base = LoadedResourceManagerBase<Font>;
+    using ResourcePtr = Base::ResourcePtr;
+    using MapType = Base::MapType;
   protected:
-    EnginePtr engine_;
+    Renderer* renderer_ = nullptr;
     NewtypeLibrary nt_;
-    map<newtype::IDType, FontPtr> ntfonts_;
-    vector<TextPtr> txts_;
+    map<newtype::IDType, FontPtr> fonts_;
+    map<newtype::IDType, TextPtr> texts_;
+    FontPtr createFont( const utf8String& name );
   protected:
     void* newtypeMemoryAllocate( uint32_t size ) override;
     void* newtypeMemoryReallocate( void* address, uint32_t newSize ) override;
@@ -123,16 +143,19 @@ namespace neko {
     void newtypeFontTextureCreated( newtype::Font& font, newtype::StyleID style, newtype::Texture& texture ) override;
     void newtypeFontTextureDestroyed( newtype::Font& font, newtype::StyleID style, newtype::Texture& texture ) override;
   public:
-    FontManager( EnginePtr engine );
+    FontManager( ThreadedLoaderPtr loader );
     ~FontManager();
     void initializeLogic();
     void initializeRender( Renderer* renderer );
     void shutdownLogic();
-    void shutdownRender( Renderer* renderer );
+    void shutdownRender();
     void prepareLogic( GameTime time );
-    void prepareRender( Renderer* renderer );
-    TextPtr createText( FontPtr font, newtype::StyleID style );
-    void draw( Renderer* renderer );
+    void prepareRender();
+    void loadJSONRaw( const nlohmann::json& arr );
+    void loadJSON( const utf8String& input );
+    void loadFile( const utf8String& filename );
+    TextPtr createText( const utf8String& fontName, newtype::StyleID style );
+    void draw();
   };
 
 }

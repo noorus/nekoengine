@@ -136,7 +136,7 @@ namespace neko {
     Locator::provideDirector( director_ );
 
     timer.start();
-    fonts_ = make_shared<FontManager>( shared_from_this() );
+    fonts_ = make_shared<FontManager>( loader_ );
     fonts_->initializeLogic();
     console_->printf( Console::srcGfx, "Font manager init took %dms", (int)timer.stop() );
 

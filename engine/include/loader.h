@@ -72,11 +72,11 @@ namespace neko {
     struct FontfaceLoad {
       FontPtr font_;
       utf8String path_;
-      Real size_;
+      Real size_ = 0.0f;
       vector<FontLoadStyleSpec> styles_;
     } fontfaceLoad;
     struct ModelLoad {
-      SceneNode* node_;
+      SceneNode* node_ = nullptr;
       utf8String path_;
     } modelLoad;
     struct AnimationLoad {

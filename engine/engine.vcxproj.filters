@@ -518,6 +518,9 @@
     <ClInclude Include="..\shared\include\rainet.h">
       <Filter>Header Files\extern</Filter>
     </ClInclude>
+    <ClInclude Include="include\resources.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="engine.manifest" />
@@ -624,6 +627,9 @@
     </None>
     <None Include="..\bin\shaders\dbg_depthvis2d.frag">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\fonts.json">
+      <Filter>Data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

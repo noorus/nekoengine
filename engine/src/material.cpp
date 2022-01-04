@@ -12,7 +12,7 @@
 namespace neko {
 
   MaterialManager::MaterialManager( Renderer* renderer, ThreadedLoaderPtr loader ):
-  loader_( loader ), renderer_( renderer )
+  LoadedResourceManagerBase<Material>( loader ), renderer_( renderer )
   {
   }
 
@@ -23,9 +23,8 @@ namespace neko {
 
   MaterialPtr MaterialManager::createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
-    MaterialPtr mat = make_shared<Material>();
+    MaterialPtr mat = make_shared<Material>( name );
     mat->type_ = Material::UnlitSimple;
-    mat->name_ = name;
     MaterialLayer layer;
     layer.image_.format_ = format;
     layer.image_.width_ = (unsigned int)width;
@@ -50,19 +49,19 @@ namespace neko {
     }
     else if ( obj.is_object() )
     {
-      auto material = make_shared<Material>();
+      auto name = obj["name"].get<utf8String>();
+      auto material = make_shared<Material>( name );
       const auto& type = obj["type"].get<utf8String>();
       if ( c_materialTypes.find( type ) == c_materialTypes.end() )
         NEKO_EXCEPT( "Unknown material type " + type );
       material->type_ = c_materialTypes.at( type );
-      material->name_ = obj["name"].get<utf8String>();
       const auto& layers = obj["layers"];
       if ( !layers.is_array() )
         NEKO_EXCEPT( "Material layers is not an array" );
       vector<utf8String> textures;
       for ( auto& layer : layers )
         textures.push_back( layer.get<utf8String>() );
-      map_[material->name_] = material;
+      map_[material->name()] = material;
       loader_->addLoadTask( { LoadTask( material, textures ) } );
     }
     else

@@ -395,6 +395,7 @@
     <ClInclude Include="include\particles.h" />
     <ClInclude Include="include\renderbuffer.h" />
     <ClInclude Include="include\renderer.h" />
+    <ClInclude Include="include\resources.h" />
     <ClInclude Include="include\scripting.h" />
     <ClInclude Include="include\shaders.h" />
     <ClInclude Include="include\pch.h" />
@@ -410,6 +411,7 @@
     <Manifest Include="engine.manifest" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\data\fonts.json" />
     <None Include="..\bin\data\materials.json" />
     <None Include="..\bin\scripts\initialization.js" />
     <None Include="..\bin\shaders\dbg_depthvis2d.frag" />

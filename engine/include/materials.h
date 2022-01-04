@@ -3,6 +3,7 @@
 #include "forwards.h"
 #include "gfx_types.h"
 #include "texture.h"
+#include "resources.h"
 
 namespace neko {
 
@@ -29,15 +30,22 @@ namespace neko {
 
   using MaterialLayers = vector<MaterialLayer>;
 
-  struct Material: public nocopy
-  {
+  class Material: public LoadedResourceBase<Material> {
+  public:
+    using Base = LoadedResourceBase<Material>;
+    using Base::Ptr;
+  public:
+    friend class MaterialManager;
+    friend class ThreadedLoader;
+  public:
+    Material() = delete;
+    explicit Material( const utf8String& name ):
+      LoadedResourceBase<Material>( name ) {}
     enum Type
     {
       UnlitSimple,
       WorldParticle
     } type_ = UnlitSimple;
-    utf8String name_;
-    bool loaded_ = false;
     Texture::Wrapping wantWrapping_ = Texture::Repeat;
     Texture::Filtering wantFiltering_ = Texture::Mipmapped;
     MaterialLayers layers_;
@@ -62,28 +70,23 @@ namespace neko {
     }
   };
 
-  using MaterialPtr = shared_ptr<Material>;
+  using MaterialPtr = Material::Ptr;
   using MaterialVector = vector<MaterialPtr>;
   using MaterialMap = map<utf8String, MaterialPtr>;
 
-  class MaterialManager : public nocopy {
-  protected:
-    ThreadedLoaderPtr loader_;
-    Renderer* renderer_ = nullptr;
-    MaterialMap map_;
+  class MaterialManager: public LoadedResourceManagerBase<Material> {
+  public:
+    using Base = LoadedResourceManagerBase<Material>;
+    using ResourcePtr = Base::ResourcePtr;
+    using MapType = Base::MapType;
+  private:
+    Renderer* renderer_;
   public:
     MaterialManager( Renderer* renderer, ThreadedLoaderPtr loader );
     MaterialPtr createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering );
     void loadJSONRaw( const nlohmann::json& arr );
     void loadJSON( const utf8String& input );
     void loadFile( const utf8String& filename );
-    inline const Material* get( const utf8String& name ) const
-    {
-      auto it = map_.find( name );
-      if ( it == map_.end() )
-        return nullptr;
-      return ( ( *it ).second.get() );
-    }
     ~MaterialManager();
   };
 

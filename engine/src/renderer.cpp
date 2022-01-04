@@ -256,6 +256,9 @@ namespace neko {
 
     materials_->loadFile( R"(materials.json)" );
 
+    fonts_->initializeRender( this );
+    fonts_->loadFile( R"(fonts.json)" );
+
     loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
 
     ctx_.fboMain_ = make_unique<Framebuffer>( this, 2, c_bufferFormat, true, 0 );
@@ -277,7 +280,7 @@ namespace neko {
       console_->printf( Console::srcGfx, "Renderer::uploadTextures got %d new materials", mats.size() );
     for ( auto& mat : mats )
     {
-      if ( !mat->loaded_ )
+      if ( !mat->loaded() )
         continue;
       for ( auto& layer : mat->layers_ )
       {
@@ -328,7 +331,7 @@ namespace neko {
 
     uploadModels();
 
-    fonts_->prepareRender( this );
+    fonts_->prepareRender();
 
     // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point at which we try to create the VAO.
     // Thus uploading the VAOs should always come last.
@@ -686,7 +689,7 @@ namespace neko {
     }
 #endif
 
-    fonts_->draw( this );
+    fonts_->draw();
 
 #ifndef NEKO_NO_GUI
     if ( gui )
@@ -700,7 +703,7 @@ namespace neko {
 
   void Renderer::shutdown()
   {
-    fonts_->shutdownRender( this );
+    fonts_->shutdownRender();
   }
 
   Renderer::~Renderer()

@@ -53,29 +53,42 @@ namespace neko {
     Locator::memory().free( Memory::Sector::Graphics, address );
   }
 
-  FontManager::FontManager( EnginePtr engine ): engine_( engine )
+  FontManager::FontManager( ThreadedLoaderPtr loader ):
+  LoadedResourceManagerBase<Font>( loader )
   {
   }
 
-  FontManager::~FontManager()
+  void FontManager::initializeLogic()
   {
-    //
+    nt_.load( this );
+
+    Locator::console().printf( Console::srcGfx, "Newtype reported: %s", nt_.mgr()->versionString().c_str() );
   }
 
   void FontManager::initializeRender( Renderer* renderer )
   {
-    //
+    renderer_ = renderer;
   }
 
-  TextPtr FontManager::createText( FontPtr font, newtype::StyleID style )
+  FontPtr FontManager::createFont( const utf8String& name )
   {
-    auto txt = make_shared<Text>();
-    txt->font_ = font;
-    txt->text_ = nt_.mgr()->createText( font->face(), style );
-    txt->text_->pen( vec3( 100.0f, 100.0f, 0.0f ) );
-    auto content = unicodeString::fromUTF8( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class." );
-    txt->text_->setText( content );
-    txts_.push_back( txt );
+    auto fnt = make_shared<Font>( nt_.mgr(), name );
+
+    assert( fonts_.find( fnt->id() ) == fonts_.end() );
+    fonts_[fnt->id()] = fnt;
+
+    return fnt;
+  }
+
+  TextPtr FontManager::createText( const utf8String& fontName, newtype::StyleID style )
+  {
+    auto font = map_[fontName];
+
+    auto txt = make_shared<Text>( nt_.mgr(), font, style );
+
+    assert( texts_.find( txt->id() ) == texts_.end() );
+    texts_[txt->id()] = txt;
+
     return txt;
   }
 
@@ -94,33 +107,85 @@ namespace neko {
     //
   }
 
-  void FontManager::prepareRender( Renderer* renderer )
+  void FontManager::loadJSONRaw( const nlohmann::json& obj )
   {
-    for ( const auto& entry : ntfonts_ )
+    if ( obj.is_array() )
     {
-      entry.second->update( renderer );
+      for ( const auto& entry : obj )
+      {
+        if ( !entry.is_object() )
+          NEKO_EXCEPT( "Font array entry is not an object" );
+        loadJSONRaw( entry );
+      }
+    }
+    else if ( obj.is_object() )
+    {
+      auto name = obj["name"].get<utf8String>();
+      if ( map_.find( name ) != map_.end() )
+        NEKO_EXCEPT( "Font already exists: " + name );
+      auto font = createFont( name );
+      auto filename = obj["file"].get<utf8String>();
+      map_[font->name()] = font;
+      loader_->addLoadTask( { LoadTask( font, filename, 24.0f ) } );
+    }
+    else
+      NEKO_EXCEPT( "Font JSON is not an array or an object" );
+  }
+
+  void FontManager::loadJSON( const utf8String& input )
+  {
+    auto parsed = nlohmann::json::parse( input );
+    loadJSONRaw( parsed );
+  }
+
+  void FontManager::loadFile( const utf8String& filename )
+  {
+    auto input = move( Locator::fileSystem().openFile( Dir_Data, filename )->readFullString() );
+    loadJSON( input );
+  }
+
+  void FontManager::prepareRender()
+  {
+    assert( renderer_ );
+    //FontVector fonts;
+    //engine_->loader()->getFinishedFonts( fonts );
+
+    for ( const auto& entry : fonts_ )
+    {
+      entry.second->update( renderer_ );
     }
 
-    for ( const auto& txt : txts_ )
+    for ( const auto& entry : texts_ )
     {
-      txt->update( renderer );
+      entry.second->update( renderer_ );
     }
   }
 
-  void FontManager::draw( Renderer* renderer )
+  void FontManager::draw()
   {
-    for ( auto& txt : txts_ )
+    assert( renderer_ );
+    for ( auto& entry : texts_ )
     {
-      const auto sid = txt->text_->styleid();
-      if ( txt->mesh_
-        && txt->font_
-        && txt->font_->usable( sid ) )
-      {
-        txt->mesh_->draw( renderer->shaders(),
-          txt->font_->style( sid ).material_->textureHandle( 0 )
-        );
-      }
+      entry.second->draw( renderer_ );
     }
+  }
+
+  void FontManager::shutdownRender()
+  {
+    texts_.clear();
+    map_.clear();
+    fonts_.clear();
+    renderer_ = nullptr;
+  }
+
+  void FontManager::shutdownLogic()
+  {
+    nt_.unload();
+  }
+
+  FontManager::~FontManager()
+  {
+    //
   }
 
 }

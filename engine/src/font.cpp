@@ -9,23 +9,8 @@
 
 namespace neko {
 
-  void FontManager::initializeLogic()
-  {
-    nt_.load( this );
-
-    engine_->console()->printf( Console::srcGfx, "Newtype reported: %s", nt_.mgr()->versionString().c_str() );
-
-    fnt_ = make_shared<Font>( nt_.mgr() );
-    ntfonts_[fnt_->id()] = fnt_;
-    vector<uint8_t> input;
-    Locator::fileSystem().openFile( Dir_Fonts, R"(SourceHanSansJP-Bold.otf)" )->readFullVector( input );
-    fnt_->loadFace( input, 0, 24.0f );
-    auto sid = fnt_->loadStyle( newtype::FontRender_Normal, 0.0f );
-
-    createText( fnt_, sid );
-  }
-
-  Font::Font( newtype::Manager* manager ): mgr_( manager )
+  Font::Font( newtype::Manager* manager, const utf8String& name ):
+  LoadedResourceBase<Font>( name ), mgr_( manager )
   {
     font_ = mgr_->createFont();
     font_->setUser( this );
@@ -95,36 +80,6 @@ namespace neko {
       writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) ); */
       style->markClean();
     }
-  }
-
-  void Text::update( Renderer* renderer )
-  {
-    text_->update();
-    if ( text_->dirty() && mesh_ )
-      mesh_.reset();
-    if ( !text_->dirty() && !mesh_ )
-    {
-      mesh_ = make_unique<TextRenderBuffer>(
-        static_cast<gl::GLuint>( text_->mesh().vertices_.size() ),
-        static_cast<gl::GLuint>( text_->mesh().indices_.size() ) );
-      const auto& verts = mesh_->buffer().lock();
-      const auto& indcs = mesh_->indices().lock();
-      memcpy( verts.data(), text_->mesh().vertices_.data(), text_->mesh().vertices_.size() * sizeof( newtype::Vertex ) );
-      memcpy( indcs.data(), text_->mesh().indices_.data(), text_->mesh().indices_.size() * sizeof( GLuint ) );
-      mesh_->buffer().unlock();
-      mesh_->indices().unlock();
-    }
-  }
-
-  void FontManager::shutdownRender( Renderer* renderer )
-  {
-    txts_.clear();
-    ntfonts_.clear();
-  }
-
-  void FontManager::shutdownLogic()
-  {
-    nt_.unload();
   }
 
 }
