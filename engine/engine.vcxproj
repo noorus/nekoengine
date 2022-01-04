@@ -331,7 +331,6 @@
     <ClCompile Include="src\subsystem.cpp" />
     <ClCompile Include="src\surface.cpp" />
     <ClCompile Include="src\texture.cpp" />
-    <ClCompile Include="src\textureatlas.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extern\lodepng\lodepng.h" />
@@ -403,7 +402,6 @@
     <ClInclude Include="include\surface.h" />
     <ClInclude Include="include\text.h" />
     <ClInclude Include="include\texture.h" />
-    <ClInclude Include="include\textureatlas.h" />
     <ClInclude Include="include\utilities.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

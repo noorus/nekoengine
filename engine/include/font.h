@@ -3,10 +3,10 @@
 #include "subsystem.h"
 #include "forwards.h"
 #include "gfx_types.h"
-#include "textureatlas.h"
 #include "materials.h"
 #include "mesh_primitives.h"
 #include <newtype.h>
+#include <nlohmann/json.hpp>
 #include "shaders.h"
 #include "resources.h"
 

@@ -291,9 +291,6 @@
     <ClCompile Include="src\particles.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
-    <ClCompile Include="src\textureatlas.cpp">
-      <Filter>Source Files\gfx</Filter>
-    </ClCompile>
     <ClCompile Include="src\text.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
@@ -505,9 +502,6 @@
     </ClInclude>
     <ClInclude Include="..\shared\include\math_aabb.h">
       <Filter>Header Files\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="include\textureatlas.h">
-      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="include\filesystem.h">
       <Filter>Header Files</Filter>
