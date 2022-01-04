@@ -57,7 +57,6 @@ namespace neko {
     };
   protected:
     ConsolePtr console_;
-    //GfxPtr gfx_;
     ThreadedRendererPtr renderer_;
 #ifndef NEKO_NO_SCRIPTING
     ScriptingPtr scripting_;
@@ -66,7 +65,6 @@ namespace neko {
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
     DirectorPtr director_;
-    // InputPtr input_;
     EngineInfo info_;
     RainetLibrary rainet_;
     Environment env_;

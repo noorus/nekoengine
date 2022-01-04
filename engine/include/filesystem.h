@@ -1,10 +1,8 @@
 #pragma once
 #include "neko_types.h"
 #include "neko_exception.h"
-//#include "consolelistener.h"
 #include <windows.h>
 #include <shlobj.h>
-
 
 namespace neko {
 

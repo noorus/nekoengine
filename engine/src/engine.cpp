@@ -18,7 +18,7 @@ namespace neko {
 
   const char* c_engineName = "Nekoengine Alpha";
   const char* c_engineLogName = "nekoengine";
-  const uint32_t c_engineVersion[3] = { 0, 1, 2 };
+  const uint32_t c_engineVersion[3] = { 0, 1, 3 };
 
 #ifdef NEKO_USE_DISCORD
   const int64_t c_discordAppId = 862843623824556052;
@@ -103,8 +103,8 @@ namespace neko {
   {
     if ( engine_ && pfnShutdown )
       pfnShutdown( engine_ );
-    // if ( module_ )
-    //   FreeLibrary( module_ );
+    if ( module_ )
+      FreeLibrary( module_ );
   }
 
   void Engine::initialize( const Options& options )
@@ -145,11 +145,6 @@ namespace neko {
     renderer_->start();
     console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );
 
-    /*timer.start();
-    input_ = make_shared<Input>( shared_from_this() );
-    input_->initialize();
-    console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );*/
-
 #ifndef NEKO_NO_SCRIPTING
     timer.start();
     scripting_ = make_shared<Scripting>( shared_from_this() );
@@ -158,8 +153,6 @@ namespace neko {
 #endif
 
     rainet_.engine_->update( 0.0, 0.0 );
-
-    //input_->postInitialize();
 
 #ifndef NEKO_NO_SCRIPTING
     scripting_->postInitialize();
@@ -245,10 +238,7 @@ namespace neko {
 #ifndef NEKO_NO_SCRIPTING
     scripting_->shutdown();
 #endif
-    //input_->shutdown();
     renderer_->restart();
-    //input_->initialize();
-    //input_->postInitialize();
 #ifndef NEKO_NO_SCRIPTING
     scripting_->initialize();
     scripting_->postInitialize();
@@ -288,7 +278,6 @@ namespace neko {
 
       console_->executeBuffered();
 
-      //gfx_->processEvents();
       messaging_->processEvents();
 
       if ( signal_ == Signal_Restart )
@@ -301,12 +290,10 @@ namespace neko {
         continue;
       }
 
-      //input_->preUpdate( time_ );
 #ifndef NEKO_NO_SCRIPTING
       scripting_->preUpdate( time_ );
 #endif
       fonts_->prepareLogic( time_ );
-      //gfx_->preUpdate( time_ );
 
       if ( !paused() )
       {
@@ -317,7 +304,6 @@ namespace neko {
           scripting_->tick( c_logicStep, time_ );
 #endif
           messaging_->tick( c_logicStep, time_ );
-          // gfx_->tick( c_logicStep, time_ );
           time_ += c_logicStep;
           accumulator -= c_logicStep;
         }
@@ -325,18 +311,11 @@ namespace neko {
 
       rendererTime_.store( time_ );
 
-      //input_->postUpdate( delta, time_ );
-
       rainet_.engine_->update( time_, delta );
 
 #ifndef NEKO_NO_SCRIPTING
       scripting_->postUpdate( delta, time_ );
 #endif
-
-      if ( delta > 0.0 && signal_ != Signal_Stop )
-      {
-        //gfx_->postUpdate( delta, time_ );
-      }
 
       auto us = clock_.peekMicroseconds();
       if ( us >= c_logicMaxFrameMicroseconds )
@@ -347,9 +326,6 @@ namespace neko {
       {
         /* this pretty sleep math is for if you really want to save on CPU, but makes for some jitter.
         auto ms = math::ifloor( static_cast<double>( cLogicMaxFrameMicroseconds - us ) / 1000.0 );
-        static char asd[64];
-        sprintf_s( asd, 64, "sleeping for %i ms\r\n", ms );
-        OutputDebugStringA( asd );
         platform::sleep( std::max( 1, ms ) );*/
         platform::sleep( 2 );
       }
@@ -366,9 +342,6 @@ namespace neko {
     scripting_.reset();
 #endif
 
-    //if ( input_ )
-    //  input_->shutdown();
-
     if ( renderer_ )
       renderer_->stop();
 
@@ -379,8 +352,6 @@ namespace neko {
 
     if ( fonts_ )
       fonts_->shutdownLogic();
-
-    //input_.reset();
 
     renderer_.reset();
 
