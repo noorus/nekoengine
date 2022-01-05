@@ -280,6 +280,7 @@
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\filesystem.cpp" />
     <ClCompile Include="src\fontmanager.cpp" />
+    <ClCompile Include="src\js_text.cpp" />
     <ClCompile Include="src\text.cpp" />
     <ClCompile Include="src\font.cpp" />
     <ClCompile Include="src\framebuffer.cpp" />
@@ -330,6 +331,7 @@
     </ClCompile>
     <ClCompile Include="src\subsystem.cpp" />
     <ClCompile Include="src\surface.cpp" />
+    <ClCompile Include="src\textmanager.cpp" />
     <ClCompile Include="src\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -377,6 +379,7 @@
     <ClInclude Include="include\js_mathutil.h" />
     <ClInclude Include="include\js_mesh.h" />
     <ClInclude Include="include\js_model.h" />
+    <ClInclude Include="include\js_text.h" />
     <ClInclude Include="include\js_util.h" />
     <ClInclude Include="include\js_wrapper.h" />
     <ClInclude Include="include\loader.h" />

@@ -87,6 +87,7 @@ namespace neko {
     quatRegistry_.initialize( isolate_, global );
     meshRegistry_.initialize( isolate_, global );
     modelRegistry_.initialize( isolate_, global );
+    textRegistry_.initialize( isolate_, global );
 
     JS_SET_GLOBAL_FUNCTION( include );
     JS_SET_GLOBAL_FUNCTION( require );
@@ -205,6 +206,7 @@ namespace neko {
 
   ScriptingContext::~ScriptingContext()
   {
+    textRegistry_.clear();
     modelRegistry_.clear();
     meshRegistry_.clear();
     quatRegistry_.clear();

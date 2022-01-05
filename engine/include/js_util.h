@@ -123,6 +123,24 @@ namespace neko {
         return ( *value ? *value : emptyString );
       }
 
+      inline unicodeString extractStringMemberUnicode( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name )
+      {
+        const unicodeString emptyString;
+        if ( maybeObject.IsEmpty() )
+        {
+          util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
+          return emptyString;
+        }
+        auto object = maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
+        if ( object.IsEmpty() || !object.ToLocalChecked()->IsString() )
+        {
+          util::throwException( isolate, ( func + ": passed object has no string member \"" + name + "\"" ).c_str() );
+          return emptyString;
+        }
+        v8::String::Value value( isolate, object.ToLocalChecked() );
+        return ( *value ? unicodeString( *value ) : emptyString );
+      }
+
       inline V8Function extractFunctionMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name )
       {
         const V8Function emptyFunc;

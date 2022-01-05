@@ -2,8 +2,6 @@ Console.log("initialization.js");
 
 // include("math.js");
 
-Console.log("include done");
-
 class Scene
 {
   constructor( name )
@@ -27,10 +25,12 @@ class DemoScene extends Scene
     super( name );
     this._mesh = null;
     this._model = null;
+    this._text = null;
   }
   initialize( time )
   {
     Console.print( "DemoScene.initialize: " + time );
+    Console.print("testing and dumping stuff");
     /*const verts = [
       [-128,  90,  90, 0, 0.7, -0.7, 0, 0],
       [-128, -90, -90, 0, 0.7, -0.7, 0, 1],
@@ -46,7 +46,6 @@ class DemoScene extends Scene
     this._mesh = new mesh("box", vec3(3, 3, 3), vec2(1));
     this._ctr = 0;
     Console.print(this._mesh);
-    Console.print("creating model");
     this._models = [
       new model({
         mesh: this._mesh,
@@ -54,6 +53,8 @@ class DemoScene extends Scene
         translate: vec3(0, 1, 0)
       })
     ]
+    this._text = new text( "bala bala lolololo" );
+    Console.print( this._text );
   }
   enter()
   {

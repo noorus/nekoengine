@@ -170,6 +170,7 @@ namespace neko {
     MeshManagerPtr meshes_;
 #ifndef NEKO_NO_SCRIPTING
     ModelManagerPtr models_;
+    TextManagerPtr texts_;
 #endif
     platform::RWLock loadLock_;
     MaterialManagerPtr materials_;

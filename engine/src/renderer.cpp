@@ -224,6 +224,7 @@ namespace neko {
     meshes_ = make_shared<MeshManager>( console_ );
 #ifndef NEKO_NO_SCRIPTING
     models_ = make_shared<ModelManager>( console_ );
+    texts_ = make_shared<TextManager>( console_ );
 #endif
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
@@ -341,6 +342,7 @@ namespace neko {
 
 #ifndef NEKO_NO_SCRIPTING
     models_->jsUpdate( director_->renderSync() );
+    texts_->jsUpdate( director_->renderSync() );
 #endif
   }
 
@@ -348,6 +350,7 @@ namespace neko {
   {
 #ifndef NEKO_NO_SCRIPTING
     director_->renderSync().resetFromRenderer();
+    texts_->jsReset();
     models_->jsReset();
     meshes_->jsReset();
 #endif
@@ -718,6 +721,7 @@ namespace neko {
     ctx_.fboMain_.reset();
 
 #ifndef NEKO_NO_SCRIPTING
+    texts_->teardown();
     models_->teardown();
 #endif
 

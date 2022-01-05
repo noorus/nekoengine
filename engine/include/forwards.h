@@ -63,4 +63,7 @@ namespace neko {
   class FileSystem;
   using FileSystemPtr = shared_ptr<FileSystem>;
 
+  class TextManager;
+  using TextManagerPtr = shared_ptr<TextManager>;
+
 }

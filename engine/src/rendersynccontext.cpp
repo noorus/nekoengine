@@ -34,6 +34,16 @@ namespace neko {
     frameDeletedModels.push_back( model );
   }
 
+  void RenderSyncContext::constructed( js::Text* text )
+  {
+    frameNewTexts.push_back( text );
+  }
+
+  void RenderSyncContext::destructed( js::Text* text )
+  {
+    frameDeletedTexts.push_back( text );
+  }
+
   void RenderSyncContext::syncFromScripting()
   {
     lock_.lock();
@@ -46,15 +56,23 @@ namespace neko {
     // new models
     totalNewModels.reserve( totalNewModels.size() + frameNewModels.size() );
     totalNewModels.insert( totalNewModels.end(), frameNewModels.begin(), frameNewModels.end() );
-    // deleted meshes
+    // deleted models
     totalDeletedModels.reserve( totalDeletedModels.size() + frameDeletedModels.size() );
     totalDeletedModels.insert( totalDeletedModels.end(), frameDeletedModels.begin(), frameDeletedModels.end() );
+    // new texts
+    totalNewTexts.reserve( totalNewTexts.size() + frameNewTexts.size() );
+    totalNewTexts.insert( totalNewTexts.end(), frameNewTexts.begin(), frameNewTexts.end() );
+    // deleted texts
+    totalDeletedTexts.reserve( totalDeletedTexts.size() + frameDeletedTexts.size() );
+    totalDeletedTexts.insert( totalDeletedTexts.end(), frameDeletedTexts.begin(), frameDeletedTexts.end() );
     lock_.unlock();
     // clear buffers
     frameNewMeshes.clear();
     frameDeletedMeshes.clear();
     frameNewModels.clear();
     frameDeletedModels.clear();
+    frameNewTexts.clear();
+    frameDeletedTexts.clear();
   }
 
   void RenderSyncContext::syncMeshesFromRenderer( js::MeshVector& outCreated, js::MeshVector& outDeleted )
@@ -73,6 +91,14 @@ namespace neko {
     lock_.unlock();
   }
 
+  void RenderSyncContext::syncTextsFromRenderer( js::TextVector& outCreated, js::TextVector& outDeleted )
+  {
+    lock_.lock();
+    outCreated.swap( totalNewTexts );
+    outDeleted.swap( totalDeletedTexts );
+    lock_.unlock();
+  }
+
   void RenderSyncContext::resetFromRenderer()
   {
     lock_.lock();
@@ -80,10 +106,14 @@ namespace neko {
     frameDeletedMeshes.clear();
     frameNewModels.clear();
     frameDeletedModels.clear();
+    frameNewTexts.clear();
+    frameDeletedTexts.clear();
     totalNewModels.clear();
     totalDeletedModels.clear();
     totalNewMeshes.clear();
     totalDeletedMeshes.clear();
+    totalNewTexts.clear();
+    totalDeletedTexts.clear();
     lock_.unlock();
   }
 

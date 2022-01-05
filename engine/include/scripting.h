@@ -9,6 +9,7 @@
 #include "js_mesh.h"
 #include "js_model.h"
 #include "js_game.h"
+#include "js_text.h"
 #include "director.h"
 
 namespace neko {
@@ -86,6 +87,7 @@ namespace neko {
     js::DynamicObjectsRegistry<js::Quaternion, quaternion> quatRegistry_;
     js::DynamicObjectsRegistry<js::Mesh, JSMesh> meshRegistry_;
     js::DynamicObjectsRegistry<js::Model, js::JSModel> modelRegistry_;
+    js::DynamicObjectsRegistry<js::Text, JSText> textRegistry_;
   public:
     EnginePtr engine_;
     ConsolePtr console_;
@@ -100,6 +102,7 @@ namespace neko {
     inline js::DynamicObjectsRegistry<js::Quaternion, quaternion>& quatreg() { return quatRegistry_; }
     inline js::DynamicObjectsRegistry<js::Mesh, JSMesh>& meshreg() { return meshRegistry_; }
     inline js::DynamicObjectsRegistry<js::Model, js::JSModel>& modelreg() { return modelRegistry_; }
+    inline js::DynamicObjectsRegistry<js::Text, JSText>& textreg() { return textRegistry_; }
     inline RenderSyncContext& renderSync() { return director_->renderSync(); }
     js::V8Value addAndRunScript( const utf8String& filename );
     js::V8Value requireScript( const utf8String& filename );

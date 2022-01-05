@@ -19,6 +19,7 @@ namespace neko {
       Wrapped_Quaternion, //!< Dynamic: Quaternion
       Wrapped_Mesh, //!< Dynamic: DynamicMesh
       Wrapped_Model, //!< Dynamic: Model
+      Wrapped_Text, //!< Dynamic: Text
       Max_WrappedType
     };
 

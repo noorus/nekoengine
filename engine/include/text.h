@@ -12,6 +12,20 @@
 
 namespace neko {
 
+  using TextMap = map<size_t, js::Text*>;
 
+  class TextManager: public enable_shared_from_this<TextManager>, public nocopy {
+  private:
+    ConsolePtr console_;
+    TextMap texts_;
+    void addJSText( js::Text* text );
+    void removeJSText( js::Text* text );
+  public:
+    TextManager( ConsolePtr console ): console_( move( console ) ) {}
+    void jsUpdate( RenderSyncContext& renderCtx );
+    void jsReset();
+    void teardown();
+    inline TextMap& texts() { return texts_; }
+  };
 
 }
