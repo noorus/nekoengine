@@ -224,7 +224,7 @@ namespace neko {
     meshes_ = make_shared<MeshManager>( console_ );
 #ifndef NEKO_NO_SCRIPTING
     models_ = make_shared<ModelManager>( console_ );
-    texts_ = make_shared<TextManager>( console_ );
+    texts_ = make_shared<TextManager>( fonts_, console_ );
 #endif
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );

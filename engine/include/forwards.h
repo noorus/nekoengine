@@ -66,4 +66,7 @@ namespace neko {
   class TextManager;
   using TextManagerPtr = shared_ptr<TextManager>;
 
+  class Text;
+  using TextPtr = shared_ptr<Text>;
+
 }

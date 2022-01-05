@@ -15,6 +15,8 @@ namespace neko {
   public:
     size_t id_;
     unicodeString content_;
+    js::Vector3Ptr pen_;
+    TextPtr impl_;
     JSText();
   };
 

@@ -123,8 +123,6 @@ namespace neko {
     void draw( Renderer* renderer );
   };
 
-  using TextPtr = shared_ptr<Text>;
-
   class FontManager: public LoadedResourceManagerBase<Font>, public enable_shared_from_this<FontManager>, public newtype::Host {
   public:
     using Base = LoadedResourceManagerBase<Font>;

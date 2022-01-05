@@ -16,12 +16,15 @@ namespace neko {
 
   class TextManager: public enable_shared_from_this<TextManager>, public nocopy {
   private:
+    FontManagerPtr fonts_;
     ConsolePtr console_;
     TextMap texts_;
     void addJSText( js::Text* text );
     void removeJSText( js::Text* text );
   public:
-    TextManager( ConsolePtr console ): console_( move( console ) ) {}
+    TextManager( FontManagerPtr fonts, ConsolePtr console ):
+      console_( move( console ) ),
+      fonts_( move( fonts ) ) {}
     void jsUpdate( RenderSyncContext& renderCtx );
     void jsReset();
     void teardown();
