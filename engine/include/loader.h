@@ -8,45 +8,15 @@ namespace neko {
 
   class SceneNode;
 
-#ifndef NEKO_NO_ANIMATION
-  struct OzzAnimationEntry
-  {
-    unique_ptr<ozz::animation::offline::RawAnimation> animation_;
-    map<utf8String, size_t> boneTrackMap_;
-  };
-#else
-  struct OzzAnimationEntry
+  // Unused atm
+  struct AnimationEntry
   {
   };
-#endif
 
-  using AnimationEntryPtr = shared_ptr<OzzAnimationEntry>;
-
+  using AnimationEntryPtr = shared_ptr<AnimationEntry>;
   using AnimationVector = vector<AnimationEntryPtr>;
 
   namespace loaders {
-
-#ifndef NEKO_NO_ANIMATION
-
-    struct UnityYamlNode {
-      bool isRoot = false;
-      int indent;
-      UnityYamlNode* parent;
-      utf8String name;
-      map<utf8String, utf8String> attribs;
-      vector<UnityYamlNode*> children;
-      UnityYamlNode( UnityYamlNode* parent_, int indent_ ): parent( parent_ ), indent( indent_ ) {}
-      ~UnityYamlNode()
-      {
-        for ( auto& child : children )
-          delete child;
-      }
-    };
-
-    void dumpUnityYaml( UnityYamlNode& node, size_t level = 0 );
-    void loadUnityAnimation( const vector<uint8_t>& data, AnimationEntryPtr& into );
-
-#endif
 
     void loadGLTFModel( const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, SceneNode* out );
 

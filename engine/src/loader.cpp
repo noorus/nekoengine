@@ -375,19 +375,6 @@ namespace neko {
         finishedModels_.push_back( task.modelLoad.node_ );
         finishedTasksLock_.unlock();
       }
-#ifndef NEKO_NO_ANIMATION
-      else if ( task.type_ == LoadTask::Load_Animation )
-      {
-        auto path = c_animationsBaseDirectory + task.animationLoad.path_;
-
-        vector<uint8_t> input;
-        platform::FileReader( path ).readFullVector( input );
-        loaders::loadUnityAnimation( input, task.animationLoad.animation_ );
-        finishedTasksLock_.lock();
-        finishedAnimations_.push_back( task.animationLoad.animation_ );
-        finishedTasksLock_.unlock();
-      }
-#endif
     }
 
     if ( !finishedMaterials_.empty() )

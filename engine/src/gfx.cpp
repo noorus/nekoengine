@@ -20,30 +20,12 @@
 # ifndef NEKO_NO_GUI
 #  pragma comment( lib, "MyGUIEngine_d.lib" )
 # endif
-# ifndef NEKO_NO_ANIMATION
-#  pragma comment( lib, "ozz_animation_d.lib" )
-#  pragma comment( lib, "ozz_animation_fbx_d.lib" )
-#  pragma comment( lib, "ozz_animation_tools_d.lib" )
-#  pragma comment( lib, "ozz_animation_offline_d.lib" )
-#  pragma comment( lib, "ozz_base_d.lib" )
-#  pragma comment( lib, "ozz_geometry_d.lib" )
-#  pragma comment( lib, "ozz_options_d.lib" )
-# endif
 #else
 # pragma comment( lib, "glbinding.lib" )
 # pragma comment( lib, "sfml-system-s.lib" )
 # pragma comment( lib, "sfml-window-s.lib" )
 # ifndef NEKO_NO_GUI
 #  pragma comment( lib, "MyGUIEngine.lib" )
-# endif
-# ifndef NEKO_NO_ANIMATION
-#  pragma comment( lib, "ozz_animation_r.lib" )
-#  pragma comment( lib, "ozz_animation_fbx_r.lib" )
-#  pragma comment( lib, "ozz_animation_tools_r.lib" )
-#  pragma comment( lib, "ozz_animation_offline_r.lib" )
-#  pragma comment( lib, "ozz_base_r.lib" )
-#  pragma comment( lib, "ozz_geometry_r.lib" )
-#  pragma comment( lib, "ozz_options_r.lib" )
 # endif
 #endif
 

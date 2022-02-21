@@ -299,7 +299,6 @@
     <ClCompile Include="src\js_vector3.cpp" />
     <ClCompile Include="src\loader.cpp" />
     <ClCompile Include="src\loader_gltf.cpp" />
-    <ClCompile Include="src\loader_unity.cpp" />
     <ClCompile Include="src\locator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\material.cpp" />

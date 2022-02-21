@@ -140,21 +140,6 @@
 // JSON
 #include <json.hpp>
 
-// OZZ
-#ifndef NEKO_NO_ANIMATION
-# include <ozz/animation/runtime/animation.h>
-# include <ozz/animation/runtime/local_to_model_job.h>
-# include <ozz/animation/runtime/sampling_job.h>
-# include <ozz/animation/runtime/skeleton.h>
-# include <ozz/base/log.h>
-# include <ozz/base/maths/math_ex.h>
-# include <ozz/base/maths/simd_math.h>
-# include <ozz/base/maths/soa_transform.h>
-# include <ozz/base/maths/vec_float.h>
-# include <ozz/animation/offline/animation_builder.h>
-# include <ozz/animation/offline/raw_animation.h>
-#endif
-
 // Local types
 #include "neko_types.h"
 #include "nekomath.h"

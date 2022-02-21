@@ -55,9 +55,6 @@ namespace neko {
 #ifdef NEKO_NO_GUI
       "nogui "
 #endif
-#ifdef NEKO_NO_ANIMATION
-      "noanimation "
-#endif
 #ifdef NEKO_NO_SCRIPTING
       "noscripting "
 #endif
