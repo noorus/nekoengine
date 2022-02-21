@@ -20,23 +20,13 @@ namespace neko {
   const char* c_engineLogName = "nekoengine";
   const uint32_t c_engineVersion[3] = { 0, 1, 3 };
 
-#ifdef NEKO_USE_DISCORD
-  const int64_t c_discordAppId = 862843623824556052;
-#else
-  const int64_t c_discordAppId = 0;
-#endif
-
-#ifdef NEKO_USE_STEAM
-  const uint32_t c_steamAppId = 1692910;
-#else
-  const uint32_t c_steamAppId = 0;
-#endif
-
 #ifdef _DEBUG
   const wchar_t* c_rainetLibraryName = L"rainet_d.dll";
 #else
   const wchar_t* c_rainetLibraryName = L"rainet.dll";
 #endif
+
+  const char* c_engineSettingsFilename = "engineconf.json";
 
   Engine::Engine( ConsolePtr console, const Environment& env ):
   console_( move( console ) ), time_( 0.0 ), signal_( Signal_None ), env_( env )
@@ -71,16 +61,6 @@ namespace neko {
 #ifdef NEKO_NO_SCRIPTING
       "noscripting "
 #endif
-#ifdef NEKO_USE_STEAM
-      "steam "
-#else
-      "nosteam "
-#endif
-#ifdef NEKO_USE_DISCORD
-      "discord "
-#else
-      "nodiscord "
-#endif
       "windows";
     return flags;
   }
@@ -107,11 +87,34 @@ namespace neko {
       FreeLibrary( module_ );
   }
 
+  void parseSettingsJSON( const json& settings, EngineSettings& out )
+  {
+    if ( !settings.is_object() )
+      return;
+    if ( settings.find( "steam" ) != settings.end() )
+    {
+      auto& steam = settings["steam"];
+      out.steamAppID = utils::parseUint32( steam["appid"].get<utf8String>().c_str() );
+      if ( out.steamAppID )
+        out.useSteam = true;
+    }
+    if ( settings.find( "discord" ) != settings.end() )
+    {
+      auto& discord = settings["discord"];
+      out.discordAppID = utils::parseUint64( discord["appid"].get<utf8String>().c_str() );
+      if ( out.discordAppID )
+        out.useDiscord = true;
+    }
+  }
+
   void Engine::initialize( const Options& options )
   {
     console_->setEngine( shared_from_this() );
 
     console_->printf( Console::srcEngine, "Build flags: %s", listFlags().c_str() );
+
+    auto settingstext = Locator::fileSystem().openFile( Dir_User, c_engineSettingsFilename )->readFullString();
+    parseSettingsJSON( json::parse( settingstext ), settings_ );
 
     platform::PerformanceTimer timer;
 
@@ -120,7 +123,7 @@ namespace neko {
     console_->printf( Console::srcEngine, "Using ICU v%d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
 
     rainet_.load( this );
-    rainet_.engine_->initialize( c_discordAppId, c_steamAppId );
+    rainet_.engine_->initialize( settings_.discordAppID, settings_.steamAppID );
 
     rendererTime_.store( 0.0f );
 

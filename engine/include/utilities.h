@@ -35,6 +35,16 @@ namespace neko {
       return move( out );
     }
 
+    inline uint32_t parseUint32( const char* str )
+    {
+      return static_cast<uint32_t>( _atoi64( str ) );
+    }
+
+    inline uint64_t parseUint64( const utf8String& str )
+    {
+      return std::stoull( str );
+    }
+
     inline void toLowercase( string& str )
     {
       std::transform( str.begin(), str.end(), str.begin(), ::tolower );

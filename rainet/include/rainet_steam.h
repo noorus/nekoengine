@@ -79,10 +79,12 @@ namespace rainet {
     static void baseShutdown();
     inline const GameInstallationState& installation() throw() { return installation_; }
     inline const utf8String& commandline() throw() { return commandLine_; }
-    inline const SteamStats& myStats() const
+    inline const SteamStats* myStats() const
     {
       const auto myid = state_.localUser_.id_.ConvertToUint64();
-      return state_.userStats_.at( myid );
+      if ( !myid || state_.userStats_.find( myid ) == state_.userStats_.end() )
+        return nullptr;
+      return &state_.userStats_.at( myid );
     }
     void refreshStats();
     void initialize();

@@ -16,10 +16,6 @@
 // Will most likely break things.
 #undef NEKO_MATH_DOUBLE
 
-// -- Platform/Store integrations --
-#undef NEKO_USE_DISCORD
-#define NEKO_USE_STEAM
-
 // -- Feature switches --
 // The game/engine isn't meant to work properly without these, but it is
 // convenient to drop some dependencies when developing stuff on the road.

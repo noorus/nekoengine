@@ -27,6 +27,7 @@
 #include <atomic>
 #include <numbers>
 #include <span>
+#include <nlohmann/json.hpp>
 
 #undef min
 #undef max
@@ -204,6 +205,8 @@ namespace neko {
   using vec2f = glm::fvec2;
   using vec3f = glm::fvec3;
   using vec4f = glm::fvec4;
+
+  using json = nlohmann::json;
 
   class nocopy {
   private:

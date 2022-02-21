@@ -139,7 +139,9 @@ namespace rainet {
   const map<utf8String, SteamStat>& System::steamStats()
   {
     assert( steam_ );
-    return steam_->myStats().map_;
+    auto stats = steam_->myStats();
+    assert( stats );
+    return stats->map_;
   }
 
   void System::shutdown()

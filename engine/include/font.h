@@ -149,7 +149,7 @@ namespace neko {
     void shutdownRender();
     void prepareLogic( GameTime time );
     void prepareRender();
-    void loadJSONRaw( const nlohmann::json& arr );
+    void loadJSONRaw( const json& arr );
     void loadJSON( const utf8String& input );
     void loadFile( const utf8String& filename );
     TextPtr createText( const utf8String& fontName, newtype::StyleID style );

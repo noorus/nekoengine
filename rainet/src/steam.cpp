@@ -161,13 +161,19 @@ namespace rainet {
 
   void Steam::statAdd( const utf8String& name, int value )
   {
-    auto val = myStats().map_.at( name ).i_;
+    auto stats = myStats();
+    if ( !stats )
+      return;
+    auto val = stats->map_.at( name ).i_;
     ::SteamUserStats()->SetStat( name.c_str(), val + value );
   }
 
   void Steam::statAdd( const utf8String& name, float value )
   {
-    auto val = myStats().map_.at( name ).f_;
+    auto stats = myStats();
+    if ( !stats )
+      return;
+    auto val = stats->map_.at( name ).f_;
     ::SteamUserStats()->SetStat( name.c_str(), val + value );
   }
 

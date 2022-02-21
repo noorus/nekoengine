@@ -1,0 +1,12 @@
+assets/
+steam_appid.txt
+*.lnk
+*.exe
+*.dll
+*.pdb
+*.exp
+*.map
+*.png
+*.cfg
+/*.json
+/data/v8/

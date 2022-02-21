@@ -105,7 +105,7 @@ namespace neko {
     //
   }
 
-  void FontManager::loadJSONRaw( const nlohmann::json& obj )
+  void FontManager::loadJSONRaw( const json& obj )
   {
     if ( obj.is_array() )
     {

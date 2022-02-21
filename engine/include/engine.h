@@ -36,6 +36,13 @@ namespace neko {
     atomic<float> f_timeWasted = 0.0f;
   };
 
+  struct EngineSettings {
+    bool useSteam = false;
+    uint32_t steamAppID = 0;
+    bool useDiscord = false;
+    uint64_t discordAppID = 0;
+  };
+
   //! \class Engine
   //! The main engine class that makes the world go round
   class Engine: public enable_shared_from_this<Engine>, public nocopy, public Listener, public rainet::Host {
@@ -81,6 +88,7 @@ namespace neko {
     GameTime time_;
     volatile Signal signal_;
     atomic<GameTime> rendererTime_;
+    EngineSettings settings_;
     bool paused();
     void restart();
   protected:
