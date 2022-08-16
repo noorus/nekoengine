@@ -18,7 +18,7 @@ namespace neko {
     vec3i movement_;
     bool mouseButtons_[5] = { false };
   protected:
-    unique_ptr<nil::System> system_;
+    nil::SystemPtr system_;
     // nil::SystemListener events
     void onDeviceConnected( nil::Device* device ) override;
     void onDeviceDisconnected( nil::Device* device ) override;

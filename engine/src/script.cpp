@@ -48,7 +48,7 @@ namespace neko {
       source = move( reader.readFullAssumeUtf8() );
     }
 
-    v8::ScriptOrigin origin( js::util::allocString( name_ ) );
+    v8::ScriptOrigin origin( isolate, js::util::allocString( name_ ) );
 
     auto script = v8::Script::Compile( context, js::util::allocString( source ) );
     if ( script.IsEmpty() )

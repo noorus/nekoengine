@@ -129,7 +129,7 @@ namespace neko {
     info_.clear();
 
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-    sf::VideoMode videoMode( g_CVar_vid_screenwidth.as_i(), g_CVar_vid_screenheight.as_i(), desktop.bitsPerPixel );
+    sf::VideoMode videoMode( sf::Vector2u( g_CVar_vid_screenwidth.as_i(), g_CVar_vid_screenheight.as_i() ), desktop.bitsPerPixel );
 
     sf::ContextSettings settings;
     settings.depthBits = 24;
@@ -198,8 +198,11 @@ namespace neko {
     renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
 
     auto documentsPath = platform::wideToUtf8( engine.env().documentsPath_ );
+
+    #ifndef NEKO_NO_GUI
     gui_->initialize( this, documentsPath, *window_ );
     gui_->setInstallationInfo( engine.installationInfo() );
+    #endif
 
     input_->initialize( window_->getSystemHandle() );
 
@@ -218,7 +221,9 @@ namespace neko {
 
     glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
 
+    #ifndef NEKO_NO_GUI
     gui_->resize( static_cast<int>( width ), static_cast<int>( height ) );
+    #endif
   }
 
   void Gfx::processEvents()

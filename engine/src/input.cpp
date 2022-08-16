@@ -19,13 +19,15 @@ namespace neko {
   {
     window_ = window;
 
-    system_ = make_unique<nil::System>(
+    system_ = nil::System::create(
       platform::g_instance,
       window,
       nil::Cooperation::Foreground,
       this );
 
-    for ( auto device : system_->getDevices() )
+    system_->initialize();
+
+    for ( auto& device : system_->getDevices() )
       if ( device->getType() != nil::Device::Device_Controller )
         device->enable();
   }

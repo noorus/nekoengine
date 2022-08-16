@@ -14,9 +14,9 @@
 #include "js_util.h"
 
 #ifdef _DEBUG
-# pragma comment( lib, "v8_d.dll.lib" )
-# pragma comment( lib, "v8_libbase_d.dll.lib" )
-# pragma comment( lib, "v8_libplatform_d.dll.lib" )
+# pragma comment( lib, "v8.dll.lib" )
+# pragma comment( lib, "v8_libbase.dll.lib" )
+# pragma comment( lib, "v8_libplatform.dll.lib" )
 #else
 # pragma comment( lib, "v8.dll.lib" )
 # pragma comment( lib, "v8_libbase.dll.lib" )
@@ -31,7 +31,6 @@ namespace neko {
 # define NEKO_CONFIG_SUBDIRNAME "release"
 #endif
 
-  const wchar_t c_icuData[] = L"icudtl.dat";
   const wchar_t c_snapshotData[] = L"snapshot_blob.bin";
   const wchar_t c_v8BaseDirectory[] = LR"(\data\v8\)";
 
@@ -45,7 +44,7 @@ namespace neko {
     dataDirectory_ = rootDirectory_ + c_v8BaseDirectory;
     dataDirectory_.append( L"" NEKO_CONFIG_SUBDIRNAME "\\" );
 
-    if ( !v8::V8::InitializeICU( platform::wideToUtf8( dataDirectory_ + c_icuData ).c_str() ) )
+    if ( !v8::V8::InitializeICU() )
       NEKO_EXCEPT( "V8 ICU initialization failed" );
 
     v8::V8::InitializeExternalStartupDataFromFile(
@@ -98,7 +97,7 @@ namespace neko {
   {
     shutdown();
     v8::V8::Dispose();
-    v8::V8::ShutdownPlatform();
+    v8::V8::DisposePlatform();
     platform_.reset();
   }
 
