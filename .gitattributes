@@ -1,25 +1,221 @@
-# Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto
 
-# Explicitly declare text files you want to always be normalized and converted
-# to native line endings on checkout.
-*.c text
-*.cc text
-*.cpp text
-*.h text
-*.hh text
-*.hpp text
-*.inl text
+# Git
+.gitattributes text
+.gitignore text
+.gitconfig text
+.gitmodules text
+
+# Windows
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Linux
+*.sh text eol=lf
+
+# Documents
+*.sql text
+*.md text
+*.adoc text
+*.textile text
+*.mustache text
+*.csv text
+*.tab text
+*.tsv text
+*.coffee text
+*.css text
+*.htm text
+*.html text
+*.xhtml text
 *.inc text
-*.asm text
-*.glsl text
+*.js text
+*.jsx text
+*.less text
+*.od text
+*.onlydata text
+*.sass text
+*.scm text
+*.log text
+*.properties text
+*.scss text
+*.styl text
+*.tag text
+*.ts text
+*.tsx text
+*.dockerignore text
+Dockerfile text
+*.markdown text
+*.mdwn text
+*.mdown text
+*.mkd text
+*.mkdn text
+*.mdtxt text
+*.mdtext text
+*.txt text
+AUTHORS text
+CHANGELOG text
+CHANGES text
+CONTRIBUTING text
+COPYING text
+copyright text
+*COPYRIGHT* text
+INSTALL text
+license text
+LICENSE text
+NEWS text
+readme text
+*README* text
+TODO text
 
-# Declare files that will always have CRLF line endings on checkout.
+# Configuration
+*.cnf text
+*.cfg text
+*.conf text
+*.config text
+*.ini text
+*.json text
+*.xml text
+*.bowerrc text
+.browserslistrc text
+.editorconfig text
+*.npmignore text
+*.yaml text
+*.yml text
+browserslist text
+Makefile text
+makefile text
+Procfile text
+.slugignore text
+
+# Linters
+.csslintrc text
+.eslintrc text
+.htmlhintrc text
+.jscsrc text
+.jshintrc text
+.jshintignore text
+.stylelintrc text
+
+# Video
+*.3gpp filter=lfs diff=lfs merge=lfs -text
+*.3gp filter=lfs diff=lfs merge=lfs -text
+*.as filter=lfs diff=lfs merge=lfs -text
+*.asf filter=lfs diff=lfs merge=lfs -text
+*.asx filter=lfs diff=lfs merge=lfs -text
+*.fla filter=lfs diff=lfs merge=lfs -text
+*.flv filter=lfs diff=lfs merge=lfs -text
+*.m4v filter=lfs diff=lfs merge=lfs -text
+*.mng filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mpeg filter=lfs diff=lfs merge=lfs -text
+*.mpg filter=lfs diff=lfs merge=lfs -text
+*.ogv filter=lfs diff=lfs merge=lfs -text
+*.swc filter=lfs diff=lfs merge=lfs -text
+*.swf filter=lfs diff=lfs merge=lfs -text
+*.webm filter=lfs diff=lfs merge=lfs -text
+
+# Audio
+*.kar filter=lfs diff=lfs merge=lfs -text
+*.m4a filter=lfs diff=lfs merge=lfs -text
+*.mid filter=lfs diff=lfs merge=lfs -text
+*.midi filter=lfs diff=lfs merge=lfs -text
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.ogg filter=lfs diff=lfs merge=lfs -text
+*.flac filter=lfs diff=lfs merge=lfs -text
+*.ape filter=lfs diff=lfs merge=lfs -text
+*.ra filter=lfs diff=lfs merge=lfs -text
+
+# Graphics
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.tif filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+*.ico binary
+*.eps filter=lfs diff=lfs merge=lfs -text
+*.ai filter=lfs diff=lfs merge=lfs -text
+*.bmp filter=lfs diff=lfs merge=lfs -text
+*.jng filter=lfs diff=lfs merge=lfs -text
+*.jp2 filter=lfs diff=lfs merge=lfs -text
+*.jpx filter=lfs diff=lfs merge=lfs -text
+*.jxr filter=lfs diff=lfs merge=lfs -text
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.psb filter=lfs diff=lfs merge=lfs -text
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.svg text
+*.svgz filter=lfs diff=lfs merge=lfs -text
+*.wbmp filter=lfs diff=lfs merge=lfs -text
+*.webp filter=lfs diff=lfs merge=lfs -text
+
+# Archives
+*.7z filter=lfs diff=lfs merge=lfs -text
+*.gz filter=lfs diff=lfs merge=lfs -text
+*.bz2 filter=lfs diff=lfs merge=lfs -text
+*.jar filter=lfs diff=lfs merge=lfs -text
+*.rar filter=lfs diff=lfs merge=lfs -text
+*.tar filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+
+# Fonts
+*.ttf binary
+*.eot binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+
+# Visual Studio
 *.sln text eol=crlf
+*.csproj text eol=crlf
+*.vbproj text eol=crlf
+*.vcxproj text eol=crlf
+*.vcproj text eol=crlf
+*.dbproj text eol=crlf
+*.fsproj text eol=crlf
+*.lsproj text eol=crlf
+*.wixproj text eol=crlf
+*.modelproj text eol=crlf
+*.sqlproj text eol=crlf
+*.wmaproj text eol=crlf
+*.xproj text eol=crlf
+*.props text eol=crlf
+*.filters text eol=crlf
+*.vcxitems text eol=crlf
 
-# Declare files that will always have LF line endings on checkout.
-*.md text eol=lf
+# Eclipse
+*.project text
+*.classpath text
+*.prefs
 
-# Denote all files that are truly binary and should not be modified.
-*.png binary
-*.jpg binary
+# C/C++
+*.c text diff=cpp
+*.cc text diff=cpp
+*.cxx text diff=cpp
+*.cpp text diff=cpp
+*.c++ text diff=cpp
+*.hpp text diff=cpp
+*.h text diff=cpp
+*.h++ text diff=cpp
+*.hh text diff=cpp
+*.inl text diff=cpp
+
+# Binaries
+*.dll filter=lfs diff=lfs merge=lfs -text
+*.exe filter=lfs diff=lfs merge=lfs -text
+*.lib filter=lfs diff=lfs merge=lfs -text
+*.slo filter=lfs diff=lfs merge=lfs -text
+*.lo filter=lfs diff=lfs merge=lfs -text
+*.o filter=lfs diff=lfs merge=lfs -text
+*.obj filter=lfs diff=lfs merge=lfs -text
+*.gch filter=lfs diff=lfs merge=lfs -text
+*.pch filter=lfs diff=lfs merge=lfs -text
+*.so filter=lfs diff=lfs merge=lfs -text
+*.dylib filter=lfs diff=lfs merge=lfs -text
+*.dll filter=lfs diff=lfs merge=lfs -text
+*.lai filter=lfs diff=lfs merge=lfs -text
+*.la filter=lfs diff=lfs merge=lfs -text
+*.a filter=lfs diff=lfs merge=lfs -text
+*.out filter=lfs diff=lfs merge=lfs -text
+*.app filter=lfs diff=lfs merge=lfs -text
+*.pyc filter=lfs diff=lfs merge=lfs -text
