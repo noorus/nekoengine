@@ -1,42 +1,34 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "neko_types.h"
-#include "forwards.h"
-#include "scripting.h"
-#include "neko_platform.h"
-#include "engine.h"
-#include "console.h"
-#include "locator.h"
-#include "memory.h"
+# include "neko_types.h"
+# include "forwards.h"
+# include "scripting.h"
+# include "neko_platform.h"
+# include "engine.h"
+# include "console.h"
+# include "locator.h"
+# include "memory.h"
 
-#include "js_console.h"
-#include "js_util.h"
+# include "js_console.h"
+# include "js_util.h"
 
-#ifdef _DEBUG
 # pragma comment( lib, "v8.dll.lib" )
 # pragma comment( lib, "v8_libbase.dll.lib" )
 # pragma comment( lib, "v8_libplatform.dll.lib" )
-#else
-# pragma comment( lib, "v8.dll.lib" )
-# pragma comment( lib, "v8_libbase.dll.lib" )
-# pragma comment( lib, "v8_libplatform.dll.lib" )
-#endif
 
 namespace neko {
 
-#ifdef _DEBUG
-# define NEKO_CONFIG_SUBDIRNAME "debug"
-#else
-# define NEKO_CONFIG_SUBDIRNAME "release"
-#endif
+# ifdef _DEBUG
+#  define NEKO_CONFIG_SUBDIRNAME "debug"
+# else
+#  define NEKO_CONFIG_SUBDIRNAME "release"
+# endif
 
   const wchar_t c_snapshotData[] = L"snapshot_blob.bin";
   const wchar_t c_v8BaseDirectory[] = LR"(\data\v8\)";
 
-  Scripting::Scripting( EnginePtr engine ):
-    Subsystem( move( engine ) ),
-    v8::ArrayBuffer::Allocator()
+  Scripting::Scripting( EnginePtr engine ): Subsystem( move( engine ) ), v8::ArrayBuffer::Allocator()
   {
     engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
 
@@ -47,14 +39,11 @@ namespace neko {
     if ( !v8::V8::InitializeICU() )
       NEKO_EXCEPT( "V8 ICU initialization failed" );
 
-    v8::V8::InitializeExternalStartupDataFromFile(
-      platform::wideToUtf8( dataDirectory_ + c_snapshotData ).c_str()
-    );
+    v8::V8::InitializeExternalStartupDataFromFile( platform::wideToUtf8( dataDirectory_ + c_snapshotData ).c_str() );
 
-    platform_ = move( v8::platform::NewDefaultPlatform(
-      0, // threadpoolsize
+    platform_ = move( v8::platform::NewDefaultPlatform( 0, // threadpoolsize
       v8::platform::IdleTaskSupport::kDisabled // idle task support
-    ) );
+      ) );
 
     v8::V8::InitializePlatform( platform_.get() );
 

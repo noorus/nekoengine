@@ -5,7 +5,8 @@ namespace neko {
 
   class Exception: public std::exception {
   public:
-    enum Type {
+    enum Type
+    {
       Type_Internal,
       Type_OpenGL,
       Type_WinAPI
@@ -24,14 +25,23 @@ namespace neko {
     virtual const char* what() const noexcept override;
   };
 
-#if defined(NEKO_EXCEPT)
+#if defined( NEKO_EXCEPT )
 # error NEKO_EXCEPT* macro already defined!
 #else
-# define NEKO_EXCEPT(description) {throw neko::Exception(description,__FUNCTION__,neko::Exception::Type_Internal);}
+# define NEKO_EXCEPT( description )                                                    \
+  {                                                                                    \
+   throw neko::Exception( description, __FUNCTION__, neko::Exception::Type_Internal ); \
+  }
 # ifndef NEKO_SIDELIBRARY_BUILD
-#  define NEKO_OPENGL_EXCEPT(description,en) {throw neko::Exception(description,en,__FUNCTION__);}
+#  define NEKO_OPENGL_EXCEPT( description, en )             \
+   {                                                        \
+    throw neko::Exception( description, en, __FUNCTION__ ); \
+   }
 # endif
-# define NEKO_WINAPI_EXCEPT(description) {throw neko::Exception(description,__FUNCTION__,neko::Exception::Type_WinAPI);}
+# define NEKO_WINAPI_EXCEPT( description )                                           \
+  {                                                                                  \
+   throw neko::Exception( description, __FUNCTION__, neko::Exception::Type_WinAPI ); \
+  }
 #endif
 
 }

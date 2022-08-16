@@ -30,7 +30,7 @@ namespace neko {
   template <typename T>
   class LoadedResourceManagerBase: public nocopy {
   public:
-    using ResourcePtr = T::Ptr;
+    using ResourcePtr = typename T::Ptr;
     using MapType = map<utf8String, ResourcePtr>;
   protected:
     ThreadedLoaderPtr loader_;

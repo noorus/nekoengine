@@ -7,8 +7,8 @@ namespace neko {
   class SceneManager;
   class SceneNode;
 
-# undef near
-# undef far
+#undef near
+#undef far
 
   class Camera {
   protected:
@@ -37,11 +37,15 @@ namespace neko {
     void exposure( Real exp );
   };
 
-  struct CameraValueState {
+  struct CameraValueState
+  {
     Real acceleration_;
     Real deceleration_;
     Real velocity_;
-    CameraValueState( Real acceleration, Real deceleration ): acceleration_( acceleration ), deceleration_( deceleration ), velocity_( 0.0f ) {}
+    CameraValueState( Real acceleration, Real deceleration ):
+      acceleration_( acceleration ), deceleration_( deceleration ), velocity_( 0.0f )
+    {
+    }
   };
 
   class OrbitCamera: public Camera {
@@ -64,7 +68,9 @@ namespace neko {
     Radians clampBottom_; //!< Maximum camera angle to Y axis
     bool reverseAxes_; // Reverse rotation axes?
   public:
-    explicit OrbitCamera( SceneManager* manager, vec2 resolution, SceneNode* pgeTarget, const vec3& vecOffset, Real rFOVy, bool bReverseAxes, Real fSensitivity, Real fMinDistance, Real fMaxDistance, Real fRotationDeceleration, Real fZoomAcceleration, Real fZoomDeceleration );
+    explicit OrbitCamera( SceneManager* manager, vec2 resolution, SceneNode* pgeTarget, const vec3& vecOffset, Real rFOVy,
+      bool bReverseAxes, Real fSensitivity, Real fMinDistance, Real fMaxDistance, Real fRotationDeceleration,
+      Real fZoomAcceleration, Real fZoomDeceleration );
     virtual void applyInputRotation( const vec3i& mousemovement );
     virtual void applyInputPanning( const vec3i& mousemovement );
     virtual void applyInputZoom( int zoom );

@@ -15,17 +15,13 @@ namespace neko {
   protected:
     HANDLE file_;
     uint64_t size_;
-
   public:
     LocalFilesystemReader( const wstring& filename ): file_( INVALID_HANDLE_VALUE )
     {
-      file_ = CreateFileW( filename.c_str(),
-        GENERIC_READ, FILE_SHARE_READ, nullptr,
-        OPEN_EXISTING,
+      file_ = CreateFileW( filename.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
         // Practically all of our file reads are sequential for now,
         // so let Windows know and optimize prefetch for that:
-        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN,
-        0 );
+        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0 );
 
       if ( file_ == INVALID_HANDLE_VALUE )
         NEKO_WINAPI_EXCEPT( "File open failed" );
@@ -111,9 +107,7 @@ namespace neko {
     }
     uint32_t seek( FileSeek direction, int32_t distance ) override
     {
-      auto dir = ( direction == FileSeek_Beginning ? FILE_BEGIN
-        : direction == FileSeek_Current ? FILE_CURRENT
-        : FILE_END );
+      auto dir = ( direction == FileSeek_Beginning ? FILE_BEGIN : direction == FileSeek_Current ? FILE_CURRENT : FILE_END );
       auto ret = SetFilePointer( file_, distance, nullptr, dir );
       if ( ret == INVALID_SET_FILE_POINTER )
         NEKO_WINAPI_EXCEPT( "SetFilePointer (seek) failed" );
@@ -171,7 +165,7 @@ namespace neko {
     return openFile( dir, platform::utf8ToWide( path ) );
   }
 
-  FileReaderPtr FileSystem::openFileAbsolute(const wstring& path)
+  FileReaderPtr FileSystem::openFileAbsolute( const wstring& path )
   {
     return make_shared<LocalFilesystemReader>( path );
   }

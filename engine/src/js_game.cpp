@@ -1,11 +1,11 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "js_console.h"
-#include "js_util.h"
-#include "js_game.h"
-#include "scripting.h"
-#include "console.h"
+# include "js_console.h"
+# include "js_util.h"
+# include "js_game.h"
+# include "scripting.h"
+# include "console.h"
 
 namespace neko {
 
@@ -13,12 +13,10 @@ namespace neko {
 
     static const char* c_className = "Game";
 
-    string Game::className( c_className );
-    WrappedType Game::internalType = Wrapped_Game;
+    string StaticObjectWrapper<Game>::className( c_className );
+    WrappedType StaticObjectWrapper<Game>::internalType = Wrapped_Game;
 
-    Game::Game()
-    {
-    }
+    Game::Game() {}
 
     JSGamePtr Game::create( Isolate* isolate, V8Object global )
     {
@@ -47,9 +45,7 @@ namespace neko {
       auto isolate = ctx->GetIsolate();
       auto call = V8Function::New( isolate, fnInitialize_ );
       const int argc = 1;
-      V8Value argv[argc] = {
-        v8::Number::New( isolate, time )
-      };
+      V8Value argv[argc] = { v8::Number::New( isolate, time ) };
       call->Call( ctx, ctx->Global(), argc, argv );
     }
 
@@ -76,12 +72,12 @@ namespace neko {
 
       for ( int i = 0; i < args.Length(); i++ )
       {
-        auto maybeObj   = args[0]->ToObject( context );
-        auto name       = util::extractStringMember( isolate, funcName, maybeObj, "name" );
+        auto maybeObj = args[0]->ToObject( context );
+        auto name = util::extractStringMember( isolate, funcName, maybeObj, "name" );
         auto initialize = util::extractFunctionMember( isolate, funcName, maybeObj, "initialize" );
-        auto update     = util::extractFunctionMember( isolate, funcName, maybeObj, "update" );
-        auto enter      = util::extractFunctionMember( isolate, funcName, maybeObj, "enter" );
-        auto leave      = util::extractFunctionMember( isolate, funcName, maybeObj, "leave" );
+        auto update = util::extractFunctionMember( isolate, funcName, maybeObj, "update" );
+        auto enter = util::extractFunctionMember( isolate, funcName, maybeObj, "enter" );
+        auto leave = util::extractFunctionMember( isolate, funcName, maybeObj, "leave" );
 
         if ( scenes_.find( name ) != scenes_.end() )
           util::throwException( isolate, ( "registerScene: Scene named \"" + name + "\" already exists" ).c_str() );
@@ -106,8 +102,8 @@ namespace neko {
       {
         if ( !scene.second.initialized_ )
         {
-          getScriptContext( context->GetIsolate() )->console_->printf( neko::Console::srcScripting,
-            "Initializing scene %s", scene.second.name().c_str() );
+          getScriptContext( context->GetIsolate() )->console_->printf(
+            neko::Console::srcScripting, "Initializing scene %s", scene.second.name().c_str() );
           scene.second.initialize( context, time );
           scene.second.initialized_ = true;
         }

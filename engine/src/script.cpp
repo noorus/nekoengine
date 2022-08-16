@@ -1,28 +1,28 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "scripting.h"
-#include "js_util.h"
-#include "neko_platform.h"
-#include "console.h"
-#include "filesystem.h"
+# include "scripting.h"
+# include "js_util.h"
+# include "neko_platform.h"
+# include "console.h"
+# include "filesystem.h"
 
 namespace neko {
 
-  using v8::Isolate;
-  using v8::Persistent;
-  using v8::Local;
   using v8::Context;
-  using v8::TryCatch;
-  using v8::HandleScope;
   using v8::EscapableHandleScope;
   using v8::FunctionCallbackInfo;
-  using v8::ObjectTemplate;
   using v8::FunctionTemplate;
+  using v8::HandleScope;
+  using v8::Isolate;
+  using v8::Local;
+  using v8::ObjectTemplate;
+  using v8::Persistent;
+  using v8::TryCatch;
   using v8::Value;
 
   Script::Script( ScriptingContext* globalCtx, const utf8String& name ):
-  globalContext_( globalCtx ), name_( name ), status_( Status_Unknown )
+    globalContext_( globalCtx ), name_( name ), status_( Status_Unknown )
   {
     //
   }

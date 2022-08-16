@@ -95,6 +95,12 @@ namespace neko {
         isolate->ThrowException( allocString( buffer, isolate ) );
       }
 
+      inline Real realFromArray( V8Context& context, v8::Local<v8::Array> arrayValue, uint32_t index )
+      {
+        return static_cast<Real>(
+          arrayValue->Get( context, index ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+      }
+
       inline Real extractNumberComponent( Isolate* isolate, v8::MaybeLocal<v8::Object>& obj, string_view name, Real defval )
       {
         if ( obj.IsEmpty() )

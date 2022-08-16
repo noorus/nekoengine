@@ -37,7 +37,7 @@ namespace neko {
       inline void setFrom( const JSText& other )
       {
         Locator::console().printf( neko::Console::srcScripting,
-          "js::Text(0x%I64X) setFrom JSText(0x%I64X)", this, other );
+          "js::Text(0x%I64X) setFrom JSText(0x%I64X)", this, reinterpret_cast<const void*>( &other ) );
         // local_.txt_ = other.txt_;
       }
       inline JSText& text() { return local_; } //!< Get the internal JSText.

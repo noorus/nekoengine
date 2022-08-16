@@ -6,7 +6,8 @@
 
 namespace neko {
 
-  enum FileSeek {
+  enum FileSeek
+  {
     FileSeek_Beginning,
     FileSeek_Current,
     FileSeek_End
@@ -15,9 +16,7 @@ namespace neko {
   class FileReader {
   public:
     FileReader() {}
-    virtual ~FileReader()
-    {
-    }
+    virtual ~FileReader() {}
     virtual const uint64_t size() const = 0;
     virtual void read( void* out, uint32_t length ) = 0;
     virtual uint64_t readUint64() = 0;
@@ -33,7 +32,8 @@ namespace neko {
 
   using FileReaderPtr = shared_ptr<FileReader>;
 
-  enum FileDir {
+  enum FileDir
+  {
     Dir_User = 0,
     Dir_Data,
     Dir_Fonts,

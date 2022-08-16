@@ -22,8 +22,8 @@ namespace neko {
 
     static const char* c_className = "mesh";
 
-    string Mesh::className( c_className );
-    WrappedType Mesh::internalType = Wrapped_Mesh;
+    string DynamicObjectWrapper<Mesh, JSMesh>::className( c_className );
+    WrappedType DynamicObjectWrapper<Mesh, JSMesh>::internalType = Wrapped_Mesh;
 
     void Mesh::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
@@ -42,10 +42,10 @@ namespace neko {
       for ( uint32_t i = 0; i < arr.Length(); ++i )
       {
         auto arrayValue = v8::Local<v8::Array>::Cast( arr.Get( context, i ).ToLocalChecked() );
-        verts[i].x = static_cast<Real>( arrayValue->Get( context, 0 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].y = static_cast<Real>( arrayValue->Get( context, 1 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].s = static_cast<Real>( arrayValue->Get( context, 2 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].t = static_cast<Real>( arrayValue->Get( context, 3 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].x = util::realFromArray( context, arrayValue, 0 );
+        verts[i].y = util::realFromArray( context, arrayValue, 1 );
+        verts[i].s = util::realFromArray( context, arrayValue, 2 );
+        verts[i].t = util::realFromArray( context, arrayValue, 3 );
       }
       vbo->pushVertices( move( verts ) );
     }
@@ -57,12 +57,12 @@ namespace neko {
       for ( uint32_t i = 0; i < arr.Length(); ++i )
       {
         auto arrayValue = v8::Local<v8::Array>::Cast( arr.Get( context, i ).ToLocalChecked() );
-        verts[i].position.x = static_cast<Real>( arrayValue->Get( context, 0 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].position.y = static_cast<Real>( arrayValue->Get( context, 1 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].position.z = static_cast<Real>( arrayValue->Get( context, 2 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].position.x = util::realFromArray( context, arrayValue, 0 );
+        verts[i].position.y = util::realFromArray( context, arrayValue, 1 );
+        verts[i].position.z = util::realFromArray( context, arrayValue, 2 );
         verts[i].normal = vec3( 0.0f );
-        verts[i].texcoord.x = static_cast<Real>( arrayValue->Get( context, 3 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
-        verts[i].texcoord.y = static_cast<Real>( arrayValue->Get( context, 4 ).ToLocalChecked()->NumberValue( context ).FromMaybe( 0.0 ) );
+        verts[i].texcoord.x = util::realFromArray( context, arrayValue, 3 );
+        verts[i].texcoord.y = util::realFromArray( context, arrayValue, 4 );
         verts[i].color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
       }
       vbo->pushVertices( move( verts ) );

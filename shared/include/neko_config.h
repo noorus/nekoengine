@@ -27,10 +27,4 @@
 #define NEKO_NO_AUDIO
 
 // Define to disable the GUI & drop MyGUI SDK requirement.
-#undef NEKO_NO_GUI
-
-// Intel graphics drivers shit the bed every time when freeing stuff on exit.
-// Set this to force an ExitProcess() instead when debugging on an Intel chip in order to not waste time.
-// EDIT: This is now a project-level preprocessor directive, don't set or unset it here.
-// Use the ShittyDebug build profile instead.
-// #define INTEL_SUCKS
+#define NEKO_NO_GUI

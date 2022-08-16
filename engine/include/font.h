@@ -59,6 +59,7 @@ namespace neko {
     void load( newtype::Host* host );
     void unload();
     inline newtype::Manager* mgr() { return manager_; }
+    inline bool loaded() const noexcept { return ( module_ != nullptr ); }
   };
 
   class TextRenderBuffer {

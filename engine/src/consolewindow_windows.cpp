@@ -2,23 +2,23 @@
 
 #ifdef NEKO_PLATFORM_WINDOWS
 
-#include "console.h"
-#include "consolewindow_windows.h"
-#include "neko_platform_windows.h"
-#include "neko_exception.h"
+# include "console.h"
+# include "consolewindow_windows.h"
+# include "neko_platform_windows.h"
+# include "neko_exception.h"
 
-#pragma warning( push )
-#pragma warning( disable : 26454 )
-#include <windows.h>
-#include <unknwn.h>
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#define min(a,b) (((a) < (b)) ? (a) : (b))
-#include <gdiplus.h>
+# pragma warning( push )
+# pragma warning( disable : 26454 )
+# include <windows.h>
+# include <unknwn.h>
+# define max( a, b ) ( ( ( a ) > ( b ) ) ? ( a ) : ( b ) )
+# define min( a, b ) ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
+# include <gdiplus.h>
 
-#pragma comment(lib, "comctl32.lib")
-#pragma comment(lib, "gdiplus.lib")
+# pragma comment( lib, "comctl32.lib" )
+# pragma comment( lib, "gdiplus.lib" )
 
-#pragma warning( pop )
+# pragma warning( pop )
 
 namespace neko {
 
@@ -48,7 +48,7 @@ namespace neko {
     // Window
 
     Window::Window( HINSTANCE instance, WNDPROC wndproc, void* userdata ):
-    instance_( instance ), wndProc_( wndproc ), userData_( userdata ), handle_( nullptr ), class_( 0 )
+      instance_( instance ), wndProc_( wndproc ), userData_( userdata ), handle_( nullptr ), class_( 0 )
     {
     }
 
@@ -81,7 +81,8 @@ namespace neko {
       sizable ? style |= WS_SIZEBOX : style &= ~WS_SIZEBOX;
       maximizable ? style |= WS_MAXIMIZEBOX : style &= ~WS_MAXIMIZEBOX;
 
-      handle_ = CreateWindowExW( 0, (LPCWSTR)class_, wideTitle.c_str(), style, x, y, w, h, nullptr, nullptr, instance_, userData_ );
+      handle_ =
+        CreateWindowExW( 0, (LPCWSTR)class_, wideTitle.c_str(), style, x, y, w, h, nullptr, nullptr, instance_, userData_ );
       if ( !handle_ )
         NEKO_EXCEPT( "Window creation failed" );
 
@@ -110,20 +111,22 @@ namespace neko {
             if ( msg.message == WM_QUIT )
               quitting = true;
           }
-        } else
+        }
+        else
           NEKO_EXCEPT( "Wait for multiple objects failed" );
       }
     }
 
     // ConsoleWindow
 
-#   define WM_NEKO_CONSOLEFLUSHBUFFER (WM_USER + 1)
+# define WM_NEKO_CONSOLEFLUSHBUFFER ( WM_USER + 1 )
 
     const COLORREF c_consoleBackground = RGB( 255, 255, 255 );
     const COLORREF c_consoleForeground = RGB( 10, 13, 20 );
 
     const string c_consoleFont = "Lucida Console";
-    const long c_consoleFontSize = 160; // in TWIPs. if you can figure out what the fuck that means in human terms, congratulations.
+    const long c_consoleFontSize =
+      160; // in TWIPs. if you can figure out what the fuck that means in human terms, congratulations.
 
     const string c_consoleClassname = "nekoConsole"; // does not matter
 
@@ -148,9 +151,8 @@ namespace neko {
     }
 
     ConsoleWindow::ConsoleWindow( ConsolePtr console, const string& title, int x, int y, int w, int h ):
-      Window( g_instance, wndProc, this ), console_( move( console ) ),
-      cmdline_( nullptr ), log_( nullptr ), logFit_(), unpauseButton_( 0 ),
-      baseCmdlineProc_( nullptr ), baseLogProc_( nullptr ), dpiScaling_( 1.0f )
+      Window( g_instance, wndProc, this ), console_( move( console ) ), cmdline_( nullptr ), log_( nullptr ), logFit_(),
+      unpauseButton_( 0 ), baseCmdlineProc_( nullptr ), baseLogProc_( nullptr ), dpiScaling_( 1.0f )
     {
       console_->addListener( this );
       create( c_consoleClassname, title, x, y, w, h );
@@ -164,11 +166,8 @@ namespace neko {
     void ConsoleWindow::onConsolePrint( Console* console, vec3 color, const string& str )
     {
       lock_.lock();
-      COLORREF clr = RGB(
-        (uint8_t)( color.x * 255.0f ),
-        (uint8_t)( color.y * 255.0f ),
-        (uint8_t)( color.z * 255.0f ) );
-      linesBuffer_.push_back({ utf8ToWide( str ), clr });
+      COLORREF clr = RGB( (uint8_t)( color.x * 255.0f ), (uint8_t)( color.y * 255.0f ), (uint8_t)( color.z * 255.0f ) );
+      linesBuffer_.push_back( { utf8ToWide( str ), clr } );
       lock_.unlock();
       PostMessageW( handle_, WM_NEKO_CONSOLEFLUSHBUFFER, 0, 0 );
     }
@@ -196,14 +195,14 @@ namespace neko {
       {
         SendMessageW( ctrl, EM_AUTOURLDETECT, TRUE, 0 );
         SendMessageW( ctrl, EM_SETEVENTMASK, NULL, ENM_SELCHANGE | ENM_SCROLL );
-        SendMessageW( ctrl, EM_SETOPTIONS, ECOOP_OR,
-          ECO_AUTOVSCROLL | ECO_NOHIDESEL | ECO_SAVESEL | ECO_SELECTIONBAR );
+        SendMessageW( ctrl, EM_SETOPTIONS, ECOOP_OR, ECO_AUTOVSCROLL | ECO_NOHIDESEL | ECO_SAVESEL | ECO_SELECTIONBAR );
       }
 
       CHARFORMAT2W format;
       memset( &format, 0, sizeof( format ) );
       format.cbSize = sizeof( CHARFORMAT2W );
-      format.dwMask = CFM_SIZE | CFM_OFFSET | CFM_EFFECTS | CFM_COLOR | CFM_BACKCOLOR | CFM_CHARSET | CFM_UNDERLINETYPE | CFM_FACE;
+      format.dwMask =
+        CFM_SIZE | CFM_OFFSET | CFM_EFFECTS | CFM_COLOR | CFM_BACKCOLOR | CFM_CHARSET | CFM_UNDERLINETYPE | CFM_FACE;
       format.yHeight = c_consoleFontSize;
       format.crTextColor = c_consoleForeground;
       format.crBackColor = c_consoleBackground;
@@ -575,32 +574,28 @@ namespace neko {
 
         self->logFit_ = fitLogControl( rect.right, rect.bottom );
         self->log_ = CreateWindowExW( WS_EX_LEFT | WS_EX_STATICEDGE, cRichEditControl, L"",
-          WS_CLIPSIBLINGS | WS_VISIBLE | WS_CHILD | WS_VSCROLL
-          | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | ES_READONLY
-          | ES_SELECTIONBAR | ES_NOOLEDRAGDROP | ES_DISABLENOSCROLL | ES_AUTOVSCROLL,
-          self->logFit_.left, self->logFit_.top, self->logFit_.right, self->logFit_.bottom, wnd, nullptr,
-          self->instance_, (void*)self );
+          WS_CLIPSIBLINGS | WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | ES_READONLY |
+            ES_SELECTIONBAR | ES_NOOLEDRAGDROP | ES_DISABLENOSCROLL | ES_AUTOVSCROLL,
+          self->logFit_.left, self->logFit_.top, self->logFit_.right, self->logFit_.bottom, wnd, nullptr, self->instance_,
+          (void*)self );
 
         RECT fit = fitCmdlineControl( rect.right, rect.bottom );
-        self->cmdline_ = CreateWindowExW( WS_EX_LEFT,
-          cRichEditControl, L"", WS_CLIPSIBLINGS | WS_VISIBLE | WS_CHILD | ES_LEFT | ES_NOOLEDRAGDROP,
-          fit.left, fit.top, fit.right, fit.bottom, wnd, nullptr,
-          self->instance_, (void*)self );
+        self->cmdline_ = CreateWindowExW( WS_EX_LEFT, cRichEditControl, L"",
+          WS_CLIPSIBLINGS | WS_VISIBLE | WS_CHILD | ES_LEFT | ES_NOOLEDRAGDROP, fit.left, fit.top, fit.right, fit.bottom,
+          wnd, nullptr, self->instance_, (void*)self );
 
         fit = fitUnpauseButton( rect.right, rect.bottom );
-        self->unpauseButton_ = CreateWindowExW( 0, L"BUTTON", nullptr, WS_CLIPSIBLINGS | WS_CHILD | BS_PUSHBUTTON,
-          fit.left, fit.top, fit.right, fit.bottom, wnd, nullptr, self->instance_, (void*)self );
+        self->unpauseButton_ = CreateWindowExW( 0, L"BUTTON", nullptr, WS_CLIPSIBLINGS | WS_CHILD | BS_PUSHBUTTON, fit.left,
+          fit.top, fit.right, fit.bottom, wnd, nullptr, self->instance_, (void*)self );
 
         if ( !self->log_ || !self->cmdline_ || !self->unpauseButton_ )
           NEKO_EXCEPT( "Window control creation failed" );
 
         SetWindowLongPtrW( self->log_, GWLP_USERDATA, (LONG_PTR)self );
-        self->baseLogProc_ = (WNDPROC)SetWindowLongPtrW(
-          self->log_, GWLP_WNDPROC, (LONG_PTR)(WNDPROC)logProc );
+        self->baseLogProc_ = (WNDPROC)SetWindowLongPtrW( self->log_, GWLP_WNDPROC, (LONG_PTR)(WNDPROC)logProc );
 
         SetWindowLongPtrW( self->cmdline_, GWLP_USERDATA, (LONG_PTR)self );
-        self->baseCmdlineProc_ = (WNDPROC)SetWindowLongPtrW(
-          self->cmdline_, GWLP_WNDPROC, (LONG_PTR)(WNDPROC)cmdlineProc );
+        self->baseCmdlineProc_ = (WNDPROC)SetWindowLongPtrW( self->cmdline_, GWLP_WNDPROC, (LONG_PTR)(WNDPROC)cmdlineProc );
 
         self->initTextControl( self->log_, false );
         self->initTextControl( self->cmdline_, true );
@@ -642,10 +637,12 @@ namespace neko {
         {
           self->autocomplete_.reset();
           return 0;
-        } else if ( HIWORD( wparam ) == EN_VSCROLL && (HANDLE)lparam == self->log_ )
+        }
+        else if ( HIWORD( wparam ) == EN_VSCROLL && (HANDLE)lparam == self->log_ )
         {
           self->recheckLogState();
-        } else if ( HIWORD( wparam ) == BN_CLICKED && (HANDLE)lparam == self->unpauseButton_ )
+        }
+        else if ( HIWORD( wparam ) == BN_CLICKED && (HANDLE)lparam == self->unpauseButton_ )
         {
           self->logUnpause();
         }
@@ -664,7 +661,8 @@ namespace neko {
           if ( custom->dwDrawStage == CDDS_PREPAINT )
           {
             return CDRF_NOTIFYPOSTPAINT;
-          } else if ( custom->dwDrawStage == CDDS_POSTPAINT )
+          }
+          else if ( custom->dwDrawStage == CDDS_POSTPAINT )
           {
             self->paintUnpauseButton( custom->hdc, custom->rc );
             return CDRF_DODEFAULT;
@@ -719,9 +717,7 @@ namespace neko {
       else if ( msg == WM_NEKO_CONSOLEFLUSHBUFFER )
       {
         if ( !self->logState_.paused )
-        {
           self->flushBuffer();
-        }
         return 0;
       }
 

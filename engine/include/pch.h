@@ -9,35 +9,35 @@
 // Platform specifics
 #ifdef NEKO_PLATFORM_WINDOWS
 
-#if !defined(_DEBUG) && !defined(NEKO_VERBOSE_COMPILE)
-# define _CRT_SECURE_NO_WARNINGS
-# define _SCL_SECURE_NO_WARNINGS
-#endif
+# if !defined( _DEBUG ) && !defined( NEKO_VERBOSE_COMPILE )
+#  define _CRT_SECURE_NO_WARNINGS
+#  define _SCL_SECURE_NO_WARNINGS
+# endif
 
-#define NTDDI_VERSION NTDDI_WIN10
-#define _WIN32_WINNT _WIN32_WINNT_WIN10
+# define NTDDI_VERSION NTDDI_WIN10
+# define _WIN32_WINNT _WIN32_WINNT_WIN10
 
-#include <sdkddkver.h>
+# include <sdkddkver.h>
 
-#include <windows.h>
-#include <shellapi.h>
-#include <shlobj.h>
-#include <commctrl.h>
-#include <richedit.h>
-#include <ctime>
+# include <windows.h>
+# include <shellapi.h>
+# include <shlobj.h>
+# include <commctrl.h>
+# include <richedit.h>
+# include <ctime>
 //#include <psapi.h>
 //#include <dbghelp.h>
-#include <avrt.h>
+# include <avrt.h>
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <windows.h>
+# define WIN32_LEAN_AND_MEAN
+# define NOMINMAX
+# include <windows.h>
 
 // VC++ Runtime Headers
-#ifdef _DEBUG
+# ifdef _DEBUG
 //# define _CRTDBG_MAP_ALLOC
-# include <crtdbg.h>
-#endif
+#  include <crtdbg.h>
+# endif
 #else
 # error Unknown platform!
 #endif
@@ -101,7 +101,7 @@
 #endif
 
 #pragma warning( push )
-#pragma warning( disable: 4251 )
+#pragma warning( disable : 4251 )
 
 // V8
 #ifndef NEKO_NO_SCRIPTING
@@ -132,7 +132,7 @@
 // MyGUI
 #ifndef NEKO_NO_GUI
 # pragma warning( push )
-# pragma warning( disable: 4275 )
+# pragma warning( disable : 4275 )
 # include <MYGUI/MyGUI.h>
 # pragma warning( pop )
 #endif

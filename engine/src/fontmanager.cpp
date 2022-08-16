@@ -34,6 +34,7 @@ namespace neko {
       pfnNewtypeShutdown( manager_ );
     if ( module_ )
       FreeLibrary( module_ );
+    module_ = nullptr;
   }
 
   void* FontManager::newtypeMemoryAllocate( uint32_t size )
@@ -178,6 +179,7 @@ namespace neko {
 
   void FontManager::shutdownLogic()
   {
+    fonts_.clear();
     nt_.unload();
   }
 

@@ -32,17 +32,17 @@ namespace neko {
 
   namespace math {
 
-    using std::min;
-    using std::max;
-    using glm::normalize;
+    using glm::angleAxis;
+    using glm::cross;
+    using glm::degrees;
     using glm::dot;
+    using glm::inverse;
     using glm::length;
     using glm::length2;
-    using glm::cross;
-    using glm::inverse;
-    using glm::angleAxis;
+    using glm::normalize;
     using glm::radians;
-    using glm::degrees;
+    using std::max;
+    using std::min;
 
     static std::random_device rd;
     static std::mt19937_64 reng( rd() );

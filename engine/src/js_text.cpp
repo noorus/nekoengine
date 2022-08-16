@@ -1,14 +1,14 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "js_util.h"
-#include "console.h"
-#include "scripting.h"
-#include "nekomath.h"
-#include "js_math.h"
-#include "js_mathutil.h"
-#include "js_text.h"
-#include "locator.h"
+# include "js_util.h"
+# include "console.h"
+# include "scripting.h"
+# include "nekomath.h"
+# include "js_math.h"
+# include "js_mathutil.h"
+# include "js_text.h"
+# include "locator.h"
 
 namespace neko {
 
@@ -22,8 +22,8 @@ namespace neko {
 
     static const char* c_className = "text";
 
-    string Text::className( c_className );
-    WrappedType Text::internalType = Wrapped_Text;
+    string DynamicObjectWrapper<Text, JSText>::className( c_className );
+    WrappedType DynamicObjectWrapper<Text, JSText>::internalType = Wrapped_Text;
 
     void Text::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {

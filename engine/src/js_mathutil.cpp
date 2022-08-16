@@ -1,10 +1,10 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "js_math.h"
-#include "js_util.h"
-#include "console.h"
-#include "scripting.h"
+# include "js_math.h"
+# include "js_util.h"
+# include "console.h"
+# include "scripting.h"
 
 namespace neko {
 
@@ -17,9 +17,7 @@ namespace neko {
         auto context = args.GetIsolate()->GetCurrentContext();
         auto object = args[arg]->ToObject( context ).ToLocalChecked();
         if ( util::isWrappedType( context, object, Wrapped_Vector2 ) )
-        {
           return Vector2::unwrap( object )->shared_from_this();
-        }
       }
       util::throwException( args.GetIsolate(), L"Expected object vec2 as argument %d", arg );
       return Vector2Ptr();
@@ -32,15 +30,14 @@ namespace neko {
         auto context = args.GetIsolate()->GetCurrentContext();
         auto object = args[arg]->ToObject( context ).ToLocalChecked();
         if ( util::isWrappedType( context, object, Wrapped_Vector3 ) )
-        {
           return Vector3::unwrap( object )->shared_from_this();
-        }
       }
       util::throwException( args.GetIsolate(), L"Expected object vec3 as argument %d", arg );
       return Vector3Ptr();
     }
 
-    Vector3Ptr extractVector3Member( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow )
+    Vector3Ptr extractVector3Member( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject,
+      const utf8String& name, bool shouldThrow )
     {
       const Vector3Ptr emptyPtr;
       if ( maybeObject.IsEmpty() )
@@ -49,7 +46,8 @@ namespace neko {
           util::throwException( isolate, ( func + ": passed object has no vec3 member \"" + name + "\"" ).c_str() );
         return emptyPtr;
       }
-      auto object = maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
+      auto object =
+        maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
       if ( object.IsEmpty() || !object.ToLocalChecked()->IsObject() )
       {
         if ( shouldThrow )
@@ -73,15 +71,14 @@ namespace neko {
         auto context = args.GetIsolate()->GetCurrentContext();
         auto object = args[arg]->ToObject( context ).ToLocalChecked();
         if ( util::isWrappedType( context, object, Wrapped_Quaternion ) )
-        {
           return Quaternion::unwrap( object )->shared_from_this();
-        }
       }
       util::throwException( args.GetIsolate(), L"Expected object quaternion as argument %d", arg );
       return QuaternionPtr();
     }
 
-    QuaternionPtr extractQuaternionMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow )
+    QuaternionPtr extractQuaternionMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject,
+      const utf8String& name, bool shouldThrow )
     {
       const QuaternionPtr emptyPtr;
       if ( maybeObject.IsEmpty() )
@@ -90,7 +87,8 @@ namespace neko {
           util::throwException( isolate, ( func + ": passed object has no quaternion member \"" + name + "\"" ).c_str() );
         return emptyPtr;
       }
-      auto object = maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
+      auto object =
+        maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
       if ( object.IsEmpty() || !object.ToLocalChecked()->IsObject() )
       {
         if ( shouldThrow )

@@ -1,29 +1,28 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "neko_types.h"
-#include "forwards.h"
-#include "scripting.h"
-#include "neko_platform.h"
-#include "engine.h"
-#include "console.h"
-#include "locator.h"
-#include "memory.h"
-#include "js_math.h"
+# include "neko_types.h"
+# include "forwards.h"
+# include "scripting.h"
+# include "neko_platform.h"
+# include "engine.h"
+# include "console.h"
+# include "locator.h"
+# include "memory.h"
+# include "js_math.h"
 
 namespace neko {
 
-  using v8::HandleScope;
-  using v8::ObjectTemplate;
-  using v8::FunctionTemplate;
-  using v8::Isolate;
   using v8::Context;
-  using v8::Local;
+  using v8::FunctionTemplate;
   using v8::Global;
+  using v8::HandleScope;
+  using v8::Isolate;
+  using v8::Local;
+  using v8::ObjectTemplate;
 
-  ScriptingContext::ScriptingContext( Scripting* owner,
-  v8::ArrayBuffer::Allocator* allocator, Isolate* isolate ):
-  owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false )
+  ScriptingContext::ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, Isolate* isolate ):
+    owner_( owner ), isolate_( isolate ), externalIsolate_( isolate ? true : false )
   {
     assert( owner_ );
 
@@ -70,15 +69,15 @@ namespace neko {
     }
   }
 
-  #define JS_SET_GLOBAL_FUNCTION( x ) global->Set( \
-    js::util::allocStringConserve( #x, isolate_ ), \
-    v8::FunctionTemplate::New( \
-      isolate_, []( const v8::FunctionCallbackInfo<v8::Value>& args ) { \
-        auto self = static_cast<ScriptingContext*>( args.Data().As<v8::External>()->Value() ); \
-        self->js_##x( args );\
-      }, \
-      v8::External::New( isolate_, static_cast<void*>( this ) ) \
-    ) )
+# define JS_SET_GLOBAL_FUNCTION( x )                                                        \
+  global->Set( js::util::allocStringConserve( #x, isolate_ ),                               \
+    v8::FunctionTemplate::New(                                                              \
+      isolate_,                                                                             \
+      []( const v8::FunctionCallbackInfo<v8::Value>& args ) {                               \
+     auto self = static_cast<ScriptingContext*>( args.Data().As<v8::External>()->Value() ); \
+     self->js_##x( args );                                                                  \
+      },                                                                                    \
+      v8::External::New( isolate_, static_cast<void*>( this ) ) ) )
 
   void ScriptingContext::registerTemplateGlobals( Local<ObjectTemplate>& global )
   {
@@ -200,8 +199,7 @@ namespace neko {
   {
     isolate_->PerformMicrotaskCheckpoint();
 
-    v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_,
-      v8::platform::MessageLoopBehavior::kDoNotWait );
+    v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_, v8::platform::MessageLoopBehavior::kDoNotWait );
   }
 
   ScriptingContext::~ScriptingContext()

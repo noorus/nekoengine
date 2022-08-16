@@ -173,11 +173,11 @@ namespace neko {
 
   constexpr vec4 rgba( int r, int g, int b, double a )
   {
-    return vec4(
+    return {
       static_cast<Real>( r ) / 255.0f,
       static_cast<Real>( g ) / 255.0f,
       static_cast<Real>( b ) / 255.0f,
-      static_cast<Real>( a ) );
+      static_cast<Real>( a ) };
   }
 
   using quat = quaternion;

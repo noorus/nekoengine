@@ -8,8 +8,8 @@
 
 // Don't ask
 // Don't touch
-#pragma warning(disable: 4073)
-#pragma init_seg(lib)
+#pragma warning( disable : 4073 )
+#pragma init_seg( lib )
 
 namespace neko {
 
@@ -35,8 +35,7 @@ namespace neko {
 
   // ConCmd
 
-  ConCmd::ConCmd( const string& name, const string& description,
-    ConCmd::Callback callback ):
+  ConCmd::ConCmd( const string& name, const string& description, ConCmd::Callback callback ):
     ConBase( name, description ), callback_( callback )
   {
     assert( callback_ );
@@ -49,24 +48,21 @@ namespace neko {
 
   // ConVar
 
-  ConVar::ConVar( const string& name, const string& description,
-    int defaultValue, ConVar::Callback callback ):
+  ConVar::ConVar( const string& name, const string& description, int defaultValue, ConVar::Callback callback ):
     ConBase( name, description ), callback_( callback )
   {
     set( defaultValue );
     default_ = value_;
   }
 
-  ConVar::ConVar( const string& name, const string& description,
-    float defaultValue, ConVar::Callback callback ):
+  ConVar::ConVar( const string& name, const string& description, float defaultValue, ConVar::Callback callback ):
     ConBase( name, description ), callback_( callback )
   {
     set( defaultValue );
     default_ = value_;
   }
 
-  ConVar::ConVar( const string& name, const string& description,
-    const string& defaultValue, ConVar::Callback callback ):
+  ConVar::ConVar( const string& name, const string& description, const string& defaultValue, ConVar::Callback callback ):
     ConBase( name, description ), callback_( callback )
   {
     set( defaultValue );
@@ -169,9 +165,8 @@ namespace neko {
 
     precreated_.clear();
 
-    cvars_.sort( []( ConBase* a, ConBase* b ) -> bool {
-      return ( _stricmp( a->name().c_str(), b->name().c_str() ) <= 0 );
-    });
+    cvars_.sort(
+      []( ConBase* a, ConBase* b ) -> bool { return ( _stricmp( a->name().c_str(), b->name().c_str() ) <= 0 ); } );
   }
 
   Console::Source Console::registerSource( const string& name, vec3 color )
@@ -191,9 +186,7 @@ namespace neko {
 
   void Console::describe( ConBase* base )
   {
-    printf( srcEngine, "%s: (%s) - %s",
-      base->name().c_str(),
-      base->isCommand() ? "command" : "variable",
+    printf( srcEngine, "%s: (%s) - %s", base->name().c_str(), base->isCommand() ? "command" : "variable",
       base->description().c_str() );
   }
 
@@ -266,7 +259,6 @@ namespace neko {
     cvars_.push_back( var );
   }
 
-
   void Console::setEngine( EnginePtr engine )
   {
     if ( !engine )
@@ -292,8 +284,8 @@ namespace neko {
     fileOut_.reset();
 
     wchar_t filename[64];
-    swprintf_s( filename, 64, L"%04d%02d%02d_%S-%02d%02d%02d.log",
-      now.year, now.month, now.day, info.logName.c_str(), now.hour, now.minute, now.second );
+    swprintf_s( filename, 64, L"%04d%02d%02d_%S-%02d%02d%02d.log", now.year, now.month, now.day, info.logName.c_str(),
+      now.hour, now.minute, now.second );
 
     fileOut_ = make_unique<TextFileWriter>( env.documentsPath_ + filename );
 
@@ -305,10 +297,8 @@ namespace neko {
     DateTime now;
     platform::getDateTime( now );
 
-    printf( srcEngine, "%s v%d.%d.%d [%s]", info.engineName.c_str(),
-      info.major, info.minor, info.build, info.profile.c_str() );
-    printf( srcEngine, "Build: %s (%s)", info.compiled.c_str(),
-      info.compiler.c_str() );
+    printf( srcEngine, "%s v%d.%d.%d [%s]", info.engineName.c_str(), info.major, info.minor, info.build, info.profile.c_str() );
+    printf( srcEngine, "Build: %s (%s)", info.compiled.c_str(), info.compiler.c_str() );
     printf( srcEngine, "Starting on %04d-%02d-%02d %02d:%02d:%02d",
       now.year, now.month, now.day, now.hour, now.minute, now.second );
   }
@@ -351,7 +341,7 @@ namespace neko {
 
   void Console::print( Source source, const char* str )
   {
-    auto &src = sources_[source];
+    auto& src = sources_[source];
     auto time = ( engine_ ? (float)engine_->time() : 0.0f );
 
     sprintf_s( tls_consolePrintBuffer, c_consolePrintfBufferSize + 32, c_fileLogFormat, 8, time, src.name.c_str(), str );
@@ -432,7 +422,8 @@ namespace neko {
             v.push_back( buffer );
             buffer.clear();
           }
-        } else
+        }
+        else
           buffer.append( 1, chr );
         escaped = false;
       }
@@ -505,9 +496,7 @@ namespace neko {
           else
           {
             lock.unlock();
-            printf( srcEngine, R"(%s is "%s")",
-              var->name().c_str(),
-              var->as_s().c_str() );
+            printf( srcEngine, R"(%s is "%s")", var->name().c_str(), var->as_s().c_str() );
           }
         }
         return;
@@ -559,10 +548,8 @@ namespace neko {
 
     utf8String line;
     while ( std::getline( ss, line ) )
-    {
       if ( !line.empty() )
         execute( line, true );
-    }
   }
 
   ConVar* Console::getVariable( const string_view name )

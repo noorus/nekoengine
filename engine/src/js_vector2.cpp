@@ -1,12 +1,12 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "js_math.h"
-#include "js_util.h"
-#include "console.h"
-#include "scripting.h"
-#include "nekomath.h"
-#include "js_mathutil.h"
+# include "js_math.h"
+# include "js_util.h"
+# include "console.h"
+# include "scripting.h"
+# include "nekomath.h"
+# include "js_mathutil.h"
 
 namespace neko {
 
@@ -22,8 +22,8 @@ namespace neko {
     static const mathShared::Messages c_addMessages( c_className + utf8String( ".add" ), false );
     static const mathShared::Messages c_subMessages( c_className + utf8String( ".sub" ), false );
 
-    string Vector2::className( c_className );
-    WrappedType Vector2::internalType = Wrapped_Vector2;
+    string DynamicObjectWrapper<Vector2, neko::vec2>::className( c_className );
+    WrappedType DynamicObjectWrapper<Vector2, neko::vec2>::internalType = Wrapped_Vector2;
 
     void Vector2::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
@@ -166,9 +166,7 @@ namespace neko {
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )
-      {
         v_.x = static_cast<Real>( value->NumberValue( context ).ToChecked() );
-      }
     }
 
     //! \verbatim
@@ -186,9 +184,7 @@ namespace neko {
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )
-      {
         v_.y = static_cast<Real>( value->NumberValue( context ).ToChecked() );
-      }
     }
 
     //! \verbatim
@@ -422,8 +418,7 @@ namespace neko {
       {
         auto mid = vec2(
           ( v_.x + other->v_.x ) * 0.5f,
-          ( v_.y + other->v_.y ) * 0.5f
-        );
+          ( v_.y + other->v_.y ) * 0.5f );
         auto ctx = getScriptContext( args.GetIsolate() );
         auto ptr = ctx->vec2reg().createFrom( mid );
         args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );

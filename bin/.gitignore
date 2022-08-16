@@ -10,3 +10,5 @@ steam_appid.txt
 *.cfg
 /*.json
 /data/v8/
+debug/
+release/

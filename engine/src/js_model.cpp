@@ -1,15 +1,15 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "js_util.h"
-#include "console.h"
-#include "scripting.h"
-#include "nekomath.h"
-#include "js_math.h"
-#include "js_mathutil.h"
-#include "js_mesh.h"
-#include "js_model.h"
-#include "js_wrapper.h"
+# include "js_util.h"
+# include "console.h"
+# include "scripting.h"
+# include "nekomath.h"
+# include "js_math.h"
+# include "js_mathutil.h"
+# include "js_mesh.h"
+# include "js_model.h"
+# include "js_wrapper.h"
 
 namespace neko {
 
@@ -17,8 +17,8 @@ namespace neko {
 
     static const char* c_className = "model";
 
-    string Model::className( c_className );
-    WrappedType Model::internalType = Wrapped_Model;
+    string DynamicObjectWrapper<Model, JSModel>::className( c_className );
+    WrappedType DynamicObjectWrapper<Model, JSModel>::internalType = Wrapped_Model;
 
     JSModel::JSModel()
     {

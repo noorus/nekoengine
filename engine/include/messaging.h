@@ -24,7 +24,8 @@ namespace neko {
     M_Debug_ToggleWireframe
   };
 
-  struct Message {
+  struct Message
+  {
     MessageCode code;
     vector<void*> arguments;
   };
@@ -41,7 +42,8 @@ namespace neko {
 
   class Messaging: public Subsystem {
   public:
-    struct ListenEntry {
+    struct ListenEntry
+    {
       size_t groups_;
       Listener* callback_;
       ListenEntry( size_t groups, Listener* callback ): groups_( groups ), callback_( callback ) {}

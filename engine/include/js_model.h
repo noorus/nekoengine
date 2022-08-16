@@ -46,7 +46,8 @@ namespace neko {
       Model( const JSModel& source ): local_( source ) {}
       inline void setFrom( const JSModel& other )
       {
-        Locator::console().printf( neko::Console::srcScripting, "js::Model(0x%I64X) setFrom JSModel(0x%I64X)", this, other );
+        Locator::console().printf( neko::Console::srcScripting,
+          "js::Model(0x%I64X) setFrom JSModel(0x%I64X)", this, reinterpret_cast<const void*>( &other ) );
         // TODO better; this is destructive
         //local_.vbo_->copy( *other.vbo_ );
         //local_.ebo_->copy( *other.ebo_ );

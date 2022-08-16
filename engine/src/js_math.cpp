@@ -32,8 +32,8 @@ namespace neko {
     static const mathShared::Messages c_addMessages( c_className + utf8String( ".add" ), true );
     static const mathShared::Messages c_subMessages( c_className + utf8String( ".sub" ), true );
 
-    string Math::className( c_className );
-    WrappedType Math::internalType = Wrapped_Math;
+    string StaticObjectWrapper<Math>::className( c_className );
+    WrappedType StaticObjectWrapper<Math>::internalType = Wrapped_Math;
 
     Math::Math()
     {

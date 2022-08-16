@@ -1,20 +1,18 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "js_console.h"
-#include "js_util.h"
-#include "console.h"
+# include "js_console.h"
+# include "js_util.h"
+# include "console.h"
 
 namespace neko {
 
   namespace js {
 
-    string Console::className( "Console" );
-    WrappedType Console::internalType = Wrapped_Console;
+    string StaticObjectWrapper<Console>::className( "Console" );
+    WrappedType StaticObjectWrapper<Console>::internalType = Wrapped_Console;
 
-    Console::Console( ConsolePtr console ): console_( move( console ) )
-    {
-    }
+    Console::Console( ConsolePtr console ): console_( move( console ) ) {}
 
     JSConsolePtr Console::create( ConsolePtr console, Isolate* isolate, V8Object global )
     {
@@ -65,9 +63,7 @@ namespace neko {
 
       if ( !variable )
       {
-        util::throwException( isolate,
-          L"Console.getVariable: No such console variable \"%s\"",
-          (const char*)*variableName );
+        util::throwException( isolate, L"Console.getVariable: No such console variable \"%s\"", (const char*)*variableName );
         return;
       }
 
@@ -91,9 +87,7 @@ namespace neko {
 
       if ( !variable )
       {
-        util::throwException( isolate,
-          L"Console.setVariable: No such console variable \"%s\"",
-          (const wchar_t*)*variableName );
+        util::throwException( isolate, L"Console.setVariable: No such console variable \"%s\"", (const wchar_t*)*variableName );
         return;
       }
 

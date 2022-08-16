@@ -1,12 +1,12 @@
 #include "pch.h"
 #ifndef NEKO_NO_SCRIPTING
 
-#include "js_math.h"
-#include "js_util.h"
-#include "console.h"
-#include "scripting.h"
-#include "nekomath.h"
-#include "js_mathutil.h"
+# include "js_math.h"
+# include "js_util.h"
+# include "console.h"
+# include "scripting.h"
+# include "nekomath.h"
+# include "js_mathutil.h"
 
 namespace neko {
 
@@ -14,8 +14,8 @@ namespace neko {
 
     static const char* c_className = "quaternion";
 
-    string Quaternion::className( c_className );
-    WrappedType Quaternion::internalType = Wrapped_Quaternion;
+    string DynamicObjectWrapper<Quaternion, neko::quaternion>::className( c_className );
+    WrappedType DynamicObjectWrapper<Quaternion, neko::quaternion>::internalType = Wrapped_Quaternion;
 
     void Quaternion::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
@@ -126,9 +126,7 @@ namespace neko {
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )
-      {
         q_.x = static_cast<Real>( value->NumberValue( context ).ToChecked() );
-      }
     }
 
     //! \verbatim
@@ -146,9 +144,7 @@ namespace neko {
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )
-      {
         q_.y = static_cast<Real>( value->NumberValue( context ).ToChecked() );
-      }
     }
 
     //! \verbatim
@@ -166,9 +162,7 @@ namespace neko {
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )
-      {
         q_.z = static_cast<Real>( value->NumberValue( context ).ToChecked() );
-      }
     }
 
     //! \verbatim
@@ -186,9 +180,7 @@ namespace neko {
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )
-      {
         q_.w = static_cast<Real>( value->NumberValue( context ).ToChecked() );
-      }
     }
 
     //! \verbatim

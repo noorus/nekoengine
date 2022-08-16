@@ -41,10 +41,8 @@ namespace neko {
     messagesBuffer.swap( messages_ );
 
     for ( auto& msg : messagesBuffer )
-    {
       for ( auto& listener : listeners_ )
         listener.callback_->onMessage( msg );
-    }
   }
 
   void Messaging::tick( GameTime tick, GameTime time )
@@ -68,7 +66,10 @@ namespace neko {
   void Messaging::remove( Listener* callback )
   {
     for ( auto it = listeners_.begin(); it != listeners_.end(); )
-      if ( ( *it ).callback_ == callback ) { it = listeners_.erase( it ); } else { it++; }
+      if ( ( *it ).callback_ == callback )
+        it = listeners_.erase( it );
+      else
+        it++;
   }
 
   Messaging::~Messaging()

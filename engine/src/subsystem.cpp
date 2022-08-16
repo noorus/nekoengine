@@ -4,9 +4,7 @@
 
 namespace neko {
 
-  Subsystem::Subsystem( EnginePtr engine ): engine_( move( engine ) )
-  {
-  }
+  Subsystem::Subsystem( EnginePtr engine ): engine_( move( engine ) ) {}
 
   void Subsystem::preUpdate( GameTime time )
   {
