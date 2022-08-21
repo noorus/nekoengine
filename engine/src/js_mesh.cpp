@@ -47,7 +47,7 @@ namespace neko {
         verts[i].s = util::realFromArray( context, arrayValue, 2 );
         verts[i].t = util::realFromArray( context, arrayValue, 3 );
       }
-      vbo->pushVertices( move( verts ) );
+      vbo->pushVertices( verts );
     }
 
     inline void extractVBO( v8::Array& arr, V8Context& context, VBOPtr& vbo )
@@ -65,7 +65,7 @@ namespace neko {
         verts[i].texcoord.y = util::realFromArray( context, arrayValue, 4 );
         verts[i].color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
       }
-      vbo->pushVertices( move( verts ) );
+      vbo->pushVertices( verts );
     }
 
     inline void extractEBO( v8::Array& arr, V8Context& context, EBOPtr& ebo )
@@ -129,7 +129,7 @@ namespace neko {
             if ( segmentsRounded.x > 0 && segmentsRounded.y > 0 )
             {
               auto retPair = Locator::meshGenerator().makePlane( dimensions->v(), segmentsRounded, normal->v() );
-              mesh.vbo_->pushVertices( move( retPair.first ) );
+              mesh.vbo_->pushVertices( retPair.first );
               mesh.ebo_->storage_.insert( mesh.ebo_->storage_.end(), retPair.second.begin(), retPair.second.end() );
               mesh.ebo_->dirty_ = true;
               valueParsed = true;
@@ -153,7 +153,7 @@ namespace neko {
             if ( segmentsRounded.x > 0 && segmentsRounded.y > 0 )
             {
               auto retPair = Locator::meshGenerator().makeTerrain( segmentsRounded, dimensions->v() );
-              mesh.vbo_->pushVertices( move( retPair.first ) );
+              mesh.vbo_->pushVertices( retPair.first );
               mesh.ebo_->storage_.insert( mesh.ebo_->storage_.end(), retPair.second.begin(), retPair.second.end() );
               mesh.ebo_->dirty_ = true;
               valueParsed = true;
@@ -177,7 +177,7 @@ namespace neko {
             if ( segmentsRounded.x > 0 && segmentsRounded.y > 0 )
             {
               auto retPair = Locator::meshGenerator().makeBox( dimensions->v(), segmentsRounded );
-              mesh.vbo_->pushVertices( move( retPair.first ) );
+              mesh.vbo_->pushVertices( retPair.first );
               mesh.ebo_->storage_.insert( mesh.ebo_->storage_.end(), retPair.second.begin(), retPair.second.end() );
               mesh.ebo_->dirty_ = true;
               valueParsed = true;

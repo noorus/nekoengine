@@ -6,24 +6,38 @@
 
 namespace neko {
 
-  namespace functional {
+  namespace utils {
 
     template <typename Container, typename Fn>
     Container map( const Container& in, Fn func )
     {
-      Container out;
+      Container out {};
       out.reserve( in.size() );
       std::transform( in.begin(), in.end(), std::back_inserter( out ), func );
-      return move( out );
+      return out;
     }
 
-  }
-
-  namespace utils {
+    template <typename T>
+    constexpr bool contains( const vector<T>& vec, T value )
+    {
+      return ( std::find( vec.begin(), vec.end(), value ) != vec.end() );
+    }
 
     constexpr size_t alignToNextMultiple( size_t offset, size_t alignment )
     {
       return ( ( offset + alignment - 1 ) / alignment ) * alignment;
+    }
+
+    inline unicodeString uniFrom( const utf8String& u8str )
+    {
+      return unicodeString::fromUTF8( icu::StringPiece( u8str.c_str(), static_cast<int32_t>( u8str.length() ) ) );
+    }
+
+    inline utf8String uniToUtf8( const unicodeString& ustr ) noexcept
+    {
+      utf8String out;
+      ustr.toUTF8String( out );
+      return out;
     }
 
     inline wstring asciiToWideNaive( string_view str )

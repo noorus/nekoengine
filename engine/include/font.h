@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 #include "shaders.h"
 #include "resources.h"
+#include "objectbase.h"
 
 namespace neko {
 
@@ -19,6 +20,8 @@ namespace neko {
     Material::Ptr material_;
   };
 
+  using FontStyleMap = map<newtype::StyleID, FontStyleData>;
+
   class Font: public LoadedResourceBase<Font> {
   public:
     using Base = LoadedResourceBase<Font>;
@@ -27,7 +30,7 @@ namespace neko {
     newtype::Manager* mgr_;
     newtype::FontPtr font_;
     newtype::FontFacePtr face_;
-    map<newtype::StyleID, FontStyleData> styles_;
+    FontStyleMap styles_;
   public:
     // The constructor is public due to make_shared's peculiarities, but don't call it directly.
     Font() = delete;
@@ -38,6 +41,7 @@ namespace neko {
     newtype::StyleID loadStyle( newtype::FontRendering rendering, Real thickness );
     bool usable( newtype::StyleID style ) const;
     inline newtype::FontFacePtr face() { return face_; }
+    inline const FontStyleMap& styles() noexcept { return styles_; }
     inline const FontStyleData& style( newtype::StyleID sid )
     {
       return styles_[sid];
@@ -85,14 +89,11 @@ namespace neko {
     }
     inline BufferType& buffer() { return *buffer_; }
     inline IndicesType& indices() { return *indices_; }
-    void draw( shaders::Shaders& shaders, gl::GLuint texture )
+    void draw( shaders::Shaders& shaders, const mat4& model, gl::GLuint texture )
     {
       gl::glBindVertexArray( vao_ );
       auto& pipeline = shaders.usePipeline( "text2d" );
-      mat4 mdl( 1.0f );
-      mdl = glm::translate( mdl, vec3( 0.0f ) );
-      mdl = glm::scale( mdl, vec3( 1.0f ) );
-      pipeline.setUniform( "model", mdl );
+      pipeline.setUniform( "model", model );
       pipeline.setUniform( "tex", 0 );
       gl::glBindTextureUnit( 0, texture );
       gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
@@ -108,18 +109,21 @@ namespace neko {
 
   using TextMeshPtr = unique_ptr<TextRenderBuffer>;
 
-  class Text {
+  class Text: public TransformableObject {
   private:
     newtype::Manager* mgr_;
     FontPtr font_;
     newtype::TextPtr text_;
     TextMeshPtr mesh_;
+    unicodeString content_;
   public:
     // The constructor is public due to make_shared's peculiarities, but don't call it directly.
     Text() = delete;
     explicit Text( newtype::Manager* manager, FontPtr font, newtype::StyleID style );
   public:
     newtype::IDType id() const;
+    void content( unicodeString text );
+    inline const unicodeString& content() noexcept { return content_; }
     void update( Renderer* renderer );
     void draw( Renderer* renderer );
   };

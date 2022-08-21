@@ -53,7 +53,7 @@ class DemoScene extends Scene
         translate: vec3(0, 1, 0)
       })
     ]
-    this._text = new text( "bala bala lolololo" );
+    this._text = new text({ translate: vec3( 200, 200, 0), str: "beep beep boop boop" } );
     Console.print( this._text );
   }
   enter()

@@ -126,6 +126,8 @@ namespace neko {
 
   using std::numeric_limits;
 
+  using std::ignore;
+
 #ifdef NEKO_MATH_DOUBLE
   using Real = double;
   namespace numbers {
@@ -187,6 +189,25 @@ namespace neko {
   constexpr vec3 vec3UnitZ = vec3( numbers::zero, numbers::zero, numbers::one );
   using Radians = Real;
   using Degrees = Real;
+
+  //! @brief Scale, Rotate, Translate
+  struct srt
+  {
+    vec3 scale { numbers::zero, numbers::zero, numbers::zero };
+    quat rotate = quatIdentity;
+    vec3 translate { numbers::zero, numbers::zero, numbers::zero };
+    inline mat4 apply( const mat4& model )
+    {
+      auto out = glm::scale( model, scale );
+      out *= glm::toMat4( rotate );
+      return glm::translate( out, translate );
+    }
+    inline mat4 asModel4()
+    {
+      mat4 model( numbers::one );
+      return apply( model );
+    }
+  };
 
   using GameTime = double;
 

@@ -94,11 +94,11 @@ namespace neko {
       MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) ) )
     {
 #endif
-      if ( button < 6 )
+      if ( button < 5 )
         mouseButtons_[button] = true;
 #ifndef NEKO_NO_GUI
     }
-    else if ( button < 6 )
+    else if ( button < 5 )
       mouseButtons_[button] = false;
 #endif
   }
@@ -112,7 +112,7 @@ namespace neko {
       MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) ) )
     {
 #endif
-      if ( button < 6 )
+      if ( button < 5 )
         mouseButtons_[button] = false;
 #ifndef NEKO_NO_GUI
     }

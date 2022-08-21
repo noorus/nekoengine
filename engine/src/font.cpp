@@ -9,11 +9,13 @@
 
 namespace neko {
 
+  const static unicodeString g_prerenderGlyphs = utils::uniFrom( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
+
   Font::Font( newtype::Manager* manager, const utf8String& name ):
   LoadedResourceBase<Font>( name ), mgr_( manager )
   {
     font_ = mgr_->createFont();
-    font_->setUser( this );
+    font_->user( this );
   }
 
   void Font::loadFace( span<uint8_t> buffer, newtype::FaceID faceIndex, Real size )
@@ -25,8 +27,10 @@ namespace neko {
   newtype::StyleID Font::loadStyle( newtype::FontRendering rendering, Real thickness )
   {
     assert( face_ );
-    auto sid = mgr_->loadStyle( face_, rendering, thickness );
+    auto sid = mgr_->loadStyle( face_, rendering, thickness, g_prerenderGlyphs );
     styles_[sid].id_ = sid;
+    Locator::console().printf(
+      Console::srcEngine, "Font %s has style 0x%x (%i, thickness %.2f)", name_.c_str(), sid, rendering, thickness );
     return sid;
   }
 
@@ -50,7 +54,7 @@ namespace neko {
       return false;
     if ( !face_ || styles_.find( style ) == styles_.end() )
       return false;
-    return ( !face_->getStyle( style )->dirty() );
+    return ( !face_->style( style )->dirty() );
   }
 
   void Font::update( Renderer* renderer )
@@ -60,7 +64,7 @@ namespace neko {
     for ( auto& entry : styles_ )
     {
       auto styleId = entry.first;
-      auto style = face_->getStyle( styleId );
+      auto style = face_->style( styleId );
       if ( !style->dirty() )
         continue;
       char tmp[64];
@@ -69,15 +73,14 @@ namespace neko {
         style->texture().dimensions().x, style->texture().dimensions().y,
         PixFmtColorR8, style->texture().data(),
         Texture::ClampBorder, Texture::Nearest );
-      /* dump texture here
-      platform::FileWriter writer( "fonttest_atlas.png" );
+      /* dump texture here */
+      sprintf_s( tmp, 64, "debug_fontatlas_%I64i_%016I64x.png", font_->id(), styleId );
+      platform::FileWriter writer( tmp );
       vector<uint8_t> buffer;
-      lodepng::encode( buffer,
-        font->texture().data(),
-        static_cast<unsigned int>( font->texture().dimensions().x ),
-        static_cast<unsigned int>( font->texture().dimensions().y ),
+      lodepng::encode( buffer, style->texture().data(), static_cast<unsigned int>( style->texture().dimensions().x ),
+        static_cast<unsigned int>( style->texture().dimensions().y ),
         LCT_GREY, 8 );
-      writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) ); */
+      writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) );
       style->markClean();
     }
   }

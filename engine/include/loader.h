@@ -63,6 +63,7 @@ namespace neko {
       fontfaceLoad.font_ = move( font );
       fontfaceLoad.path_ = path;
       fontfaceLoad.size_ = pointSize;
+      fontfaceLoad.styles_ = { { newtype::FontRender_Normal, 0.0 } };
     }
     LoadTask( SceneNode* modelRootNode, const utf8String& path ): type_( Load_Model )
     {

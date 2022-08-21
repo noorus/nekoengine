@@ -598,6 +598,8 @@ namespace neko {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
   }
 
+  static FontPtr g_text;
+
   void Renderer::draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui )
   {
     // check that the drawcontext is ready (fbo's available etc)
@@ -660,6 +662,19 @@ namespace neko {
       builtin_.screenQuad_->draw();
     }
 
+    for ( auto& text : texts_->texts() )
+    {
+      auto& txt = text.second->text();
+      if ( !txt.impl_ )
+        txt.impl_ = fonts_->createText( "demo_font", 0 );
+      txt.impl_->content( txt.content_ );
+      txt.impl_->setScale( txt.scale_->v() );
+      txt.impl_->setRotation( txt.rotate_->q() );
+      txt.impl_->setTranslation( txt.translate_->v() );
+      txt.impl_->update( this );
+      txt.impl_->draw( this );
+    }
+
     // below here be debug shit
     #if 0
     if ( userData_.image_ && userData_.image_->uploaded() )
@@ -671,24 +686,6 @@ namespace neko {
       glBindTextures( 0, 1, &handle );
       builtin_.screenQuad_->begin();
       builtin_.screenQuad_->draw();
-    }
-
-    {
-      if ( !g_text )
-      {
-        g_font = fonts_->createFont();
-        loader_->addLoadTask( { LoadTask( g_font, R"(SourceHanSansJP-Bold.otf)", 24.0f ) } );
-        g_text = make_unique<Text>( loader_, meshes_, g_font );
-        g_text->set( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class.", vec2( 100.0f, 100.0f ) );
-      }
-
-      auto& pipeline = shaders_->usePipeline( "text2d" );
-      mat4 mdl( 1.0f );
-      mdl = glm::translate( mdl, vec3( 0.0f ) );
-      mdl = glm::scale( mdl, vec3( 1.0f ) );
-      pipeline.setUniform( "model", mdl );
-      pipeline.setUniform( "tex", 0 );
-      g_text->draw( this );
     }
 #endif
 

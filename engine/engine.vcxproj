@@ -117,7 +117,7 @@
       <AdditionalDependencies>nil64_d.lib;icuind.lib;icudtd.lib;icuucd.lib;libbz2-static.lib;newtype_d.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <MapExports>true</MapExports>
       <AssemblyDebug>true</AssemblyDebug>
@@ -125,7 +125,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <AdditionalOptions>/ignore:4099 /ignore:4217 /ignore:4286 /time %(AdditionalOptions)</AdditionalOptions>
-      <OptimizeReferences>false</OptimizeReferences>
+      <OptimizeReferences>
+      </OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
     </Link>
     <Manifest>
@@ -399,6 +400,7 @@
     <ClInclude Include="include\MyGUI_NekoRTTexture.h" />
     <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\nekosimd.h" />
+    <ClInclude Include="include\objectbase.h" />
     <ClInclude Include="include\particles.h" />
     <ClInclude Include="include\renderbuffer.h" />
     <ClInclude Include="include\renderer.h" />

@@ -252,7 +252,7 @@ namespace neko {
               Locator::console().printf( Console::srcLoader, "exr: tinyexr loaded %s, %ix%i, rgba32f", target.c_str(), exr_width, exr_height );
               layer.image_.width_ = exr_width;
               layer.image_.height_ = exr_height;
-              layer.image_.data_.resize( exr_width * exr_height * 4 * sizeof( float ) );
+              layer.image_.data_.resize( static_cast<uint64_t>( exr_width ) * exr_height * 4 * sizeof( float ) );
               layer.image_.format_ = PixFmtColorRGBA32f;
               memcpy( layer.image_.data_.data(), exr_values, layer.image_.data_.size() );
               free( exr_values );

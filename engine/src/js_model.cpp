@@ -96,68 +96,9 @@ namespace neko {
       }
     }
 
-    void Model::js_getScale( V8String prop, const PropertyCallbackInfo<v8::Value>& info )
-    {
-      info.GetReturnValue().Set( local_.scale_->handle( info.GetIsolate() ) );
-    }
-
-    void Model::js_setScale( V8String prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info )
-    {
-      auto isolate = info.GetIsolate();
-      auto context = isolate->GetCurrentContext();
-
-      WrappedType argWrapType = Max_WrappedType;
-      if ( !util::getWrappedType( context, value, argWrapType ) || argWrapType != Wrapped_Vector3 )
-      {
-        isolate->ThrowException( util::staticStr( isolate, "Passed argument is not a vec3" ) );
-        return;
-      }
-
-      auto object = value->ToObject( context ).ToLocalChecked();
-      local_.scale_ = Vector3::unwrap( object )->shared_from_this();
-    }
-
-    void Model::js_getTranslate( V8String prop, const PropertyCallbackInfo<v8::Value>& info )
-    {
-      info.GetReturnValue().Set( local_.translate_->handle( info.GetIsolate() ) );
-    }
-
-    void Model::js_setTranslate( V8String prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info )
-    {
-      auto isolate = info.GetIsolate();
-      auto context = isolate->GetCurrentContext();
-
-      WrappedType argWrapType = Max_WrappedType;
-      if ( !util::getWrappedType( context, value, argWrapType ) || argWrapType != Wrapped_Vector3 )
-      {
-        isolate->ThrowException( util::staticStr( isolate, "Passed argument is not a vec3" ) );
-        return;
-      }
-
-      auto object = value->ToObject( context ).ToLocalChecked();
-      local_.translate_ = Vector3::unwrap( object )->shared_from_this();
-    }
-
-    void Model::js_getRotate( V8String prop, const PropertyCallbackInfo<v8::Value>& info )
-    {
-      info.GetReturnValue().Set( local_.rotate_->handle( info.GetIsolate() ) );
-    }
-
-    void Model::js_setRotate( V8String prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info )
-    {
-      auto isolate = info.GetIsolate();
-      auto context = isolate->GetCurrentContext();
-
-      WrappedType argWrapType = Max_WrappedType;
-      if ( !util::getWrappedType( context, value, argWrapType ) || argWrapType != Wrapped_Quaternion )
-      {
-        isolate->ThrowException( util::staticStr( isolate, "Passed argument is not a quaternion" ) );
-        return;
-      }
-
-      auto object = value->ToObject( context ).ToLocalChecked();
-      local_.rotate_ = Quaternion::unwrap( object )->shared_from_this();
-    }
+    JS_WRAPPER_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Model, Scale, local_.scale_ )
+    JS_WRAPPER_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Model, Translate, local_.translate_ )
+    JS_WRAPPER_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS( Model, Rotate, local_.rotate_ )
 
     void Model::js_toString( const V8CallbackArgs& args )
     {

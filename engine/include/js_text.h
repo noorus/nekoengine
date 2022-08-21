@@ -15,8 +15,10 @@ namespace neko {
   public:
     size_t id_;
     unicodeString content_;
-    js::Vector3Ptr pen_;
     TextPtr impl_;
+    js::Vector3Ptr scale_;
+    js::Vector3Ptr translate_;
+    js::QuaternionPtr rotate_;
     JSText();
   };
 
@@ -24,13 +26,21 @@ namespace neko {
 
     class Text: public DynamicObjectWrapper<Text, JSText> {
     private:
-      JSText local_;
+      JSText local_; //!< Internal model.
     protected:
+      //! Properties
+      void js_getScale( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setScale( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getTranslate( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setTranslate( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getRotate( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setRotate( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      //! Functions
       void js_toString( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
-      virtual int32_t jsEstimateSize() const;
-      virtual void jsOnDestruct( Isolate* isolate );
+      int32_t jsEstimateSize() const override;
+      void jsOnDestruct( Isolate* isolate ) override;
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
     public:
       Text( const JSText& source ): local_( source ) {}

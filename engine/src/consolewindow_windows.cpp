@@ -36,12 +36,13 @@ namespace neko {
     inline wstring getWindowText( HWND wnd ) noexcept
     {
       wstring str;
-      auto length = (int)GetWindowTextLengthW( wnd );
+      auto length = GetWindowTextLengthW( wnd );
       if ( !length )
         return str;
-      str.resize( length + 1, '\0' );
-      GetWindowTextW( wnd, &str[0], length + 1 );
-      str.resize( length );
+      length++;
+      str.resize( length, '\0' );
+      GetWindowTextW( wnd, &str[0], length );
+      str.resize( static_cast<uint64_t>( length ) - 1 );
       return str;
     }
 
@@ -198,7 +199,7 @@ namespace neko {
         SendMessageW( ctrl, EM_SETOPTIONS, ECOOP_OR, ECO_AUTOVSCROLL | ECO_NOHIDESEL | ECO_SAVESEL | ECO_SELECTIONBAR );
       }
 
-      CHARFORMAT2W format;
+      CHARFORMAT2W format {};
       memset( &format, 0, sizeof( format ) );
       format.cbSize = sizeof( CHARFORMAT2W );
       format.dwMask =
@@ -225,7 +226,7 @@ namespace neko {
     {
       CHARRANGE range = { -1, -1 };
       SendMessage( log_, EM_EXSETSEL, 0, (LPARAM)&range );
-      CHARFORMAT2W format;
+      CHARFORMAT2W format {};
       format.cbSize = sizeof( CHARFORMAT2W );
       format.dwEffects = NULL;
       format.dwMask = CFM_COLOR | CFM_EFFECTS;
@@ -282,6 +283,8 @@ namespace neko {
       HDC memdc = CreateCompatibleDC( hdc );
       BITMAPINFOHEADER bmpInfoHdr = { sizeof( BITMAPINFOHEADER ), width, -height, 1, 32 };
       HBITMAP hbitmap = CreateDIBSection( memdc, (BITMAPINFO*)( &bmpInfoHdr ), DIB_RGB_COLORS, nullptr, nullptr, 0 );
+      if ( !hbitmap )
+        return;
       HGDIOBJ oldbitmap = SelectObject( memdc, hbitmap );
 
       // ---
@@ -322,11 +325,12 @@ namespace neko {
 
     inline RECT fitLogControl( int w, int h )
     {
-      RECT ret;
-      ret.left = ctrlMargin;
-      ret.right = w - ret.left - ctrlMargin;
-      ret.top = headerHeight + ctrlMargin;
-      ret.bottom = h - ret.top - cmdlineHeight - ( ctrlMargin * 2 );
+      RECT ret = {
+        .left = ctrlMargin,
+        .top = headerHeight + ctrlMargin,
+        .right = w - ret.left - ctrlMargin,
+        .bottom = h - ret.top - cmdlineHeight - ( ctrlMargin * 2 )
+      };
       return ret;
     }
 
@@ -337,11 +341,12 @@ namespace neko {
     inline RECT fitUnpauseButton( int w, int h )
     {
       int scrollbarWidth = GetSystemMetrics( SM_CXVSCROLL );
-      RECT ret;
-      ret.left = ( w - ctrlMargin - scrollbarWidth - unpauseButtonMargin - unpauseButtonWidth );
-      ret.right = unpauseButtonWidth;
-      ret.top = headerHeight + ctrlMargin + unpauseButtonMargin;
-      ret.bottom = unpauseButtonHeight;
+      RECT ret = {
+        .left = ( w - ctrlMargin - scrollbarWidth - unpauseButtonMargin - unpauseButtonWidth ),
+        .top = headerHeight + ctrlMargin + unpauseButtonMargin,
+        .right = unpauseButtonWidth,
+        .bottom = unpauseButtonHeight
+      };
       return ret;
     }
 
@@ -350,11 +355,12 @@ namespace neko {
 
     inline RECT fitCmdlineControl( int w, int h )
     {
-      RECT ret;
-      ret.left = ctrlMargin + cmdlinePadding;
-      ret.right = ( w - ret.left - ctrlMargin ) - cmdlinePadding; // really width
-      ret.top = ( h - cmdlineHeight - ctrlMargin ) + cmdlinePadding + cmdlineHeightFix;
-      ret.bottom = cmdlineHeight - ( cmdlinePadding * 2 ) - cmdlineHeightFix; // really height
+      RECT ret = {
+        .left = ctrlMargin + cmdlinePadding,
+        .top = ( h - cmdlineHeight - ctrlMargin ) + cmdlinePadding + cmdlineHeightFix,
+        .right = ( w - ret.left - ctrlMargin ) - cmdlinePadding, // really width
+        .bottom = cmdlineHeight - ( cmdlinePadding * 2 ) - cmdlineHeightFix // really height
+      };
       return ret;
     }
 
@@ -366,13 +372,14 @@ namespace neko {
     LRESULT ConsoleWindow::cmdlineProc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
     {
       auto window = (ConsoleWindow*)GetWindowLongPtrW( wnd, GWLP_USERDATA );
-      auto console = window->console_;
+      auto& console = window->console_;
 
       CHARRANGE range = { 0, -1 };
 
       if ( msg == WM_CHAR && wparam == TAB )
         return 0;
-      else if ( msg == WM_KEYDOWN )
+
+      if ( msg == WM_KEYDOWN )
       {
         if ( wparam == VK_TAB )
         {
@@ -417,7 +424,8 @@ namespace neko {
           SendMessageW( window->cmdline_, EM_EXSETSEL, 0, (LPARAM)&range );
           return 0;
         }
-        else if ( wparam == VK_UP && !window->history_.stack.empty() )
+
+        if ( wparam == VK_UP && !window->history_.stack.empty() )
         {
           if ( window->history_.browsing )
           {
@@ -428,7 +436,7 @@ namespace neko {
               return 0;
             }
             window->history_.position--;
-            auto backline = window->history_.stack[window->history_.position];
+            auto& backline = window->history_.stack[window->history_.position];
             window->setCmdline( backline.c_str() );
             SendMessageW( window->cmdline_, EM_EXSETSEL, 0, (LPARAM)&range );
           }
@@ -436,7 +444,7 @@ namespace neko {
           {
             window->history_.browsing = true;
             window->history_.position = window->history_.stack.size() - 1;
-            auto backline = window->history_.stack.back();
+            auto& backline = window->history_.stack.back();
             auto strtemp = wideToUtf8( getWindowText( window->cmdline_ ) );
             window->history_.stack.push_back( strtemp );
             window->setCmdline( backline );
@@ -454,7 +462,7 @@ namespace neko {
             window->history_.browsing = false;
             return 0;
           }
-          auto backline = window->history_.stack[window->history_.position];
+          auto& backline = window->history_.stack[window->history_.position];
           window->setCmdline( backline );
           SendMessageW( window->cmdline_, EM_EXSETSEL, 0, (LPARAM)&range );
           if ( window->history_.position >= window->history_.stack.size() - 1 )
@@ -494,7 +502,7 @@ namespace neko {
     LRESULT ConsoleWindow::logProc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
     {
       auto window = (ConsoleWindow*)GetWindowLongPtrW( wnd, GWLP_USERDATA );
-      auto console = window->console_;
+      auto& console = window->console_;
 
       if ( msg == WM_CHAR )
       {
@@ -517,7 +525,7 @@ namespace neko {
       logState_.firstvisibleline = SendMessageW( log_, EM_GETFIRSTVISIBLELINE, 0, 0 );
 
       auto lastlinechar = SendMessageW( log_, EM_LINEINDEX, logState_.linecount - 1, 0 );
-      POINTL lastlinept;
+      POINTL lastlinept {};
       SendMessageW( log_, EM_POSFROMCHAR, (WPARAM)&lastlinept, lastlinechar );
 
       if ( logState_.selection || lastlinept.y > logFit_.bottom )

@@ -521,6 +521,9 @@
     <ClInclude Include="include\js_text.h">
       <Filter>Header Files\scripting</Filter>
     </ClInclude>
+    <ClInclude Include="include\objectbase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="engine.manifest" />

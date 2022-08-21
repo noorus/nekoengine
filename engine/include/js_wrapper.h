@@ -92,6 +92,44 @@ namespace neko {
         obj->js_set##valInternal( prop, value, info ); \
       } )
 
+# define JS_WRAPPER_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( cls, propname, varname )                                         \
+  void cls::js_get##propname( V8String prop, const PropertyCallbackInfo<v8::Value>& info )                    \
+  {                                                                                                      \
+   info.GetReturnValue().Set( varname->handle( info.GetIsolate() ) );                                    \
+  }                                                                                                      \
+  void cls::js_set##propname( V8String prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info ) \
+  {                                                                                                      \
+   auto isolate = info.GetIsolate();                                                                     \
+   auto context = isolate->GetCurrentContext();                                                          \
+   WrappedType argWrapType = Max_WrappedType;                                                            \
+   if ( !util::getWrappedType( context, value, argWrapType ) || argWrapType != Wrapped_Vector3 )         \
+   {                                                                                                     \
+    isolate->ThrowException( util::staticStr( isolate, "Passed argument is not a vec3" ) );              \
+    return;                                                                                              \
+   }                                                                                                     \
+   auto object = value->ToObject( context ).ToLocalChecked();                                            \
+   varname = Vector3::unwrap( object )->shared_from_this();                                              \
+  }
+
+# define JS_WRAPPER_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS( cls, propname, varname )                    \
+  void cls::js_get##propname( V8String prop, const PropertyCallbackInfo<v8::Value>& info )                  \
+  {                                                                                                         \
+   info.GetReturnValue().Set( varname->handle( info.GetIsolate() ) );                                       \
+  }                                                                                                         \
+  void cls::js_set##propname( V8String prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info ) \
+  {                                                                                                         \
+   auto isolate = info.GetIsolate();                                                                        \
+   auto context = isolate->GetCurrentContext();                                                             \
+   WrappedType argWrapType = Max_WrappedType;                                                               \
+   if ( !util::getWrappedType( context, value, argWrapType ) || argWrapType != Wrapped_Quaternion )         \
+   {                                                                                                        \
+    isolate->ThrowException( util::staticStr( isolate, "Passed argument is not a quaternion" ) );           \
+    return;                                                                                                 \
+   }                                                                                                        \
+   auto object = value->ToObject( context ).ToLocalChecked();                                               \
+   varname = Quaternion::unwrap( object )->shared_from_this();                                       \
+  }
+
     //! Use this to create member functions for variables in dynamic-wrapped objects' templates.
 #   define JS_WRAPPER_SETMEMBER(obj,cls,x) obj->PrototypeTemplate()->Set( \
       util::staticStr( isolate, #x ), \

@@ -11,9 +11,18 @@ namespace neko {
   mgr_( manager ), font_( font )
   {
     text_ = mgr_->createText( font_->face(), style );
-    text_->pen( vec3( 100.0f, 100.0f, 0.0f ) );
-    auto content = unicodeString::fromUTF8( "It's pretty interesting.\nWhen you read ahead beforehand,\nyou have a much easier time in class." );
-    text_->setText( content );
+    // pen is an expensive call because it causes regeneration of the text mesh.
+    // fortunately there's practically no need to ever use a non-zero origin pen
+    // because translation can be done via the model matrix.
+    text_->pen( vec3( 0.0f ) );
+  }
+
+  void Text::content( unicodeString text )
+  {
+    if ( text.compare( content_ ) == 0 )
+      return;
+    content_ = move( text );
+    text_->text( content_ );
   }
 
   newtype::IDType Text::id() const
@@ -46,6 +55,7 @@ namespace neko {
     if ( mesh_ && font_ && font_->usable( sid ) )
     {
       mesh_->draw( renderer->shaders(),
+        transform_.asModel4(),
         font_->style( sid ).material_->textureHandle( 0 )
       );
     }

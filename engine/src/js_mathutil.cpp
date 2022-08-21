@@ -20,7 +20,7 @@ namespace neko {
           return Vector2::unwrap( object )->shared_from_this();
       }
       util::throwException( args.GetIsolate(), L"Expected object vec2 as argument %d", arg );
-      return Vector2Ptr();
+      return {};
     }
 
     Vector3Ptr extractVector3( int arg, const V8CallbackArgs& args )
@@ -33,7 +33,7 @@ namespace neko {
           return Vector3::unwrap( object )->shared_from_this();
       }
       util::throwException( args.GetIsolate(), L"Expected object vec3 as argument %d", arg );
-      return Vector3Ptr();
+      return {};
     }
 
     Vector3Ptr extractVector3Member( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject,
@@ -74,7 +74,7 @@ namespace neko {
           return Quaternion::unwrap( object )->shared_from_this();
       }
       util::throwException( args.GetIsolate(), L"Expected object quaternion as argument %d", arg );
-      return QuaternionPtr();
+      return {};
     }
 
     QuaternionPtr extractQuaternionMember( Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject,

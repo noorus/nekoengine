@@ -76,14 +76,17 @@ namespace neko {
     assert( fonts_.find( fnt->id() ) == fonts_.end() );
     fonts_[fnt->id()] = fnt;
 
+    Locator::console().printf( Console::srcEngine, "Created font %s", fnt->name().c_str() );
+
     return fnt;
   }
 
   TextPtr FontManager::createText( const utf8String& fontName, newtype::StyleID style )
   {
-    auto font = map_[fontName];
+    auto& font = map_[fontName];
 
-    auto txt = make_shared<Text>( nt_.mgr(), font, style );
+    // FIXME style is not used, because atm the caller cannot know valid style IDs as they are not exposed
+    auto txt = make_shared<Text>( nt_.mgr(), font, font->styles().begin()->first );
 
     assert( texts_.find( txt->id() ) == texts_.end() );
     texts_[txt->id()] = txt;
@@ -93,12 +96,12 @@ namespace neko {
 
   void FontManager::newtypeFontTextureCreated( newtype::Font& ntfont, newtype::StyleID style, newtype::Texture& texture )
   {
-    auto font = reinterpret_cast<Font*>( ntfont.getUser() );
+    auto font = reinterpret_cast<Font*>( ntfont.user() );
   }
 
   void FontManager::newtypeFontTextureDestroyed( newtype::Font& ntfont, newtype::StyleID style, newtype::Texture& texture )
   {
-    auto font = reinterpret_cast<Font*>( ntfont.getUser() );
+    auto font = reinterpret_cast<Font*>( ntfont.user() );
   }
 
   void FontManager::prepareLogic( GameTime time )
@@ -146,8 +149,19 @@ namespace neko {
   void FontManager::prepareRender()
   {
     assert( renderer_ );
-    //FontVector fonts;
-    //engine_->loader()->getFinishedFonts( fonts );
+
+    FontVector fonts;
+    loader_->getFinishedFonts( fonts );
+    if ( !fonts.empty() )
+      Locator::console().printf( Console::srcGfx, "FontManager::prepareRender got %d new fonts", fonts.size() );
+
+    for ( auto& newFont : fonts )
+    {
+      if ( fonts_.find( newFont->id() ) == fonts_.end() )
+        fonts_[newFont->id()] = newFont;
+      else if ( fonts_[newFont->id()] != newFont )
+        NEKO_EXCEPT( "Loader-returned font already exists" );
+    }
 
     for ( const auto& entry : fonts_ )
     {
@@ -180,12 +194,12 @@ namespace neko {
   void FontManager::shutdownLogic()
   {
     fonts_.clear();
-    nt_.unload();
   }
 
   FontManager::~FontManager()
   {
-    //
+    fonts_.clear();
+    nt_.unload();
   }
 
 }
