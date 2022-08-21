@@ -28,3 +28,5 @@
 
 // Define to disable the GUI & drop MyGUI SDK requirement.
 #define NEKO_NO_GUI
+
+#define NEKO_NO_RAINET

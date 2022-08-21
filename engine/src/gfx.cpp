@@ -9,6 +9,7 @@
 #include "console.h"
 #include "messaging.h"
 #include "gui.h"
+#include "neko_types.h"
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -311,8 +312,9 @@ namespace neko {
     camera_->update( delta, time );
 
     // activate as current context
-    auto _dummy = window_->setActive( true );
+    ignore = window_->setActive( true );
 
+#ifndef NEKO_NO_RAINET
     while ( !updateAccounts_.empty() )
     {
       auto id = updateAccounts_.front();
@@ -323,12 +325,13 @@ namespace neko {
       if ( account->id_ == engine.rainet()->accountMe()->id_ && account->steamImage_ )
         renderer_->setUserData( account->id_, account->steamName_, *account->steamImage_ );
     }
+#endif
 
     if ( flags_.resized )
     {
       renderer_->reset( viewport_.size_.x, viewport_.size_.y );
       flags_.resized = false;
-      _dummy = window_->setActive( true );
+      ignore = window_->setActive( true );
     }
 
 #ifndef NEKO_NO_GUI

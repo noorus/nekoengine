@@ -24,7 +24,7 @@ namespace rainet {
 
   struct SteamStats
   {
-    SteamSnowflake id_;
+    SteamSnowflake id_ = 0;
     map<utf8String, SteamStat> map_;
   };
 
@@ -41,12 +41,12 @@ namespace rainet {
         uint8_t stats : 1;
         uint8_t playerCount : 1;
       } bits;
-      uint64_t field;
+      uint64_t field = 0;
     } updated_;
     map<SteamSnowflake, SteamUser> friends_;
     map<SteamSnowflake, Image> userImages_;
     map<SteamSnowflake, SteamStats> userStats_;
-    int globalPlayercount_;
+    int globalPlayercount_ = 0;
   };
 
   class Steam {

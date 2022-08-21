@@ -58,10 +58,14 @@ namespace neko {
 #ifdef NEKO_NO_SCRIPTING
       "noscripting "
 #endif
+#ifdef NEKO_NO_RAINET
+      "norainet"
+#endif
       "windows";
     return flags;
   }
 
+#ifndef NEKO_NO_RAINET
   void RainetLibrary::load( rainet::Host* host )
   {
     module_ = LoadLibraryW( c_rainetLibraryName );
@@ -79,10 +83,14 @@ namespace neko {
   void RainetLibrary::unload()
   {
     if ( engine_ && pfnShutdown )
+    {
       pfnShutdown( engine_ );
+      engine_ = nullptr;
+    }
     if ( module_ )
       FreeLibrary( module_ );
   }
+#endif
 
   void parseSettingsJSON( const json& settings, EngineSettings& out )
   {
@@ -119,8 +127,10 @@ namespace neko {
     u_getVersion( icuVersion );
     console_->printf( Console::srcEngine, "Using ICU v%d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
 
+#ifndef NEKO_NO_RAINET
     rainet_.load( this );
     rainet_.engine_->initialize( settings_.discordAppID, settings_.steamAppID );
+#endif
 
     rendererTime_.store( 0.0f );
 
@@ -152,7 +162,9 @@ namespace neko {
     console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
 #endif
 
+#ifndef NEKO_NO_RAINET
     rainet_.engine_->update( 0.0, 0.0 );
+#endif
 
 #ifndef NEKO_NO_SCRIPTING
     scripting_->postInitialize();
@@ -192,6 +204,8 @@ namespace neko {
     }
   }
 
+#ifndef NEKO_NO_RAINET
+
   void Engine::onDiscordDebugPrint( const utf8String& message )
   {
     console_->printf( Console::srcEngine, "Discord: %s", message.c_str() );
@@ -226,6 +240,8 @@ namespace neko {
       messaging_->send( M_Extern_AccountUpdated, 1, static_cast<size_t>( user.id_ ) );
   }
 
+#endif
+
   bool Engine::paused()
   {
     if ( state_.focusLost || state_.windowMove || state_.steamOverlay || state_.timePaused )
@@ -247,9 +263,14 @@ namespace neko {
 
   const rainet::GameInstallationState& Engine::installationInfo()
   {
+#ifndef NEKO_NO_RAINET
     if ( rainet_.engine_->startedFromSteam() )
       return rainet_.engine_->steamInstallation();
     return rainet_.engine_->localInstallation();
+#else
+    static rainet::GameInstallationState fuckyou = { .installPath_ = platform::wideToUtf8( platform::getCurrentDirectory() ) };
+    return fuckyou;
+#endif
   }
 
   void Engine::run()
@@ -269,8 +290,10 @@ namespace neko {
     platform::PerformanceTimer overallTime;
     overallTime.start();
 
+#ifndef NEKO_NO_RAINET
     rainet_.engine_->update( time_, 0.0 );
     rainet_.engine_->changeActivity_AlphaDevelop();
+#endif
 
     while ( signal_ != Signal_Stop )
     {
@@ -311,7 +334,9 @@ namespace neko {
 
       rendererTime_.store( time_ );
 
+#ifndef NEKO_NO_RAINET
       rainet_.engine_->update( time_, delta );
+#endif
 
 #ifndef NEKO_NO_SCRIPTING
       scripting_->postUpdate( delta, time_ );
@@ -331,9 +356,11 @@ namespace neko {
       }
     }
 
+#ifndef NEKO_NO_RAINET
     auto secondsDebugged = static_cast<float>( overallTime.stop() / 1000.0 );
     rainet_.engine_->statAdd( "dev_debugTime", secondsDebugged );
     rainet_.engine_->uploadStats();
+#endif
   }
 
   void Engine::shutdown()
@@ -360,7 +387,9 @@ namespace neko {
     messaging_.reset();
     Locator::provideMessaging( MessagingPtr() );
 
+#ifndef NEKO_NO_RAINET
     rainet_.unload();
+#endif
 
     console_->resetEngine();
   }

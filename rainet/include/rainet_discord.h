@@ -6,7 +6,7 @@
 namespace rainet {
 
   struct DiscordUser {
-    DcSnowflake id_;
+    DcSnowflake id_ = 0;
     utf8String name_;
     utf8String discriminator_;
   };
@@ -21,7 +21,7 @@ namespace rainet {
         uint8_t friends : 1;
         uint8_t images : 1;
       } bits;
-      uint64_t field;
+      uint64_t field = 0;
     } updated_;
     map<DcSnowflake, DiscordUser> friends_;
     map<DcSnowflake, Image> userImages_;

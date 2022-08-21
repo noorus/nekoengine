@@ -72,7 +72,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)extern\steamworks\sdk\redistributable_bin\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>discord_game_sdk.dll.lib;steam_api64.lib;icuind.lib;icuucd.lib;%(AdditionalDependencies)</AdditionalDependencies>
