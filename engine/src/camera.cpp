@@ -6,8 +6,39 @@
 
 namespace neko {
 
+  EditorOrthoCamera::EditorOrthoCamera( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def ):
+    Camera( manager, resolution, 90.0f )
+  {
+    eye_ = def.eye;
+    up_ = def.up;
+  }
+
+  void EditorOrthoCamera::setViewport( vec2 resolution )
+  {
+    resolution_ = resolution;
+    auto ratio = resolution_.x / resolution_.y;
+    auto scale = 0.1f;
+    //projection_ = glm::ortho( 0.0f, resolution_.x * ratio * scale, resolution_.y * scale, 0.0f );
+    // projection_ = glm::perspectiveFovRH( glm::radians( fov_ ), resolution.x, resolution.y, near_, far_ );
+    auto diam = 10.0f;
+    projection_ = glm::ortho(
+      -( ( diam * 0.5f ) * ratio ),
+      ( ( diam * 0.5f ) * ratio ),
+      -( diam * 0.5f ),
+      ( diam * 0.5f ),
+      0.01f, 1000.0f );
+  }
+
+  void EditorOrthoCamera::update( GameTime delta, GameTime time )
+  {
+    position_ = vec3( 0.0f, 0.0f, 0.0f );
+    node_->setTranslate( position_ );
+
+    view_ = glm::lookAt( position_ + eye_, position_, up_ );
+  }
+
   Camera::Camera( SceneManager* manager, vec2 resolution, Degrees fov ):
-  manager_( manager ), fov_( fov ), near_( 0.1f ), far_( 50.0f ), exposure_( 1.0f )
+  manager_( manager ), fov_( fov ), near_( 0.1f ), far_( 1000.0f ), exposure_( 1.0f )
   {
     setViewport( resolution );
     node_ = manager_->createSceneNode();
@@ -26,7 +57,7 @@ namespace neko {
 #else
     auto ratio = resolution_.x / resolution_.y;
     auto diam = 10.0f;
-    projection_ = glm::orthoRH(
+    projection_ = glm::ortho(
       -( ( diam * 0.5f ) * ratio ),
       ( ( diam * 0.5f ) * ratio ),
       -( diam * 0.5f ),

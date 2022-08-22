@@ -31,6 +31,8 @@ namespace neko {
 
   namespace BuiltinData {
 
+    // clang-format off
+
     const vector<PixelRGBA> placeholderImage2x2 =
     {
       { 255, 0,   0,   255 },
@@ -47,10 +49,40 @@ namespace neko {
       {  1.0f,  1.0f, 1.0f, 1.0f }
     };
 
+    const vector<Vertex2D> fourthScreenQuads2D[4] =
+    {    // top left
+      {  // x      y     s     t
+        {  -1.0f, 1.0f, 0.0f, 1.0f },
+        {  -1.0f, 0.0f, 0.0f, 0.0f },
+        {  0.0f,  0.0f, 1.0f, 0.0f },
+        {  0.0f,  1.0f, 1.0f, 1.0f }
+      }, // top right
+      {  // x      y     s     t
+        {  0.0f,  1.0f, 0.0f, 1.0f },
+        {  0.0f,  0.0f, 0.0f, 0.0f },
+        {  1.0f,  0.0f, 1.0f, 0.0f },
+        {  1.0f,  1.0f, 1.0f, 1.0f }
+      }, // bottom left
+      {  // x      y     s     t
+        { -1.0f,  0.0f, 0.0f, 1.0f },
+        { -1.0f, -1.0f, 0.0f, 0.0f },
+        {  0.0f, -1.0f, 1.0f, 0.0f },
+        {  0.0f,  0.0f, 1.0f, 1.0f }
+      }, // bottom right
+      {  // x      y     s     t
+        {  0.0f,  0.0f, 0.0f, 1.0f },
+        {  0.0f, -1.0f, 0.0f, 0.0f },
+        {  1.0f, -1.0f, 1.0f, 0.0f },
+        {  1.0f,  0.0f, 1.0f, 1.0f }
+      }
+    };
+
     const vector<GLuint> quadIndices =
     {
       0, 1, 2, 0, 2, 3
     };
+
+    // clang-format on
 
   }
 
@@ -233,6 +265,9 @@ namespace neko {
       (const void*)BuiltinData::placeholderImage2x2.data() );
 
     builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
+    for ( int i = 0; i < 4; ++i )
+      builtin_.screenFourthQuads_[i] =
+        meshes_->createStatic( GL_TRIANGLES, BuiltinData::fourthScreenQuads2D[i], BuiltinData::quadIndices );
 
     auto unitSphere = Locator::meshGenerator().makeSphere( 1.0f, vec2u( 32, 32 ) );
     builtin_.unitSphere_ = meshes_->createStatic( GL_TRIANGLE_STRIP, unitSphere.first, unitSphere.second );
@@ -260,7 +295,8 @@ namespace neko {
     fonts_->initializeRender( this );
     fonts_->loadFile( R"(fonts.json)" );
 
-    loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
+    //loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
+    loader_->addLoadTask( { LoadTask( new SceneNode(), R"(camera.gltf)" ) } );
 
     ctx_.fboMain_ = make_unique<Framebuffer>( this, 2, c_bufferFormat, true, 0 );
 
@@ -441,7 +477,7 @@ namespace neko {
 
   static unique_ptr<SakuraSystem> g_sakura;
 
-  void setGLDrawState( bool depthtest, bool depthwrite, bool facecull )
+  void setGLDrawState( bool depthtest, bool depthwrite, bool facecull, bool wireframe )
   {
     glDisable( GL_SCISSOR_TEST );
     glDisable( GL_STENCIL_TEST );
@@ -454,7 +490,7 @@ namespace neko {
       glDisable( GL_DEPTH_TEST );
     glDepthMask( depthwrite ? GL_TRUE : GL_FALSE );
 
-    glPolygonMode( GL_FRONT_AND_BACK, g_CVar_dbg_wireframe.as_b() ? GL_LINE : GL_FILL );
+    glPolygonMode( GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL );
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -473,9 +509,9 @@ namespace neko {
       glDisable( GL_CULL_FACE );
   }
 
-  void Renderer::sceneDraw( GameTime time, GameTime delta, Camera& camera )
+  void Renderer::sceneDraw( GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams )
   {
-    camera.exposure( g_CVar_vid_exposure.as_f() );
+    camera.exposure( drawparams.isEditor ? 1.0f : g_CVar_vid_exposure.as_f() );
 
     {
       auto world = shaders_->world()->lock().data();
@@ -486,7 +522,9 @@ namespace neko {
       shaders_->world()->unlock();
     }
 
-    setGLDrawState( true, true, true );
+    auto wire = ( drawparams.drawWireframe || ( !drawparams.isEditor && g_CVar_dbg_wireframe.as_b() ) );
+
+    setGLDrawState( true, true, true, wire );
 
     auto fn_drawModels = [&]( shaders::Pipeline& pipeline ) -> void
     {
@@ -525,7 +563,7 @@ namespace neko {
       fn_drawModels( pipeline );
     }
 
-    if ( false )
+    if ( true )
     {
       auto& pipeline = useMaterial( "demo_uvtest" );
       for ( auto node : sceneGraph_ )
@@ -553,7 +591,7 @@ namespace neko {
     glDisable( GL_LINE_SMOOTH );
 
     {
-      setGLDrawState( true, true, false );
+      setGLDrawState( true, true, false, wire );
       if ( !g_sakura )
         g_sakura = make_unique<SakuraSystem>( aabb( vec3( -8.0f, -2.0f, -8.0f ), vec3( 8.0f, 10.0f, 8.0f ) ) );
 
@@ -562,8 +600,9 @@ namespace neko {
       g_sakura->draw( *shaders_.get(), *partmat );
     }
 
+    if ( drawparams.drawSky )
     {
-      setGLDrawState( true, true, true );
+      setGLDrawState( true, true, true, wire );
       glDepthFunc( GL_LEQUAL );
       auto& pipeline = shaders_->usePipeline( "mat_skybox" );
       pipeline.setUniform( "tex", 0 );
@@ -575,14 +614,6 @@ namespace neko {
         builtin_.skybox_->drawOnce( pipeline, vec3( 0.0f ) );
       }
       glDepthFunc( GL_LESS );
-    }
-
-    if ( false )
-    {
-      setGLDrawState( false, false, true );
-      auto& pipeline = shaders_->usePipeline( "mat_screentone" );
-      builtin_.screenQuad_->begin();
-      builtin_.screenQuad_->draw();
     }
   }
 
@@ -598,13 +629,18 @@ namespace neko {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
   }
 
-  static FontPtr g_text;
-
-  void Renderer::draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui )
+  void Renderer::draw(
+    GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad )
   {
     // check that the drawcontext is ready (fbo's available etc)
     if ( !ctx_.ready() )
       return;
+
+    GLint previousViewport[4];
+    glGetIntegerv( GL_VIEWPORT, previousViewport );
+    glViewport( 0, 0, static_cast<GLsizei>( drawparams.fullWindowResolution.x ),
+      static_cast<GLsizei>( drawparams.fullWindowResolution.y ) );
+    glDisable( GL_SCISSOR_TEST );
 
     // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
     glBindVertexArray( builtin_.emptyVAO_ );
@@ -618,13 +654,15 @@ namespace neko {
       shaders_->processing()->unlock();
     }
 
-    ctx_.fboMain_->prepare( 0, { 0, 1 } );
-    ctx_.fboMain_->begin();
-    implClearAndPrepare(); // 1 - clear the main fbo
-    sceneDraw( time, delta, camera );
-    ctx_.fboMain_->end();
+    {
+      ctx_.fboMain_->prepare( 0, { 0, 1 } );
+      ctx_.fboMain_->begin();
+      implClearAndPrepare(); // 1 - clear the main fbo
+      sceneDraw( time, delta, camera, drawparams );
+      ctx_.fboMain_->end();
+    }
 
-    implClearAndPrepare(); // 2 - clear the window
+    // implClearAndPrepare(); // 2 - clear the window
 
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_CULL_FACE );
@@ -639,27 +677,28 @@ namespace neko {
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
     // Early out - if dbg_showdepth is enabled, just show the main depth buffer
-    if ( g_CVar_dbg_showdepth.as_b() )
+    if ( !drawparams.isEditor && g_CVar_dbg_showdepth.as_b() )
     {
-      setGLDrawState( false, false, true );
+      setGLDrawState( false, false, true, false );
       auto& pipeline = shaders_->usePipeline( "dbg_depthvis2d" );
       pipeline.setUniform( "tex", 0 );
       GLuint handle = ctx_.fboMain_->depth()->handle();
       glBindTextures( 0, 1, &handle );
-      builtin_.screenQuad_->begin();
-      builtin_.screenQuad_->draw();
+      viewportQuad->begin();
+      viewportQuad->draw();
       return;
     }
 
+
     // Draw the main FBO, including HDR mergedown with tonemapping
     {
-      setGLDrawState( false, false, true );
+      setGLDrawState( false, false, true, false );
       auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
       pipeline.setUniform( "tex", 0 );
       const GLuint hndl = ctx_.fboMain_->texture( 0 )->handle();
       glBindTextures( 0, 1, &hndl );
-      builtin_.screenQuad_->begin();
-      builtin_.screenQuad_->draw();
+      viewportQuad->begin();
+      viewportQuad->draw();
     }
 
     for ( auto& text : texts_->texts() )

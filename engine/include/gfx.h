@@ -18,6 +18,16 @@ namespace neko {
     Viewport( size_t width, size_t height ): size_( width, height ) {}
   };
 
+  class EditorViewport: public Viewport {
+  protected:
+    utf8String name_;
+    unique_ptr<EditorOrthoCamera> camera_;
+  public:
+    EditorViewport( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def );
+    inline void setSize( vec2i size ) { size_ = size; }
+    inline unique_ptr<EditorOrthoCamera>& camera() { return camera_; }
+  };
+
   class Gfx:
     public platform::RenderWindowEventRecipient,
     public Listener
@@ -51,6 +61,7 @@ namespace neko {
     unique_ptr<OrbitCamera> camera_;
     RendererPtr renderer_;
     Viewport viewport_;
+    vector<EditorViewport> viewports_;
     Image lastCapture_;
     std::queue<uint64_t> updateAccounts_;
     platform::RWLock logicLock_;

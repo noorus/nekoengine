@@ -71,7 +71,9 @@ namespace neko {
   // 131154: Pixel-path performance warning: Pixel transfer is synchronized with 3D rendering.
   // -> Basically just means that we're not using NV-specific (?) multithreaded texture uploads
   // -> https://on-demand.gputechconf.com/gtc/2012/presentations/S0356-GTC2012-Texture-Transfers.pdf
-  const std::array<GLuint, 5> c_ignoredGlDebugMessages = { 8, 131185, 131218, 131204, 131154 };
+  // 131139: Rasterization quality warning: A non-fullscreen clear caused a fallback from CSAA to MSAA.
+  // -> If glClear is used when scissor testing or glViewport causes the area to be limited
+  const array<GLuint, 6> c_ignoredGlDebugMessages = { 8, 131185, 131218, 131204, 131154, 131139 };
 
   void Gfx::openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
     const GLchar* message, const void* userParam )
@@ -174,6 +176,17 @@ namespace neko {
     printInfo();
   }
 
+  static const vector<EditorViewportDefinition> g_editorViewportDefs = {
+    { .name = "top", .eye = vec3( 0.01f, -100.0f, 0.0f ), .up = vec3( 0.0f, 1.0f, 0.0f ) },
+    { .name = "front", .eye = vec3( 0.0f, 0.01f, 100.0f ), .up = vec3( 0.0f, 1.0f, 0.0f ) },
+    { .name = "left", .eye = vec3( -100.0f, 0.01f, 0.0f ), .up = vec3( 0.0f, 1.0f, 0.0f ) }
+  };
+
+  EditorViewport::EditorViewport( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def )
+  {
+    camera_ = make_unique<EditorOrthoCamera>( manager, resolution, def );
+  }
+
   void Gfx::postInitialize( Engine& engine )
   {
     renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
@@ -183,16 +196,23 @@ namespace neko {
     setOpenGLDebugLogging( g_CVar_gl_debuglog.as_i() > 0 );
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
+
     camera_ = make_unique<OrbitCamera>( renderer_.get(), realResolution, target_,
-      vec3( 5.0f, 3.0f, 5.0f ), // vecOffset
-      60.0f, // fov
-      true, // reverse
-      10.0f, // sens
-      5.0f, // mindist
-      50.0f, // maxdist
-      2.0f, // rotdecel
-      5.0f, // zoomaccel
-      2.0f ); // zoomdecel
+    vec3( 5.0f, 3.0f, 5.0f ), // vecOffset
+    60.0f, // fov
+    true, // reverse
+    10.0f, // sens
+    5.0f, // mindist
+    50.0f, // maxdist
+    2.0f, // rotdecel
+    5.0f, // zoomaccel
+    2.0f ); // zoomdecel
+
+    for ( const auto& def : g_editorViewportDefs )
+    {
+      EditorViewport vp( renderer_.get(), realResolution, def );
+      viewports_.push_back( move( vp ) );
+    }
 
     resize( window_->getSize().x, window_->getSize().y );
 
@@ -217,10 +237,16 @@ namespace neko {
 
     console_->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
 
+    for ( auto& viewport :viewports_)
+    {
+      viewport.size_ = vec2i( static_cast<GLsizei>( width / 2 ), static_cast<GLsizei>( height / 2 ) );
+      viewport.camera()->setViewport( vec2( static_cast<Real>( width ) * 0.5f, static_cast<Real>( height ) * 0.5f ) );
+    }
+
     auto realResolution = vec2( (Real)width, (Real)height );
     camera_->setViewport( realResolution );
 
-    glViewport( 0, 0, (GLsizei)width, (GLsizei)height );
+    glViewport( 0, 0, static_cast<GLsizei>( width ), static_cast<GLsizei>( height ) );
 
     #ifndef NEKO_NO_GUI
     gui_->resize( static_cast<int>( width ), static_cast<int>( height ) );
@@ -231,7 +257,7 @@ namespace neko {
   {
     input_->update();
 
-    sf::Event evt;
+    sf::Event evt {};
     while ( window_->pollEvent( evt ) )
     {
       if ( evt.type == sf::Event::Closed )
@@ -282,6 +308,26 @@ namespace neko {
     logicLock_.unlock();
   }
 
+  // clang-format off
+
+  static ViewportDrawParameters g_editorparams = {
+    .drawSky = false,
+    .drawFBO = true,
+    .drawWireframe = false,
+    .isEditor = true,
+    .fullWindowResolution = { 0.0f, 0.0f }
+  };
+
+  static ViewportDrawParameters g_liveparams = {
+    .drawSky = true,
+    .drawFBO = true,
+    .drawWireframe = false,
+    .isEditor = false,
+    .fullWindowResolution = { 0.0f, 0.0f }
+  };
+
+  // clang-format on
+
   void Gfx::update( GameTime time, GameTime delta, Engine& engine )
   {
     if ( flags_.reloadShaders )
@@ -308,6 +354,9 @@ namespace neko {
       camera_->applyInputRotation( input_->movement() );
 
     camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
+
+    for ( auto& vp : viewports_ )
+      vp.camera()->update( delta, time );
 
     camera_->update( delta, time );
 
@@ -337,7 +386,47 @@ namespace neko {
 #ifndef NEKO_NO_GUI
     renderer_->draw( time, delta, *camera_.get(), gui_->platform() );
 #else
-    renderer_->draw( time, delta, *camera_.get(), nullptr );
+
+    glClearColor( 0.0f, 0.1f, 0.2f, 1.0f );
+    glDepthMask( TRUE );
+    glDepthFunc( GL_LESS );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    const auto halfwidth = static_cast<GLsizei>( viewport_.size_.x * 0.5f );
+    const auto halfheight = static_cast<GLsizei>( viewport_.size_.y * 0.5f );
+    g_editorparams.fullWindowResolution = viewport_.size_;
+    g_liveparams.fullWindowResolution = viewport_.size_;
+#if 1
+    for ( int i = 0; i < 3; ++i )
+    {
+      /* if ( i == 0 )
+      {
+        glViewport( 0, halfheight, halfwidth, halfheight );
+        glScissor( 0, halfheight, halfwidth, halfheight );
+      }
+      if ( i == 1 )
+      {
+        glViewport( halfwidth, halfheight, halfwidth, halfheight );
+        glScissor( halfwidth, halfheight, halfwidth, halfheight );
+      }
+      if ( i == 2 )
+      {
+        glViewport( 0, 0, halfwidth, halfheight );
+        glScissor( 0, 0, halfwidth, halfheight );
+      }*/
+      renderer_->draw( time, delta, *viewports_[i].camera().get(), g_editorparams,
+        renderer_->builtins().screenFourthQuads_[i] );
+    }
+
+    /* glViewport( halfwidth, 0, halfwidth, halfheight );
+    glScissor( halfwidth, 0, halfwidth, halfheight );*/
+    renderer_->draw(
+      time, delta, *camera_.get(), g_liveparams, renderer_->builtins().screenFourthQuads_[3] );
+# else
+    glViewport( 0, 0, viewport_.size_.x, viewport_.size_.y );
+    glScissor( 0, 0, viewport_.size_.x, viewport_.size_.y );
+    renderer_->draw( time, delta, *camera_.get(), g_liveparams, renderer_->builtins().screenQuad_ );
+#endif
 #endif
 
     window_->display();
@@ -368,6 +457,9 @@ namespace neko {
     input_->shutdown();
 
     gui_->shutdown();
+
+    for ( auto& vp : viewports_ )
+      vp.camera().reset();
 
     camera_.reset();
 

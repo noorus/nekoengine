@@ -25,7 +25,7 @@ namespace neko {
   public:
     Camera( SceneManager* manager, vec2 viewport, Real fov );
     virtual ~Camera();
-    void setViewport( vec2 resolution );
+    virtual void setViewport( vec2 resolution );
     virtual void update( GameTime delta, GameTime time ) = 0;
     inline const vec2& resolution() const noexcept { return resolution_; }
     inline const mat4& view() const noexcept { return view_; }
@@ -35,6 +35,23 @@ namespace neko {
     inline Real far() const noexcept { return far_; }
     inline Real exposure() const noexcept { return exposure_; }
     void exposure( Real exp );
+  };
+
+  struct EditorViewportDefinition
+  {
+    utf8String name;
+    vec3 eye;
+    vec3 up;
+  };
+
+  class EditorOrthoCamera: public Camera {
+  protected:
+    vec3 eye_;
+    vec3 up_;
+  public:
+    EditorOrthoCamera( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def );
+    void setViewport( vec2 resolution ) override;
+    void update( GameTime delta, GameTime time ) override;
   };
 
   struct CameraValueState

@@ -122,7 +122,7 @@ namespace neko {
   {
     assert( colorReadIndex < colorBuffers_.size() );
     glNamedFramebufferReadBuffer( handle_, CONVGLENUM( GL_COLOR_ATTACHMENT0, colorReadIndex ) );
-    array<GLenum, 32> drawBuffers;
+    array<GLenum, 32> drawBuffers {};
     int ctr = 0;
     for ( auto index : colorWriteIndexes )
     {

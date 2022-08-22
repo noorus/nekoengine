@@ -135,6 +135,15 @@ namespace neko {
     void destroySceneNode( SceneNode* node );
   };
 
+  struct ViewportDrawParameters
+  {
+    bool drawSky;
+    bool drawFBO;
+    bool drawWireframe;
+    bool isEditor;
+    vec2 fullWindowResolution;
+  };
+
   class Renderer: public SceneManager {
     friend class Texture;
     friend class Renderbuffer;
@@ -143,6 +152,7 @@ namespace neko {
     struct StaticData {
       MaterialPtr placeholderTexture_;
       StaticMeshPtr screenQuad_;
+      StaticMeshPtr screenFourthQuads_[4];
       GLuint emptyVAO_;
       StaticMeshPtr unitSphere_;
       StaticMeshPtr skybox_;
@@ -192,12 +202,13 @@ namespace neko {
     void implClearAndPrepare();
     void uploadModelsEnterNode( SceneNode* node );
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
-    void sceneDraw( GameTime time, GameTime delta, Camera& camera );
+    void sceneDraw( GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams );
     void clearErrors();
     void setCameraUniforms( Camera& camera, uniforms::Camera& uniform );
     TexturePtr loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering );
   public:
     Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
+    inline const StaticData& builtins() noexcept { return builtin_; }
     void preInitialize();
     void initialize( size_t width, size_t height );
     void shutdown();
@@ -209,7 +220,8 @@ namespace neko {
     void setUserData( uint64_t id, const utf8String name, rainet::Image& image );
     void jsRestart();
     inline shaders::Shaders& shaders() noexcept { return *( shaders_.get() ); }
-    void draw( GameTime time, GameTime delta, Camera& camera, MyGUI::NekoPlatform* gui );
+    void draw(
+      GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad );
     void reset( size_t width, size_t height );
     ~Renderer();
   };
