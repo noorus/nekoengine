@@ -509,6 +509,43 @@ namespace neko {
       glDisable( GL_CULL_FACE );
   }
 
+  void drawEditorGrid( shaders::Shaders& shaders, const vec3& origin, const vec3& normal )
+  {
+    constexpr int count = 10;
+    auto g_viz = LineRenderBuffer<44>();
+    auto verts = g_viz.buffer().lock();
+    auto fv = 90.0f / 255.0f;
+    const auto color = vec4( fv, fv, fv, 1.0f );
+
+    for ( size_t i = 0; i < 44; ++i )
+      verts[i].color = color;
+
+    vec2i segments { count, count };
+    vec2 dimensions { (Real)segments.x, (Real)segments.y };
+
+    auto vx = math::perpendicular( normal );
+    auto vy = glm::cross( normal, vx );
+    auto delta1 = vec3( dimensions.x / (Real)segments.x * vx );
+    auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
+
+    size_t i = 0;
+    auto fit = vec3( math::floor( origin.x ), math::floor( origin.y ), math::floor( origin.y ) );
+    auto orig = fit + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
+    for ( auto x = 0; x <= segments.x; ++x )
+    {
+      verts[i++].pos = orig + (Real)x * delta1;
+      verts[i++].pos = orig + (Real)x * delta1 + dimensions.y * delta2;
+    }
+    for ( auto y = 0; y <= segments.y; ++y )
+    {
+      verts[i++].pos = orig + (Real)y * delta2;
+      verts[i++].pos = orig + dimensions.x * delta1 + (Real)y * delta2;
+    }
+    g_viz.buffer().unlock();
+    auto ppl = &shaders.usePipeline( "dbg_line" );
+    g_viz.draw( *ppl, 44, 0, gl::GL_LINES );
+  }
+
   void Renderer::sceneDraw( GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams )
   {
     camera.exposure( drawparams.isEditor ? 1.0f : g_CVar_vid_exposure.as_f() );
@@ -617,10 +654,10 @@ namespace neko {
     }
   }
 
-  void Renderer::implClearAndPrepare()
+  void Renderer::implClearAndPrepare( const vec3& color )
   {
     // set the clear color
-    glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+    glClearColor( color.x, color.y, color.z, 1.0f );
     // enable depth writes or there is no depth clearing
     glDepthMask( TRUE );
     // reset depth func
@@ -657,8 +694,16 @@ namespace neko {
     {
       ctx_.fboMain_->prepare( 0, { 0, 1 } );
       ctx_.fboMain_->begin();
-      implClearAndPrepare(); // 1 - clear the main fbo
+      implClearAndPrepare( drawparams.isEditor ? vec3( 0.01f ) : vec3( 0.0f ) ); // 1 - clear the main fbo
       sceneDraw( time, delta, camera, drawparams );
+      if ( drawparams.isEditor )
+      {
+        glLineWidth( 2.0f );
+        glEnable( GL_DEPTH_TEST );
+        glDepthMask( GL_FALSE );
+        glEnable( GL_LINE_SMOOTH );
+        drawEditorGrid( *shaders_, camera.position(), camera.direction() );
+      }
       ctx_.fboMain_->end();
     }
 

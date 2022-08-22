@@ -77,7 +77,7 @@ namespace neko::loaders {
       }
       else
       {
-        const auto accessor = model.accessors[sparse_accessor];
+        const auto& accessor = model.accessors[sparse_accessor];
 
         memcpy( out_buf.data_.data(), buffer.data.data() + bufferView.byteOffset, bufferView.byteLength );
 
@@ -220,7 +220,7 @@ namespace neko::loaders {
           v.texcoord = gltf_mesh_vec2( * ( tc_data + i ) );
           v.color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
           v.bitangent = vec3( 0.0f );
-          out->mesh_->vertices_.push_back( move( v ) );
+          out->mesh_->vertices_.push_back( v );
         }
         out->mesh_->indices_.resize( indices.count );
         for ( int i = 0; i < indices.count; i++ )

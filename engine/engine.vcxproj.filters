@@ -524,6 +524,9 @@
     <ClInclude Include="include\objectbase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\buffers.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="engine.manifest" />
@@ -635,6 +638,9 @@
       <Filter>Data</Filter>
     </None>
     <None Include="cpp.hint" />
+    <None Include="..\bin\shaders\dbg_bgline.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="engine.rc">

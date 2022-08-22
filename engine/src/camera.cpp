@@ -20,7 +20,7 @@ namespace neko {
     auto scale = 0.1f;
     //projection_ = glm::ortho( 0.0f, resolution_.x * ratio * scale, resolution_.y * scale, 0.0f );
     // projection_ = glm::perspectiveFovRH( glm::radians( fov_ ), resolution.x, resolution.y, near_, far_ );
-    auto diam = 10.0f;
+    auto diam = orthoRadius_;
     projection_ = glm::ortho(
       -( ( diam * 0.5f ) * ratio ),
       ( ( diam * 0.5f ) * ratio ),
@@ -35,6 +35,11 @@ namespace neko {
     node_->setTranslate( position_ );
 
     view_ = glm::lookAt( position_ + eye_, position_, up_ );
+  }
+
+  vec3 EditorOrthoCamera::direction() const
+  {
+    return math::normalize( -eye_ );
   }
 
   Camera::Camera( SceneManager* manager, vec2 resolution, Degrees fov ):
@@ -215,6 +220,11 @@ namespace neko {
     node_->setTranslate( position_ );
 
     view_ = glm::lookAt( position_, target, vec3UnitY );
+  }
+
+  vec3 OrbitCamera::direction() const
+  {
+    return math::normalize( target_->getDerivedTranslate() - position_ );
   }
 
   void OrbitCamera::setSensitivity( Real sensitivity )

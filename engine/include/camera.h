@@ -35,6 +35,7 @@ namespace neko {
     inline Real far() const noexcept { return far_; }
     inline Real exposure() const noexcept { return exposure_; }
     void exposure( Real exp );
+    virtual vec3 direction() const = 0;
   };
 
   struct EditorViewportDefinition
@@ -48,10 +49,14 @@ namespace neko {
   protected:
     vec3 eye_;
     vec3 up_;
+    Real orthoRadius_ = 14.0f;
   public:
     EditorOrthoCamera( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def );
     void setViewport( vec2 resolution ) override;
     void update( GameTime delta, GameTime time ) override;
+    inline Real radius() noexcept { return orthoRadius_; }
+    void radius( Real radius );
+    vec3 direction() const override;
   };
 
   struct CameraValueState
@@ -103,6 +108,7 @@ namespace neko {
     virtual void setMaxDistance( Real fMaxDistance );
     virtual void setClampTop( Radians fClampTop );
     virtual void setClampBottom( Radians fClampBottom );
+    vec3 direction() const override;
   };
 
 }

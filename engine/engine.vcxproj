@@ -363,6 +363,7 @@
     <ClInclude Include="..\shared\include\neko_pooledtypes.h" />
     <ClInclude Include="..\shared\include\neko_types.h" />
     <ClInclude Include="..\shared\include\rainet.h" />
+    <ClInclude Include="include\buffers.h" />
     <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\console.h" />
     <ClInclude Include="include\consolelistener.h" />
@@ -422,6 +423,7 @@
     <None Include="..\bin\data\fonts.json" />
     <None Include="..\bin\data\materials.json" />
     <None Include="..\bin\scripts\initialization.js" />
+    <None Include="..\bin\shaders\dbg_bgline.vert" />
     <None Include="..\bin\shaders\dbg_depthvis2d.frag" />
     <None Include="..\bin\shaders\dbg_line.frag" />
     <None Include="..\bin\shaders\dbg_line.vert" />

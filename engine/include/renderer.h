@@ -199,7 +199,7 @@ namespace neko {
       utf8String name_;
       MaterialPtr image_;
     } userData_;
-    void implClearAndPrepare();
+    void implClearAndPrepare( const vec3& color );
     void uploadModelsEnterNode( SceneNode* node );
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
     void sceneDraw( GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams );
