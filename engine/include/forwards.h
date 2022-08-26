@@ -69,4 +69,7 @@ namespace neko {
   class Text;
   using TextPtr = shared_ptr<Text>;
 
+  class ParticleSystemManager;
+  using ParticleSystemManagerPtr = shared_ptr<ParticleSystemManager>;
+
 }

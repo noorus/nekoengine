@@ -184,6 +184,7 @@ namespace neko {
 #endif
     platform::RWLock loadLock_;
     MaterialManagerPtr materials_;
+    ParticleSystemManagerPtr particles_;
     DirectorPtr director_;
     vec2 resolution_;
     struct DrawCtx
@@ -214,7 +215,7 @@ namespace neko {
     void shutdown();
     MaterialPtr createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
     inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
-    void prepare( GameTime time );
+    void update( GameTime delta, GameTime time );
     void uploadTextures();
     void uploadModels();
     void setUserData( uint64_t id, const utf8String name, rainet::Image& image );

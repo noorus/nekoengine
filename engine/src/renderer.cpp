@@ -274,6 +274,8 @@ namespace neko {
 
     auto skybox = Locator::meshGenerator().makeBox( vec3( 1.0f ), vec2u( 1 ), true, vec4( 1.0f ) );
     builtin_.skybox_ = meshes_->createStatic( GL_TRIANGLES, skybox.first, skybox.second );
+
+    particles_ = make_shared<ParticleSystemManager>();
   }
 
   TexturePtr Renderer::loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering )
@@ -354,7 +356,7 @@ namespace neko {
     sceneGraph_.insert( nodes.begin(), nodes.end() );
   }
 
-  void Renderer::prepare( GameTime time )
+  void Renderer::update( GameTime delta, GameTime time )
   {
     // Upload any new textures. Could this be parallellized?
     uploadTextures();
@@ -380,6 +382,8 @@ namespace neko {
     models_->jsUpdate( director_->renderSync() );
     texts_->jsUpdate( director_->renderSync() );
 #endif
+
+    particles_->update( delta, time );
   }
 
   void Renderer::jsRestart()
@@ -474,8 +478,6 @@ namespace neko {
     for ( auto child : node->children_ )
       sceneDrawEnterNode( child, pipeline );
   }
-
-  static unique_ptr<SakuraSystem> g_sakura;
 
   void setGLDrawState( bool depthtest, bool depthwrite, bool facecull, bool wireframe )
   {
@@ -627,15 +629,8 @@ namespace neko {
 
     glDisable( GL_LINE_SMOOTH );
 
-    {
-      setGLDrawState( true, true, false, wire );
-      if ( !g_sakura )
-        g_sakura = make_unique<SakuraSystem>( aabb( vec3( -8.0f, -2.0f, -8.0f ), vec3( 8.0f, 10.0f, 8.0f ) ) );
-
-      g_sakura->update( delta );
-      const auto partmat = materials_->get( "demo_sakura" );
-      g_sakura->draw( *shaders_.get(), *partmat );
-    }
+    setGLDrawState( true, true, false, wire );
+    particles_->draw( *shaders_, *materials_ );
 
     if ( drawparams.drawSky )
     {
@@ -734,7 +729,6 @@ namespace neko {
       return;
     }
 
-
     // Draw the main FBO, including HDR mergedown with tonemapping
     {
       setGLDrawState( false, false, true, false );
@@ -797,7 +791,7 @@ namespace neko {
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
 
-    g_sakura.reset();
+    particles_.reset();
 
     ctx_.fboMain_.reset();
 

@@ -15,6 +15,8 @@
 
 namespace neko {
 
+  // clang-format off
+
   template <size_t Count>
   class Particles {
   protected:
@@ -28,7 +30,7 @@ namespace neko {
     neko_avx_align vec4 colors_[c_particleCount];
     bool gravity_ = false;
     unique_ptr<PointRenderBuffer<Count>> buffer_;
-    GameTime time_;
+    GameTime time_ = 0.0;
     // position.w can be age if:
     // - velocity.w is kept 1
     // - acceleration.w is kept 1
@@ -44,21 +46,23 @@ namespace neko {
       for ( size_t i = 0; i < c_particleCount; ++i )
         resetParticle( i );
     }
-    virtual void update( GameTime ddelta )
+    virtual void update( GameTime ddelta, GameTime time )
     {
       time_ += ddelta;
       float ftime = ( static_cast<float>( time_ ) * 6.0f );
       float mod_i = ( 1.2f + ( math::sin( 4.0f + ftime * numbers::pi * 0.1f ) * 0.8f ) ) * 0.5f;
       float mod_j = 1.0f - math::cos( ftime * numbers::pi );
-      float mod_g = ( ( ( mod_i * 0.5f ) * ( mod_i * mod_i ) + ( mod_j * mod_i * 0.5f ) * 0.5f ) * 3.0f );
-      static const float ggg[8] = {
-        0.0f, mod_g, 0.0f, 0.0f,
-        0.0f, mod_g, 0.0f, 0.0f };
+      float mod_k = ( ( ( mod_i * 0.5f ) * ( mod_i * mod_i ) + ( mod_j * mod_i * 0.5f ) * 0.5f ) * 3.0f );
+      float windStrength = 0.2f;
+      auto wind = simd::vec8f(
+        0.0f, mod_k * windStrength, 0.0f, 0.0f,
+        0.0f, mod_k * windStrength, 0.0f, 0.0f );
       simd::vec8f delta( static_cast<float>( ddelta ) );
-      static const float s_gravity[8] = {
-        0.0f, gravity_ ? -numbers::g : 0.0f, 0.0f, 0.0f,
-        0.0f, gravity_ ? -numbers::g : 0.0f, 0.0f, 0.0f };
+      const float s_gravity[8] = {
+        0.0f, ( gravity_ ? -numbers::g : 0.0f ), 0.0f, 0.0f,
+        0.0f, ( gravity_ ? -numbers::g : 0.0f ), 0.0f, 0.0f };
       simd::vec8f gravity( s_gravity );
+      gravity *= delta;
       for ( size_t i = 0; i < ( c_particleCount / 8 ); ++i )
       {
         simd::vec8f mass_packed( &masses_[i * 8] );
@@ -68,12 +72,15 @@ namespace neko {
         {
           size_t components_index = ( ( i * 8 ) + ( j * 2 ) );
           simd::vec8f acceleration( &acceleration_[components_index][0] );
-          simd::vec8f forces = mass[j] * gravity;
-          acceleration = acceleration + ( forces / mass[j] );
+          // f = m * ( g + w )
+          auto forces = gravity + wind;
+          simd::vec8f force = mass[j] * forces;
+          // a = f / m
+          acceleration = ( force / mass[j] );
           simd::vec8f velocity( &velocities_[components_index][0] );
           velocity = simd::vec8f::fma( acceleration, delta, velocity );
           simd::vec8f position( &positions_[components_index][0] );
-          position = position + velocity + ggg;
+          position = simd::vec8f::fma( velocity, delta, position );
           position.storeNontemporal( &positions_[components_index][0] );
           velocity.storeNontemporal( &velocities_[components_index][0] );
         }
@@ -100,6 +107,8 @@ namespace neko {
     }
   };
 
+  using ParticleSystemPtr = shared_ptr<Particles<256>>;
+
   class SakuraSystem: public Particles<256> {
   protected:
     using Base = Particles<256>;
@@ -118,8 +127,18 @@ namespace neko {
   public:
     SakuraSystem( const aabb& box );
     virtual void resetParticle( size_t index );
-    virtual void update( GameTime delta );
+    virtual void update( GameTime delta, GameTime time );
     virtual void draw( shaders::Shaders& shaders, const Material& mat );
+  };
+
+  class ParticleSystemManager {
+  protected:
+    unique_ptr<SakuraSystem> sakura_;
+  public:
+    ParticleSystemManager();
+    void update( GameTime delta, GameTime time );
+    void draw( shaders::Shaders& shaders, MaterialManager& materials );
+    ~ParticleSystemManager();
   };
 
 }

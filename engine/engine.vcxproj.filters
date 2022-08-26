@@ -303,6 +303,12 @@
     <ClCompile Include="src\textmanager.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
+    <ClCompile Include="src\particlemanager.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\threadedrenderer.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">

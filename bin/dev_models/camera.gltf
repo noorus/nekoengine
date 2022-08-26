@@ -1,0 +1,129 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "babylon.js glTF exporter for 3dsmax 2023 v20220628.14"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "translation": [
+        0.0,
+        0.0,
+        -0.0038908124
+      ],
+      "rotation": [
+        0.0,
+        -0.7071068,
+        0.0,
+        0.7071067
+      ],
+      "name": "camera"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "TANGENT": 2,
+            "NORMAL": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0
+        }
+      ],
+      "name": "camera"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 276,
+      "type": "SCALAR",
+      "name": "accessorIndices"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 136,
+      "max": [
+        1.546343,
+        0.617675543,
+        0.499312878
+      ],
+      "min": [
+        -0.7500001,
+        -0.498669446,
+        -0.5006874
+      ],
+      "type": "VEC3",
+      "name": "accessorPositions"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 136,
+      "type": "VEC4",
+      "name": "accessorTangents"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 1632,
+      "componentType": 5126,
+      "count": 136,
+      "type": "VEC3",
+      "name": "accessorNormals"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 136,
+      "type": "VEC2",
+      "name": "accessorUVs"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 552,
+      "name": "bufferViewScalar"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 552,
+      "byteLength": 3264,
+      "byteStride": 12,
+      "name": "bufferViewFloatVec3"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 3816,
+      "byteLength": 2176,
+      "byteStride": 16,
+      "name": "bufferViewFloatVec4"
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 5992,
+      "byteLength": 1088,
+      "byteStride": 8,
+      "name": "bufferViewFloatVec2"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "camera.bin",
+      "byteLength": 7080
+    }
+  ]
+}

@@ -89,11 +89,16 @@ namespace neko {
       bool timePaused;
       State(): focusLost( false ), windowMove( false ), steamOverlay( false ), timePaused( false ) {}
     } state_;
+    struct Sync
+    {
+      atomic<GameTime> gameTime = 0.0;
+      atomic<GameTime> realTime = 0.0;
+    } sync_;
     Stats stats_;
     platform::PerformanceClock clock_;
-    GameTime time_;
-    volatile Signal signal_;
-    atomic<GameTime> rendererTime_;
+    GameTime time_ = 0.0;
+    GameTime realTime_ = 0.0;
+    volatile Signal signal_ = Signal_None;
     EngineSettings settings_;
     bool paused();
     void restart();
@@ -116,11 +121,12 @@ namespace neko {
     inline ScriptingPtr scripting() noexcept { return scripting_; }
 #endif
     inline GameTime time() const noexcept { return time_; }
+    inline GameTime realTime() const noexcept { return realTime_; }
     inline ThreadedLoaderPtr loader() noexcept { return loader_; }
     inline FontManagerPtr fonts() noexcept { return fonts_; }
     inline MessagingPtr msgs() noexcept { return messaging_; }
     inline DirectorPtr director() noexcept { return director_; }
-    inline atomic<GameTime>& renderTime() noexcept { return rendererTime_; }
+    inline Sync& sync() noexcept { return sync_; }
     inline const utf8String& listFlags();
     const rainet::GameInstallationState& installationInfo();
     inline const Stats& stats() const noexcept { return stats_; }

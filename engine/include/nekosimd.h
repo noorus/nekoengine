@@ -5,6 +5,8 @@ namespace neko {
 
   namespace simd {
 
+    // clang-format off
+
     #define neko_avx_align __declspec( align( 32 ) )
     #define neko_avx_inline __forceinline
 
@@ -16,7 +18,7 @@ namespace neko {
         {
           float e0, e1, e2, e3, e4, e5, e6, e7;
         };
-        float v[4];
+        float v[8];
         __m256 packed;
       };
       neko_avx_inline vec8f()
@@ -43,21 +45,22 @@ namespace neko {
       {
         packed = _mm256_load_ps( values );
       }
-      //! Load eight unaligned sample values into vector
+      //! Load eight unaligned sample values into vector.
+      //! For performance, prefer aligned loads instead.
       neko_avx_inline void loadUnaligned( const float* __restrict values )
       {
         packed = _mm256_loadu_ps( values );
       }
       //! Store eight sample values from vector to 32-byte boundary aligned memory
-      //! using a non-temporal usage hint (data not reused, don't cache in SSB)
-      //! treating nontemporal data as temporal would be cache pollution = bad
+      //! using a non-temporal usage hint (data not reused, don't cache in SSB).
+      //! Treating nontemporal data as temporal would be cache pollution = bad
       neko_avx_inline void storeNontemporal( float* __restrict values )
       {
         _mm256_stream_ps( values, packed );
       }
       //! Store eight sample values from vector to 32-byte boundary aligned memory
-      //! using a temporal usage hint (data is reused, maybe cache in SSB)
-      //! subsequent stores of values cached in SSB can bypass L1, L2 & memctrl = nice
+      //! using a temporal usage hint (data is reused, maybe cache in SSB).
+      //! Subsequent stores of values cached in SSB may bypass L1, L2 & memctrl = good
       neko_avx_inline void storeTemporal( float* __restrict values )
       {
         _mm256_store_ps( values, packed );
@@ -119,6 +122,18 @@ namespace neko {
       {
         return _mm256_div_ps( packed, rhs.packed );
       }
+      //! multiplication assignment
+      neko_avx_inline vec8f& operator*=( const vec8f& rhs )
+      {
+        packed = _mm256_mul_ps( packed, rhs.packed );
+        return *this;
+      }
+      //! division assignment
+      neko_avx_inline vec8f& operator/=( const vec8f& rhs )
+      {
+        packed = _mm256_div_ps( packed, rhs.packed );
+        return *this;
+      }
       //! a == b
       neko_avx_inline bool operator==( const vec8f& rhs ) const
       {
@@ -165,14 +180,15 @@ namespace neko {
         auto ret = _mm_add_ss( lo, hi );
         return _mm_cvtss_f32( ret );
       }
+      //! broadcast the 8 members of this block into four blocks of two 4-member vectors
+      // [1,2,3,4,5,6,7,8]
+      // =>
+      // [1,1,1,1,2,2,2,2]
+      // [3,3,3,3,4,4,4,4]
+      // [5,5,5,5,6,6,6,6]
+      // [7,7,7,7,8,8,8,8]
       neko_avx_inline void unpack8x4( vec8f& a, vec8f& b, vec8f& c, vec8f& d )
       {
-        // [1,2,3,4,5,6,7,8]
-        // =>
-        // [1,1,1,1,2,2,2,2]
-        // [3,3,3,3,4,4,4,4]
-        // [5,5,5,5,6,6,6,6]
-        // [7,7,7,7,8,8,8,8]
         auto hipart = _mm256_extractf128_ps( packed, 1 );
         auto lopart = _mm256_castps256_ps128( packed );
         auto d0 = _mm_permute_ps( lopart, 0b00000000 );

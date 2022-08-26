@@ -328,6 +328,21 @@ namespace neko {
 
   // clang-format on
 
+  void Gfx::updateRealTime( GameTime realTime, GameTime delta, Engine& engine )
+  {
+    if ( input_->mousebtn( 2 ) )
+      camera_->applyInputPanning( input_->movement() );
+    else if ( input_->mousebtn( 1 ) )
+      camera_->applyInputRotation( input_->movement() );
+
+    camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
+
+    for ( auto& vp : viewports_ )
+      vp.camera()->update( delta, realTime );
+
+    camera_->update( delta, realTime );
+  }
+
   void Gfx::update( GameTime time, GameTime delta, Engine& engine )
   {
     if ( flags_.reloadShaders )
@@ -337,7 +352,7 @@ namespace neko {
       flags_.reloadShaders = false;
     }
 
-    renderer_->prepare( time );
+    renderer_->update( delta, time );
 
     {
       char stats[256];
@@ -347,18 +362,6 @@ namespace neko {
         utils::beautifyDuration( secondsWasted ).c_str() );
       gui_->setDebugStats( stats );
     }
-
-    if ( input_->mousebtn( 2 ) )
-      camera_->applyInputPanning( input_->movement() );
-    else if ( input_->mousebtn( 1 ) )
-      camera_->applyInputRotation( input_->movement() );
-
-    camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
-
-    for ( auto& vp : viewports_ )
-      vp.camera()->update( delta, time );
-
-    camera_->update( delta, time );
 
     // activate as current context
     ignore = window_->setActive( true );
@@ -414,14 +417,14 @@ namespace neko {
         glViewport( 0, 0, halfwidth, halfheight );
         glScissor( 0, 0, halfwidth, halfheight );
       }*/
-      renderer_->draw( time, delta, *viewports_[i].camera().get(), g_editorparams,
+      renderer_->draw( time, delta, *viewports_[i].camera(), g_editorparams,
         renderer_->builtins().screenFourthQuads_[i] );
     }
 
     /* glViewport( halfwidth, 0, halfwidth, halfheight );
     glScissor( halfwidth, 0, halfwidth, halfheight );*/
     renderer_->draw(
-      time, delta, *camera_.get(), g_liveparams, renderer_->builtins().screenFourthQuads_[3] );
+      time, delta, *camera_, g_liveparams, renderer_->builtins().screenFourthQuads_[3] );
 # else
     glViewport( 0, 0, viewport_.size_.x, viewport_.size_.y );
     glScissor( 0, 0, viewport_.size_.x, viewport_.size_.y );
@@ -474,7 +477,7 @@ namespace neko {
   void Gfx::jsRestart()
   {
     renderer_->jsRestart();
-    renderer_->prepare( 0.0 );
+    renderer_->update( 0.0, 0.0 );
   }
 
   void Gfx::restart( Engine& engine )
@@ -488,102 +491,6 @@ namespace neko {
   {
     shutdown();
     input_.reset();
-  }
-
-  const string c_gfxThreadName = "nekoRenderer";
-
-  ThreadedRenderer::ThreadedRenderer( EnginePtr engine, ThreadedLoaderPtr loader,
-  FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console ):
-  engine_( move( engine ) ), loader_( move( loader ) ), fonts_( move( fonts ) ),
-  messaging_( move( messaging ) ), director_( move( director ) ), lastTime_( 0.0 ),
-  console_( move( console ) ), thread_( c_gfxThreadName, threadProc, this )
-  {
-  }
-
-  // Context: Renderer thread
-  void ThreadedRenderer::initialize()
-  {
-    gfx_ = make_shared<Gfx>( loader_, fonts_, messaging_, director_, console_ );
-    gfx_->postInitialize( *engine_.get() );
-    lastTime_ = 0.0;
-  }
-
-  // Context: Renderer thread
-  void ThreadedRenderer::shutdown()
-  {
-    gfx_.reset();
-  }
-
-  // Context: Renderer thread
-  void ThreadedRenderer::run( platform::Event& wantStop )
-  {
-    while ( true )
-    {
-      if ( wantStop.check() )
-        break;
-
-      if ( restartEvent_.check() )
-      {
-        restartEvent_.reset();
-        console_->printf( Console::srcGfx, "Restarting renderer" );
-        gfx_->logicLock_.lock();
-        gfx_->jsRestart();
-        gfx_->logicLock_.unlock();
-        console_->printf( Console::srcGfx, "Restart done" );
-        restartedEvent_.set();
-        continue;
-      }
-
-      gfx_->logicLock_.lock();
-
-      gfx_->processEvents();
-
-      auto time = engine_->renderTime().load();
-      auto delta = ( time - lastTime_ );
-      lastTime_ = time;
-
-      gfx_->update( time, delta, *engine_.get() );
-
-      gfx_->logicLock_.unlock();
-
-      platform::sleep( 1 );
-    }
-  }
-
-  bool ThreadedRenderer::threadProc( platform::Event& running, platform::Event& wantStop, void* argument )
-  {
-    platform::performanceInitializeRenderThread();
-
-    auto myself = ( (ThreadedRenderer*)argument )->shared_from_this();
-    myself->initialize();
-    running.set();
-    myself->run( wantStop );
-    myself->shutdown();
-
-    platform::performanceTeardownCurrentThread();
-    return true;
-  }
-
-  void ThreadedRenderer::start()
-  {
-    thread_.start();
-  }
-
-  void ThreadedRenderer::restart()
-  {
-    restartedEvent_.reset();
-    restartEvent_.set();
-    restartedEvent_.wait();
-  }
-
-  void ThreadedRenderer::stop()
-  {
-    thread_.stop();
-  }
-
-  ThreadedRenderer::~ThreadedRenderer()
-  {
-    //
   }
 
 }

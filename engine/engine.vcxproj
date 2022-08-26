@@ -288,6 +288,7 @@
     <ClCompile Include="src\filesystem.cpp" />
     <ClCompile Include="src\fontmanager.cpp" />
     <ClCompile Include="src\js_text.cpp" />
+    <ClCompile Include="src\particlemanager.cpp" />
     <ClCompile Include="src\text.cpp" />
     <ClCompile Include="src\font.cpp" />
     <ClCompile Include="src\framebuffer.cpp" />
@@ -339,6 +340,7 @@
     <ClCompile Include="src\surface.cpp" />
     <ClCompile Include="src\textmanager.cpp" />
     <ClCompile Include="src\texture.cpp" />
+    <ClCompile Include="src\threadedrenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extern\lodepng\lodepng.h" />

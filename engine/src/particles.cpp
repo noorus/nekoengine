@@ -33,15 +33,15 @@ namespace neko {
     acceleration_[index] = vec4( 0.0f );
     velocities_[index] = vec4(
       0.0f,
-      -( 0.045f + ( math::rand() * 0.02f ) ),
-      -( 0.02f + ( math::rand() * 0.015f ) ),
+      -( 0.045f + ( math::rand() * 0.02f ) ) * 20.0f,
+      -( 0.02f + ( math::rand() * 0.015f ) ) * 100.0f,
       0.0f );
-    masses_[index] = 0.000001f + ( math::rand() * 0.00005f );
+    masses_[index] = 0.001f + ( math::rand() * 0.002f );
     colors_[index] = vec4( 1.0f );
     sizes_[index] = vec3( 0.2f + math::rand() * 0.1f );
   }
 
-  void SakuraSystem::update( GameTime delta )
+  void SakuraSystem::update( GameTime delta, GameTime time )
   {
     for ( size_t i = 0; i < c_particleCount; ++i )
     {
@@ -53,7 +53,7 @@ namespace neko {
       rot_[i] += static_cast<float>( delta * 100.0 );
       orientations_[i] = math::angleAxis( math::radians( rot_[i] ), axes_[i] );
     }
-    Base::update( delta );
+    Base::update( delta, time );
   }
 
   void SakuraSystem::draw( shaders::Shaders& shaders, const Material& mat )

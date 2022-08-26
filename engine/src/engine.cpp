@@ -29,7 +29,7 @@ namespace neko {
   const char* c_engineSettingsFilename = "engineconf.json";
 
   Engine::Engine( ConsolePtr console, const Environment& env ):
-  console_( move( console ) ), time_( 0.0 ), signal_( Signal_None ), env_( env )
+  console_( move( console ) ), env_( env )
   {
     info_.logName = c_engineLogName;
     info_.engineName = c_engineName;
@@ -59,7 +59,7 @@ namespace neko {
       "noscripting "
 #endif
 #ifdef NEKO_NO_RAINET
-      "norainet"
+      "norainet "
 #endif
       "windows";
     return flags;
@@ -132,8 +132,6 @@ namespace neko {
     rainet_.engine_->initialize( settings_.discordAppID, settings_.steamAppID );
 #endif
 
-    rendererTime_.store( 0.0f );
-
     loader_ = make_shared<ThreadedLoader>();
     loader_->start();
 
@@ -199,6 +197,8 @@ namespace neko {
         signal_ = Signal_Restart;
         break;
       case M_Debug_PauseTime:
+
+        console_->printf( Console::srcEngine, "Pausing/unpausing time" );
         state_.timePaused = !state_.timePaused;
         break;
     }
@@ -277,6 +277,7 @@ namespace neko {
   {
     clock_.init();
     time_ = 0.0;
+    realTime_ = 0.0;
 
     GameTime accumulator = 0.0;
     GameTime delta = 0.0;
@@ -332,7 +333,10 @@ namespace neko {
         }
       }
 
-      rendererTime_.store( time_ );
+      realTime_ += delta;
+
+      sync_.gameTime.store( time_ );
+      sync_.realTime.store( realTime_ );
 
 #ifndef NEKO_NO_RAINET
       rainet_.engine_->update( time_, delta );
