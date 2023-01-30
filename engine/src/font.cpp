@@ -73,14 +73,6 @@ namespace neko {
         style->texture().dimensions().x, style->texture().dimensions().y,
         PixFmtColorR8, style->texture().data(),
         Texture::ClampBorder, Texture::Nearest );
-      /* dump texture here */
-      sprintf_s( tmp, 64, "debug_fontatlas_%I64i_%016I64x.png", font_->id(), styleId );
-      platform::FileWriter writer( tmp );
-      vector<uint8_t> buffer;
-      lodepng::encode( buffer, style->texture().data(), static_cast<unsigned int>( style->texture().dimensions().x ),
-        static_cast<unsigned int>( style->texture().dimensions().y ),
-        LCT_GREY, 8 );
-      writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) );
       style->markClean();
     }
   }

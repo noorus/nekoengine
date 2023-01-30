@@ -86,7 +86,7 @@ namespace neko {
   {
     shutdown();
     v8::V8::Dispose();
-    v8::V8::DisposePlatform();
+    v8::V8::ShutdownPlatform();
     platform_.reset();
   }
 

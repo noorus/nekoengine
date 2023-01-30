@@ -218,12 +218,14 @@ namespace neko {
       bool wmPaint();
       bool resizing_;
       size2i lastSize_;
+      bool forceAspect_ = false;
       void checkStartSizing();
       RenderWindowEventRecipient* target_;
       SnapshotPainter snapshotPainter_;
     public:
       RenderWindowHandler();
       inline HWND getWindow() const noexcept { return window_; }
+      void setForceAspect( bool enabled );
       void changeTargetResolution( const size2i targetResolution );
       void setWindow( RenderWindowEventRecipient* callback, HWND window );
     private:

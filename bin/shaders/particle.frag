@@ -13,7 +13,7 @@ uniform sampler2D tex;
 
 void main()
 {
-  vec4 diffuse = texture( tex, vs_out.texcoord );
+  vec4 diffuse = texture( tex, interpolateAtSample( vs_out.texcoord, gl_SampleID ) );
   if ( diffuse.a < 0.1 )
     discard;
   out_color = diffuse;

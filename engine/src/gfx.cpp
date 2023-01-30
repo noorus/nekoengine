@@ -41,8 +41,14 @@ namespace neko {
     " [release]";
 #endif
 
+  const char c_imguiGlslVersion[] = "#version 450";
+
   NEKO_DECLARE_CONVAR( vid_screenwidth, "Screen width. Changes are applied when the renderer is restarted.", 1920 );
   NEKO_DECLARE_CONVAR( vid_screenheight, "Screen height. Changes are applied when the renderer is restarted.", 1080 );
+
+  NEKO_DECLARE_CONVAR( vid_viewportwidth, "Game viewport native width. Changes are applied when the renderer is restarted.", 1280 );
+  NEKO_DECLARE_CONVAR( vid_viewportheight, "Game viewport native height. Changes are applied when the renderer is restarted.", 720 );
+
   NEKO_DECLARE_CONVAR( vid_vsync, "Whether to print OpenGL debug log output.", true );
   NEKO_DECLARE_CONVAR( gl_debuglog, "OpenGL debug log output level. 0 = none, 1 = some, 2 = debug context", 2 );
 
@@ -61,6 +67,10 @@ namespace neko {
     console_->print( Console::srcGfx, "GL Vendor: " + info_.vendor_ );
     console_->print( Console::srcGfx, "GL Version: " + info_.version_ );
     console_->print( Console::srcGfx, "GL Renderer: " + info_.renderer_ );
+
+#ifdef IMGUI_VERSION
+    console_->print( Console::srcGfx, "Using Dear ImGui v" IMGUI_VERSION );
+#endif
   }
 
   // 8: (Intel) Redundant state change in glBindFramebuffer API call, FBO 0, "", already bound.
@@ -138,6 +148,7 @@ namespace neko {
     settings.depthBits = 24;
     settings.stencilBits = 8;
     settings.antialiasingLevel = 0;
+    settings.sRgbCapable = false;
     settings.majorVersion = c_glVersion[0];
     settings.minorVersion = c_glVersion[1];
     settings.attributeFlags = sf::ContextSettings::Attribute::Core;
@@ -197,6 +208,25 @@ namespace neko {
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    auto& igIO = ImGui::GetIO();
+    igIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    igIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    //igIO.ConfigFlags |= ImGuiConfigFlags_IsSRGB;
+    //igIO.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    ImGui::StyleColorsDark();
+
+    auto& igStyle = ImGui::GetStyle();
+    if ( igIO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
+    {
+      igStyle.WindowRounding = 0.0f;
+      igStyle.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
+
+    ImGui_ImplWin32_Init( window_->getSystemHandle() );
+    ImGui_ImplOpenGL3_Init( c_imguiGlslVersion );
+
     camera_ = make_unique<OrbitCamera>( renderer_.get(), realResolution, target_,
     vec3( 5.0f, 3.0f, 5.0f ), // vecOffset
     60.0f, // fov
@@ -216,7 +246,7 @@ namespace neko {
 
     resize( window_->getSize().x, window_->getSize().y );
 
-    renderer_->initialize( viewport_.size_.x, viewport_.size_.y );
+    renderer_->initialize( gameViewport_.size_.x, gameViewport_.size_.y );
 
     auto documentsPath = platform::wideToUtf8( engine.env().documentsPath_ );
 
@@ -232,10 +262,23 @@ namespace neko {
 
   void Gfx::resize( size_t width, size_t height )
   {
-    viewport_.size_ = vec2i( width, height );
-    input_->setWindowSize( viewport_.size_ );
+    auto newfbosize = vec2i( g_CVar_vid_viewportwidth.as_i(), g_CVar_vid_viewportheight.as_i() );
+    if ( newfbosize != gameViewport_.size_ )
+    {
+      console_->printf( Console::srcGfx, "Resizing main fbo to %dx%d", newfbosize.x, newfbosize.y );
+      gameViewport_.size_ = newfbosize;
+      flags_.mainbufResized = true;
+    }
 
-    console_->printf( Console::srcGfx, "Setting viewport to %dx%d", width, height );
+    auto newwindowsize = vec2i( width, height );
+    if ( newwindowsize != windowViewport_.size_ )
+    {
+      console_->printf( Console::srcGfx, "Resizing viewport to %dx%d", newwindowsize.x, newwindowsize.y );
+      windowViewport_.size_ = newwindowsize;
+      flags_.editorResized = true;
+    }
+    input_->setWindowSize( windowViewport_.size_ );
+
 
     for ( auto& viewport :viewports_)
     {
@@ -267,7 +310,6 @@ namespace neko {
       else if ( evt.type == sf::Event::Resized )
       {
         resize( evt.size.width, evt.size.height );
-        flags_.resized = true;
       }
       else if ( evt.type == sf::Event::LostFocus )
       {
@@ -288,6 +330,8 @@ namespace neko {
         }
         if ( evt.key.code == sf::Keyboard::F7 )
           messaging_->send( M_Debug_PauseTime );
+        if ( evt.key.code == sf::Keyboard::F8 )
+          messaging_->send( M_Debug_ToggleDevMode );
         if ( evt.key.code == sf::Keyboard::F9 )
         {
           messaging_->send( M_Debug_ToggleWireframe );
@@ -330,18 +374,42 @@ namespace neko {
 
   void Gfx::updateRealTime( GameTime realTime, GameTime delta, Engine& engine )
   {
-    if ( input_->mousebtn( 2 ) )
-      camera_->applyInputPanning( input_->movement() );
-    else if ( input_->mousebtn( 1 ) )
-      camera_->applyInputRotation( input_->movement() );
+    auto& igIO = ImGui::GetIO();
 
-    camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
+    int vp = 3;
+    if ( engine.devmode() )
+    {
+      const auto halfwidth = static_cast<GLsizei>( windowViewport_.size_.x * 0.5f );
+      const auto halfheight = static_cast<GLsizei>( windowViewport_.size_.y * 0.5f );
+      if ( input_->mousePosition_.x < halfwidth )
+        vp = ( input_->mousePosition_.y < halfheight ? 0 : 2 );
+      else
+        vp = ( input_->mousePosition_.y < halfheight ? 1 : 3 );
+    }
+
+    if ( vp == 3 )
+    {
+      if ( input_->mousebtn( 2 ) )
+        camera_->applyInputPanning( input_->movement() );
+      else if ( input_->mousebtn( 1 ) )
+        camera_->applyInputRotation( input_->movement() );
+
+      camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
+    }
+    else
+    {
+      if ( input_->mousebtn( 2 ) )
+        viewports_[vp].camera()->applyInputPanning( input_->movement() );
+      viewports_[vp].camera()->applyInputZoom( static_cast<int>( input_->movement().z ) );
+    }
 
     for ( auto& vp : viewports_ )
       vp.camera()->update( delta, realTime );
 
     camera_->update( delta, realTime );
   }
+
+  static bool show_demo_window = true;
 
   void Gfx::update( GameTime time, GameTime delta, Engine& engine )
   {
@@ -379,10 +447,10 @@ namespace neko {
     }
 #endif
 
-    if ( flags_.resized )
+    if ( flags_.mainbufResized )
     {
-      renderer_->reset( viewport_.size_.x, viewport_.size_.y );
-      flags_.resized = false;
+      renderer_->reset( gameViewport_.size_.x, gameViewport_.size_.y );
+      flags_.mainbufResized = false;
       ignore = window_->setActive( true );
     }
 
@@ -390,47 +458,64 @@ namespace neko {
     renderer_->draw( time, delta, *camera_.get(), gui_->platform() );
 #else
 
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
     glClearColor( 0.0f, 0.1f, 0.2f, 1.0f );
     glDepthMask( TRUE );
     glDepthFunc( GL_LESS );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    const auto halfwidth = static_cast<GLsizei>( viewport_.size_.x * 0.5f );
-    const auto halfheight = static_cast<GLsizei>( viewport_.size_.y * 0.5f );
-    g_editorparams.fullWindowResolution = viewport_.size_;
-    g_liveparams.fullWindowResolution = viewport_.size_;
-#if 1
-    for ( int i = 0; i < 3; ++i )
+    g_editorparams.fullWindowResolution = windowViewport_.size_;
+    g_liveparams.fullWindowResolution = windowViewport_.size_;
+
+    if ( engine.devmode() )
     {
-      /* if ( i == 0 )
+      const auto halfwidth = static_cast<GLsizei>( windowViewport_.size_.x * 0.5f );
+      const auto halfheight = static_cast<GLsizei>( windowViewport_.size_.y * 0.5f );
+      for ( int i = 0; i < 3; ++i )
       {
-        glViewport( 0, halfheight, halfwidth, halfheight );
-        glScissor( 0, halfheight, halfwidth, halfheight );
+        renderer_->draw( time, delta, *viewports_[i].camera(), g_editorparams, renderer_->builtins().screenFourthQuads_[i] );
       }
-      if ( i == 1 )
-      {
-        glViewport( halfwidth, halfheight, halfwidth, halfheight );
-        glScissor( halfwidth, halfheight, halfwidth, halfheight );
-      }
-      if ( i == 2 )
-      {
-        glViewport( 0, 0, halfwidth, halfheight );
-        glScissor( 0, 0, halfwidth, halfheight );
-      }*/
-      renderer_->draw( time, delta, *viewports_[i].camera(), g_editorparams,
-        renderer_->builtins().screenFourthQuads_[i] );
+      renderer_->draw( time, delta, *camera_, g_liveparams, renderer_->builtins().screenFourthQuads_[3] );
+    }
+    else
+    {
+      renderer_->draw( time, delta, *camera_, g_liveparams, renderer_->builtins().screenQuad_ );
     }
 
-    /* glViewport( halfwidth, 0, halfwidth, halfheight );
-    glScissor( halfwidth, 0, halfwidth, halfheight );*/
-    renderer_->draw(
-      time, delta, *camera_, g_liveparams, renderer_->builtins().screenFourthQuads_[3] );
-# else
-    glViewport( 0, 0, viewport_.size_.x, viewport_.size_.y );
-    glScissor( 0, 0, viewport_.size_.x, viewport_.size_.y );
-    renderer_->draw( time, delta, *camera_.get(), g_liveparams, renderer_->builtins().screenQuad_ );
+    if ( show_demo_window )
+      ImGui::ShowDemoWindow( &show_demo_window );
+
+    auto gameMainTexture = renderer_->getMergedMainFramebuffer();
+    if ( gameMainTexture )
+    {
+      auto wndsize = ImVec2( gameViewport_.sizef() );
+      ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0, 0 ) );
+      ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
+      ImGui::SetNextWindowContentSize( wndsize );
+      ImGui::SetNextWindowSizeConstraints( wndsize, wndsize );
+      ImGui::Begin( "Game", nullptr,
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
+          ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking );
+      ImGui::Image( reinterpret_cast<ImTextureID>( static_cast<intptr_t>( gameMainTexture->handle() ) ), wndsize,
+        ImVec2( 0, 1 ), ImVec2( 1, 0 ) );
+      ImGui::End();
+      ImGui::PopStyleVar( 2 );
+    }
+
+    ImGui::EndFrame();
+
 #endif
-#endif
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
+    if ( ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
+    {
+      ImGui::UpdatePlatformWindows();
+      ImGui::RenderPlatformWindowsDefault();
+    }
 
     window_->display();
   }
@@ -438,7 +523,7 @@ namespace neko {
   const Image& Gfx::renderWindowReadPixels()
   {
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-    lastCapture_.size_ = size2i( viewport_.size_ );
+    lastCapture_.size_ = size2i( windowViewport_.size_ );
     lastCapture_.buffer_.resize( lastCapture_.size_.w * lastCapture_.size_.h * 4 * sizeof( uint8_t ) );
     glReadnPixels( 0, 0,
       (GLsizei)lastCapture_.size_.w, (GLsizei)lastCapture_.size_.h,
@@ -465,6 +550,10 @@ namespace neko {
       vp.camera().reset();
 
     camera_.reset();
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 
     platform::RenderWindowHandler::get().setWindow( nullptr, nullptr );
 

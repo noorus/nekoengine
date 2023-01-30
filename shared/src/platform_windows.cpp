@@ -14,8 +14,13 @@
 #define min( a, b ) ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
 #include <gdiplus.h>
 
+#include <imgui.h>
+#include <backends/imgui_impl_win32.h>
+
 #pragma comment( lib, "comctl32.lib" )
 #pragma comment( lib, "gdiplus.lib" )
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
 namespace neko {
 
@@ -293,50 +298,58 @@ namespace neko {
       size.h = ( (int64_t)want.bottom - want.top - resolution_.h );
     }
 
+    void RenderWindowHandler::setForceAspect( bool enabled )
+    {
+      forceAspect_ = enabled;
+    }
+
     void RenderWindowHandler::wmSizing( WPARAM wparam, LPARAM lparam )
     {
       checkStartSizing();
       auto rect = (RECT*)lparam;
-      auto dw = float( rect->right - rect->left );
-      auto dh = float( rect->bottom - rect->top );
-      auto w = dw - borders_.w;
-      auto h = dh - borders_.h;
-      bool sel = false;
-      if ( wparam == WMSZ_LEFT || wparam == WMSZ_RIGHT )
-        sel = true;
-      else if ( wparam == WMSZ_TOP || wparam == WMSZ_BOTTOM )
-        sel = false;
-      else
-        sel = ( ( w / h ) > vaspect_ );
-      float nw = w, nh = h;
-      if ( sel )
-        nh = ( w * haspect_ );
-      else
-        nw = ( h * vaspect_ );
-      nw += borders_.w;
-      nh += borders_.h;
-      if ( wparam == WMSZ_TOPLEFT || wparam == WMSZ_TOPRIGHT )
+      if ( forceAspect_ )
       {
-        if ( wparam == WMSZ_TOPRIGHT )
-          rect->right = rect->left + (LONG)math::round( nw );
+        auto dw = float( rect->right - rect->left );
+        auto dh = float( rect->bottom - rect->top );
+        auto w = dw - borders_.w;
+        auto h = dh - borders_.h;
+        bool sel = false;
+        if ( wparam == WMSZ_LEFT || wparam == WMSZ_RIGHT )
+          sel = true;
+        else if ( wparam == WMSZ_TOP || wparam == WMSZ_BOTTOM )
+          sel = false;
         else
-          rect->left = rect->right - (LONG)math::round( nw );
-        rect->top = rect->bottom - (LONG)math::round( nh );
-        return;
+          sel = ( ( w / h ) > vaspect_ );
+        float nw = w, nh = h;
+        if ( sel )
+          nh = ( w * haspect_ );
+        else
+          nw = ( h * vaspect_ );
+        nw += borders_.w;
+        nh += borders_.h;
+        if ( wparam == WMSZ_TOPLEFT || wparam == WMSZ_TOPRIGHT )
+        {
+          if ( wparam == WMSZ_TOPRIGHT )
+            rect->right = rect->left + (LONG)math::round( nw );
+          else
+            rect->left = rect->right - (LONG)math::round( nw );
+          rect->top = rect->bottom - (LONG)math::round( nh );
+          return;
+        }
+        switch ( wparam )
+        {
+          case WMSZ_TOP:
+          case WMSZ_BOTTOM:
+            rect->left = (LONG)math::round( (float)rect->left + ( ( dw - nw ) / 2.0f ) );
+            break;
+          case WMSZ_BOTTOMLEFT:
+            rect->left = (LONG)math::round( (float)rect->right - nw );
+            rect->top = sel ? rect->top : (LONG)math::round( (float)rect->bottom - nh );
+            break;
+        }
+        rect->right = rect->left + (LONG)math::round( nw );
+        rect->bottom = rect->top + (LONG)math::round( nh );
       }
-      switch ( wparam )
-      {
-        case WMSZ_TOP:
-        case WMSZ_BOTTOM:
-          rect->left = (LONG)math::round( (float)rect->left + ( ( dw - nw ) / 2.0f ) );
-          break;
-        case WMSZ_BOTTOMLEFT:
-          rect->left = (LONG)math::round( (float)rect->right - nw );
-          rect->top = sel ? rect->top : (LONG)math::round( (float)rect->bottom - nh );
-          break;
-      }
-      rect->right = rect->left + (LONG)math::round( nw );
-      rect->bottom = rect->top + (LONG)math::round( nh );
       lastSize_ = size2i( *rect );
       RECT newClientRect = {0, 0, (LONG)lastSize_.w, (LONG)lastSize_.h};
       InvalidateRect( window_, &newClientRect, FALSE );
@@ -386,6 +399,9 @@ namespace neko {
 
     LRESULT RenderWindowHandler::wndProc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam )
     {
+      if ( ImGui_ImplWin32_WndProcHandler( wnd, msg, wparam, lparam ) )
+        return TRUE;
+
       if ( msg == WM_SIZING )
       {
         get().wmSizing( wparam, lparam );
@@ -407,6 +423,12 @@ namespace neko {
       {
         if ( get().wmPaint() )
           return 0;
+      }
+      else if ( msg == WM_DPICHANGED )
+      {
+        const auto suggested = reinterpret_cast<RECT*>( lparam );
+        ::SetWindowPos( wnd, nullptr, suggested->left, suggested->top, suggested->right - suggested->left,
+          suggested->bottom - suggested->top, SWP_NOZORDER | SWP_NOACTIVATE );
       }
       return get().originalProc_( wnd, msg, wparam, lparam );
     }

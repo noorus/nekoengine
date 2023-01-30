@@ -15,9 +15,8 @@ uniform sampler2D tex;
 
 void main()
 {
-  vec3 hdrcolor = texture( tex, vs_out.texcoord ).rgb;
+  vec3 hdrcolor = texture( tex, interpolateAtSample( vs_out.texcoord, gl_SampleID ) ).rgb;
 
   vec3 result = tonemap_linear( hdrcolor );
-
   out_color = vec4( result.rgb, 1.0 );
 }

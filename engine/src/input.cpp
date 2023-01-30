@@ -87,8 +87,8 @@ namespace neko {
 
   void GfxInput::onMouseButtonPressed( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
   {
-#ifndef NEKO_NO_GUI
     platform::getCursorPosition( window_, mousePosition_ );
+#ifndef NEKO_NO_GUI
     if ( !MyGUI::InputManager::getInstance().injectMousePress(
       (int)mousePosition_.x, (int)mousePosition_.y,
       MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) ) )
@@ -105,8 +105,8 @@ namespace neko {
 
   void GfxInput::onMouseButtonReleased( nil::Mouse* mouse, const nil::MouseState& state, size_t button )
   {
-#ifndef NEKO_NO_GUI
     platform::getCursorPosition( window_, mousePosition_ );
+#ifndef NEKO_NO_GUI
     if ( !MyGUI::InputManager::getInstance().injectMouseRelease(
       (int)mousePosition_.x, (int)mousePosition_.y,
       MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) ) )

@@ -129,6 +129,12 @@
 // Nil
 #include <nil.h>
 
+// Dear ImGui
+#define IM_VEC2_CLASS_EXTRA constexpr ImVec2( const neko::vec2& _v ): x( _v.x ), y( _v.y ) {}
+#include <imgui.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_win32.h>
+
 // MyGUI
 #ifndef NEKO_NO_GUI
 # pragma warning( push )

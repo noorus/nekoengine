@@ -112,6 +112,12 @@
     <Filter Include="Data">
       <UniqueIdentifier>{3ff94752-9950-4867-bdbe-da41a44d8721}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\extern\imgui">
+      <UniqueIdentifier>{3c231546-a8d2-4762-8d0e-b1fd83a9e536}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\imgui\backends">
+      <UniqueIdentifier>{82d35cce-4410-4928-aac2-df0331a94ef1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -308,6 +314,27 @@
     </ClCompile>
     <ClCompile Include="src\threadedrenderer.cpp">
       <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui.cpp">
+      <Filter>Source Files\extern\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui_demo.cpp">
+      <Filter>Source Files\extern\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui_draw.cpp">
+      <Filter>Source Files\extern\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui_tables.cpp">
+      <Filter>Source Files\extern\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\imgui_widgets.cpp">
+      <Filter>Source Files\extern\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\extern\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imgui\backends\imgui_impl_win32.cpp">
+      <Filter>Source Files\extern\imgui\backends</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -646,6 +673,9 @@
     <None Include="cpp.hint" />
     <None Include="..\bin\shaders\dbg_bgline.vert">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\scripts\.eslintrc.json">
+      <Filter>Scripts</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

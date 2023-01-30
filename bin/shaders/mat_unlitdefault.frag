@@ -17,7 +17,7 @@ uniform sampler2D tex;
 
 void main()
 {
-  vec2 tc = vec2( vs_out.texcoord.x, vs_out.texcoord.y );
+  vec2 tc = interpolateAtSample( vs_out.texcoord, gl_SampleID );
 
   vec3 Lo = texture( tex, tc ).rgb;
   float alpha = texture( tex, tc ).a;

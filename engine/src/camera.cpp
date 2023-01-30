@@ -9,29 +9,51 @@ namespace neko {
   EditorOrthoCamera::EditorOrthoCamera( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def ):
     Camera( manager, resolution, 90.0f )
   {
+    position_ = vec3( 0.0f, 0.0f, 0.0f );
     eye_ = def.eye;
     up_ = def.up;
   }
 
+  // kun alkaa dragata, täytyy:
+  // - tallentaa mitä porttia vedetään (stateful ettei mouseover riko)
+  // - ottaa pos jossa tartuttiin kiinni
+  // - ottaa hiiren pos jossa tartuttiin kiinni
+  // - moven updatessa translatoida posia sen verran kuin hiiri on liikkunut vedon alkukohdasta
+
   void EditorOrthoCamera::setViewport( vec2 resolution )
   {
     resolution_ = resolution;
-    auto ratio = resolution_.x / resolution_.y;
     auto scale = 0.1f;
     //projection_ = glm::ortho( 0.0f, resolution_.x * ratio * scale, resolution_.y * scale, 0.0f );
     // projection_ = glm::perspectiveFovRH( glm::radians( fov_ ), resolution.x, resolution.y, near_, far_ );
+    _reposition();
+  }
+
+  void EditorOrthoCamera::_reposition()
+  {
+    auto ratio = resolution_.x / resolution_.y;
     auto diam = orthoRadius_;
     projection_ = glm::ortho(
-      -( ( diam * 0.5f ) * ratio ),
-      ( ( diam * 0.5f ) * ratio ),
-      -( diam * 0.5f ),
-      ( diam * 0.5f ),
-      0.01f, 1000.0f );
+      -( ( diam * 0.5f ) * ratio ), ( ( diam * 0.5f ) * ratio ), -( diam * 0.5f ), ( diam * 0.5f ), 0.01f, 1000.0f );
+  }
+
+  void EditorOrthoCamera::applyInputPanning( const vec3i& move )
+  {
+    const float multiplier = 0.05f;
+    auto mov = vec3f( static_cast<Real>( move.x ) * multiplier, 0.0f, static_cast<Real>( move.y ) * multiplier );
+    position_ += mov;
+    _reposition();
+  }
+
+  void EditorOrthoCamera::applyInputZoom( int zoom )
+  {
+    orthoRadius_ += -( (Real)zoom / (Real)WHEEL_DELTA );
+    _reposition();
   }
 
   void EditorOrthoCamera::update( GameTime delta, GameTime time )
   {
-    position_ = vec3( 0.0f, 0.0f, 0.0f );
+    //position_ = vec3( 0.0f, 0.0f, 0.0f );
     node_->setTranslate( position_ );
 
     view_ = glm::lookAt( position_ + eye_, position_, up_ );

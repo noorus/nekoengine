@@ -83,11 +83,11 @@ namespace neko {
     Environment env_;
   protected:
     struct State {
-      bool focusLost;
-      bool windowMove;
-      bool steamOverlay;
-      bool timePaused;
-      State(): focusLost( false ), windowMove( false ), steamOverlay( false ), timePaused( false ) {}
+      bool focusLost = false;
+      bool windowMove = false;
+      bool steamOverlay = false;
+      bool timePaused = false;
+      bool devMode = false;
     } state_;
     struct Sync
     {
@@ -130,6 +130,7 @@ namespace neko {
     inline const utf8String& listFlags();
     const rainet::GameInstallationState& installationInfo();
     inline const Stats& stats() const noexcept { return stats_; }
+    inline const bool devmode() const noexcept { return state_.devMode; }
 #ifndef NEKO_NO_RAINET
     inline rainet::System* rainet() { return rainet_.engine_; }
 #endif

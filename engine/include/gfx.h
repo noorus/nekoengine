@@ -16,6 +16,7 @@ namespace neko {
     vec2i size_;
     Viewport(): size_( 0, 0 ) {}
     Viewport( size_t width, size_t height ): size_( width, height ) {}
+    inline vec2 sizef() const { return vec2( static_cast<float>( size_.x ), static_cast<float>( size_.y ) ); }
   };
 
   class EditorViewport: public Viewport {
@@ -60,7 +61,8 @@ namespace neko {
     SceneNode* target_;
     unique_ptr<OrbitCamera> camera_;
     RendererPtr renderer_;
-    Viewport viewport_;
+    Viewport windowViewport_;
+    Viewport gameViewport_;
     vector<EditorViewport> viewports_;
     Image lastCapture_;
     std::queue<uint64_t> updateAccounts_;
@@ -69,9 +71,9 @@ namespace neko {
     void printInfo();
     void resize( size_t width, size_t height );
     struct Flags {
-      bool resized;
-      bool reloadShaders;
-      Flags(): resized( false ), reloadShaders( false ) {}
+      bool editorResized = false;
+      bool mainbufResized = false;
+      bool reloadShaders = false;
     } flags_;
   private:
     static void openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity,

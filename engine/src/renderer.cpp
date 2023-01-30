@@ -19,7 +19,7 @@ namespace neko {
 
   using namespace gl;
 
-  NEKO_DECLARE_CONVAR( vid_msaa, "Main buffer multisample antialiasing multiplier.", 8 );
+  NEKO_DECLARE_CONVAR( vid_msaa, "Main buffer multisample antialiasing multiplier.", 4 );
   NEKO_DECLARE_CONVAR( dbg_shownormals, "Whether to visualize vertex normals with lines.", false );
   NEKO_DECLARE_CONVAR( dbg_showtangents, "Whether to visualize vertex tangents with lines.", false );
   NEKO_DECLARE_CONVAR( dbg_wireframe, "Whether to render in wireframe mode.", false );
@@ -300,7 +300,10 @@ namespace neko {
     //loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
     loader_->addLoadTask( { LoadTask( new SceneNode(), R"(camera.gltf)" ) } );
 
+    if ( g_CVar_vid_msaa.as_i() > 1 )
+      ctx_.fboMainMultisampled_ = make_unique<Framebuffer>( this, 2, c_bufferFormat, true, g_CVar_vid_msaa.as_i() );
     ctx_.fboMain_ = make_unique<Framebuffer>( this, 2, c_bufferFormat, true, 0 );
+    ctx_.mergedMain_ = make_unique<Framebuffer>( this, 1, PixFmtColorRGBA8, false, 0 );
 
     reset( width, height );
   }
@@ -308,7 +311,10 @@ namespace neko {
   void Renderer::reset( size_t width, size_t height )
   {
     resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
+    if ( ctx_.fboMainMultisampled_ )
+      ctx_.fboMainMultisampled_->recreate( width, height );
     ctx_.fboMain_->recreate( width, height );
+    ctx_.mergedMain_->recreate( width, height );
   }
 
   void Renderer::uploadTextures()
@@ -499,7 +505,6 @@ namespace neko {
 
     glDisable( GL_LINE_SMOOTH );
     glDisable( GL_POLYGON_SMOOTH );
-    glDisable( GL_MULTISAMPLE );
 
     if ( facecull )
     {
@@ -687,8 +692,16 @@ namespace neko {
     }
 
     {
-      ctx_.fboMain_->prepare( 0, { 0, 1 } );
-      ctx_.fboMain_->begin();
+      if ( ctx_.fboMainMultisampled_ )
+      {
+        ctx_.fboMainMultisampled_->prepare( 0, { 0, 1 } );
+        ctx_.fboMainMultisampled_->begin();
+      }
+      else
+      {
+        ctx_.fboMain_->prepare( 0, { 0, 1 } );
+        ctx_.fboMain_->begin();
+      }
       implClearAndPrepare( drawparams.isEditor ? vec3( 0.01f ) : vec3( 0.0f ) ); // 1 - clear the main fbo
       sceneDraw( time, delta, camera, drawparams );
       if ( drawparams.isEditor )
@@ -699,7 +712,10 @@ namespace neko {
         glEnable( GL_LINE_SMOOTH );
         drawEditorGrid( *shaders_, camera.position(), camera.direction() );
       }
-      ctx_.fboMain_->end();
+      if ( ctx_.fboMainMultisampled_ )
+        ctx_.fboMainMultisampled_->end();
+      else
+        ctx_.fboMain_->end();
     }
 
     // implClearAndPrepare(); // 2 - clear the window
@@ -717,7 +733,7 @@ namespace neko {
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
     // Early out - if dbg_showdepth is enabled, just show the main depth buffer
-    if ( !drawparams.isEditor && g_CVar_dbg_showdepth.as_b() )
+    /* if ( !drawparams.isEditor && g_CVar_dbg_showdepth.as_b() )
     {
       setGLDrawState( false, false, true, false );
       auto& pipeline = shaders_->usePipeline( "dbg_depthvis2d" );
@@ -727,14 +743,41 @@ namespace neko {
       viewportQuad->begin();
       viewportQuad->draw();
       return;
+    }*/
+
+    /* glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    GLenum fb = GL_BACK;
+    glDrawBuffers( 1, &fb );
+    glClearBufferfv( GL_COLOR, 0, &vec4( 0.0f, 0.0f, 0.0f, 1.0f )[0] );*/
+
+    if ( ctx_.fboMainMultisampled_ )
+    {
+      ctx_.fboMainMultisampled_->blitColorTo( 0, 0, *ctx_.fboMain_ );
+      ctx_.fboMainMultisampled_->invalidate();
     }
 
-    // Draw the main FBO, including HDR mergedown with tonemapping
+    // Merge down the main HDR FBO with tonemapping to final RGBA8 buffer
     {
-      setGLDrawState( false, false, true, false );
+      ctx_.mergedMain_->prepare( 0, { 0 } );
+      ctx_.mergedMain_->begin();
+      setGLDrawState( false, false, false, false );
       auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
       pipeline.setUniform( "tex", 0 );
       const GLuint hndl = ctx_.fboMain_->texture( 0 )->handle();
+      glBindTextures( 0, 1, &hndl );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+      ctx_.mergedMain_->end();
+    }
+
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+
+    // Draw the merged buffer in full quad
+    {
+      setGLDrawState( false, false, false, false );
+      auto& pipeline = shaders_->usePipeline( "passthrough2d" );
+      pipeline.setUniform( "tex", 0 );
+      const GLuint hndl = ctx_.mergedMain_->texture( 0 )->handle();
       glBindTextures( 0, 1, &hndl );
       viewportQuad->begin();
       viewportQuad->draw();
@@ -793,7 +836,9 @@ namespace neko {
 
     particles_.reset();
 
+    ctx_.mergedMain_.reset();
     ctx_.fboMain_.reset();
+    ctx_.fboMainMultisampled_.reset();
 
 #ifndef NEKO_NO_SCRIPTING
     texts_->teardown();

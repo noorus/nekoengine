@@ -25,20 +25,22 @@ namespace neko {
     size_t colorbufcount_;
     int multisamples_;
     vec4 clearColor_;
+    GLuint sampler_ = 0;
     int savedViewport_[4];
     mutable bool available_;
     bool depth_;
     PixelFormat format_;
+    bool storedMultisampleEnable_ = false;
   public:
     Framebuffer() = delete;
     Framebuffer( Renderer* renderer, size_t colorBufferCount, PixelFormat colorBufferFormat, bool depthBuffer, int multisamples );
     void recreate( size_t width, size_t height );
     void destroy();
     bool validate() const;
+    void invalidate();
     void begin();
     void end();
     void prepare( size_t colorReadIndex, vector<size_t> colorWriteIndexes );
-    void beginSimple();
     void blitColorTo( size_t sourceIndex, size_t destIndex, Framebuffer& target );
     inline vector<TexturePtr>& textures() { return colorBuffers_; }
     inline TexturePtr texture( size_t index ) { return colorBuffers_.at( index ); }

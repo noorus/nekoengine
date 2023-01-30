@@ -11,10 +11,6 @@ namespace neko {
   mgr_( manager ), font_( font )
   {
     text_ = mgr_->createText( font_->face(), style );
-    // pen is an expensive call because it causes regeneration of the text mesh.
-    // fortunately there's practically no need to ever use a non-zero origin pen
-    // because translation can be done via the model matrix.
-    text_->pen( vec3( 0.0f ) );
   }
 
   void Text::content( unicodeString text )

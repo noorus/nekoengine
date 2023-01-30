@@ -196,10 +196,12 @@ namespace neko {
       case M_Debug_ReloadScript:
         signal_ = Signal_Restart;
         break;
+      case M_Debug_ToggleDevMode:
+        state_.devMode = !state_.devMode;
+        break;
       case M_Debug_PauseTime:
-
-        console_->printf( Console::srcEngine, "Pausing/unpausing time" );
         state_.timePaused = !state_.timePaused;
+        console_->printf( Console::srcEngine, "Time %s", state_.timePaused ? "paused" : "unpaused" );
         break;
     }
   }

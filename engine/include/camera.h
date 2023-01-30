@@ -50,6 +50,7 @@ namespace neko {
     vec3 eye_;
     vec3 up_;
     Real orthoRadius_ = 14.0f;
+    void _reposition();
   public:
     EditorOrthoCamera( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def );
     void setViewport( vec2 resolution ) override;
@@ -57,6 +58,8 @@ namespace neko {
     inline Real radius() noexcept { return orthoRadius_; }
     void radius( Real radius );
     vec3 direction() const override;
+    virtual void applyInputPanning( const vec3i& mousemovement );
+    virtual void applyInputZoom( int zoom );
   };
 
   struct CameraValueState

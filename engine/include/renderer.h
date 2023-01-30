@@ -189,11 +189,10 @@ namespace neko {
     vec2 resolution_;
     struct DrawCtx
     {
+      unique_ptr<Framebuffer> fboMainMultisampled_;
       unique_ptr<Framebuffer> fboMain_;
-      inline bool ready() const noexcept
-      {
-        return ( fboMain_ && fboMain_->available() );
-      }
+      unique_ptr<Framebuffer> mergedMain_; // the output of fboMain after mergedown & post
+      inline bool ready() const noexcept { return ( fboMain_ && fboMain_->available() ); }
     } ctx_;
     struct UserData
     {
@@ -215,6 +214,12 @@ namespace neko {
     void shutdown();
     MaterialPtr createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
     inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
+    inline TexturePtr getMergedMainFramebuffer()
+    {
+      if ( ctx_.ready() && ctx_.mergedMain_->available() )
+        return ctx_.mergedMain_->texture( 0 );
+      return {};
+    }
     void update( GameTime delta, GameTime time );
     void uploadTextures();
     void uploadModels();
