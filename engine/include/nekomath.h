@@ -41,6 +41,12 @@ namespace neko {
     using glm::length2;
     using glm::normalize;
     using glm::radians;
+    using glm::rotate;
+    using glm::toMat3;
+    using glm::toMat4;
+    using glm::translate;
+    using glm::scale;
+
     using std::max;
     using std::min;
 
@@ -225,7 +231,7 @@ namespace neko {
 
     inline vec3 perpendicular( const vec3 v )
     {
-      const Real sqz = static_cast<Real>( 1e-06 * 1e-06 );
+      const auto sqz = static_cast<Real>( 1e-06 * 1e-06 );
       auto perp = cross( v, vec3( 1.0f, 0.0f, 0.0f ) );
       if ( length2( perp ) < sqz )
         perp = cross( v, vec3( 0.0f, 1.0f, 0.0f ) );

@@ -373,6 +373,7 @@
     <ClInclude Include="..\shared\include\neko_pooledtypes.h" />
     <ClInclude Include="..\shared\include\neko_types.h" />
     <ClInclude Include="..\shared\include\rainet.h" />
+    <ClInclude Include="include\bounds.h" />
     <ClInclude Include="include\buffers.h" />
     <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\console.h" />
@@ -385,6 +386,7 @@
     <ClInclude Include="include\font.h" />
     <ClInclude Include="include\forwards.h" />
     <ClInclude Include="include\framebuffer.h" />
+    <ClInclude Include="include\frustum.h" />
     <ClInclude Include="include\gfx.h" />
     <ClInclude Include="include\gfx_imguistyle.h" />
     <ClInclude Include="include\gfx_types.h" />
@@ -414,6 +416,7 @@
     <ClInclude Include="include\nekosimd.h" />
     <ClInclude Include="include\objectbase.h" />
     <ClInclude Include="include\particles.h" />
+    <ClInclude Include="include\plane.h" />
     <ClInclude Include="include\renderbuffer.h" />
     <ClInclude Include="include\renderer.h" />
     <ClInclude Include="include\resources.h" />
@@ -424,6 +427,7 @@
     <ClInclude Include="include\surface.h" />
     <ClInclude Include="include\text.h" />
     <ClInclude Include="include\texture.h" />
+    <ClInclude Include="include\transform.h" />
     <ClInclude Include="include\utilities.h" />
     <ClInclude Include="include\viewport.h" />
     <ClInclude Include="resource.h" />

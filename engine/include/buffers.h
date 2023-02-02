@@ -19,7 +19,7 @@ namespace neko {
   protected:
     static constexpr GLuint c_maxVertices = Count;
     unique_ptr<MappedGLBuffer<VertexPointParticle>> buffer_;
-    GLuint vao_;
+    GLuint vao_ = 0;
   public:
     PointRenderBuffer()
     {
@@ -54,7 +54,7 @@ namespace neko {
   protected:
     const GLuint c_maxVertices = Count;
     unique_ptr<MappedGLBuffer<VertexLine>> buffer_;
-    GLuint vao_;
+    GLuint vao_ = 0;
   public:
     LineRenderBuffer()
     {

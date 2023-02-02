@@ -36,6 +36,10 @@ namespace neko {
     inline Real exposure() const noexcept { return exposure_; }
     void exposure( Real exp );
     virtual vec3 direction() const = 0;
+    inline Real fovy() const { return fov_; }
+    virtual Real aspect() const = 0;
+    virtual vec3 right() const = 0;
+    virtual vec3 up() const = 0;
   };
 
   struct EditorViewportDefinition
