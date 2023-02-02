@@ -336,6 +336,9 @@
     <ClCompile Include="..\extern\imgui\backends\imgui_impl_win32.cpp">
       <Filter>Source Files\extern\imgui\backends</Filter>
     </ClCompile>
+    <ClCompile Include="src\viewport.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">
@@ -558,6 +561,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\buffers.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\viewport.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gfx_imguistyle.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>

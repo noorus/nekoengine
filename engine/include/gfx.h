@@ -7,17 +7,11 @@
 #include "input.h"
 #include "camera.h"
 #include "gui.h"
+#include "viewport.h"
 
 namespace neko {
 
   constexpr int32_t c_glVersion[2] = { 4, 6 };
-
-  struct Viewport {
-    vec2i size_;
-    Viewport(): size_( 0, 0 ) {}
-    Viewport( size_t width, size_t height ): size_( width, height ) {}
-    inline vec2 sizef() const { return vec2( static_cast<float>( size_.x ), static_cast<float>( size_.y ) ); }
-  };
 
   class EditorViewport: public Viewport {
   protected:
@@ -25,8 +19,16 @@ namespace neko {
     unique_ptr<EditorOrthoCamera> camera_;
   public:
     EditorViewport( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def );
-    inline void setSize( vec2i size ) { size_ = size; }
     inline unique_ptr<EditorOrthoCamera>& camera() { return camera_; }
+  };
+
+  class Editor {
+  protected:
+    bool enabled_ = false;
+    vec3 clearColor_ = vec3( 0.0f, 0.0f, 0.0f );
+  public:
+    inline bool enabled() const { return enabled_; }
+    inline vec3& clearColorRef() { return clearColor_; }
   };
 
   class Gfx:
@@ -65,6 +67,7 @@ namespace neko {
     Viewport gameViewport_;
     vector<EditorViewport> viewports_;
     Image lastCapture_;
+    Editor editor_;
     std::queue<uint64_t> updateAccounts_;
     platform::RWLock logicLock_;
     void preInitialize();
@@ -75,6 +78,7 @@ namespace neko {
       bool mainbufResized = false;
       bool reloadShaders = false;
     } flags_;
+    void clear( const vec4& color );
   private:
     static void openglDebugCallbackFunction( GLenum source, GLenum type, GLuint id, GLenum severity,
       GLsizei length, const GLchar* message, const void* userParam );

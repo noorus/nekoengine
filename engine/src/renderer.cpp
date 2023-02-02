@@ -19,7 +19,7 @@ namespace neko {
 
   using namespace gl;
 
-  NEKO_DECLARE_CONVAR( vid_msaa, "Main buffer multisample antialiasing multiplier.", 4 );
+  NEKO_DECLARE_CONVAR( vid_msaa, "Main framebuffer multisample multiplier.", 4 );
   NEKO_DECLARE_CONVAR( dbg_shownormals, "Whether to visualize vertex normals with lines.", false );
   NEKO_DECLARE_CONVAR( dbg_showtangents, "Whether to visualize vertex tangents with lines.", false );
   NEKO_DECLARE_CONVAR( dbg_wireframe, "Whether to render in wireframe mode.", false );
@@ -452,20 +452,6 @@ namespace neko {
     uniform.exposure = camera.exposure();
   }
 
-  void dumpSceneGraph( SceneNode& root, int level = 0 )
-  {
-    utf8String str;
-    for ( int i = 0; i < level; i++ )
-      str.append( "  " );
-    Locator::console().printf( Console::srcGame,
-      "%s<node \"%s\" pos %.2f %.2f %.2f, scale %.2f %.2f %.2f, rot %.2f %.2f %.2f %.2f>", str.c_str(), root.name_.c_str(),
-      root.translate_.x, root.translate_.y, root.translate_.z,
-      root.scale_.x, root.scale_.y, root.scale_.z,
-      root.rotate_.x, root.rotate_.y, root.rotate_.z, root.rotate_.z );
-    for ( auto& child : root.children_ )
-      dumpSceneGraph( *child, level + 1 );
-  }
-
   void Renderer::setUserData( uint64_t id, const utf8String name, rainet::Image& image )
   {
     userData_.name_ = name;
@@ -553,7 +539,7 @@ namespace neko {
     g_viz.draw( *ppl, 44, 0, gl::GL_LINES );
   }
 
-  void Renderer::sceneDraw( GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams )
+  void Renderer::sceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams )
   {
     camera.exposure( drawparams.isEditor ? 1.0f : g_CVar_vid_exposure.as_f() );
 
@@ -666,8 +652,131 @@ namespace neko {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
   }
 
+  void Renderer::bindVao( GLuint id )
+  {
+    glBindVertexArray( id );
+  }
+
+  void Renderer::bindTexture( GLuint unit, TexturePtr texture )
+  {
+    glBindTextureUnit( unit, texture->handle() );
+  }
+
+  void Renderer::bindTextures( const vector<GLuint>& textures, GLuint firstUnit )
+  {
+    glBindTextures( firstUnit, static_cast<GLsizei>( textures.size() ), textures.data() );
+  }
+
+  void Renderer::bindTextures( const vector<TexturePtr>& textures, GLuint firstUnit )
+  {
+    vector<GLuint> handles( textures.size(), 0 );
+    for ( size_t i = 0; i < textures.size(); ++i )
+      handles[i] = textures[i]->handle();
+    glBindTextures( firstUnit, static_cast<GLsizei>( handles.size() ), handles.data() );
+  }
+
+  void Renderer::bindTextureUnits( const vector<GLuint>& textures )
+  {
+    for ( GLuint i = 0; i < textures.size(); ++i )
+      glBindTextureUnit( i, textures[i] );
+  }
+
+  void Renderer::resetFbo()
+  {
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+  }
+
+  void Renderer::drawGame( GameTime time, Camera& camera, const Viewport* viewport, const ViewportDrawParameters& params )
+  {
+    if ( !ctx_.ready() )
+      return;
+
+    if ( viewport )
+      viewport->begin();
+
+    {
+      auto processing = shaders_->processing()->lock().data();
+      processing->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
+      processing->gamma = g_CVar_vid_gamma.as_f();
+      processing->resolution = resolution_;
+      processing->textproj = glm::ortho( 0.0f, resolution_.x, resolution_.y, 0.0f );
+      shaders_->processing()->unlock();
+    }
+
+    bindVao( builtin_.emptyVAO_ );
+
+    FramebufferPtr main = ( ctx_.fboMainMultisampled_ ? ctx_.fboMainMultisampled_ : ctx_.fboMain_ );
+
+    {
+      main->prepare( 0, { 0, 1 } );
+      main->begin();  
+      implClearAndPrepare( params.isEditor ? vec3( 0.01f ) : vec3( 0.0f ) );
+      sceneDraw( time, camera, params );
+      if ( params.isEditor )
+      {
+        glLineWidth( 2.0f );
+        glEnable( GL_DEPTH_TEST );
+        glDepthMask( GL_FALSE );
+        glEnable( GL_LINE_SMOOTH );
+        drawEditorGrid( *shaders_, camera.position(), camera.direction() );
+      }
+      main->end();
+    }
+
+    glDisable( GL_DEPTH_TEST );
+    glDisable( GL_CULL_FACE );
+    glDisable( GL_MULTISAMPLE );
+    glDisable( GL_STENCIL_TEST );
+
+    // Smoothing can generate sub-fragments and cause visible ridges between triangles.
+    // Use a framebuffer for AA instead.
+    glDisable( GL_LINE_SMOOTH );
+    glDisable( GL_POLYGON_SMOOTH );
+
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+    if ( main != ctx_.fboMain_ )
+    {
+      main->blitColorTo( 0, 0, *ctx_.fboMain_ );
+      main->invalidate();
+      main = ctx_.fboMain_;
+    }
+
+    {
+      ctx_.mergedMain_->prepare( 0, { 0 } );
+      ctx_.mergedMain_->begin();
+      setGLDrawState( false, false, false, false );
+      auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
+      pipeline.setUniform( "tex", 0 );
+      bindTextures( main->textures() );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+      ctx_.mergedMain_->end();
+    }
+
+    resetFbo();
+
+    // Draw the merged buffer in full quad
+    if ( viewport )
+    {
+      setGLDrawState( false, false, false, false );
+      auto& pipeline = shaders_->usePipeline( "passthrough2d" );
+      pipeline.setUniform( "tex", 0 );
+      const GLuint hndl = ctx_.mergedMain_->texture( 0 )->handle();
+      glBindTextures( 0, 1, &hndl );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();
+    }
+
+    bindTextureUnits( { 0, 0 } );
+    bindVao( builtin_.emptyVAO_ );
+
+    if ( viewport )
+      viewport->end();
+  }
+
   void Renderer::draw(
-    GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad )
+    GameTime time, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad )
   {
     // check that the drawcontext is ready (fbo's available etc)
     if ( !ctx_.ready() )
@@ -703,7 +812,7 @@ namespace neko {
         ctx_.fboMain_->begin();
       }
       implClearAndPrepare( drawparams.isEditor ? vec3( 0.01f ) : vec3( 0.0f ) ); // 1 - clear the main fbo
-      sceneDraw( time, delta, camera, drawparams );
+      sceneDraw( time, camera, drawparams );
       if ( drawparams.isEditor )
       {
         glLineWidth( 2.0f );

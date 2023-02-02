@@ -42,7 +42,7 @@ namespace neko {
     Vertex3D( float x_, float y_, float z_, float nx_, float ny_, float nz_, float s_, float t_, float r_, float g_, float b_, float a_ ):
       position( x_, y_, z_ ), normal( nx_, ny_, nz_ ), texcoord( s_, t_ ), color( r_, g_, b_, a_ ), tangent{ 0.0f }, bitangent{ 0.0f } {}
     Vertex3D( vec3 position_, vec3 normal_, vec2 texcoord_, vec4 color_ ):
-      position( move( position_ ) ), normal( move( normal_ ) ), texcoord( move( texcoord_ ) ), color( move( color_ ) ), tangent{ 0.0f }, bitangent{ 0.0f } {}
+      position( position_ ), normal( normal_ ), texcoord( texcoord_ ), color( color_ ), tangent{ 0.0f }, bitangent{ 0.0f } {}
   };
 
   struct VertexPointParticle

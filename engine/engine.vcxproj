@@ -348,6 +348,7 @@
     <ClCompile Include="src\textmanager.cpp" />
     <ClCompile Include="src\texture.cpp" />
     <ClCompile Include="src\threadedrenderer.cpp" />
+    <ClCompile Include="src\viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\extern\lodepng\lodepng.h" />
@@ -385,6 +386,7 @@
     <ClInclude Include="include\forwards.h" />
     <ClInclude Include="include\framebuffer.h" />
     <ClInclude Include="include\gfx.h" />
+    <ClInclude Include="include\gfx_imguistyle.h" />
     <ClInclude Include="include\gfx_types.h" />
     <ClInclude Include="include\gui.h" />
     <ClInclude Include="include\input.h" />
@@ -423,6 +425,7 @@
     <ClInclude Include="include\text.h" />
     <ClInclude Include="include\texture.h" />
     <ClInclude Include="include\utilities.h" />
+    <ClInclude Include="include\viewport.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

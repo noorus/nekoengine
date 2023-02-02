@@ -139,6 +139,7 @@ namespace neko {
     Engine( ConsolePtr console, const Environment& env );
     //! Destructor.
     ~Engine();
+    void requestQuit();
     //! Triggers a "graceful" quit in case of a fatal error.
     void triggerFatalError( FatalError error );
     //! Initializes the Engine.

@@ -19,9 +19,7 @@ namespace neko {
     M_Extern_AccountUpdated,
     // Debug commands
     M_Debug_ReloadScript,
-    M_Debug_ReloadShaders,
     M_Debug_PauseTime,
-    M_Debug_ToggleWireframe,
     M_Debug_ToggleDevMode
   };
 

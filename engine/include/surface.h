@@ -28,4 +28,6 @@ namespace neko {
     inline GLuint handle() const noexcept { return handle_; }
   };
 
+  using SurfacePtr = shared_ptr<Surface>;
+
 }

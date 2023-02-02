@@ -157,7 +157,7 @@ namespace neko {
   void Framebuffer::prepare( size_t colorReadIndex, vector<size_t> colorWriteIndexes )
   {
     assert( colorReadIndex < colorBuffers_.size() );
-   // glNamedFramebufferReadBuffer( handle_, CONVGLENUM( GL_COLOR_ATTACHMENT0, colorReadIndex ) );
+    // glNamedFramebufferReadBuffer( handle_, CONVGLENUM( GL_COLOR_ATTACHMENT0, colorReadIndex ) );
     array<GLenum, 32> drawBuffers {};
     int ctr = 0;
     for ( auto index : colorWriteIndexes )
@@ -165,7 +165,7 @@ namespace neko {
       assert( index < colorBuffers_.size() );
       drawBuffers[ctr++] = CONVGLENUM( GL_COLOR_ATTACHMENT0, index );
     }
-    //glNamedFramebufferDrawBuffers( handle_, (GLsizei)colorWriteIndexes.size(), drawBuffers.data() );
+    // glNamedFramebufferDrawBuffers( handle_, (GLsizei)colorWriteIndexes.size(), drawBuffers.data() );
   }
 
   void Framebuffer::begin()

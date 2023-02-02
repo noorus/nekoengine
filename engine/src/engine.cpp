@@ -28,6 +28,14 @@ namespace neko {
 
   const char* c_engineSettingsFilename = "engineconf.json";
 
+  static void concmdQuit( Console* console, ConCmd* command, StringVector& arguments )
+  {
+    console->engine()->requestQuit();
+  }
+
+  NEKO_DECLARE_CONCMD( quit, "Quit the game/editor.", concmdQuit );
+  NEKO_DECLARE_CONCMD( exit, "Quit the game/editor.", concmdQuit );
+
   Engine::Engine( ConsolePtr console, const Environment& env ):
   console_( move( console ) ), env_( env )
   {
@@ -249,6 +257,11 @@ namespace neko {
     if ( state_.focusLost || state_.windowMove || state_.steamOverlay || state_.timePaused )
       return true;
     return false;
+  }
+
+  void Engine::requestQuit()
+  {
+    signal_ = Signal_Stop;
   }
 
   void Engine::restart()

@@ -11,6 +11,7 @@
 #include "scripting.h"
 #include "shaders.h"
 #include "rainet.h"
+#include "viewport.h"
 
 namespace MyGUI {
 #ifndef NEKO_NO_GUI
@@ -171,6 +172,12 @@ namespace neko {
     GLuint implCreateFramebuffer( size_t width, size_t height );
     void implDeleteFramebuffer( GLuint handle );
     shaders::Pipeline& useMaterial( const utf8String& name );
+    void bindVao( GLuint id );
+    void bindTexture( GLuint unit, TexturePtr texture );
+    void bindTextures( const vector<TexturePtr>& textures, GLuint firstUnit = 0 );
+    void bindTextures( const vector<GLuint>& textures, GLuint firstUnit = 0 );
+    void bindTextureUnits( const vector<GLuint>& textures );
+    void resetFbo();
   protected:
     GLInformation info_;
     ConsolePtr console_;
@@ -189,9 +196,9 @@ namespace neko {
     vec2 resolution_;
     struct DrawCtx
     {
-      unique_ptr<Framebuffer> fboMainMultisampled_;
-      unique_ptr<Framebuffer> fboMain_;
-      unique_ptr<Framebuffer> mergedMain_; // the output of fboMain after mergedown & post
+      FramebufferPtr fboMainMultisampled_;
+      FramebufferPtr fboMain_;
+      FramebufferPtr mergedMain_; // the output of fboMain after mergedown & post
       inline bool ready() const noexcept { return ( fboMain_ && fboMain_->available() ); }
     } ctx_;
     struct UserData
@@ -202,7 +209,7 @@ namespace neko {
     void implClearAndPrepare( const vec3& color );
     void uploadModelsEnterNode( SceneNode* node );
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
-    void sceneDraw( GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams );
+    void sceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );
     void clearErrors();
     void setCameraUniforms( Camera& camera, uniforms::Camera& uniform );
     TexturePtr loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering );
@@ -226,8 +233,9 @@ namespace neko {
     void setUserData( uint64_t id, const utf8String name, rainet::Image& image );
     void jsRestart();
     inline shaders::Shaders& shaders() noexcept { return *( shaders_.get() ); }
+    void drawGame( GameTime time, Camera& camera, const Viewport* viewport, const ViewportDrawParameters& params );
     void draw(
-      GameTime time, GameTime delta, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad );
+      GameTime time, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad );
     void reset( size_t width, size_t height );
     ~Renderer();
   };
