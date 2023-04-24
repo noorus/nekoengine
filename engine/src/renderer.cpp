@@ -502,46 +502,9 @@ namespace neko {
       glDisable( GL_CULL_FACE );
   }
 
-  void drawEditorGrid( shaders::Shaders& shaders, const vec3& origin, const vec3& normal )
-  {
-    constexpr int count = 10;
-    auto g_viz = LineRenderBuffer<44>();
-    auto verts = g_viz.buffer().lock();
-    auto fv = 90.0f / 255.0f;
-    const auto color = vec4( fv, fv, fv, 1.0f );
-
-    for ( size_t i = 0; i < 44; ++i )
-      verts[i].color = color;
-
-    vec2i segments { count, count };
-    vec2 dimensions { (Real)segments.x, (Real)segments.y };
-
-    auto vx = math::perpendicular( normal );
-    auto vy = glm::cross( normal, vx );
-    auto delta1 = vec3( dimensions.x / (Real)segments.x * vx );
-    auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
-
-    size_t i = 0;
-    auto fit = vec3( math::floor( origin.x ), math::floor( origin.y ), math::floor( origin.y ) );
-    auto orig = fit + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
-    for ( auto x = 0; x <= segments.x; ++x )
-    {
-      verts[i++].pos = orig + (Real)x * delta1;
-      verts[i++].pos = orig + (Real)x * delta1 + dimensions.y * delta2;
-    }
-    for ( auto y = 0; y <= segments.y; ++y )
-    {
-      verts[i++].pos = orig + (Real)y * delta2;
-      verts[i++].pos = orig + dimensions.x * delta1 + (Real)y * delta2;
-    }
-    g_viz.buffer().unlock();
-    auto ppl = &shaders.usePipeline( "dbg_line" );
-    g_viz.draw( *ppl, 44, 0, gl::GL_LINES );
-  }
-
   void Renderer::sceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams )
   {
-    camera.exposure( drawparams.isEditor ? 1.0f : g_CVar_vid_exposure.as_f() );
+    camera.exposure( drawparams.drawopExposure() );
 
     {
       auto world = shaders_->world()->lock().data();
@@ -552,7 +515,7 @@ namespace neko {
       shaders_->world()->unlock();
     }
 
-    auto wire = ( drawparams.drawWireframe || ( !drawparams.isEditor && g_CVar_dbg_wireframe.as_b() ) );
+    auto wire = ( drawparams.drawopShouldDrawWireframe() );
 
     setGLDrawState( true, true, true, wire );
 
@@ -623,7 +586,7 @@ namespace neko {
     setGLDrawState( true, true, false, wire );
     particles_->draw( *shaders_, *materials_ );
 
-    if ( drawparams.drawSky )
+    if ( drawparams.drawopShouldDrawSky() )
     {
       setGLDrawState( true, true, true, wire );
       glDepthFunc( GL_LEQUAL );
@@ -710,16 +673,8 @@ namespace neko {
     {
       main->prepare( 0, { 0, 1 } );
       main->begin();  
-      implClearAndPrepare( params.isEditor ? vec3( 0.01f ) : vec3( 0.0f ) );
+      implClearAndPrepare( params.drawopClearColor() );
       sceneDraw( time, camera, params );
-      if ( params.isEditor )
-      {
-        glLineWidth( 2.0f );
-        glEnable( GL_DEPTH_TEST );
-        glDepthMask( GL_FALSE );
-        glEnable( GL_LINE_SMOOTH );
-        drawEditorGrid( *shaders_, camera.position(), camera.direction() );
-      }
       main->end();
     }
 
@@ -784,8 +739,8 @@ namespace neko {
 
     GLint previousViewport[4];
     glGetIntegerv( GL_VIEWPORT, previousViewport );
-    glViewport( 0, 0, static_cast<GLsizei>( drawparams.fullWindowResolution.x ),
-      static_cast<GLsizei>( drawparams.fullWindowResolution.y ) );
+    glViewport( 0, 0, static_cast<GLsizei>( drawparams.drawopFullResolution().x ),
+      static_cast<GLsizei>( drawparams.drawopFullResolution().y ) );
     glDisable( GL_SCISSOR_TEST );
 
     // Default to empty VAO, since not having a bound VAO is illegal as per 4.5 spec
@@ -811,15 +766,15 @@ namespace neko {
         ctx_.fboMain_->prepare( 0, { 0, 1 } );
         ctx_.fboMain_->begin();
       }
-      implClearAndPrepare( drawparams.isEditor ? vec3( 0.01f ) : vec3( 0.0f ) ); // 1 - clear the main fbo
+      implClearAndPrepare( drawparams.drawopClearColor() ); // 1 - clear the main fbo
       sceneDraw( time, camera, drawparams );
-      if ( drawparams.isEditor )
+      if ( false ) // drawparams.isEditor )
       {
         glLineWidth( 1.0f );
         glEnable( GL_DEPTH_TEST );
         glDepthMask( GL_FALSE );
         glEnable( GL_LINE_SMOOTH );
-        drawEditorGrid( *shaders_, camera.position(), camera.direction() );
+        // drawEditorGrid( *shaders_, camera.position(), camera.direction() );
       }
       if ( ctx_.fboMainMultisampled_ )
         ctx_.fboMainMultisampled_->end();

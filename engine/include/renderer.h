@@ -12,6 +12,7 @@
 #include "shaders.h"
 #include "rainet.h"
 #include "viewport.h"
+#include "gfx.h"
 
 namespace MyGUI {
 #ifndef NEKO_NO_GUI
@@ -135,15 +136,6 @@ namespace neko {
     void addSceneNode( SceneNode* node );
     void destroySceneNode( SceneNode* node );
     inline set<SceneNode*> sceneGraph() { return sceneGraph_; }
-  };
-
-  struct ViewportDrawParameters
-  {
-    bool drawSky;
-    bool drawFBO;
-    bool drawWireframe;
-    bool isEditor;
-    vec2 fullWindowResolution;
   };
 
   class Renderer: public SceneManager {

@@ -291,9 +291,14 @@
     <ClCompile Include="src\consolewindow_windows.cpp" />
     <ClCompile Include="src\director.cpp" />
     <ClCompile Include="src\dynamicmesh.cpp" />
+    <ClCompile Include="src\editor.cpp" />
+    <ClCompile Include="src\editorgridrenderer.cpp" />
+    <ClCompile Include="src\editorviewport.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\filesystem.cpp" />
     <ClCompile Include="src\fontmanager.cpp" />
+    <ClCompile Include="src\gameviewport.cpp" />
+    <ClCompile Include="src\imguistyle.cpp" />
     <ClCompile Include="src\js_text.cpp" />
     <ClCompile Include="src\particlemanager.cpp" />
     <ClCompile Include="src\text.cpp" />
@@ -424,6 +429,7 @@
     <ClInclude Include="include\scripting.h" />
     <ClInclude Include="include\shaders.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\specialrenderers.h" />
     <ClInclude Include="include\subsystem.h" />
     <ClInclude Include="include\surface.h" />
     <ClInclude Include="include\text.h" />

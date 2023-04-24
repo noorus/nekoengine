@@ -8,19 +8,39 @@
 #include "camera.h"
 #include "gui.h"
 #include "viewport.h"
+#include "specialrenderers.h"
 
 namespace neko {
 
   constexpr int32_t c_glVersion[2] = { 4, 6 };
 
-  class EditorViewport: public Viewport {
+  class ViewportDrawParameters {
+  public:
+    virtual bool drawopShouldDrawSky() const = 0;
+    virtual bool drawopShouldDrawWireframe() const = 0;
+    virtual vec2 drawopFullResolution() const = 0;
+    virtual vec3 drawopClearColor() const = 0;
+    virtual Real drawopExposure() const = 0;
+  };
+
+  class EditorViewport: public Viewport, public ViewportDrawParameters {
   protected:
     utf8String name_;
     unique_ptr<EditorOrthoCamera> camera_;
     bool panning_ = false;
     vec4 axisMask_ = { 1.0f, 1.0f, 1.0f, 1.0f };
+    vec2 windowResolution_ = { 0.0f, 0.0f };
+    // EditorGridRenderer grid_;
+  public:
+    // ViewportDrawParameters interface implementation
+    bool drawopShouldDrawSky() const override;
+    bool drawopShouldDrawWireframe() const override;
+    vec2 drawopFullResolution() const override;
+    vec3 drawopClearColor() const override;
+    Real drawopExposure() const override;
   public:
     EditorViewport( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def );
+    void resize( int width, int height, const Viewport& windowViewport );
     inline void panning( bool isPanning ) { panning_ = isPanning; }
     inline bool panning() const { return panning_; }
     inline unique_ptr<EditorOrthoCamera>& camera() { return camera_; }
@@ -28,6 +48,23 @@ namespace neko {
     inline vec4 axisMask() const { return axisMask_; }
     vec3 pointToWorld( vec2 point ); // Cast a point on the 2D viewport to world coordinates. Depth will be zero.
     vec3 windowPointToWorld( vec2 point ); // Same as pointToWorld but assumes window coordinates
+  };
+
+  class GameViewport: public Viewport, public ViewportDrawParameters {
+  protected:
+    CameraPtr camera_;
+    vec2 windowResolution_ = { 0.0f, 0.0f };
+  public:
+    void setCamera( CameraPtr camera );
+    inline CameraPtr camera() const { return camera_; }
+    void resize( int width, int height, const Viewport& windowViewport );
+  public:
+    // ViewportDrawParameters interface implementation
+    bool drawopShouldDrawSky() const override;
+    bool drawopShouldDrawWireframe() const override;
+    vec2 drawopFullResolution() const override;
+    vec3 drawopClearColor() const override;
+    Real drawopExposure() const override;
   };
 
   class CursorLock {
@@ -57,7 +94,7 @@ namespace neko {
     vec2 mousePos_ { 0.0f };
   public:
     void initialize( RendererPtr renderer, const vec2& realResolution );
-    void resize( size_t width, size_t height );
+    void resize( const Viewport& windowViewport );
     inline void mainMenuHeight( float height ) { mainMenuHeight_ = height; }
     inline bool enabled() const { return enabled_; }
     inline void enabled( bool enable ) { enabled_ = enable; }
@@ -65,7 +102,7 @@ namespace neko {
     void shutdown();
     void updateRealtime(
       GameTime realTime, GameTime delta, GfxInputPtr input, SceneManager& scene, const Viewport& window, OrbitCamera& gameCamera );
-    bool draw( RendererPtr renderer, GameTime time, const Viewport& window, Camera& gameCamera );
+    bool draw( RendererPtr renderer, GameTime time, const Viewport& window, GameViewport& gameViewport );
   };
 
   class Gfx:
@@ -98,10 +135,10 @@ namespace neko {
     Info info_;
     unique_ptr<sf::Window> window_;
     SceneNode* target_;
-    unique_ptr<OrbitCamera> camera_;
+    shared_ptr<OrbitCamera> camera_;
     RendererPtr renderer_;
     Viewport windowViewport_;
-    Viewport gameViewport_;
+    GameViewport gameViewport_;
     Image lastCapture_;
     Editor editor_;
     std::queue<uint64_t> updateAccounts_;

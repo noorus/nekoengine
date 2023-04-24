@@ -23,7 +23,7 @@ namespace neko {
   {
     freeBuffers_.push_back( vbo->id_ );
     auto target = &vbos_[vbo->type_];
-    target->erase( std::remove( target->begin(), target->end(), move( vbo ) ), target->end() );
+    target->erase( std::remove( target->begin(), target->end(), vbo ), target->end() );
   }
 
   EBOPtr MeshManager::createEBO()
@@ -36,7 +36,7 @@ namespace neko {
   void MeshManager::freeEBO( EBOPtr ebo )
   {
     freeBuffers_.push_back( ebo->id_ );
-    ebos_.erase( std::remove( ebos_.begin(), ebos_.end(), move( ebo ) ), ebos_.end() );
+    ebos_.erase( std::remove( ebos_.begin(), ebos_.end(), ebo ), ebos_.end() );
   }
 
   VAOPtr MeshManager::createVAO()
@@ -49,7 +49,7 @@ namespace neko {
   void MeshManager::freeVAO( VAOPtr vao )
   {
     freeVaos_.push_back( vao->id_ );
-    vaos_.erase( std::remove( vaos_.begin(), vaos_.end(), move( vao ) ), vaos_.end() );
+    vaos_.erase( std::remove( vaos_.begin(), vaos_.end(), vao ), vaos_.end() );
   }
 
 #ifndef NEKO_NO_SCRIPTING

@@ -118,6 +118,12 @@
     <Filter Include="Source Files\extern\imgui\backends">
       <UniqueIdentifier>{82d35cce-4410-4928-aac2-df0331a94ef1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gfx\renderers">
+      <UniqueIdentifier>{0be19b3f-13b4-4f80-afd3-3f19c96314f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gfx\editor">
+      <UniqueIdentifier>{2c3d41cb-ba37-4499-a4e9-15b7fb70f179}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -341,6 +347,21 @@
     </ClCompile>
     <ClCompile Include="src\utilities.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editorgridrenderer.cpp">
+      <Filter>Source Files\gfx\renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editorviewport.cpp">
+      <Filter>Source Files\gfx\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editor.cpp">
+      <Filter>Source Files\gfx\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gameviewport.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imguistyle.cpp">
+      <Filter>Source Files\gfx\gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -582,6 +603,9 @@
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="include\transform.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\specialrenderers.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>
