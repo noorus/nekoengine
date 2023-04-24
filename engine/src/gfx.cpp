@@ -188,15 +188,69 @@ namespace neko {
     printInfo();
   }
 
+  // clang-format off
+
   static const vector<EditorViewportDefinition> g_editorViewportDefs = {
-    { .name = "top", .eye = vec3( 0.01f, -100.0f, 0.0f ), .up = vec3( 0.0f, 1.0f, 0.0f ) },
-    { .name = "front", .eye = vec3( 0.0f, 0.01f, 100.0f ), .up = vec3( 0.0f, 1.0f, 0.0f ) },
-    { .name = "left", .eye = vec3( -100.0f, 0.01f, 0.0f ), .up = vec3( 0.0f, 1.0f, 0.0f ) }
+    {
+      .name = "top",
+      .position = vec3( 0.0f, 10.0f, 0.0f ),
+      .eye = vec3( 0.0f, -1.0f, 0.0f ),
+      .up = vec3( 0.0f, 0.0f, -1.0f )
+    },
+    {
+      .name = "front",
+      .position = vec3( 0.0f, 0.0f, 10.0f ),
+      .eye = vec3( 0.0f, 0.0f, -1.0f ),
+      .up = vec3( 0.0f, 1.0f, 0.0f )
+    },
+    {
+      .name = "left",
+      .position = vec3( 10.0f, 0.0f, 0.0f ),
+      .eye = vec3( -1.0f, 0.0f, 0.0f ),
+      .up = vec3( 0.0f, 1.0f, 0.0f )
+    }
   };
 
-  EditorViewport::EditorViewport( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def )
+  // clang-format on
+
+  EditorViewport::EditorViewport( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def ): name_( def.name )
   {
+    axisMask_ = vec4(
+      math::abs( def.eye.x ) > 0.1f ? 0.0f : 1.0f,
+      math::abs( def.eye.y ) > 0.1f ? 0.0f : 1.0f,
+      math::abs( def.eye.z ) > 0.1f ? 0.0f : 1.0f,
+      1.0f );
     camera_ = make_unique<EditorOrthoCamera>( manager, resolution, def );
+  }
+
+  void Editor::initialize( RendererPtr renderer, const vec2& realResolution )
+  {
+    viewports_.clear();
+
+    for ( const auto& def : g_editorViewportDefs )
+    {
+      EditorViewport vp( renderer.get(), realResolution, def );
+      viewports_.push_back( move( vp ) );
+    }
+  }
+  
+  void Editor::resize( size_t width, size_t height )
+  {
+    const auto halfsize = vec2i( width / 2, height / 2 );
+    for ( int i = 0; i < viewports_.size(); ++i )
+    {
+      auto& viewport = viewports_[i];
+      if ( i == 0 )
+        viewport.move( 0, 0 );
+      else if ( i == 1 )
+        viewport.move( static_cast<int>( halfsize.x ), 0 );
+      else if ( i == 2 )
+        viewport.move( 0, static_cast<int>( halfsize.y ) );
+      else if ( i == 3 )
+        viewport.move( static_cast<int>( halfsize.x ), static_cast<int>( halfsize.y ) );
+      viewport.resize( static_cast<GLsizei>( halfsize.x ), static_cast<GLsizei>( halfsize.y ) );
+      viewport.camera()->setViewport( vec2( static_cast<Real>( halfsize.x ), static_cast<Real>( halfsize.y ) ) );
+    }
   }
 
   void Gfx::postInitialize( Engine& engine )
@@ -240,11 +294,7 @@ namespace neko {
     5.0f, // zoomaccel
     2.0f ); // zoomdecel
 
-    for ( const auto& def : g_editorViewportDefs )
-    {
-      EditorViewport vp( renderer_.get(), realResolution, def );
-      viewports_.push_back( move( vp ) );
-    }
+    editor_.initialize( renderer_, realResolution );
 
     resize( window_->getSize().x, window_->getSize().y );
 
@@ -281,11 +331,7 @@ namespace neko {
     }
     input_->setWindowSize( windowViewport_.size() );
 
-    for ( auto& viewport :viewports_)
-    {
-      viewport.resize( static_cast<GLsizei>( width / 2 ), static_cast<GLsizei>( height / 2 ) );
-      viewport.camera()->setViewport( vec2( static_cast<Real>( width ) * 0.5f, static_cast<Real>( height ) * 0.5f ) );
-    }
+    editor_.resize( width, height );
 
     auto realResolution = vec2( (Real)width, (Real)height );
     camera_->setViewport( realResolution );
@@ -299,7 +345,7 @@ namespace neko {
 
   NEKO_EXTERN_CONVAR( vid_gamma );
 
-  void Gfx::processEvents()
+  void Gfx::processEvents( bool discardMouse, bool discardKeyboard )
   {
     input_->update();
 
@@ -369,21 +415,111 @@ namespace neko {
 
   // clang-format on
 
-  void Gfx::updateRealTime( GameTime realTime, GameTime delta, Engine& engine )
+  SceneNode* findFirstModelNode( SceneNode* node )
   {
-    auto& igIO = ImGui::GetIO();
-
-    int vp = 3;
-    if ( engine.devmode() )
+    if ( node->mesh_ && node->mesh_->mesh_ )
+      return node;
+    for ( auto child : node->children_ )
     {
-      const auto halfsize = vec2i( windowViewport_.sizef() * 0.5f );
-      if ( input_->mousePosition_.x < halfsize.x )
-        vp = ( input_->mousePosition_.y < halfsize.y ? 0 : 2 );
-      else
-        vp = ( input_->mousePosition_.y < halfsize.y ? 1 : 3 );
+      auto ret = findFirstModelNode( child );
+      if ( ret )
+        return ret;
+    }
+    return nullptr;
+  }
+
+  vec3 EditorViewport::pointToWorld( vec2 point )
+  {
+    auto vmp = vec4( mapPointByViewport( point ), 0.0f, 1.0f );
+    auto mat = glm::inverse( camera_->projection() * camera_->view() * camera_->model() );
+    auto wc = ( camera_->model() * mat * vmp ) * axisMask_;
+    return vec3 { -wc.z, -wc.y, -wc.x };
+  }
+
+  vec3 EditorViewport::windowPointToWorld( vec2 point )
+  {
+    auto vmp = vec4( mapPointByWindow( point ), 0.0f, 1.0f );
+    auto mat = glm::inverse( camera_->projection() * camera_->view() * camera_->model() );
+    auto wc = ( camera_->model() * mat * vmp ) * axisMask_;
+    return vec3 { -wc.z, -wc.y, -wc.x };
+  }
+
+  void Editor::updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SceneManager& scene,
+    const Viewport& window, OrbitCamera& gameCamera )
+  {
+    auto panButtonPressed = input->mousebtn( 2 );
+    mousePos_ = vec2( static_cast<Real>( input->mousePosition_.x ), static_cast<Real>( input->mousePosition_.y ) );
+
+    SceneNode* mdl = nullptr;
+    for ( auto node : scene.sceneGraph() )
+    {
+      mdl = findFirstModelNode( node );
+      if ( mdl )
+        break;
     }
 
-    if ( vp == 3 )
+    auto& igIO = ImGui::GetIO();
+    if ( !igIO.WantCaptureMouse )
+    {
+      auto vpidx = 3;
+      if ( !panButtonPressed )
+      {
+        panningViewport_ = -1;
+        if ( cursorLock_ )
+          cursorLock_.reset();
+      }
+      if ( panningViewport_ < 0 )
+      {
+        const auto halfsize = vec2i( window.sizef() * 0.5f );
+        if ( input->mousePosition_.x < halfsize.x )
+          vpidx = ( input->mousePosition_.y < halfsize.y ? 0 : 2 );
+        else
+          vpidx = ( input->mousePosition_.y < halfsize.y ? 1 : 3 );
+        if ( panButtonPressed )
+        {
+          panningViewport_ = vpidx;
+          //if ( !cursorLock_ )
+          //  cursorLock_ = make_unique<CursorLock>();
+        }
+      }
+      else
+        vpidx = panningViewport_;
+
+      if ( vpidx == 3 )
+      {
+        if ( panButtonPressed )
+          gameCamera.applyInputPanning( input->movement() );
+        else if ( input->mousebtn( 1 ) )
+          gameCamera.applyInputRotation( input->movement() );
+
+        gameCamera.applyInputZoom( static_cast<int>( input->movement().z ) );
+      }
+      else
+      {
+        auto& vp = viewports_[vpidx];
+        if ( panButtonPressed )
+          vp.camera()->applyInputPanning( input->movement() );
+        else
+        {
+          if ( input->mousebtn( 0 ) && mdl )
+          {
+            auto wc = viewports_[vpidx].windowPointToWorld( mousePos_ );
+            mdl->setTranslate( wc );
+          }
+        }
+        vp.camera()->applyInputZoom( static_cast<int>( input->movement().z ) );
+      }
+    }
+
+    for ( auto& vp : viewports_ )
+      vp.camera()->update( delta, realTime );
+  }
+
+  void Gfx::updateRealTime( GameTime realTime, GameTime delta, Engine& engine )
+  {
+    if ( editor_.enabled() )
+      editor_.updateRealtime( realTime, delta, input_, *renderer_, windowViewport_, *camera_ );
+    else
     {
       if ( input_->mousebtn( 2 ) )
         camera_->applyInputPanning( input_->movement() );
@@ -392,15 +528,6 @@ namespace neko {
 
       camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
     }
-    else
-    {
-      if ( input_->mousebtn( 2 ) )
-        viewports_[vp].camera()->applyInputPanning( input_->movement() );
-      viewports_[vp].camera()->applyInputZoom( static_cast<int>( input_->movement().z ) );
-    }
-
-    for ( auto& vp : viewports_ )
-      vp.camera()->update( delta, realTime );
 
     camera_->update( delta, realTime );
   }
@@ -414,6 +541,47 @@ namespace neko {
   }
 
   static bool show_demo_window = true;
+
+  void Gfx::preUpdate()
+  {
+  }
+
+  bool Editor::draw( RendererPtr renderer, GameTime time, const Viewport& window, Camera& gameCamera )
+  {
+    if ( !enabled_ )
+      return false;
+
+    const auto halfsize = vec2i( window.sizef() * 0.5f );
+
+    ImGui::SetNextWindowPos( { 0, 0 } );
+    ImGui::SetNextWindowSize( { window.sizef().x, window.sizef().y } );
+    ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0, 0 ) );
+    ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
+    ImGui::Begin( "Invisible", nullptr, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoSavedSettings );
+    for ( int i = 0; i < 3; ++i )
+    {
+      renderer->draw( time, *viewports_[i].camera(), g_editorparams, renderer->builtins().screenFourthQuads_[i] );
+      auto& vp = viewports_[i];
+      auto topleft = vp.posf();
+      auto bottomright = topleft + vp.sizef();
+      if ( topleft.y < mainMenuHeight_ )
+        topleft.y = mainMenuHeight_;
+      ImGui::GetBackgroundDrawList()->AddRect( topleft, bottomright, ImColor( 0.0f, 0.5f, 0.8f ) );
+      auto mousepoint = vp.mapPointByWindow( mousePos_ );
+      ImGui::GetBackgroundDrawList()->AddText( topleft + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ),
+        utils::ilprinf( "%s - mouse %.2f %.2f camera %.2f %.2f %.2f",
+        vp.name().c_str(),
+        mousepoint.x, mousepoint.y,
+        vp.camera()->position().x, vp.camera()->position().y, vp.camera()->position().z
+      ).c_str() );
+    }
+    ImGui::End();
+    ImGui::PopStyleVar( 2 );
+
+    renderer->draw( time, gameCamera, g_liveparams, renderer->builtins().screenFourthQuads_[3] );
+
+    return true;
+  }
 
   void Gfx::update( GameTime time, GameTime delta, Engine& engine )
   {
@@ -471,19 +639,7 @@ namespace neko {
     g_editorparams.fullWindowResolution = windowViewport_.sizef();
     g_liveparams.fullWindowResolution = windowViewport_.sizef();
 
-    if ( engine.devmode() )
-    {
-      const auto halfsize = vec2i( windowViewport_.sizef() * 0.5f );
-      for ( int i = 0; i < 3; ++i )
-      {
-        renderer_->draw( time, *viewports_[i].camera(), g_editorparams, renderer_->builtins().screenFourthQuads_[i] );
-      }
-      renderer_->draw( time, *camera_, g_liveparams, renderer_->builtins().screenFourthQuads_[3] );
-    }
-    else
-    {
-      renderer_->drawGame( time, *camera_, nullptr, g_liveparams );
-    }
+    editor_.enabled( engine.devmode() );
 
     /*
           processing->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
@@ -494,6 +650,7 @@ namespace neko {
 
     if ( ImGui::BeginMainMenuBar() )
     {
+      editor_.mainMenuHeight( ImGui::GetWindowHeight() );
       if ( ImGui::BeginMenu( "File" ) )
       {
         ImGui::Separator();
@@ -519,6 +676,9 @@ namespace neko {
       }
       ImGui::EndMainMenuBar();
     }
+
+    if ( !editor_.draw( renderer_, time, windowViewport_, *camera_ ) )
+      renderer_->drawGame( time, *camera_, nullptr, g_liveparams );
 
     if ( show_demo_window )
       ImGui::ShowDemoWindow( &show_demo_window );
@@ -578,6 +738,12 @@ namespace neko {
     return lastCapture_;
   }
 
+  void Editor::shutdown()
+  {
+    for ( auto& vp : viewports_ )
+      vp.camera().reset();
+  }
+
   void Gfx::shutdown()
   {
     messaging_->remove( this );
@@ -592,8 +758,7 @@ namespace neko {
 
     gui_->shutdown();
 
-    for ( auto& vp : viewports_ )
-      vp.camera().reset();
+    editor_.shutdown();
 
     camera_.reset();
 

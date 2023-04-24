@@ -9,7 +9,7 @@ namespace neko {
   EditorOrthoCamera::EditorOrthoCamera( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def ):
     Camera( manager, resolution, 90.0f )
   {
-    position_ = vec3( 0.0f, 0.0f, 0.0f );
+    position_ = def.position;
     eye_ = def.eye;
     up_ = def.up;
   }
@@ -31,17 +31,18 @@ namespace neko {
 
   void EditorOrthoCamera::_reposition()
   {
-    auto ratio = resolution_.x / resolution_.y;
+    aspect_ = resolution_.x / resolution_.y;
     auto diam = orthoRadius_;
     projection_ = glm::ortho(
-      -( ( diam * 0.5f ) * ratio ), ( ( diam * 0.5f ) * ratio ), -( diam * 0.5f ), ( diam * 0.5f ), 0.01f, 1000.0f );
+      -( ( diam * 0.5f ) * aspect_ ), ( ( diam * 0.5f ) * aspect_ ), -( diam * 0.5f ), ( diam * 0.5f ), 0.01f, 1000.0f );
   }
 
   void EditorOrthoCamera::applyInputPanning( const vec3i& move )
   {
     const float multiplier = 0.05f;
-    auto mov = vec3f( static_cast<Real>( move.x ) * multiplier, 0.0f, static_cast<Real>( move.y ) * multiplier );
-    position_ += mov;
+    auto xmov = ( right() * ( static_cast<Real>( -move.x ) * multiplier ) );
+    auto ymov = ( up() * ( static_cast<Real>( move.y ) * multiplier ) );
+    position_ += ( xmov + ymov );
     _reposition();
   }
 
@@ -53,15 +54,33 @@ namespace neko {
 
   void EditorOrthoCamera::update( GameTime delta, GameTime time )
   {
-    //position_ = vec3( 0.0f, 0.0f, 0.0f );
     node_->setTranslate( position_ );
-
-    view_ = glm::lookAt( position_ + eye_, position_, up_ );
+    view_ = glm::lookAt( position_, position_ + ( eye_ * 100.0f ), up() );
   }
 
   vec3 EditorOrthoCamera::direction() const
   {
-    return math::normalize( -eye_ );
+    return eye_;
+  }
+
+  void EditorOrthoCamera::radius( Real radius )
+  {
+    orthoRadius_ = radius;
+  }
+
+  Real EditorOrthoCamera::aspect() const
+  {
+    return aspect_;
+  }
+
+  vec3 EditorOrthoCamera::right() const
+  {
+    return math::cross( direction(), up() );
+  }
+
+  vec3 EditorOrthoCamera::up() const
+  {
+    return up_;
   }
 
   Camera::Camera( SceneManager* manager, vec2 resolution, Degrees fov ):
@@ -91,6 +110,13 @@ namespace neko {
       ( diam * 0.5f ),
       0.01f, 1000.0f );
 #endif
+  }
+
+  const mat4 Camera::model() const noexcept
+  {
+    auto ret = mat4( numbers::one );
+    ret = glm::translate( ret, position_ );
+    return ret;
   }
 
   void Camera::exposure( Real exp )
@@ -247,6 +273,21 @@ namespace neko {
   vec3 OrbitCamera::direction() const
   {
     return math::normalize( target_->getDerivedTranslate() - position_ );
+  }
+
+  Real OrbitCamera::aspect() const
+  {
+    return 1.0f; // dunno
+  }
+
+  vec3 OrbitCamera::right() const
+  {
+    return math::cross( direction(), up() );
+  }
+
+  vec3 OrbitCamera::up() const
+  {
+    return { 0.0f, 1.0f, 0.0f };
   }
 
   void OrbitCamera::setSensitivity( Real sensitivity )

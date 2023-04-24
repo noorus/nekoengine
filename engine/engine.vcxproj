@@ -348,6 +348,7 @@
     <ClCompile Include="src\textmanager.cpp" />
     <ClCompile Include="src\texture.cpp" />
     <ClCompile Include="src\threadedrenderer.cpp" />
+    <ClCompile Include="src\utilities.cpp" />
     <ClCompile Include="src\viewport.cpp" />
   </ItemGroup>
   <ItemGroup>

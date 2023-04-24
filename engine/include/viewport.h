@@ -22,10 +22,13 @@ namespace neko {
     inline vec2i size() const { return { width_, height_ }; }
     inline vec2 posf() const { return position_; }
     inline vec2 sizef() const { return { static_cast<float>( width_ ), static_cast<float>( height_ ) }; }
+    void move( int x, int y );
     void resize( int width, int height );
     inline void resize( vec2i size ) { resize( static_cast<int>( size.x ), static_cast<int>( size.y ) ); }
     void begin() const;
     void end() const;
+    vec2 mapPointByViewport( vec2 point ) const; //!< Map a point from viewport-relative coordinates to view space
+    vec2 mapPointByWindow( vec2 point ) const; //!< Map a point from window-relative coordinates to view space
   };
 
 }

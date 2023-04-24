@@ -31,6 +31,7 @@ namespace neko {
     inline const mat4& view() const noexcept { return view_; }
     inline const mat4& projection() const noexcept { return projection_; }
     inline const vec3& position() const noexcept { return position_; }
+    const mat4 model() const noexcept;
     inline Real near() const noexcept { return near_; }
     inline Real far() const noexcept { return far_; }
     inline Real exposure() const noexcept { return exposure_; }
@@ -45,6 +46,7 @@ namespace neko {
   struct EditorViewportDefinition
   {
     utf8String name;
+    vec3 position;
     vec3 eye;
     vec3 up;
   };
@@ -53,6 +55,7 @@ namespace neko {
   protected:
     vec3 eye_;
     vec3 up_;
+    Real aspect_ = 1.0f;
     Real orthoRadius_ = 14.0f;
     void _reposition();
   public:
@@ -64,6 +67,9 @@ namespace neko {
     vec3 direction() const override;
     virtual void applyInputPanning( const vec3i& mousemovement );
     virtual void applyInputZoom( int zoom );
+    Real aspect() const override;
+    vec3 right() const override;
+    vec3 up() const override;
   };
 
   struct CameraValueState
@@ -116,6 +122,9 @@ namespace neko {
     virtual void setClampTop( Radians fClampTop );
     virtual void setClampBottom( Radians fClampBottom );
     vec3 direction() const override;
+    Real aspect() const override;
+    vec3 right() const override;
+    vec3 up() const override;
   };
 
 }

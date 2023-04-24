@@ -40,6 +40,9 @@ namespace neko {
       return out;
     }
 
+    //! Inline printf - buffer max is 16384 characters total
+    utf8String ilprinf( const char* fmt, ... );
+
     inline wstring asciiToWideNaive( string_view str )
     {
       wstring out;

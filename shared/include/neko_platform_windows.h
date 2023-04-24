@@ -387,11 +387,30 @@ namespace neko {
 
     inline bool getCursorPosition( const HWND window, POINT& position )
     {
-      if ( !GetCursorPos( &position ) )
+      if ( !::GetCursorPos( &position ) )
         return false;
-      if ( !ScreenToClient( window, &position ) )
+      if ( !::ScreenToClient( window, &position ) )
         return false;
       return true;
+    }
+
+    inline bool getCursorPosition( vec2i& position )
+    {
+      POINT tmp;
+      if ( !::GetCursorPos( &tmp ) )
+        return false;
+      position = vec2i( tmp.x, tmp.y );
+      return true;
+    }
+
+    inline void setCursorPosition( vec2i position )
+    {
+      ::SetCursorPos( static_cast<int>( position.x ), static_cast<int>( position.y ) );
+    }
+
+    inline void showCursor( bool show )
+    {
+      ::ShowCursor( show ? TRUE : FALSE );
     }
 
     inline int64_t unixTimestamp()

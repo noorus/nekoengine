@@ -17,18 +17,55 @@ namespace neko {
   protected:
     utf8String name_;
     unique_ptr<EditorOrthoCamera> camera_;
+    bool panning_ = false;
+    vec4 axisMask_ = { 1.0f, 1.0f, 1.0f, 1.0f };
   public:
     EditorViewport( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def );
+    inline void panning( bool isPanning ) { panning_ = isPanning; }
+    inline bool panning() const { return panning_; }
     inline unique_ptr<EditorOrthoCamera>& camera() { return camera_; }
+    inline const utf8String& name() const { return name_; }
+    inline vec4 axisMask() const { return axisMask_; }
+    vec3 pointToWorld( vec2 point ); // Cast a point on the 2D viewport to world coordinates. Depth will be zero.
+    vec3 windowPointToWorld( vec2 point ); // Same as pointToWorld but assumes window coordinates
+  };
+
+  class CursorLock {
+  private:
+    vec2i saved_ {};
+  public:
+    CursorLock()
+    {
+      platform::getCursorPosition( saved_ );
+      platform::showCursor( false );
+    }
+    ~CursorLock()
+    {
+      platform::setCursorPosition( saved_ );
+      platform::showCursor( true );
+    }
   };
 
   class Editor {
   protected:
-    bool enabled_ = false;
+    bool enabled_ = true;
     vec3 clearColor_ = vec3( 0.0f, 0.0f, 0.0f );
+    vector<EditorViewport> viewports_;
+    int panningViewport_ = -1;
+    unique_ptr<CursorLock> cursorLock_;
+    float mainMenuHeight_ = 0.0f;
+    vec2 mousePos_ { 0.0f };
   public:
+    void initialize( RendererPtr renderer, const vec2& realResolution );
+    void resize( size_t width, size_t height );
+    inline void mainMenuHeight( float height ) { mainMenuHeight_ = height; }
     inline bool enabled() const { return enabled_; }
+    inline void enabled( bool enable ) { enabled_ = enable; }
     inline vec3& clearColorRef() { return clearColor_; }
+    void shutdown();
+    void updateRealtime(
+      GameTime realTime, GameTime delta, GfxInputPtr input, SceneManager& scene, const Viewport& window, OrbitCamera& gameCamera );
+    bool draw( RendererPtr renderer, GameTime time, const Viewport& window, Camera& gameCamera );
   };
 
   class Gfx:
@@ -65,7 +102,6 @@ namespace neko {
     RendererPtr renderer_;
     Viewport windowViewport_;
     Viewport gameViewport_;
-    vector<EditorViewport> viewports_;
     Image lastCapture_;
     Editor editor_;
     std::queue<uint64_t> updateAccounts_;
@@ -88,8 +124,9 @@ namespace neko {
     void postInitialize( Engine& engine );
     Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     const Image& renderWindowReadPixels() override;
-    void processEvents(); //!< Process vital window events and such.
+    void processEvents( bool discardMouse, bool discardKeyboard ); //!< Process vital window events and such.
     void updateRealTime( GameTime realTime, GameTime delta, Engine& engine );
+    void preUpdate();
     void update( GameTime gameTime, GameTime delta, Engine& engine );
     inline Renderer& renderer() noexcept { return *( renderer_.get() ); }
     void shutdown();

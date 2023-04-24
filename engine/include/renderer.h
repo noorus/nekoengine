@@ -134,6 +134,7 @@ namespace neko {
     SceneNode* createSceneNode( SceneNode* parent = nullptr );
     void addSceneNode( SceneNode* node );
     void destroySceneNode( SceneNode* node );
+    inline set<SceneNode*> sceneGraph() { return sceneGraph_; }
   };
 
   struct ViewportDrawParameters

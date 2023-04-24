@@ -815,7 +815,7 @@ namespace neko {
       sceneDraw( time, camera, drawparams );
       if ( drawparams.isEditor )
       {
-        glLineWidth( 2.0f );
+        glLineWidth( 1.0f );
         glEnable( GL_DEPTH_TEST );
         glDepthMask( GL_FALSE );
         glEnable( GL_LINE_SMOOTH );

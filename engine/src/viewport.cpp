@@ -26,10 +26,27 @@ namespace neko {
     return ( position_.x >= 0 && position_.y >= 0 && width_ > 0 && height_ > 0 );
   }
 
+  void Viewport::move( int x, int y )
+  {
+    position_.x = x;
+    position_.y = y;
+  }
+
   void Viewport::resize( int width, int height )
   {
     width_ = width;
     height_ = height;
+  }
+
+  vec2 Viewport::mapPointByViewport( vec2 point ) const
+  {
+    return { 2.0f * point.x / static_cast<float>( width_ ) - 1.0f, -( 2.0f * point.y / static_cast<float>( height_ ) - 1.0f ) };
+  }
+
+  vec2 Viewport::mapPointByWindow( vec2 point ) const
+  {
+    point -= vec2f( position_ );
+    return mapPointByViewport( point );
   }
 
   void Viewport::begin() const

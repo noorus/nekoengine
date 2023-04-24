@@ -60,7 +60,12 @@ namespace neko {
 
       gfx_->logicLock_.lock();
 
-      gfx_->processEvents();
+      gfx_->preUpdate();
+
+      auto discardMouse = ImGui::GetIO().WantCaptureMouse;
+      auto discardKeyboard = ImGui::GetIO().WantCaptureKeyboard;
+
+      gfx_->processEvents( discardMouse, discardKeyboard );
 
       auto time = engine_->sync().gameTime.load();
       auto delta = ( time - lastTime_ );
