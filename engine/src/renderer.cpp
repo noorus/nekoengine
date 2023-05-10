@@ -276,6 +276,7 @@ namespace neko {
     builtin_.skybox_ = meshes_->createStatic( GL_TRIANGLES, skybox.first, skybox.second );
 
     particles_ = make_shared<ParticleSystemManager>();
+    origoTest_ = make_shared<AxesPointerRenderer>();
   }
 
   TexturePtr Renderer::loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering )
@@ -447,6 +448,7 @@ namespace neko {
     uniform.position = vec4( camera.position(), 1.0f );
     uniform.projection = camera.projection();
     uniform.view = camera.view();
+    uniform.model = camera.model();
     uniform.nearDist = camera.near();
     uniform.farDist = camera.far();
     uniform.exposure = camera.exposure();
@@ -502,7 +504,7 @@ namespace neko {
       glDisable( GL_CULL_FACE );
   }
 
-  void Renderer::sceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams )
+  void Renderer::prepareSceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams )
   {
     camera.exposure( drawparams.drawopExposure() );
 
@@ -514,7 +516,25 @@ namespace neko {
         pointLight.dummy = vec4( 0.0f );
       shaders_->world()->unlock();
     }
+  }
 
+  void Renderer::prepareSceneDraw( GameTime time, const ViewportDrawParameters& drawparams )
+  {
+    auto camera = drawparams.drawopGetCamera();
+    camera->exposure( drawparams.drawopExposure() );
+
+    {
+      auto world = shaders_->world()->lock().data();
+      world->time = (float)time;
+      setCameraUniforms( *camera, world->camera );
+      for ( auto& pointLight : world->pointLights )
+        pointLight.dummy = vec4( 0.0f );
+      shaders_->world()->unlock();
+    }
+  }
+
+  void Renderer::sceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams )
+  {
     auto wire = ( drawparams.drawopShouldDrawWireframe() );
 
     setGLDrawState( true, true, true, wire );
@@ -585,8 +605,9 @@ namespace neko {
 
     setGLDrawState( true, true, false, wire );
     particles_->draw( *shaders_, *materials_ );
+    origoTest_->draw( *shaders_, { 0.0f, 0.0f, 5.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } );
 
-    if ( drawparams.drawopShouldDrawSky() )
+    if ( drawparams.drawopShouldDrawSky() && false )
     {
       setGLDrawState( true, true, true, wire );
       glDepthFunc( GL_LEQUAL );
@@ -674,7 +695,12 @@ namespace neko {
       main->prepare( 0, { 0, 1 } );
       main->begin();  
       implClearAndPrepare( params.drawopClearColor() );
+      prepareSceneDraw( time, params );
+      params.drawopPreSceneDraw( *shaders_ );
+      prepareSceneDraw( time, camera, params );
       sceneDraw( time, camera, params );
+      prepareSceneDraw( time, params );
+      params.drawopPostSceneDraw( *shaders_ );
       main->end();
     }
 
@@ -767,15 +793,12 @@ namespace neko {
         ctx_.fboMain_->begin();
       }
       implClearAndPrepare( drawparams.drawopClearColor() ); // 1 - clear the main fbo
+      prepareSceneDraw( time, camera, drawparams );
+      drawparams.drawopPreSceneDraw( *shaders_ );
+      prepareSceneDraw( time, camera, drawparams );
       sceneDraw( time, camera, drawparams );
-      if ( false ) // drawparams.isEditor )
-      {
-        glLineWidth( 1.0f );
-        glEnable( GL_DEPTH_TEST );
-        glDepthMask( GL_FALSE );
-        glEnable( GL_LINE_SMOOTH );
-        // drawEditorGrid( *shaders_, camera.position(), camera.direction() );
-      }
+      prepareSceneDraw( time, drawparams );
+      drawparams.drawopPostSceneDraw( *shaders_ );
       if ( ctx_.fboMainMultisampled_ )
         ctx_.fboMainMultisampled_->end();
       else
@@ -847,7 +870,7 @@ namespace neko {
       viewportQuad->draw();
     }
 
-    for ( auto& text : texts_->texts() )
+    /* for ( auto& text : texts_->texts() )
     {
       auto& txt = text.second->text();
       if ( !txt.impl_ )
@@ -858,7 +881,7 @@ namespace neko {
       txt.impl_->setTranslation( txt.translate_->v() );
       txt.impl_->update( this );
       txt.impl_->draw( this );
-    }
+    }*/
 
     // below here be debug shit
     #if 0
@@ -898,6 +921,7 @@ namespace neko {
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
 
+    origoTest_.reset();
     particles_.reset();
 
     ctx_.mergedMain_.reset();

@@ -58,7 +58,6 @@ namespace neko {
       createSimplePipeline( "gui", "gui.vert", "gui.frag", { "yscale", "tex" } );
       createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
       createSimplePipeline( "dbg_line", "dbg_line.vert", "dbg_line.frag", { "model" } );
-      createSimplePipeline( "dbg_bgline", "dbg_bgline.vert", "dbg_line.frag", { "model" } );
       createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
       createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "tex" } );
       createSimplePipeline( "particle_world", "particle_world.vert", "particle_world.geom", "particle.frag", { "model", "tex" } );
@@ -70,6 +69,7 @@ namespace neko {
       createSimplePipeline( "mainframebuf2d", "passthrough2d.vert", "mainframebuf2d.frag", { "tex" } );
       createSimplePipeline( "passthrough2d", "passthrough2d.vert", "passthrough2d.frag", { "tex" } );
       createSimplePipeline( "dbg_depthvis2d", "passthrough2d.vert", "dbg_depthvis2d.frag", { "tex" } );
+      createSimplePipeline( "editor_bgline", "editor_bgline.vert", "editor_bgline.frag", { "model" } );
     }
 
     // Shader

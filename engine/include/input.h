@@ -8,6 +8,60 @@
 
 namespace neko {
 
+  template <size_t Count>
+  class ButtonTracker {
+  protected:
+    static constexpr size_t c_buttonCount = Count;
+    std::array<bool, c_buttonCount> states_ = { false };
+    std::array<bool, c_buttonCount> previousStates_ = { false };
+  public:
+    inline void reset( const vector<nil::Button>& state )
+    {
+      size_t count = math::min( state.size(), c_buttonCount );
+      for ( auto i = 0; i < count; ++i )
+      {
+        previousStates_[i] = states_[i];
+        states_[i] = state[i].pushed;
+      }
+    }
+    inline void reset()
+    {
+      std::copy( states_.begin(), states_.end(), previousStates_.begin() );
+    }
+    inline void markPressed( size_t index )
+    {
+      assert( index < c_buttonCount );
+      states_[index] = true;
+    }
+    inline void markReleased( size_t index )
+    {
+      assert( index < c_buttonCount );
+      states_[index] = false;
+    }
+    inline void update( const vector<nil::Button>& state )
+    {
+      size_t count = math::min( state.size(), c_buttonCount );
+      previousStates.swap( states_ );
+      for ( auto i = 0; i < count; ++i )
+        states_[i] = state[i].pushed;
+    }
+    inline const bool wasPressed( size_t index ) const
+    {
+      assert( index < c_buttonCount );
+      return ( states_[index] && !previousStates_[index] );
+    }
+    inline const bool wasReleased( size_t index ) const
+    {
+      assert( index < c_buttonCount );
+      return ( !states_[index] && previousStates_[index] );
+    }
+    inline const bool isPressed( size_t index ) const
+    {
+      assert( index < c_buttonCount );
+      return ( states_[index] );
+    }
+  };
+
   class GfxInput: public nocopy, public nil::SystemListener, public nil::MouseListener, public nil::KeyboardListener {
   public:
     HWND window_;
@@ -16,7 +70,7 @@ namespace neko {
     ConsolePtr console_;
     vec2i windowSize_;
     vec3i movement_;
-    bool mouseButtons_[5] = { false };
+    ButtonTracker<5> mouseButtons_;
   protected:
     nil::SystemPtr system_;
     // nil::SystemListener events
@@ -45,8 +99,9 @@ namespace neko {
     inline bool mousebtn( size_t index ) const
     {
       assert( index >= 0 && index < 5 );
-      return mouseButtons_[index];
+      return mouseButtons_.isPressed( index );
     }
+    inline const ButtonTracker<5>& mouseButtons() const { return mouseButtons_; }
     void resetMovement();
     void shutdown();
     void update();

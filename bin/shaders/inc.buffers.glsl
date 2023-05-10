@@ -30,6 +30,7 @@ namespace neko::uniforms {
     vec4 position;
     mat4 projection;
     mat4 view;
+    mat4 model;
     float nearDist;
     float farDist;
     float exposure;

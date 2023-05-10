@@ -48,11 +48,13 @@ namespace neko {
   {
     // console_->printf( Console::srcInput, "Mouse enabled: %s", device->getName().c_str() );
     instance->addListener( this );
+    mouseButtons_.reset( instance->getState().buttons );
   }
 
   void GfxInput::onMouseDisabled( nil::Device* device, nil::Mouse* instance )
   {
     // console_->printf( Console::srcInput, "Mouse disabled: %s", device->getName().c_str() );
+    mouseButtons_.reset( instance->getState().buttons );
   }
 
   void GfxInput::onKeyboardEnabled( nil::Device* device, nil::Keyboard* instance )
@@ -94,8 +96,7 @@ namespace neko {
       MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) ) )
     {
 #endif
-      if ( button < 5 )
-        mouseButtons_[button] = true;
+      mouseButtons_.markPressed( button );
 #ifndef NEKO_NO_GUI
     }
     else if ( button < 5 )
@@ -112,8 +113,7 @@ namespace neko {
       MyGUI::MouseButton( MyGUI::MouseButton::Enum( button ) ) ) )
     {
 #endif
-      if ( button < 5 )
-        mouseButtons_[button] = false;
+      mouseButtons_.markReleased( button );
 #ifndef NEKO_NO_GUI
     }
 #endif
@@ -153,6 +153,7 @@ namespace neko {
   {
     moved_ = false;
     resetMovement();
+    mouseButtons_.reset();
     system_->update();
     if ( moved_ )
     {

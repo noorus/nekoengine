@@ -87,7 +87,7 @@ namespace neko {
       bool windowMove = false;
       bool steamOverlay = false;
       bool timePaused = false;
-      bool devMode = false;
+      bool devMode = true;
     } state_;
     struct Sync
     {

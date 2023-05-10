@@ -17,12 +17,13 @@ namespace neko {
 
   // clang-format off
 
-  static const vector<EditorViewportDefinition> g_editorViewportDefs = {
+  static const vector<EditorViewportDefinition> g_editorViewportDefs =
+  {
     {
       .name = "top",
       .position = vec3( 0.0f, 10.0f, 0.0f ),
       .eye = vec3( 0.0f, -1.0f, 0.0f ),
-      .up = vec3( 0.0f, 0.0f, -1.0f )
+      .up = vec3( 0.0f, 0.0f, 1.0f )
     },
     {
       .name = "front",
@@ -46,12 +47,12 @@ namespace neko {
 
     for ( const auto& def : g_editorViewportDefs )
     {
-      EditorViewport vp( renderer.get(), realResolution, def );
-      viewports_.push_back( move( vp ) );
+      auto vp = make_shared<EditorViewport>( renderer.get(), shared_from_this(), realResolution, def );
+      viewports_.push_back( vp );
     }
   }
 
-  void Editor::resize( const Viewport& windowViewport )
+  void Editor::resize( const Viewport& windowViewport, GameViewport& gameViewport )
   {
     const auto width = windowViewport.size().x;
     const auto height = windowViewport.size().y;
@@ -62,16 +63,20 @@ namespace neko {
     {
       auto& viewport = viewports_[i];
       if ( i == 0 )
-        viewport.move( 0, 0 );
+        viewport->move( 0, 0 );
       else if ( i == 1 )
-        viewport.move( static_cast<int>( halfsize.x ), 0 );
+        viewport->move( static_cast<int>( halfsize.x ), 0 );
       else if ( i == 2 )
-        viewport.move( 0, static_cast<int>( halfsize.y ) );
+        viewport->move( 0, static_cast<int>( halfsize.y ) );
       else if ( i == 3 )
-        viewport.move( static_cast<int>( halfsize.x ), static_cast<int>( halfsize.y ) );
-      viewport.resize( static_cast<GLsizei>( halfsize.x ), static_cast<GLsizei>( halfsize.y ), windowViewport );
-      viewport.camera()->setViewport( vec2( static_cast<Real>( halfsize.x ), static_cast<Real>( halfsize.y ) ) );
+        viewport->move( static_cast<int>( halfsize.x ), static_cast<int>( halfsize.y ) );
+      viewport->resize( static_cast<GLsizei>( halfsize.x ), static_cast<GLsizei>( halfsize.y ), windowViewport );
+      viewport->camera()->setViewport( vec2( static_cast<Real>( halfsize.x ), static_cast<Real>( halfsize.y ) ) );
     }
+
+    gameViewport.move( static_cast<int>( halfsize.x ), static_cast<int>( halfsize.y ) );
+    //gameViewport.resize( static_cast<GLsizei>( halfsize.x ), static_cast<GLsizei>( halfsize.y ), windowViewport );
+    //gameViewport.camera()->setViewport( vec2( static_cast<Real>( halfsize.x ), static_cast<Real>( halfsize.y ) ) );
   }
 
   SceneNode* findFirstModelNode( SceneNode* node )
@@ -88,9 +93,10 @@ namespace neko {
   }
 
   void Editor::updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SceneManager& scene,
-    const Viewport& window, OrbitCamera& gameCamera )
+    const Viewport& window, GameViewport& gameViewport )
   {
-    auto panButtonPressed = input->mousebtn( 2 );
+    size_t PANBTN = 2; // = input->mousebtn( 2 );
+    size_t GAMEVP = 3;
     mousePos_ = vec2( static_cast<Real>( input->mousePosition_.x ), static_cast<Real>( input->mousePosition_.y ) );
 
     SceneNode* mdl = nullptr;
@@ -104,55 +110,62 @@ namespace neko {
     auto& igIO = ImGui::GetIO();
     if ( !igIO.WantCaptureMouse )
     {
-      auto vpidx = 3;
-      if ( !panButtonPressed )
-      {
-        panningViewport_ = -1;
-        if ( cursorLock_ )
-          cursorLock_.reset();
-      }
-      if ( panningViewport_ < 0 )
+      auto vpidx = GAMEVP;
+      if ( !dragOp_.ongoing() )
       {
         const auto halfsize = vec2i( window.sizef() * 0.5f );
         if ( input->mousePosition_.x < halfsize.x )
           vpidx = ( input->mousePosition_.y < halfsize.y ? 0 : 2 );
         else
           vpidx = ( input->mousePosition_.y < halfsize.y ? 1 : 3 );
-        if ( panButtonPressed )
+        if ( input->mouseButtons().wasPressed( PANBTN ) && vpidx != GAMEVP )
         {
-          panningViewport_ = vpidx;
-          //if ( !cursorLock_ )
-          //  cursorLock_ = make_unique<CursorLock>();
+          dragOp_.begin( viewports_[vpidx], mousePos_ );
+          lastDragopPos_ = { 0.0f, 0.0f };
         }
       }
-      else
-        vpidx = panningViewport_;
-
-      if ( vpidx == 3 )
+      if ( dragOp_.ongoing() )
       {
-        if ( panButtonPressed )
-          gameCamera.applyInputPanning( input->movement() );
+        dragOp_.update( mousePos_ );
+        auto np = dragOp_.getRelative();
+        auto diff = ( np - lastDragopPos_ );
+        lastDragopPos_ = np;
+        dragOp_.viewport()->camera()->applyInputPanning( diff );
+        if ( input->mouseButtons().wasReleased( PANBTN ) )
+          dragOp_.end();
+      }
+      else if ( vpidx == 3 )
+      {
+        auto gamecam = static_cast<OrbitCamera*>( gameViewport.camera().get() );
+        if ( input->mouseButtons().isPressed( PANBTN ) )
+          gamecam->applyInputPanning( input->movement() );
         else if ( input->mousebtn( 1 ) )
-          gameCamera.applyInputRotation( input->movement() );
+          gamecam->applyInputRotation( input->movement() );
+        else if ( input->mouseButtons().wasPressed( 0 ) )
+        {
+          auto ret = gameViewport.windowPointToWorld( vec3( mousePos_, 0.8f ) );
+          Locator::console().printf( Console::srcGame, "Gameviewport click %.2f %.2f %.2f (camera %.2f %.2f %.2f)",
+            ret.x, ret.y, ret.z, gamecam->position().x, gamecam->position().y, gamecam->position().z );
+          if ( mdl )
+            mdl->setTranslate( ret );
+        }
 
-        gameCamera.applyInputZoom( static_cast<int>( input->movement().z ) );
+        gamecam->applyInputZoom( static_cast<int>( input->movement().z ) );
       }
       else
       {
         auto& vp = viewports_[vpidx];
-        if ( panButtonPressed )
-          vp.camera()->applyInputPanning( input->movement() );
-        else if ( input->mousebtn( 0 ) && mdl )
+        if ( input->mousebtn( 0 ) && mdl )
         {
-          auto wc = viewports_[vpidx].windowPointToWorld( mousePos_ );
+          auto wc = viewports_[vpidx]->windowPointToWorld( mousePos_ );
           mdl->setTranslate( wc );
         }
-        vp.camera()->applyInputZoom( static_cast<int>( input->movement().z ) );
+        vp->camera()->applyInputZoom( static_cast<int>( input->movement().z ) );
       }
     }
 
     for ( auto& vp : viewports_ )
-      vp.camera()->update( delta, realTime );
+      vp->camera()->update( delta, realTime );
   }
 
   bool Editor::draw( RendererPtr renderer, GameTime time, const Viewport& window, GameViewport& gameViewport )
@@ -171,32 +184,46 @@ namespace neko {
         ImGuiWindowFlags_NoSavedSettings );
     for ( int i = 0; i < 3; ++i )
     {
-      renderer->draw( time, *viewports_[i].camera(), viewports_[i], renderer->builtins().screenFourthQuads_[i] );
+      renderer->draw( time, *viewports_[i]->camera(), *viewports_[i], renderer->builtins().screenFourthQuads_[i] );
       auto& vp = viewports_[i];
-      auto topleft = vp.posf();
-      auto bottomright = topleft + vp.sizef();
+      auto topleft = vp->posf();
+      auto bottomright = topleft + vp->sizef();
       if ( topleft.y < mainMenuHeight_ )
         topleft.y = mainMenuHeight_;
+
+      // clang-format off
+
       ImGui::GetBackgroundDrawList()->AddRect( topleft, bottomright, ImColor( 0.0f, 0.5f, 0.8f ) );
-      auto mousepoint = vp.mapPointByWindow( mousePos_ );
+      auto mousepoint = vp->mapPointByWindow( mousePos_ );
+      auto ndc = vp->ndcPointToWorld( { 0.0f, 0.0f, 0.0f } );
       ImGui::GetBackgroundDrawList()->AddText( topleft + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ),
-        utils::ilprinf( "%s - mouse %.2f %.2f camera %.2f %.2f %.2f aspect %.2f radius %.2f", vp.name().c_str(),
-          mousepoint.x, mousepoint.y, vp.camera()->position().x, vp.camera()->position().y, vp.camera()->position().z,
-          vp.camera()->aspect(), vp.camera()->radius() )
+        utils::ilprinf( "%s - mouse %.2f %.2f camera %.2f %.2f %.2f dir %.2f %.2f %.2f aspect %.2f radius %.2f ndc %.2f %.2f %.2f", vp->name().c_str(),
+          mousepoint.x, mousepoint.y,
+          vp->camera()->position().x, vp->camera()->position().y, vp->camera()->position().z,
+          vp->camera()->direction().x, vp->camera()->direction().y, vp->camera()->direction().z,
+          vp->camera()->aspect(), vp->camera()->radius(),
+          ndc.x, ndc.y, ndc.z )
           .c_str() );
     }
+
+    auto vp = &gameViewport;
+    renderer->draw( time, *gameViewport.camera(), gameViewport, renderer->builtins().screenFourthQuads_[3] );
+          ImGui::GetForegroundDrawList()->AddText( gameViewport.posf() + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ),
+        utils::ilprinf( "game - camera %.2f %.2f %.2f dir %.2f %.2f %.2f aspect %.2f",
+          vp->camera()->position().x, vp->camera()->position().y, vp->camera()->position().z,
+          vp->camera()->direction().x, vp->camera()->direction().y, vp->camera()->direction().z,
+          vp->camera()->aspect() )
+          .c_str() );
+
     ImGui::End();
     ImGui::PopStyleVar( 2 );
-
-    renderer->draw( time, *gameViewport.camera(), gameViewport, renderer->builtins().screenFourthQuads_[3] );
 
     return true;
   }
 
   void Editor::shutdown()
   {
-    for ( auto& vp : viewports_ )
-      vp.camera().reset();
+    viewports_.clear();
   }
 
 }

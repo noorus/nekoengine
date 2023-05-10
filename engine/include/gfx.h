@@ -20,34 +20,72 @@ namespace neko {
     virtual bool drawopShouldDrawWireframe() const = 0;
     virtual vec2 drawopFullResolution() const = 0;
     virtual vec3 drawopClearColor() const = 0;
+    virtual vec4 drawopGridColor() const = 0;
     virtual Real drawopExposure() const = 0;
+    virtual const CameraPtr drawopGetCamera() const = 0;
+    virtual void drawopPreSceneDraw( shaders::Shaders& shaders ) const = 0;
+    virtual void drawopPostSceneDraw( shaders::Shaders& shaders ) const = 0;
+  };
+
+  class Editor;
+  using EditorPtr = shared_ptr<Editor>;
+
+  class EditorViewport;
+
+  using EditorViewportPtr = shared_ptr<EditorViewport>;
+
+  struct ViewportDragOperation
+  {
+  protected:
+    EditorViewportPtr vp_;
+    bool dragging_ = false;
+    vec2 startPos_;
+    vec2 worlddims_;
+    vec2 curPos_;
+    vec2 remapNormal( vec2 vpcoord ) const; //!< Maps -1...1 coord to 0...1
+    vec2 remapWorld( vec2 norm ) const; //!< Maps 0...1 to world dimensions
+  public:
+    void begin( EditorViewportPtr vp, vec2 wincoord );
+    void update( vec2 wincoord );
+    inline const bool ongoing() const noexcept { return dragging_; }
+    inline EditorViewportPtr viewport() const { return vp_; }
+    vec2 getRelative() const;
+    void end();
   };
 
   class EditorViewport: public Viewport, public ViewportDrawParameters {
   protected:
     utf8String name_;
-    unique_ptr<EditorOrthoCamera> camera_;
+    shared_ptr<EditorOrthoCamera> camera_;
     bool panning_ = false;
     vec4 axisMask_ = { 1.0f, 1.0f, 1.0f, 1.0f };
     vec2 windowResolution_ = { 0.0f, 0.0f };
-    // EditorGridRenderer grid_;
+    unique_ptr<EditorGridRenderer> grid_;
+    unique_ptr<AxesPointerRenderer> axesGizmo_;
+    EditorPtr editor_; 
   public:
     // ViewportDrawParameters interface implementation
     bool drawopShouldDrawSky() const override;
     bool drawopShouldDrawWireframe() const override;
     vec2 drawopFullResolution() const override;
     vec3 drawopClearColor() const override;
+    vec4 drawopGridColor() const override;
     Real drawopExposure() const override;
+    void drawopPreSceneDraw( shaders::Shaders& shaders ) const override;
+    void drawopPostSceneDraw( shaders::Shaders& shaders ) const override;
+    const CameraPtr drawopGetCamera() const override;
+    // Viewport interface implementation
+    vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const override;
+    vec3 ndcPointToWorld( vec3 ndc_viewcoord ) const override;
   public:
-    EditorViewport( SceneManager* manager, vec2 resolution, const EditorViewportDefinition& def );
+    EditorViewport( SceneManager* manager, EditorPtr editor, vec2 resolution, const EditorViewportDefinition& def );
+    ~EditorViewport();
     void resize( int width, int height, const Viewport& windowViewport );
     inline void panning( bool isPanning ) { panning_ = isPanning; }
     inline bool panning() const { return panning_; }
-    inline unique_ptr<EditorOrthoCamera>& camera() { return camera_; }
+    inline shared_ptr<EditorOrthoCamera>& camera() { return camera_; }
     inline const utf8String& name() const { return name_; }
     inline vec4 axisMask() const { return axisMask_; }
-    vec3 pointToWorld( vec2 point ); // Cast a point on the 2D viewport to world coordinates. Depth will be zero.
-    vec3 windowPointToWorld( vec2 point ); // Same as pointToWorld but assumes window coordinates
   };
 
   class GameViewport: public Viewport, public ViewportDrawParameters {
@@ -64,7 +102,14 @@ namespace neko {
     bool drawopShouldDrawWireframe() const override;
     vec2 drawopFullResolution() const override;
     vec3 drawopClearColor() const override;
+    vec4 drawopGridColor() const override;
     Real drawopExposure() const override;
+    void drawopPreSceneDraw( shaders::Shaders& shaders ) const override;
+    void drawopPostSceneDraw( shaders::Shaders& shaders ) const override;
+    const CameraPtr drawopGetCamera() const override;
+    // Viewport interface implementation
+    vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const override;
+    vec3 ndcPointToWorld( vec3 ndc_viewcoord ) const override;
   };
 
   class CursorLock {
@@ -83,25 +128,29 @@ namespace neko {
     }
   };
 
-  class Editor {
+  class Editor: public enable_shared_from_this<Editor> {
   protected:
     bool enabled_ = true;
     vec3 clearColor_ = vec3( 0.0f, 0.0f, 0.0f );
-    vector<EditorViewport> viewports_;
+    vec4 gridColor_ = vec4( 0.06f, 0.055f, 0.062f, 0.38f );
+    vector<EditorViewportPtr> viewports_;
     int panningViewport_ = -1;
     unique_ptr<CursorLock> cursorLock_;
     float mainMenuHeight_ = 0.0f;
     vec2 mousePos_ { 0.0f };
+    ViewportDragOperation dragOp_;
+    vec2 lastDragopPos_ { 0.0f, 0.0f };
   public:
     void initialize( RendererPtr renderer, const vec2& realResolution );
-    void resize( const Viewport& windowViewport );
+    void resize( const Viewport& windowViewport, GameViewport& gameViewport );
     inline void mainMenuHeight( float height ) { mainMenuHeight_ = height; }
     inline bool enabled() const { return enabled_; }
     inline void enabled( bool enable ) { enabled_ = enable; }
     inline vec3& clearColorRef() { return clearColor_; }
+    inline vec4& gridColorRef() { return gridColor_; }
     void shutdown();
-    void updateRealtime(
-      GameTime realTime, GameTime delta, GfxInputPtr input, SceneManager& scene, const Viewport& window, OrbitCamera& gameCamera );
+    void updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SceneManager& scene, const Viewport& window,
+      GameViewport& gameViewport );
     bool draw( RendererPtr renderer, GameTime time, const Viewport& window, GameViewport& gameViewport );
   };
 
@@ -140,7 +189,7 @@ namespace neko {
     Viewport windowViewport_;
     GameViewport gameViewport_;
     Image lastCapture_;
-    Editor editor_;
+    EditorPtr editor_;
     std::queue<uint64_t> updateAccounts_;
     platform::RWLock logicLock_;
     void preInitialize();

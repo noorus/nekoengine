@@ -13,6 +13,7 @@
 #include "rainet.h"
 #include "viewport.h"
 #include "gfx.h"
+#include "specialrenderers.h"
 
 namespace MyGUI {
 #ifndef NEKO_NO_GUI
@@ -185,6 +186,7 @@ namespace neko {
     platform::RWLock loadLock_;
     MaterialManagerPtr materials_;
     ParticleSystemManagerPtr particles_;
+    shared_ptr<AxesPointerRenderer> origoTest_;
     DirectorPtr director_;
     vec2 resolution_;
     struct DrawCtx
@@ -202,6 +204,8 @@ namespace neko {
     void implClearAndPrepare( const vec3& color );
     void uploadModelsEnterNode( SceneNode* node );
     void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
+    void prepareSceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );
+    void prepareSceneDraw( GameTime time, const ViewportDrawParameters& drawparams );
     void sceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );
     void clearErrors();
     void setCameraUniforms( Camera& camera, uniforms::Camera& uniform );

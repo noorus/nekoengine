@@ -20,6 +20,42 @@ namespace neko {
 
   using namespace gl;
 
+  AxesPointerRenderer::AxesPointerRenderer()
+  {
+    viz_ = make_unique<LineRenderBuffer<6>>();
+  }
+
+  AxesPointerRenderer::~AxesPointerRenderer()
+  {
+    viz_.reset();
+  }
+
+  void AxesPointerRenderer::draw( shaders::Shaders& shaders, vec3 origin, vec3 up, vec3 right )
+  {
+    origin = vec3( -origin.z, -origin.y, -origin.x );
+    auto verts = viz_->buffer().lock();
+    Real length = 0.5f;
+    verts[0].color = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+    verts[0].pos = origin;
+    verts[1].color = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+    verts[1].pos = origin + ( right * length );
+    verts[2].color = vec4( 0.0f, 1.0f, 0.0f, 1.0f );
+    verts[2].pos = origin;
+    verts[3].color = vec4( 0.0f, 1.0f, 0.0f, 1.0f );
+    verts[3].pos = origin + ( up * length );
+    verts[4].color = vec4( 0.0f, 0.0f, 1.0f, 1.0f );
+    verts[4].pos = origin;
+    verts[5].color = vec4( 0.0f, 0.0f, 1.0f, 1.0f );
+    verts[5].pos = origin + ( math::cross( right, up ) * length );
+    viz_->buffer().unlock();
+    glLineWidth( 2.0f );
+    glDisable( GL_DEPTH_TEST );
+    glDepthMask( GL_FALSE );
+    glDisable( GL_LINE_SMOOTH );
+    auto pl = &shaders.usePipeline( "dbg_line" );
+    viz_->draw( *pl, 6, 0, gl::GL_LINES );
+  }
+
   EditorGridRenderer::EditorGridRenderer()
   {
     viz_ = make_unique<LineRenderBuffer<1024>>();
@@ -30,17 +66,26 @@ namespace neko {
     viz_.reset();
   }
 
-  void EditorGridRenderer::update( EditorOrthoCamera& camera )
+  void EditorGridRenderer::update( const EditorViewport& viewport, EditorOrthoCamera& camera )
   {
-    auto aspect = camera.aspect();
-    auto normal = math::normalize( -camera.direction() );
-    auto origin = camera.position() + ( ( camera.far() - 1.0f ) * camera.direction() );
-    auto color = vec4( 0.3f, 0.3f, 0.3f, 1.0f );
+    if ( camera.radius() < 1.0f )
+    {
+      drawCount_ = 0;
+      return;
+    }
 
-    constexpr int count = 10;
+    auto area = math::ceil( camera.aspect() * camera.radius() );
+    auto normal = math::normalize( -camera.direction() );
+    auto origin = camera.position(); // viewport.ndcPointToWorld( { 0.0f, 0.0f, 0.0f } );
+
+    auto color = viewport.drawopGridColor();
+
+    int count = math::iround( area ) + 1;
     auto verts = viz_->buffer().lock();
 
-    for ( size_t i = 0; i < 44; ++i )
+    drawCount_ = math::min( count * 4 + 4, 1024 );
+
+    for ( size_t i = 0; i < drawCount_; ++i )
       verts[i].color = color;
 
     vec2i segments { count, count };
@@ -48,21 +93,30 @@ namespace neko {
 
     auto vx = math::perpendicular( normal );
     auto vy = glm::cross( normal, vx );
+
     auto delta1 = vec3( dimensions.x / (Real)segments.x * vx );
     auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
 
     size_t i = 0;
-    auto fit = vec3( math::floor( origin.x ), math::floor( origin.y ), math::floor( origin.y ) );
+    auto fit = vec3( math::floor( origin.x ), math::floor( origin.y ), math::floor( origin.z ) );
     auto orig = fit + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
     for ( auto x = 0; x <= segments.x; ++x )
     {
       verts[i++].pos = orig + (Real)x * delta1;
+      if ( i >= drawCount_ )
+        break;
       verts[i++].pos = orig + (Real)x * delta1 + dimensions.y * delta2;
+      if ( i >= drawCount_ )
+        break;
     }
     for ( auto y = 0; y <= segments.y; ++y )
     {
       verts[i++].pos = orig + (Real)y * delta2;
+      if ( i >= drawCount_ )
+        break;
       verts[i++].pos = orig + dimensions.x * delta1 + (Real)y * delta2;
+      if ( i >= drawCount_ )
+        break;
     }
 
     viz_->buffer().unlock();
@@ -70,12 +124,16 @@ namespace neko {
 
   void EditorGridRenderer::draw( shaders::Shaders& shaders )
   {
-    glLineWidth( 2.0f );
-    glEnable( GL_DEPTH_TEST );
+    if ( !drawCount_ )
+      return;
+
+    glLineWidth( 1.0f );
+    glDisable( GL_DEPTH_TEST );
     glDepthMask( GL_FALSE );
-    glEnable( GL_LINE_SMOOTH );
-    auto pl = &shaders.usePipeline( "dbg_line" );
-    viz_->draw( *pl, 44, 0, gl::GL_LINES );
+    glDisable( GL_LINE_SMOOTH );
+    auto pl = &shaders.usePipeline( "editor_bgline" );
+    // pl->setUniform( "model", mat4(1.0f) );
+    viz_->draw( *pl, drawCount_, 0, gl::GL_LINES );
   }
 
 }

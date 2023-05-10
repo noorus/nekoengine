@@ -256,7 +256,8 @@ namespace neko {
 
     gameViewport_.setCamera( camera_ );
 
-    editor_.initialize( renderer_, realResolution );
+    editor_ = make_shared<Editor>();
+    editor_->initialize( renderer_, realResolution );
 
     resize( window_->getSize().x, window_->getSize().y );
 
@@ -294,7 +295,7 @@ namespace neko {
 
     input_->setWindowSize( windowViewport_.size() );
 
-    editor_.resize( windowViewport_ );
+    editor_->resize( windowViewport_, gameViewport_ );
 
     auto realResolution = vec2( (Real)width, (Real)height );
     camera_->setViewport( realResolution );
@@ -360,8 +361,8 @@ namespace neko {
 
   void Gfx::updateRealTime( GameTime realTime, GameTime delta, Engine& engine )
   {
-    if ( editor_.enabled() )
-      editor_.updateRealtime( realTime, delta, input_, *renderer_, windowViewport_, *camera_ );
+    if ( editor_->enabled() )
+      editor_->updateRealtime( realTime, delta, input_, *renderer_, windowViewport_, gameViewport_ );
     else
     {
       if ( input_->mousebtn( 2 ) )
@@ -440,9 +441,9 @@ namespace neko {
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    clear( vec4( editor_.clearColorRef(), 1.0f ) );
+    clear( vec4( editor_->clearColorRef(), 1.0f ) );
 
-    editor_.enabled( engine.devmode() );
+    editor_->enabled( engine.devmode() );
 
     /*
           processing->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
@@ -453,7 +454,7 @@ namespace neko {
 
     if ( ImGui::BeginMainMenuBar() )
     {
-      editor_.mainMenuHeight( ImGui::GetWindowHeight() );
+      editor_->mainMenuHeight( ImGui::GetWindowHeight() );
       if ( ImGui::BeginMenu( "File" ) )
       {
         ImGui::Separator();
@@ -480,17 +481,21 @@ namespace neko {
       ImGui::EndMainMenuBar();
     }
 
-    if ( !editor_.draw( renderer_, time, windowViewport_, gameViewport_ ) )
+    if ( !editor_->draw( renderer_, time, windowViewport_, gameViewport_ ) )
       renderer_->drawGame( time, *camera_, &windowViewport_, gameViewport_ );
 
-    if ( show_demo_window )
+    if ( show_demo_window && false )
       ImGui::ShowDemoWindow( &show_demo_window );
 
     auto gamma = g_CVar_vid_gamma.as_f();
     ImGui::Begin( "Environment" );
     ImGui::Text( "Editor" );
     ImGui::Separator();
-    ImGui::ColorEdit3( "Background", &editor_.clearColorRef().x, ImGuiColorEditFlags_DisplayHSV );
+    ImGui::ColorEdit3(
+      "Background", &editor_->clearColorRef().x, ImGuiColorEditFlags_Float | ImGuiColorEditFlags_DisplayHSV );
+    ImGui::ColorEdit4( "Grid Lines", &editor_->gridColorRef().x,
+      ImGuiColorEditFlags_Float | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreviewHalf |
+        ImGuiColorEditFlags_DisplayHSV );
     ImGui::Text( "Rendering" );
     ImGui::Separator();
     ImGui::DragFloat( "Gamma", &gamma, 0.0025f, 0.0f, 10.0f );
@@ -498,7 +503,7 @@ namespace neko {
     ImGui::End();
 
     auto gameMainTexture = renderer_->getMergedMainFramebuffer();
-    if ( gameMainTexture )
+    if ( gameMainTexture && false )
     {
       auto wndsize = ImVec2( gameViewport_.sizef() );
       ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 0, 0 ) );
@@ -555,7 +560,8 @@ namespace neko {
 
     gui_->shutdown();
 
-    editor_.shutdown();
+    editor_->shutdown();
+    editor_.reset();
 
     camera_.reset();
 

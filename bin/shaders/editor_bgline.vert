@@ -13,8 +13,6 @@ out VertexData {
 layout ( location = 0 ) in vec3 vbo_position;
 layout ( location = 1 ) in vec4 vbo_color;
 
-// uniform mat4 model;
-
 void main()
 {
   mat4 modelViewProjection = world.camera.projection * world.camera.view;

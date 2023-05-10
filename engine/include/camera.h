@@ -38,7 +38,7 @@ namespace neko {
     void exposure( Real exp );
     virtual vec3 direction() const = 0;
     inline Real fovy() const { return fov_; }
-    virtual Real aspect() const = 0;
+    virtual Real aspect() const;
     virtual vec3 right() const = 0;
     virtual vec3 up() const = 0;
   };
@@ -65,7 +65,7 @@ namespace neko {
     inline Real radius() noexcept { return orthoRadius_; }
     void radius( Real radius );
     vec3 direction() const override;
-    virtual void applyInputPanning( const vec3i& mousemovement );
+    virtual void applyInputPanning( const vec2& worldmov );
     virtual void applyInputZoom( int zoom );
     Real aspect() const override;
     vec3 right() const override;
@@ -122,7 +122,6 @@ namespace neko {
     virtual void setClampTop( Radians fClampTop );
     virtual void setClampBottom( Radians fClampBottom );
     vec3 direction() const override;
-    Real aspect() const override;
     vec3 right() const override;
     vec3 up() const override;
   };

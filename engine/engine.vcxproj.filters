@@ -719,11 +719,14 @@
       <Filter>Data</Filter>
     </None>
     <None Include="cpp.hint" />
-    <None Include="..\bin\shaders\dbg_bgline.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\bin\scripts\.eslintrc.json">
       <Filter>Scripts</Filter>
+    </None>
+    <None Include="..\bin\shaders\editor_bgline.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\editor_bgline.frag">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

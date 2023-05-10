@@ -447,7 +447,6 @@
     <None Include="..\bin\data\materials.json" />
     <None Include="..\bin\scripts\.eslintrc.json" />
     <None Include="..\bin\scripts\initialization.js" />
-    <None Include="..\bin\shaders\dbg_bgline.vert" />
     <None Include="..\bin\shaders\dbg_depthvis2d.frag" />
     <None Include="..\bin\shaders\dbg_line.frag" />
     <None Include="..\bin\shaders\dbg_line.vert" />
@@ -457,6 +456,8 @@
     <None Include="..\bin\shaders\dbg_showvertextangents.frag" />
     <None Include="..\bin\shaders\dbg_showvertextangents.geom" />
     <None Include="..\bin\shaders\dbg_showvertextangents.vert" />
+    <None Include="..\bin\shaders\editor_bgline.frag" />
+    <None Include="..\bin\shaders\editor_bgline.vert" />
     <None Include="..\bin\shaders\gaussblur2d.frag" />
     <None Include="..\bin\shaders\inc.buffers.glsl" />
     <None Include="..\bin\shaders\inc.colorutils.glsl" />

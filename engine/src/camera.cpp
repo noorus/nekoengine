@@ -10,22 +10,14 @@ namespace neko {
     Camera( manager, resolution, 90.0f )
   {
     position_ = def.position;
-    eye_ = def.eye;
+    eye_ = math::normalize( def.eye );
     up_ = def.up;
   }
-
-  // kun alkaa dragata, täytyy:
-  // - tallentaa mitä porttia vedetään (stateful ettei mouseover riko)
-  // - ottaa pos jossa tartuttiin kiinni
-  // - ottaa hiiren pos jossa tartuttiin kiinni
-  // - moven updatessa translatoida posia sen verran kuin hiiri on liikkunut vedon alkukohdasta
 
   void EditorOrthoCamera::setViewport( vec2 resolution )
   {
     resolution_ = resolution;
     auto scale = 0.1f;
-    //projection_ = glm::ortho( 0.0f, resolution_.x * ratio * scale, resolution_.y * scale, 0.0f );
-    // projection_ = glm::perspectiveFovRH( glm::radians( fov_ ), resolution.x, resolution.y, near_, far_ );
     _reposition();
   }
 
@@ -34,14 +26,13 @@ namespace neko {
     aspect_ = resolution_.x / resolution_.y;
     auto diam = orthoRadius_;
     projection_ = glm::ortho(
-      -( ( diam * 0.5f ) * aspect_ ), ( ( diam * 0.5f ) * aspect_ ), -( diam * 0.5f ), ( diam * 0.5f ), 0.01f, 1000.0f );
+      -( ( diam * 0.5f ) * aspect_ ), ( ( diam * 0.5f ) * aspect_ ), -( diam * 0.5f ), ( diam * 0.5f ), -1000.0f, 1000.0f );
   }
 
-  void EditorOrthoCamera::applyInputPanning( const vec3i& move )
+  void EditorOrthoCamera::applyInputPanning( const vec2& worldmov )
   {
-    const float multiplier = 0.05f;
-    auto xmov = ( right() * ( static_cast<Real>( -move.x ) * multiplier ) );
-    auto ymov = ( up() * ( static_cast<Real>( move.y ) * multiplier ) );
+    auto xmov = ( right() * ( worldmov.x ) );
+    auto ymov = ( up() * ( worldmov.y ) );
     position_ += ( xmov + ymov );
     _reposition();
   }
@@ -98,25 +89,17 @@ namespace neko {
   void Camera::setViewport( vec2 resolution )
   {
     resolution_ = resolution;
-#if 1
-    projection_ = glm::perspectiveFovRH( glm::radians( fov_ ), resolution.x, resolution.y, near_, far_ );
-#else
-    auto ratio = resolution_.x / resolution_.y;
-    auto diam = 10.0f;
-    projection_ = glm::ortho(
-      -( ( diam * 0.5f ) * ratio ),
-      ( ( diam * 0.5f ) * ratio ),
-      -( diam * 0.5f ),
-      ( diam * 0.5f ),
-      0.01f, 1000.0f );
-#endif
+    projection_ = glm::perspective( glm::radians( fov_ ), aspect(), near_, far_ );
+  }
+
+  Real Camera::aspect() const
+  {
+    return ( resolution_.x / resolution_.y );
   }
 
   const mat4 Camera::model() const noexcept
   {
-    auto ret = mat4( numbers::one );
-    ret = glm::translate( ret, position_ );
-    return ret;
+    return glm::translate( mat4( 1.0f ), position_ );
   }
 
   void Camera::exposure( Real exp )
@@ -267,17 +250,13 @@ namespace neko {
     position_ = target + offset_;
     node_->setTranslate( position_ );
 
-    view_ = glm::lookAt( position_, target, vec3UnitY );
+    //view_ = glm::lookAt( position_, target, vec3UnitY ); // glm::lookAt(glm::vec3(0.0f), CameraDirection, CameraUpVector);
+    view_ = glm::lookAtRH( position_, target, up() );
   }
 
   vec3 OrbitCamera::direction() const
   {
     return math::normalize( target_->getDerivedTranslate() - position_ );
-  }
-
-  Real OrbitCamera::aspect() const
-  {
-    return 1.0f; // dunno
   }
 
   vec3 OrbitCamera::right() const

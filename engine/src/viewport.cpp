@@ -49,6 +49,38 @@ namespace neko {
     return mapPointByViewport( point );
   }
 
+  vec3 Viewport::ndcPointToWorld( vec2 ndc_viewcoord ) const
+  {
+    NEKO_EXCEPT( "ndcPointToWorld called on bare Viewport" );
+    return { 0.0f, 0.0f, 0.0f };
+  }
+
+  vec3 Viewport::ndcPointToWorld( vec3 ndc_viewcoord ) const
+  {
+    NEKO_EXCEPT( "ndcPointToWorld called on bare Viewport" );
+    return { 0.0f, 0.0f, 0.0f };
+  }
+
+  vec3 Viewport::viewportPointToWorld( vec2 px_viewcoord ) const
+  {
+    return ndcPointToWorld( mapPointByViewport( px_viewcoord ) );
+  }
+
+  vec3 Viewport::viewportPointToWorld( vec3 px_viewcoord ) const
+  {
+    return ndcPointToWorld( vec3( mapPointByViewport( { px_viewcoord.x, px_viewcoord.y } ), px_viewcoord.z ) );
+  }
+
+  vec3 Viewport::windowPointToWorld( vec2 px_windowcoord ) const
+  {
+    return ndcPointToWorld( mapPointByWindow( px_windowcoord ) );
+  }
+
+  vec3 Viewport::windowPointToWorld( vec3 px_windowcoord ) const
+  {
+    return ndcPointToWorld( vec3( mapPointByWindow( { px_windowcoord.x, px_windowcoord.y } ), px_windowcoord.z ) );
+  }
+
   void Viewport::begin() const
   {
     glGetIntegerv( GL_VIEWPORT, previousSaved_ );

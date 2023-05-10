@@ -12,14 +12,27 @@
 
 namespace neko {
 
+  class EditorViewport;
+
   class EditorGridRenderer {
   private:
     unique_ptr<LineRenderBuffer<1024>> viz_;
+    int drawCount_ = 0;
+    mat4 mdl;
   public:
     EditorGridRenderer();
     ~EditorGridRenderer();
-    void update( EditorOrthoCamera& camera );
+    void update( const EditorViewport& viewport, EditorOrthoCamera& camera );
     void draw( shaders::Shaders& shaders );
+  };
+
+  class AxesPointerRenderer {
+  private:
+    unique_ptr<LineRenderBuffer<6>> viz_;
+  public:
+    AxesPointerRenderer();
+    ~AxesPointerRenderer();
+    void draw( shaders::Shaders& shaders, vec3 origin, vec3 up, vec3 right );
   };
 
 }
