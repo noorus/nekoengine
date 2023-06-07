@@ -47,29 +47,6 @@ namespace neko {
 
       world_ = make_unique<MappedGLBuffer<neko::uniforms::World>>();
       processing_ = make_unique<MappedGLBuffer<neko::uniforms::Processing>>();
-
-      // Includes
-      loadInclude( "inc.buffers.glsl" );
-      loadInclude( "inc.colorutils.glsl" );
-      loadInclude( "inc.math.glsl" );
-
-      // Default pipelines
-      createSimplePipeline( "gaussblur2d", "passthrough2d.vert", "gaussblur2d.frag", { "tex_image", "horizontal" } );
-      createSimplePipeline( "gui", "gui.vert", "gui.frag", { "yscale", "tex" } );
-      createSimplePipeline( "dbg_showvertexnormals", "dbg_showvertexnormals.vert", "dbg_showvertexnormals.geom", "dbg_showvertexnormals.frag", { "model" } );
-      createSimplePipeline( "dbg_line", "dbg_line.vert", "dbg_line.frag", { "model" } );
-      createSimplePipeline( "dbg_showvertextangents", "dbg_showvertextangents.vert", "dbg_showvertextangents.geom", "dbg_showvertextangents.frag", { "model" } );
-      createSimplePipeline( "mat_unlit", "mat_unlitdefault.vert", "mat_unlitdefault.frag", { "model", "tex" } );
-      createSimplePipeline( "particle_world", "particle_world.vert", "particle_world.geom", "particle.frag", { "model", "tex" } );
-      createSimplePipeline( "particle_billboard", "particle_billboard.vert", "particle_billboard.geom", "particle.frag", { "model", "tex" } );
-      createSimplePipeline( "mat_skybox", "mat_skybox.vert", "mat_skybox.frag", { "model", "tex" } );
-      createSimplePipeline( "mat_screentone", "mat_screentone.vert", "mat_screentone.frag", { "model" } );
-      createSimplePipeline( "text2d", "text_2d.vert", "text.frag", { "model", "tex" } );
-      createSimplePipeline( "text3d", "text_3d.vert", "text.frag", { "model", "tex" } );
-      createSimplePipeline( "mainframebuf2d", "passthrough2d.vert", "mainframebuf2d.frag", { "tex" } );
-      createSimplePipeline( "passthrough2d", "passthrough2d.vert", "passthrough2d.frag", { "tex" } );
-      createSimplePipeline( "dbg_depthvis2d", "passthrough2d.vert", "dbg_depthvis2d.frag", { "tex" } );
-      createSimplePipeline( "editor_bgline", "editor_bgline.vert", "editor_bgline.frag", { "model" } );
     }
 
     // Shader
@@ -201,7 +178,7 @@ namespace neko {
         program.uniforms_[uni.c_str()] = glGetUniformLocation( program.id(), uni.c_str() );
     }
 
-    utf8String Shaders::loadSource( const utf8String& filename, int includeDepth )
+    utf8String Shaders::readSource( const utf8String& filename, int includeDepth )
     {
       if ( includeDepth > 3 )
       {
@@ -250,17 +227,48 @@ namespace neko {
       return move( out );
     }
 
-    void Shaders::loadInclude( utf8String filename )
+    void Shaders::readIncludeFile( utf8String filename )
     {
-      auto source = loadSource( filename );
+      auto source = readSource( filename );
       source[source.length() - 1] = '\n';
       includes_[filename] = source;
+    }
+
+    void Shaders::loadIncludeJSONRaw( const nlohmann::json& obj )
+    {
+      if ( obj.is_array() )
+      {
+        for ( const auto& entry : obj )
+        {
+          if ( !entry.is_string() )
+            NEKO_EXCEPT( "Includes array entry is not a string" );
+          loadIncludeJSONRaw( entry );
+        }
+      }
+      else if ( obj.is_string() )
+      {
+        readIncludeFile( obj.get<utf8String>() );
+      }
+      else
+        NEKO_EXCEPT( "Include JSON is not an array or a string" );
+    }
+
+    void Shaders::loadIncludeJSON( const utf8String& input )
+    {
+      auto parsed = nlohmann::json::parse( input );
+      loadIncludeJSONRaw( parsed );
+    }
+
+    void Shaders::loadIncludeFile( const utf8String& filename )
+    {
+      auto input = move( Locator::fileSystem().openFile( Dir_Data, filename )->readFullString() );
+      loadIncludeJSON( input );
     }
 
     void Shaders::buildSeparableProgram( const utf8String& name,
     const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program, const vector<utf8String>& uniforms )
     {
-      auto source = loadSource( filename );
+      auto source = readSource( filename );
 
       console_->printf( Console::srcGfx, "Compiling %s shader: %s", c_shaderTypes[type].name.c_str(), name.c_str() );
 
@@ -270,57 +278,90 @@ namespace neko {
       linkSingleProgram( *program, *shader, uniforms );
     }
 
-    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms )
+    void Shaders::loadPipelineJSONRaw( const nlohmann::json& obj )
     {
-      assert( pipelines_.find( name ) == pipelines_.end() );
+      if ( obj.is_array() )
+      {
+        for ( const auto& entry : obj )
+        {
+          if ( !entry.is_object() )
+            NEKO_EXCEPT( "Pipeline array entry is not an object" );
+          loadPipelineJSONRaw( entry );
+        }
+      }
+      else if ( obj.is_object() )
+      {
+        auto name = obj["name"].get<utf8String>();
+        if ( pipelines_.find( name ) != pipelines_.end() )
+          NEKO_EXCEPT( "Pipeline " + name + " already exists" );
 
-      ShaderPtr vs, fs;
-      ProgramPtr vp, fp;
+        utf8String vp_filename = obj.contains( "vert" ) ? obj["vert"].get<utf8String>() : "";
+        utf8String gp_filename = obj.contains( "geom" ) ? obj["geom"].get<utf8String>() : "";
+        utf8String fp_filename = obj.contains( "frag" ) ? obj["frag"].get<utf8String>() : "";
 
-      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp, uniforms );
-      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
+        vector<utf8String> uniforms;
+        if ( obj.contains( "uniforms" ) )
+        {
+          const auto& funf = obj["uniforms"];
+          if ( !funf.is_array() )
+            NEKO_EXCEPT( "Pipeline uniforms is not an array" );
+          for ( auto& u : funf )
+            uniforms.push_back( u.get<utf8String>() );
+        }
 
-      auto pipeline = make_unique<Pipeline>( name );
-      glUseProgramStages( pipeline->id(), c_shaderTypes[vs->type()].maskBit, vp->id() );
-      glUseProgramStages( pipeline->id(), c_shaderTypes[fs->type()].maskBit, fp->id() );
+        ShaderPtr vs, gs, fs;
+        ProgramPtr vp, gp, fp;
 
-      pipeline->stages_[Type::Shader_Vertex] = vp;
-      pipeline->stages_[Type::Shader_Fragment] = fp;
+        if ( !vp_filename.empty() )
+          buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp, uniforms );
+        if ( !gp_filename.empty() )
+          buildSeparableProgram( name, gp_filename, Type::Shader_Geometry, gs, gp, uniforms );
+        if ( !fp_filename.empty() )
+          buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
 
-      shaders_.push_back( move( vs ) );
-      shaders_.push_back( move( fs ) );
-      programs_.push_back( move( vp ) );
-      programs_.push_back( move( fp ) );
-      pipelines_[name] = move( pipeline );
+        auto pipeline = make_unique<Pipeline>( name );
+        if ( vp )
+          glUseProgramStages( pipeline->id(), c_shaderTypes[vs->type()].maskBit, vp->id() );
+        if ( gp )
+          glUseProgramStages( pipeline->id(), c_shaderTypes[gs->type()].maskBit, gp->id() );
+        if ( fp )
+          glUseProgramStages( pipeline->id(), c_shaderTypes[fs->type()].maskBit, fp->id() );
+
+        if ( vp )
+          pipeline->stages_[Type::Shader_Vertex] = vp;
+        if ( gp )
+          pipeline->stages_[Type::Shader_Geometry] = gp;
+        if ( fp )
+          pipeline->stages_[Type::Shader_Fragment] = fp;
+
+        if ( vs )
+          shaders_.push_back( move( vs ) );
+        if ( gs )
+          shaders_.push_back( move( gs ) );
+        if ( fs )
+          shaders_.push_back( move( fs ) );
+        if ( vp )
+          programs_.push_back( move( vp ) );
+        if ( gp )
+          programs_.push_back( move( gp ) );
+        if ( fp )
+          programs_.push_back( move( fp ) );
+        pipelines_[name] = move( pipeline );
+      }
+      else
+        NEKO_EXCEPT( "Pipeline JSON is not an array or an object" );
     }
 
-    void Shaders::createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms )
+    void Shaders::loadPipelineJSON( const utf8String& input )
     {
-      assert( pipelines_.find( name ) == pipelines_.end() );
+      auto parsed = nlohmann::json::parse( input );
+      loadPipelineJSONRaw( parsed );
+    }
 
-      ShaderPtr vs, gs, fs;
-      ProgramPtr vp, gp, fp;
-
-      buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp, uniforms );
-      buildSeparableProgram( name, gp_filename, Type::Shader_Geometry, gs, gp, uniforms );
-      buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
-
-      auto pipeline = make_unique<Pipeline>( name );
-      glUseProgramStages( pipeline->id(), c_shaderTypes[vs->type()].maskBit, vp->id() );
-      glUseProgramStages( pipeline->id(), c_shaderTypes[gs->type()].maskBit, gp->id() );
-      glUseProgramStages( pipeline->id(), c_shaderTypes[fs->type()].maskBit, fp->id() );
-
-      pipeline->stages_[Type::Shader_Vertex] = vp;
-      pipeline->stages_[Type::Shader_Geometry] = gp;
-      pipeline->stages_[Type::Shader_Fragment] = fp;
-
-      shaders_.push_back( move( vs ) );
-      shaders_.push_back( move( gs ) );
-      shaders_.push_back( move( fs ) );
-      programs_.push_back( move( vp ) );
-      programs_.push_back( move( gp ) );
-      programs_.push_back( move( fp ) );
-      pipelines_[name] = move( pipeline );
+    void Shaders::loadPipelineFile( const utf8String& filename )
+    {
+      auto input = move( Locator::fileSystem().openFile( Dir_Data, filename )->readFullString() );
+      loadPipelineJSON( input );
     }
 
     Pipeline& Shaders::usePipeline( const utf8String& name )

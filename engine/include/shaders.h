@@ -161,19 +161,23 @@ namespace neko {
       unique_ptr<MappedGLBuffer<neko::uniforms::World>> world_;
       unique_ptr<MappedGLBuffer<neko::uniforms::Processing>> processing_;
       void dumpLog( const GLuint& target, const bool isProgram );
-      void loadInclude( utf8String filename );
+      void readIncludeFile( utf8String filename );
       void compileShader( Shader& shader, const string_view source );
       void linkSingleProgram( Program& program, Shader& shader, const vector<utf8String>& uniforms );
-      utf8String loadSource( const utf8String& filename, int includeDepth = 0 );
+      utf8String readSource( const utf8String& filename, int includeDepth = 0 );
       void buildSeparableProgram( const utf8String& name, const utf8String& filename, Type type, ShaderPtr& shader, ProgramPtr& program, const vector<utf8String>& uniforms );
     public:
       Shaders( ConsolePtr console );
       inline unique_ptr<MappedGLBuffer<neko::uniforms::World>>& world() { return world_; }
       inline unique_ptr<MappedGLBuffer<neko::uniforms::Processing>>& processing() { return processing_; }
       void initialize();
-      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );
-      void createSimplePipeline( const utf8String& name, const utf8String& vp_filename, const utf8String& gp_filename, const utf8String& fp_filename, const vector<utf8String>& uniforms );
       Pipeline& usePipeline( const utf8String& name );
+      void loadIncludeJSONRaw( const nlohmann::json& arr );
+      void loadIncludeJSON( const utf8String& input );
+      void loadIncludeFile( const utf8String& filename );
+      void loadPipelineJSONRaw( const nlohmann::json& arr );
+      void loadPipelineJSON( const utf8String& input );
+      void loadPipelineFile( const utf8String& filename );
       void shutdown();
       ~Shaders();
     };

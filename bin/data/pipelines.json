@@ -1,0 +1,142 @@
+[
+  {
+    "name": "gaussblur2d",
+    "vert": "passthrough2d.vert",
+    "frag": "gaussblur2d.frag",
+    "uniforms": [
+      "tex_image",
+      "horizontal"
+    ]
+  },
+  {
+    "name": "gui",
+    "vert": "gui.vert",
+    "frag": "gui.frag",
+    "uniforms": [
+      "yscale",
+      "tex"
+    ]
+  },
+  {
+    "name": "dbg_showvertexnormals",
+    "vert": "dbg_showvertexnormals.vert",
+    "geom": "dbg_showvertexnormals.geom",
+    "frag": "dbg_showvertexnormals.frag",
+    "uniforms": [
+      "model"
+    ]
+  },
+  {
+    "name": "dbg_line",
+    "vert": "dbg_line.vert",
+    "frag": "dbg_line.frag",
+    "uniforms": [
+      "model"
+    ]
+  },
+  {
+    "name": "dbg_showvertextangents",
+    "vert": "dbg_showvertextangents.vert",
+    "geom": "dbg_showvertextangents.geom",
+    "frag": "dbg_showvertextangents.frag",
+    "uniforms": [
+      "model"
+    ]
+  },
+  {
+    "name": "mat_unlit",
+    "vert": "mat_unlitdefault.vert",
+    "frag": "mat_unlitdefault.frag",
+    "uniforms": [
+      "model",
+      "tex"
+    ]
+  },
+  {
+    "name": "particle_world",
+    "vert": "particle_world.vert",
+    "geom": "particle_world.geom",
+    "frag": "particle.frag",
+    "uniforms": [
+      "model",
+      "tex"
+    ]
+  },
+  {
+    "name": "particle_billboard",
+    "vert": "particle_billboard.vert",
+    "geom": "particle_billboard.geom",
+    "frag": "particle.frag",
+    "uniforms": [
+      "model",
+      "tex"
+    ]
+  },
+  {
+    "name": "mat_skybox",
+    "vert": "mat_skybox.vert",
+    "frag": "mat_skybox.frag",
+    "uniforms": [
+      "model",
+      "tex"
+    ]
+  },
+  {
+    "name": "mat_screentone",
+    "vert": "mat_screentone.vert",
+    "frag": "mat_screentone.frag",
+    "uniforms": [
+      "model"
+    ]
+  },
+  {
+    "name": "text2d",
+    "vert": "text_2d.vert",
+    "frag": "text.frag",
+    "uniforms": [
+      "model",
+      "tex"
+    ]
+  },
+  {
+    "name": "text3d",
+    "vert": "text_3d.vert",
+    "frag": "text.frag",
+    "uniforms": [
+      "model",
+      "tex"
+    ]
+  },
+  {
+    "name": "mainframebuf2d",
+    "vert": "passthrough2d.vert",
+    "frag": "mainframebuf2d.frag",
+    "uniforms": [
+      "tex"
+    ]
+  },
+  {
+    "name": "passthrough2d",
+    "vert": "passthrough2d.vert",
+    "frag": "passthrough2d.frag",
+    "uniforms": [
+      "tex"
+    ]
+  },
+  {
+    "name": "dbg_depthvis2d",
+    "vert": "passthrough2d.vert",
+    "frag": "dbg_depthvis2d.frag",
+    "uniforms": [
+      "tex"
+    ]
+  },
+  {
+    "name": "editor_bgline",
+    "vert": "editor_bgline.vert",
+    "frag": "editor_bgline.frag",
+    "uniforms": [
+      "model"
+    ]
+  }
+]

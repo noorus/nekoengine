@@ -338,3 +338,4 @@ lib/*.exe
 *.lnk
 assets*
 publish*
+/bin/imgui.ini
