@@ -15,9 +15,9 @@ typedef unsigned char byte;
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#include "SDL.h"
-#include "SDL_opengl.h"
-#include "SDL_ttf.h"
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_opengl.h>
+#include <SDL3/SDL_ttf.h>
 
 #include <string>
 #include <set>
@@ -167,6 +167,9 @@ public:
 
 	// Set the controller LED Color, if available
 	void SetControllerColor( uint8 nColorR, uint8 nColorG, uint8 nColorB, unsigned int nFlags );
+
+	// Set the trigger effect on DualSense controllers
+	void SetTriggerEffect( bool bEnabled );
 
 	// Trigger a vibration on the controller, if available
 	void TriggerControllerVibration( unsigned short nLeftSpeed, unsigned short nRightSpeed );

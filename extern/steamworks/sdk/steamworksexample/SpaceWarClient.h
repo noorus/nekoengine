@@ -37,6 +37,8 @@ class CP2PAuthedGame;
 class CVoiceChat;
 class CHTMLSurface;
 class CRemotePlayList;
+class CItemStore;
+class COverlayExamples;
 
 // Height of the HUD font
 #define HUD_FONT_HEIGHT 18
@@ -129,6 +131,28 @@ struct PurchaseableItem_t
 	uint64 m_ulPrice;
 };
 
+struct OverlayExample_t
+{
+	enum EOverlayExampleItem
+	{
+		k_EOverlayExampleItem_BackToMenu,
+		k_EOverlayExampleItem_Invalid,
+		k_EOverlayExampleItem_ActivateGameOverlay,
+		k_EOverlayExampleItem_ActivateGameOverlayToUser,
+		k_EOverlayExampleItem_ActivateGameOverlayToWebPage,
+		k_EOverlayExampleItem_ActivateGameOverlayToStore,
+		// k_EOverlayExampleItem_ActivateGameOverlayRemotePlayTogetherInviteDialog,
+		k_EOverlayExampleItem_ActivateGameOverlayInviteDialogConnectString,
+		k_EOverlayExampleItem_HookScreenshots,
+		k_EOverlayExampleItem_RequestKeyboard,
+		k_EOverlayExampleItem_Notification_SetInset,
+		k_EOverlayExampleItem_Notification_SetPosition,
+	};
+
+	EOverlayExampleItem m_eItem;
+	const char *m_pchExtraCommandData;
+};
+
 
 class CSpaceWarClient 
 {
@@ -192,6 +216,8 @@ public:
 	void OnMenuSelection( FriendsListMenuItem_t selection );
 	void OnMenuSelection( RemotePlayListMenuItem_t selection );
 	void OnMenuSelection( ERemoteStorageSyncMenuCommand selection );
+	void OnMenuSelection( PurchaseableItem_t selection );
+	void OnMenuSelection( OverlayExample_t selection );
 
 	void OnMenuSelection( MusicPlayerMenuItem_t selection ) { m_pMusicPlayer->OnMenuSelection( selection ); }
 
@@ -273,6 +299,7 @@ private:
 
 	// load subscribed workshop items
 	void LoadWorkshopItems();
+	void QueryWorkshopItems();
 
 	// Set appropriate rich presence keys for a player who is currently in-game and
 	// return the value that should go in steam_display
@@ -281,9 +308,6 @@ private:
 	// load a workshop item from file
 	bool LoadWorkshopItem( PublishedFileId_t workshopItemID );
 	CWorkshopItem *LoadWorkshopItemFromFile( const char *pszFileName );
-
-	// ask the inventory service for things to purchase
-	void LoadItemsWithPrices();
 
 	// draw the in-game store
 	void DrawInGameStore();
@@ -341,6 +365,7 @@ private:
 
 	// Server address data
 	CSteamID m_steamIDGameServer;
+	CSteamID m_steamIDGameServerFromBrowser;
 	uint32 m_unServerIP;
 	uint16 m_usServerPort;
 	HAuthTicket m_hAuthTicket;
@@ -405,7 +430,7 @@ private:
 
 	// Steam Workshop items
 	CWorkshopItem *m_rgpWorkshopItems[ MAX_WORKSHOP_ITEMS ];
-	int m_nNumWorkshopItems; // items in m_rgpWorkshopItems
+	int m_nNumWorkshopItems; // items in m_rgpWorkshopItem
 
 	// Main menu instance
 	CMainMenu *m_pMainMenu;
@@ -431,7 +456,8 @@ private:
 	CServerBrowser *m_pServerBrowser;
 	CRemotePlayList *m_pRemotePlayList;
 	CRemoteStorage *m_pRemoteStorage;
-
+	CItemStore *m_pItemStore;
+	COverlayExamples *m_pOverlayExamples;
 
 	// lobby handling
 	// the name of the lobby we're connected to
@@ -461,6 +487,11 @@ private:
 
 	// callback when new Workshop item was installed
 	STEAM_CALLBACK(CSpaceWarClient, OnWorkshopItemInstalled, ItemInstalled_t);
+	void OnUGCQueryCompleted( SteamUGCQueryCompleted_t *pParam, bool bIOFailure );
+	CCallResult<CSpaceWarClient, SteamUGCQueryCompleted_t> m_SteamCallResultUGCQueryCompleted;
+
+	// callback when a Remote Play Together guest invite has been created
+	STEAM_CALLBACK( CSpaceWarClient, OnSteamRemotePlayTogetherGuestInvite, SteamRemotePlayTogetherGuestInvite_t );
 
 	// Steam China support. duration control callback can be posted asynchronously, but we also
 	// call it directly.
@@ -475,12 +506,6 @@ private:
 		}
 	}
 	CCallResult<CSpaceWarClient, DurationControl_t> m_SteamCallResultDurationControl;
-
-	// callback when we ask the Inventory Service for prices
-	void OnRequestPricesResult( SteamInventoryRequestPricesResult_t *pParam, bool bIOFailure );
-	CCallResult<CSpaceWarClient, SteamInventoryRequestPricesResult_t> m_SteamCallResultRequestPrices;
-	char m_rgchCurrency[4];
-	std::vector<PurchaseableItem_t> m_vecPurchaseableItems;
 
 	// lobby browser menu
 	CLobbyBrowser *m_pLobbyBrowser;

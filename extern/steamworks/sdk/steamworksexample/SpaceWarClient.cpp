@@ -25,12 +25,15 @@
 #include "Inventory.h"
 #include "steam/steamencryptedappticket.h"
 #include "RemotePlay.h"
+#include "ItemStore.h"
+#include "OverlayExamples.h"
 #ifdef WIN32
 #include <direct.h>
 #else
 #define MAX_PATH PATH_MAX
 #include <unistd.h>
 #define _getcwd getcwd
+#define _snprintf snprintf
 #endif
 
 
@@ -165,9 +168,13 @@ void CSpaceWarClient::Init( IGameEngine *pGameEngine )
 	// HTML Surface page
 	m_pHTMLSurface = new CHTMLSurface(pGameEngine);
 
-	LoadWorkshopItems();
+	// in-game store
+	m_pItemStore = new CItemStore( pGameEngine );
+	m_pItemStore->LoadItemsWithPrices();
 
-	LoadItemsWithPrices();
+	m_pOverlayExamples = new COverlayExamples( pGameEngine );
+
+	LoadWorkshopItems();
 }
 
 
@@ -269,8 +276,9 @@ void CSpaceWarClient::DisconnectFromServer()
 	}
 
 	if ( m_hConnServer != k_HSteamNetConnection_Invalid )
-		SteamNetworkingSockets()->CloseConnection( m_hConnServer, EDisconnectReason::k_EDRClientDisconnect, nullptr, false );
+		SteamNetworkingSockets()->CloseConnection( m_hConnServer, k_EDRClientDisconnect, nullptr, false );
 	m_steamIDGameServer = CSteamID();
+	m_steamIDGameServerFromBrowser = CSteamID();
 	m_hConnServer = k_HSteamNetConnection_Invalid;
 }
 
@@ -295,9 +303,17 @@ void CSpaceWarClient::OnReceiveServerInfo( CSteamID steamIDGameServer, bool bVAC
 
 	MsgClientBeginAuthentication_t msg;
 #ifdef USE_GS_AUTH_API
+	SteamNetworkingIdentity snid;
+	// if the server Steam ID was aquired from another source ( m_steamIDGameServerFromBrowser )
+	// then use it as the identity
+	// if it only came from the server itself, then use the IP address
+	if ( m_steamIDGameServer == m_steamIDGameServerFromBrowser )
+		snid.SetSteamID( m_steamIDGameServer );
+	else
+		snid.SetIPv4Addr( m_unServerIP, m_usServerPort );
 	char rgchToken[1024];
 	uint32 unTokenLen = 0;
-	m_hAuthTicket = SteamUser()->GetAuthSessionTicket( rgchToken, sizeof( rgchToken ), &unTokenLen );
+	m_hAuthTicket = SteamUser()->GetAuthSessionTicket( rgchToken, sizeof( rgchToken ), &unTokenLen, &snid );
 	msg.SetToken( rgchToken, unTokenLen );
 
 #else
@@ -619,7 +635,7 @@ void CSpaceWarClient::InitiateServerConnection( CSteamID steamIDGameServer )
 
 	SetGameState( k_EClientGameConnecting );
 
-	m_steamIDGameServer = steamIDGameServer;
+	m_steamIDGameServerFromBrowser = m_steamIDGameServer = steamIDGameServer;
 
 	SteamNetworkingIdentity identity;
 	identity.SetSteamID(steamIDGameServer);
@@ -660,10 +676,10 @@ void CSpaceWarClient::OnNetConnectionStatusChanged(SteamNetConnectionStatusChang
 		SteamNetworkingSockets()->CloseConnection(m_hConn, m_info.m_eEndReason, nullptr, false);
 		switch (m_info.m_eEndReason)
 		{
-		case EDisconnectReason::k_EDRServerReject:
+		case k_EDRServerReject:
 			OnReceiveServerAuthenticationResponse(false, 0);
 			break;
-		case EDisconnectReason::k_EDRServerFull:
+		case k_EDRServerFull:
 			OnReceiveServerFullResponse();
 			break;
 		}
@@ -1036,6 +1052,24 @@ void CSpaceWarClient::OnMenuSelection( ERemoteStorageSyncMenuCommand selection )
 
 
 //-----------------------------------------------------------------------------
+// Purpose: Handles menu actions when viewing the Item Store
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnMenuSelection( PurchaseableItem_t selection )
+{
+	m_pItemStore->OnMenuSelection( selection );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Handles menu actions when viewing Overlay Examples
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnMenuSelection( OverlayExample_t selection )
+{
+	m_pOverlayExamples->OnMenuSelection( selection );
+}
+
+
+//-----------------------------------------------------------------------------
 // Purpose: For a player in game, set the appropriate rich presence keys for display
 // in the Steam friends list and return the value for steam_display
 //-----------------------------------------------------------------------------
@@ -1192,7 +1226,12 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		pchSteamRichPresenceDisplay = SetInGameRichPresence();
 		bDisplayScoreInRichPresence = true;
 	}
-	else if ( m_eGameState == k_EClientRemotePlay )
+	else if ( m_eGameState == k_EClientRemotePlayInvite )
+	{
+		SteamRemotePlay()->BSendRemotePlayTogetherInvite( CSteamID() );
+		SetGameState( k_EClientGameMenu );
+	}
+	else if ( m_eGameState == k_EClientRemotePlaySessions )
 	{
 		// we've switched to the remote play menu
 		m_pRemotePlayList->Show();
@@ -1215,6 +1254,18 @@ void CSpaceWarClient::OnGameStateChanged( EClientGameState eGameStateNew )
 		// we've switched to the html page
 		m_pHTMLSurface->Show();
 		SteamFriends()->SetRichPresence("status", "Using the web");
+	}
+	else if ( m_eGameState == k_EClientInGameStore )
+	{
+		// we've switched to the item store
+		m_pItemStore->Show();
+		SteamFriends()->SetRichPresence( "status", "Viewing Item Store" );
+	}
+	else if ( m_eGameState == k_EClientOverlayAPI )
+	{
+		// we've switched to the item store
+		m_pOverlayExamples->Show();
+		SteamFriends()->SetRichPresence( "status", "Viewing Overlay API Examples" );
 	}
 
 	if ( pchSteamRichPresenceDisplay != NULL )
@@ -1377,7 +1428,8 @@ void CSpaceWarClient::RunFrame()
 	// Check if escape has been pressed, we'll use that info in a couple places below
 	bool bEscapePressed = false;
 	if ( m_pGameEngine->BIsKeyDown( VK_ESCAPE ) ||
-		m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_PauseMenu ) )
+		m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_PauseMenu ) ||
+		m_pGameEngine->BIsControllerActionActive( eControllerDigitalAction_MenuCancel ) )
 	{
 		static uint64 m_ulLastESCKeyTick = 0;
 		uint64 ulCurrentTickCount = m_pGameEngine->GetGameTickCount();
@@ -1516,12 +1568,7 @@ void CSpaceWarClient::RunFrame()
 		// Check if we've waited too long and should time out the connection
 		if ( m_pGameEngine->GetGameTickCount() - m_ulStateTransitionTime > MILLISECONDS_CONNECTION_TIMEOUT )
 		{
-			if ( m_pP2PAuthedGame )
-				m_pP2PAuthedGame->EndGame();
-			if ( m_eConnectedStatus == k_EClientConnectedAndAuthenticated )
-			{
-				SteamUser()->TerminateGameConnection( m_unServerIP, m_usServerPort );
-			}
+			DisconnectFromServer();
 			m_GameServerPing.CancelPing();
 			SetConnectionFailureText( "Timed out connecting to game server" );
 			SetGameState( k_EClientGameConnectionFailure );
@@ -1599,7 +1646,7 @@ void CSpaceWarClient::RunFrame()
 			SetGameState( k_EClientGameMenu );
 		break;
 
-	case k_EClientRemotePlay:
+	case k_EClientRemotePlaySessions:
 		m_pStarField->Render();
 		m_pRemotePlayList->RunFrame();
 
@@ -1736,10 +1783,18 @@ void CSpaceWarClient::RunFrame()
 
 	case k_EClientInGameStore:
 		m_pStarField->Render();
-		DrawInGameStore();
+		m_pItemStore->RunFrame();
 
 		if (bEscapePressed)
 			SetGameState(k_EClientGameMenu);
+		break;
+
+	case k_EClientOverlayAPI:
+		m_pStarField->Render();
+		m_pOverlayExamples->RunFrame();
+
+		if ( bEscapePressed )
+			SetGameState( k_EClientGameMenu );
 		break;
 		
 	default:
@@ -2026,7 +2081,24 @@ void CSpaceWarClient::DrawInstructions()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu\n Build ID:%d", SteamApps()->GetAppBuildId() );
+	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
+	{
+		const char *rgchActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
+
+		if ( strcmp( rgchActionOrigin, "None" ) == 0 )
+		{
+			sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu. No controller button bound\n Build ID:%d", SteamApps()->GetAppBuildId() );
+		}
+		else
+		{
+			sprintf_safe( rgchBuffer, "Press ESC or '%s' to return the Main Menu\n Build ID:%d", rgchActionOrigin, SteamApps()->GetAppBuildId() );
+		}
+	}
+	else
+	{
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu\n Build ID:%d", SteamApps()->GetAppBuildId() );
+	}
+	
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 
 }
@@ -2086,7 +2158,23 @@ void CSpaceWarClient::DrawConnectionFailureText()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.7);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
+	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
+	{
+		const char *rgchActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
+
+		if ( strcmp( rgchActionOrigin, "None" ) == 0 )
+		{
+			sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu. No controller button bound" );
+		}
+		else
+		{
+			sprintf_safe( rgchBuffer, "Press ESC or '%s' to return the Main Menu", rgchActionOrigin );
+		}
+	}
+	else
+	{
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
+	}
 	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB( 255, 25, 200, 25 ), TEXTPOS_CENTER|TEXTPOS_TOP, rgchBuffer );
 }
 
@@ -2505,24 +2593,24 @@ void CSpaceWarClient::LoadWorkshopItems()
 
 
 //-----------------------------------------------------------------------------
-// Purpose: load all all purchaseable items
-//-----------------------------------------------------------------------------
-void CSpaceWarClient::LoadItemsWithPrices()
-{
-	m_vecPurchaseableItems.clear();
-
-	SteamAPICall_t hSteamAPICall = SteamInventory()->RequestPrices();
-	m_SteamCallResultRequestPrices.Set( hSteamAPICall, this, &CSpaceWarClient::OnRequestPricesResult );
-}
-
-
-//-----------------------------------------------------------------------------
 // Purpose: new Workshop was installed, load it instantly
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::OnWorkshopItemInstalled( ItemInstalled_t *pParam )
 {
 	if ( pParam->m_unAppID == SteamUtils()->GetAppID() )
 		LoadWorkshopItem( pParam->m_nPublishedFileId );
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Remote Play Together guest invite was created
+//-----------------------------------------------------------------------------
+void CSpaceWarClient::OnSteamRemotePlayTogetherGuestInvite( SteamRemotePlayTogetherGuestInvite_t *pParam )
+{
+	char rgch[ 1024 ];
+	sprintf_safe( rgch, "Remote Play Together guest invite URL: %s\n",
+		pParam->m_szConnectURL );
+	OutputDebugString( rgch );
 }
 
 
@@ -2569,36 +2657,6 @@ void CSpaceWarClient::OnDurationControl( DurationControl_t *pParam )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Request prices from the Steam Inventory Service
-//-----------------------------------------------------------------------------
-void CSpaceWarClient::OnRequestPricesResult( SteamInventoryRequestPricesResult_t *pParam, bool bIOFailure )
-{
-	if ( pParam->m_result == k_EResultOK )
-	{
-		strncpy( m_rgchCurrency, pParam->m_rgchCurrency, sizeof( m_rgchCurrency ) );
-
-		uint32 unItems = SteamInventory()->GetNumItemsWithPrices();
-		std::vector<SteamItemDef_t> vecItemDefs;
-		vecItemDefs.resize( unItems );
-		std::vector<uint64> vecPrices;
-		vecPrices.resize( unItems );
-
-		if ( SteamInventory()->GetItemsWithPrices( vecItemDefs.data(), vecPrices.data(), NULL, unItems ) )
-		{
-			m_vecPurchaseableItems.reserve( unItems );
-			for ( uint32 i = 0; i < unItems; ++i )
-			{
-				PurchaseableItem_t t;
-				t.m_nItemDefID = vecItemDefs[i];
-				t.m_ulPrice = vecPrices[i];
-				m_vecPurchaseableItems.push_back( t );
-			}
-		}
-	}
-}
-
-
-//-----------------------------------------------------------------------------
 // Purpose: Draws PublishFileID, title & description for each subscribed Workshop item
 //-----------------------------------------------------------------------------
 void CSpaceWarClient::DrawWorkshopItems()
@@ -2640,62 +2698,22 @@ void CSpaceWarClient::DrawWorkshopItems()
 	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.8);
 	rect.bottom = m_pGameEngine->GetViewportHeight();
 
-	sprintf_safe(rgchBuffer, "Press ESC to return to the Main Menu");
-	m_pGameEngine->BDrawString(m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER | TEXTPOS_TOP, rgchBuffer);
-}
-
-
-void CSpaceWarClient::DrawInGameStore()
-{
-	const int32 width = m_pGameEngine->GetViewportWidth();
-
-	RECT rect;
-	rect.top = 0;
-	rect.bottom = 64;
-	rect.left = 0;
-	rect.right = width;
-
-	char rgchBuffer[1024];
-	sprintf_safe(rgchBuffer, "In-Game Store");
-	m_pGameEngine->BDrawString( m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER |TEXTPOS_VCENTER, rgchBuffer);
-
-	rect.left = 32;
-	rect.top = 64;
-	rect.bottom = 96;
-
-	for ( uint32 i = 0; i < m_vecPurchaseableItems.size(); ++i )
+	if ( m_pGameEngine->BIsSteamInputDeviceActive() )
 	{
-		const auto &t = m_vecPurchaseableItems[i];
-		
-		char buf[512];
-		uint32 bufSize = sizeof(buf);
-		if ( !SteamInventory()->GetItemDefinitionProperty( t.m_nItemDefID, "name", buf, &bufSize ) && bufSize <= sizeof(buf) )
+		const char *rgchActionOrigin = m_pGameEngine->GetTextStringForControllerOriginDigital( eControllerActionSet_MenuControls, eControllerDigitalAction_MenuCancel );
+
+		if ( strcmp( rgchActionOrigin, "None" ) == 0 )
 		{
-			continue;
+			sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu. No controller button bound" );
 		}
-		uint32 unQuantity = SpaceWarLocalInventory()->GetNumOf( t.m_nItemDefID );
-
-		rect.top += 32;
-		rect.bottom += 32;
-
-		sprintf_safe( rgchBuffer, "%u. Purchase %-25s    %s %0.2f    (own %u)", i+1, buf, m_rgchCurrency, float(t.m_ulPrice)/100, unQuantity );
-
-		m_pGameEngine->BDrawString( m_hInGameStoreFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_LEFT |TEXTPOS_VCENTER, rgchBuffer);
-
-		// if the user presses a key, let them purchase the item
-		uint32 key = 0x30 + i + 1;
-		if ( m_pGameEngine->BIsKeyDown( key ) )
+		else
 		{
-			uint32 rgQuantity[1] = {1};
-			SteamInventory()->StartPurchase( &t.m_nItemDefID, rgQuantity, 1 );
+			sprintf_safe( rgchBuffer, "Press ESC or '%s' to return the Main Menu", rgchActionOrigin );
 		}
 	}
-	
-	rect.left = 0;
-	rect.right = width;
-	rect.top = LONG(m_pGameEngine->GetViewportHeight() * 0.8);
-	rect.bottom = m_pGameEngine->GetViewportHeight();
-
-	sprintf_safe(rgchBuffer, "Press ESC to return to the Main Menu");
+	else
+	{
+		sprintf_safe( rgchBuffer, "Press ESC to return to the Main Menu" );
+	}
 	m_pGameEngine->BDrawString(m_hInstructionsFont, rect, D3DCOLOR_ARGB(255, 25, 200, 25), TEXTPOS_CENTER | TEXTPOS_TOP, rgchBuffer);
 }

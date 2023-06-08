@@ -15,6 +15,28 @@
 #include "glstringosx.h"
 #include "gameengineosx.h"
 
+#include "steam/isteamdualsense.h"
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 101400
+#define NSOpenGLContextParameterSwapInterval NSOpenGLCPSwapInterval
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 101200
+#define NSWindowStyleMaskTitled NSTitledWindowMask
+#define NSWindowStyleMaskClosable  NSClosableWindowMask
+#define NSWindowStyleMaskResizable NSResizableWindowMask
+
+#define NSEventTypeKeyDown NSKeyDown
+#define NSEventTypeKeyUp NSKeyUp
+#define NSEventTypeFlagsChanged NSFlagsChanged
+
+#define NSEventModifierFlagShift NSShiftKeyMask
+#define NSEventModifierFlagControl NSControlKeyMask
+#define NSEventModifierFlagOption NSAlternateKeyMask
+
+#define NSEventMaskAny NSAnyEventMask
+#endif
+
+#endif
 
 CGameEngineGL *g_engine;		// dxabstract will use this.. it is set by the engine constructor
 
@@ -295,9 +317,9 @@ bool CGameEngineGL::BInitializeGraphics()
 
 	ProcessSerialNumber psn = { 0, kCurrentProcess };
 	TransformProcessType( &psn, kProcessTransformToForegroundApplication );
-	SetFrontProcess( &psn );
-	
-	uint32_t mask = NSTitledWindowMask | NSClosableWindowMask| NSResizableWindowMask;
+	[[GLApplication sharedApplication] activateIgnoringOtherApps: YES];
+
+	uint32_t mask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable;
 
 	GLuint attribs[] = 
 	{
@@ -312,8 +334,6 @@ bool CGameEngineGL::BInitializeGraphics()
 	
 	NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes: (NSOpenGLPixelFormatAttribute*) attribs];
 
-	NSApplication *app = [GLApplication sharedApplication];
-	
 	NSApplicationLoad();
 
 	m_view = [[NSOpenGLView alloc] initWithFrame:NSMakeRect( 0, 0, m_nWindowWidth, m_nWindowHeight )
@@ -330,7 +350,7 @@ bool CGameEngineGL::BInitializeGraphics()
 	[m_window setAcceptsMouseMovedEvents:YES];
 	
 	GLint swapInt = 1;
-	[[m_view openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
+	[[m_view openGLContext] setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
 	[[m_view openGLContext] makeCurrentContext];
 
 	[m_window setContentView:m_view];
@@ -2118,10 +2138,10 @@ void CGameEngineGL::UpdateKey( uint32_t vkKey, int nDown )
 void CGameEngineGL::MessagePump()
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSApplication *pApp = [NSApplication sharedApplication];
+	NSApplication *pApp = [GLApplication sharedApplication];
     do
     {
-        NSEvent *event = [pApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
+        NSEvent *event = [pApp nextEventMatchingMask:NSEventMaskAny untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
 		if ( event == nil )
 			break;
 		
@@ -2130,8 +2150,8 @@ void CGameEngineGL::MessagePump()
         uint32_t c = 0;
 		switch ( [event type] )
 		{
-			case NSKeyDown:
-			case NSKeyUp:
+			case NSEventTypeKeyDown:
+			case NSEventTypeKeyUp:
                 c = [[event charactersIgnoringModifiers] characterAtIndex:0];
             
                 switch ( c )
@@ -2155,17 +2175,17 @@ void CGameEngineGL::MessagePump()
                 
                 c = toupper(c);
                 
-                if ( [event type] == NSKeyDown )
+                if ( [event type] == NSEventTypeKeyDown )
                     m_SetKeysDown.insert( c );
                 else
                     m_SetKeysDown.erase( c );
 				continue;
             
-            case NSFlagsChanged:
+            case NSEventTypeFlagsChanged:
                 c = [event modifierFlags];
-                UpdateKey( VK_SHIFT, c & NSShiftKeyMask );
-                UpdateKey( VK_CONTROL, c & NSControlKeyMask );
-                UpdateKey( VK_SELECT, c & NSAlternateKeyMask );
+                UpdateKey( VK_SHIFT, c & NSEventModifierFlagShift );
+                UpdateKey( VK_CONTROL, c & NSEventModifierFlagControl );
+                UpdateKey( VK_SELECT, c & NSEventModifierFlagOption );
                 continue;
 
 			default:
@@ -2556,6 +2576,30 @@ void CGameEngineGL::SetControllerColor( uint8 nColorR, uint8 nColorG, uint8 nCol
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Set the trigger effect on DualSense controllers
+//-----------------------------------------------------------------------------
+void CGameEngineGL::SetTriggerEffect( bool bEnabled )
+{
+	ScePadTriggerEffectParam param;
+
+	memset( &param, 0, sizeof( param ) );
+	param.triggerMask = SCE_PAD_TRIGGER_EFFECT_TRIGGER_MASK_R2;
+
+	// Clear any existing effect
+	param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].mode = SCE_PAD_TRIGGER_EFFECT_MODE_OFF;
+	SteamInput()->SetDualSenseTriggerEffect( m_ActiveControllerHandle, &param );
+
+	if ( bEnabled )
+	{
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].mode = SCE_PAD_TRIGGER_EFFECT_MODE_VIBRATION;
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].commandData.vibrationParam.position = 5;
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].commandData.vibrationParam.amplitude = 5;
+		param.command[ SCE_PAD_TRIGGER_EFFECT_PARAM_INDEX_FOR_R2 ].commandData.vibrationParam.frequency = 8;
+		SteamInput()->SetDualSenseTriggerEffect( m_ActiveControllerHandle, &param );
+	}
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Trigger vibration on the controller, if supported by controller
 //-----------------------------------------------------------------------------
 void CGameEngineGL::TriggerControllerVibration( unsigned short nLeftSpeed, unsigned short nRightSpeed )
@@ -2568,7 +2612,7 @@ void CGameEngineGL::TriggerControllerVibration( unsigned short nLeftSpeed, unsig
 //-----------------------------------------------------------------------------
 void CGameEngineGL::TriggerControllerHaptics( ESteamControllerPad ePad, unsigned short usOnMicroSec, unsigned short usOffMicroSec, unsigned short usRepeat )
 {
-	SteamInput()->TriggerRepeatedHapticPulse( m_ActiveControllerHandle, ePad, usOnMicroSec, usOffMicroSec, usRepeat, 0 );
+	SteamInput()->Legacy_TriggerRepeatedHapticPulse( m_ActiveControllerHandle, ePad, usOnMicroSec, usOffMicroSec, usRepeat, 0 );
 }
 
 //-----------------------------------------------------------------------------
