@@ -301,7 +301,7 @@ namespace neko {
     fonts_->loadFile( R"(fonts.json)" );
 
     //loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
-    loader_->addLoadTask( { LoadTask( new SceneNode(), R"(camera.gltf)" ) } );
+    loader_->addLoadTask( { LoadTask( make_shared<MeshNode>(), R"(camera.gltf)" ) } );
 
     if ( g_CVar_vid_msaa.as_i() > 1 )
       ctx_.fboMainMultisampled_ = make_unique<Framebuffer>( this, 2, c_bufferFormat, true, g_CVar_vid_msaa.as_i() );
@@ -342,17 +342,17 @@ namespace neko {
     }
   }
 
-  void Renderer::uploadModelsEnterNode( SceneNode* node )
+  void Renderer::uploadModelsEnterNode( MeshNodePtr node )
   {
-    if ( node->mesh_ && !node->mesh_->mesh_ )
-      node->mesh_->mesh_ = meshes_->createStatic( GL_TRIANGLES, node->mesh_->vertices_, node->mesh_->indices_ );
-    for ( auto child : node->children_ )
+    if ( !node->mesh )
+      node->mesh = meshes_->createStatic( GL_TRIANGLES, node->vertices, node->indices );
+    for ( auto child : node->children )
       uploadModelsEnterNode( child );
   }
 
   void Renderer::uploadModels()
   {
-    vector<SceneNode*> nodes;
+    vector<MeshNodePtr> nodes;
     loader_->getFinishedModels( nodes );
     if ( nodes.empty() )
       return;
@@ -362,7 +362,7 @@ namespace neko {
     for ( auto node : nodes )
       uploadModelsEnterNode( node );
 
-    sceneGraph_.insert( nodes.begin(), nodes.end() );
+    // sceneGraph_.insert( nodes.begin(), nodes.end() );
   }
 
   void Renderer::update( GameTime delta, GameTime time )
@@ -462,9 +462,9 @@ namespace neko {
     userData_.image_ = createTextureWithData( "rainet_avatar_" + id, image.width_, image.height_, PixFmtColorRGBA8, image.buffer_.data() );
   }
 
-  void Renderer::sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline )
+  void Renderer::sceneDrawEnterNode( MeshNodePtr node, shaders::Pipeline& pipeline )
   {
-    if ( node->mesh_ && node->mesh_->mesh_ )
+    /* if ( node->mesh_ && node->mesh_->mesh_ )
     {
       node->mesh_->mesh_->begin();
       mat4 model = node->getFullTransform();
@@ -472,7 +472,7 @@ namespace neko {
       node->mesh_->mesh_->draw();
     }
     for ( auto child : node->children_ )
-      sceneDrawEnterNode( child, pipeline );
+      sceneDrawEnterNode( child, pipeline );*/
   }
 
   void setGLDrawState( bool depthtest, bool depthwrite, bool facecull, bool wireframe )
@@ -581,12 +581,13 @@ namespace neko {
     if ( true )
     {
       auto& pipeline = useMaterial( "demo_uvtest" );
-      for ( auto node : sceneGraph_ )
-        sceneDrawEnterNode( node, pipeline );
+      //for ( auto node : sceneGraph_ )
+      //  sceneDrawEnterNode( node, pipeline );
     }
 
     glEnable( GL_LINE_SMOOTH );
 
+    #if 0
     if ( g_CVar_dbg_shownormals.as_b() )
     {
       auto& pipeline = shaders_->usePipeline( "dbg_showvertexnormals" );
@@ -602,6 +603,7 @@ namespace neko {
       for ( auto node : sceneGraph_ )
         sceneDrawEnterNode( node, pipeline );
     }
+    #endif
 
     glDisable( GL_LINE_SMOOTH );
 

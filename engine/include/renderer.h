@@ -32,114 +32,33 @@ namespace neko {
 
   struct GLInformation
   {
-    int32_t versionMajor; //!< Major GL version
-    int32_t versionMinor; //!< Minor GL version
-    int64_t maxTextureSize; //!< Maximum width/height for GL_TEXTURE
-    int64_t maxRenderbufferSize; //!< Maximum width/height for GL_RENDERBUFFER
-    int64_t maxFramebufferWidth; //!< Maximum width for GL_FRAMEBUFFER
-    int64_t maxFramebufferHeight; //!< Maximum height for GL_FRAMEBUFFER
-    int64_t textureBufferAlignment; //!< Minimum alignment for texture buffer sizes and offsets
-    int64_t uniformBufferAlignment; //!< Minimum alignment for uniform buffer sizes and offsets
-    float maxAnisotropy; //!< Maximum anisotropy level, usually 16.0
-    GLInformation()
-    {
-      memset( this, 0, sizeof( GLInformation ) );
-    }
+    int32_t versionMajor = 0; //!< Major GL version
+    int32_t versionMinor = 0; //!< Minor GL version
+    int64_t maxTextureSize = 0; //!< Maximum width/height for GL_TEXTURE
+    int64_t maxRenderbufferSize = 0; //!< Maximum width/height for GL_RENDERBUFFER
+    int64_t maxFramebufferWidth = 0; //!< Maximum width for GL_FRAMEBUFFER
+    int64_t maxFramebufferHeight = 0; //!< Maximum height for GL_FRAMEBUFFER
+    int64_t textureBufferAlignment = 0; //!< Minimum alignment for texture buffer sizes and offsets
+    int64_t uniformBufferAlignment = 0; //!< Minimum alignment for uniform buffer sizes and offsets
+    float maxAnisotropy = 0.0f; //!< Maximum anisotropy level, usually 16.0
   };
 
-  struct ModelLoadOutput
-  {
-    vector<Vertex3D> vertices_;
-    vector<GLuint> indices_;
-    StaticMeshPtr mesh_;
-  };
+  class MeshNode;
+  using MeshNodePtr = shared_ptr<MeshNode>;
 
-  using ModelLoadOutputPtr = shared_ptr<ModelLoadOutput>;
-
-  class SceneNode: public nocopy
-  {
+  class MeshNode {
   public:
-    vec3 translate_;
-    vec3 scale_;
-    quaternion rotate_;
-    utf8String name_;
-    ModelLoadOutputPtr mesh_;
-    vector<SceneNode*> children_;
-    SceneNode* parent_;
-    mutable bool needParentUpdate_ : 1;
-    bool needChildUpdate_ : 1;
-    bool inheritOrientation_ : 1;
-    bool inheritScale_ : 1;
-    mutable bool cachedOutOfDate_ : 1;
-    mutable vec3 derivedTranslate_;
-    mutable vec3 derivedScale_;
-    mutable quaternion derivedRotate_;
-    mutable mat4 cachedTransform_;
-    const mat4& getFullTransform() const;
-    void updateFromParent() const;
-    const quaternion& getDerivedRotate() const;
-    const vec3& getDerivedTranslate() const;
-    const vec3& getDerivedScale() const;
-    void update( bool children, bool parentChanged );
-    void setTranslate( const vec3& position );
-    void setScale( const vec3& scale );
-    void setRotate( const quaternion& rotation );
-    void translate( const vec3& position );
-    void scale( const vec3& scale );
-    void rotate( const quaternion& rotation );
-    void needUpdate();
-    inline void name( const utf8String& name ) { name_ = name; }
-    inline const utf8String& name() const noexcept { return name_; }
-    inline const vec3& translation() const noexcept { return translate_; }
-    inline const vec3& scaling() const noexcept { return scale_; }
-    inline const quaternion& rotation() const noexcept { return rotate_; }
-    vec3 convertLocalToWorldPosition( const vec3& localPosition );
-    vec3 convertWorldToLocalPosition( const vec3& worldPosition );
-    quaternion convertLocalToWorldOrientation( const quaternion& localOrientation );
-    quaternion convertWorldToLocalOrientation( const quaternion& worldOrientation );
-    SceneNode():
-      translate_( 0.0f ),
-      rotate_( quatIdentity ),
-      scale_( 0.0f ),
-      parent_( nullptr ),
-      inheritOrientation_( true ),
-      inheritScale_( true ),
-      needParentUpdate_( true ),
-      needChildUpdate_( true ),
-      cachedOutOfDate_( true ),
-      derivedTranslate_( 0.0f ),
-      derivedScale_( 1.0f ),
-      derivedRotate_( quatIdentity )
-    {
-    }
-    SceneNode( SceneNode* parent ):
-      translate_( 0.0f ),
-      rotate_( quatIdentity ),
-      scale_( 0.0f ),
-      parent_( parent ),
-      inheritOrientation_( true ),
-      inheritScale_( true ),
-      needParentUpdate_( true ),
-      needChildUpdate_( true ),
-      cachedOutOfDate_( true ),
-      derivedTranslate_( 0.0f ),
-      derivedScale_( 1.0f ),
-      derivedRotate_( quatIdentity )
-    {
-    }
+    utf8String name;
+    vec3 scale;
+    quat rotate;
+    vec3 translate;
+    vector<Vertex3D> vertices;
+    vector<GLuint> indices;
+    StaticMeshPtr mesh;
+    set<MeshNodePtr> children;
   };
 
-  class SceneManager: public nocopy {
-  protected:
-    set<SceneNode*> sceneGraph_;
-  public:
-    SceneNode* createSceneNode( SceneNode* parent = nullptr );
-    void addSceneNode( SceneNode* node );
-    void destroySceneNode( SceneNode* node );
-    inline set<SceneNode*> sceneGraph() { return sceneGraph_; }
-  };
-
-  class Renderer: public SceneManager {
+  class Renderer {
     friend class Texture;
     friend class Renderbuffer;
     friend class Framebuffer;
@@ -148,11 +67,10 @@ namespace neko {
       MaterialPtr placeholderTexture_;
       StaticMeshPtr screenQuad_;
       StaticMeshPtr screenFourthQuads_[4];
-      GLuint emptyVAO_;
+      GLuint emptyVAO_ = 0;
       StaticMeshPtr unitSphere_;
       StaticMeshPtr skybox_;
       StaticMeshPtr unitQuad_;
-      StaticData(): emptyVAO_( 0 ) {}
     } builtin_;
     GLuint implCreateTexture2D( size_t width, size_t height,
       GLGraphicsFormat format, GLGraphicsFormat internalFormat,
@@ -202,8 +120,8 @@ namespace neko {
       MaterialPtr image_;
     } userData_;
     void implClearAndPrepare( const vec3& color );
-    void uploadModelsEnterNode( SceneNode* node );
-    void sceneDrawEnterNode( SceneNode* node, shaders::Pipeline& pipeline );
+    void uploadModelsEnterNode( MeshNodePtr node );
+    void sceneDrawEnterNode( MeshNodePtr node, shaders::Pipeline& pipeline );
     void prepareSceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );
     void prepareSceneDraw( GameTime time, const ViewportDrawParameters& drawparams );
     void sceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );

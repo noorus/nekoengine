@@ -10,6 +10,7 @@
 #include "messaging.h"
 #include "gui.h"
 #include "neko_types.h"
+#include "loader.h"
 
 namespace neko {
 
@@ -47,7 +48,7 @@ namespace neko {
 
     for ( const auto& def : g_editorViewportDefs )
     {
-      auto vp = make_shared<EditorViewport>( renderer.get(), shared_from_this(), realResolution, def );
+      auto vp = make_shared<EditorViewport>( shared_from_this(), realResolution, def );
       viewports_.push_back( vp );
     }
   }
@@ -79,33 +80,12 @@ namespace neko {
     //gameViewport.camera()->setViewport( vec2( static_cast<Real>( halfsize.x ), static_cast<Real>( halfsize.y ) ) );
   }
 
-  SceneNode* findFirstModelNode( SceneNode* node )
-  {
-    if ( node->mesh_ && node->mesh_->mesh_ )
-      return node;
-    for ( auto child : node->children_ )
-    {
-      auto ret = findFirstModelNode( child );
-      if ( ret )
-        return ret;
-    }
-    return nullptr;
-  }
-
-  void Editor::updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SceneManager& scene,
+  void Editor::updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene,
     const Viewport& window, GameViewport& gameViewport )
   {
     size_t PANBTN = 2; // = input->mousebtn( 2 );
     size_t GAMEVP = 3;
     mousePos_ = vec2( static_cast<Real>( input->mousePosition_.x ), static_cast<Real>( input->mousePosition_.y ) );
-
-    SceneNode* mdl = nullptr;
-    for ( auto node : scene.sceneGraph() )
-    {
-      mdl = findFirstModelNode( node );
-      if ( mdl )
-        break;
-    }
 
     auto& igIO = ImGui::GetIO();
     if ( !igIO.WantCaptureMouse )
@@ -146,8 +126,6 @@ namespace neko {
           auto ret = gameViewport.windowPointToWorld( vec3( mousePos_, 0.8f ) );
           Locator::console().printf( Console::srcGame, "Gameviewport click %.2f %.2f %.2f (camera %.2f %.2f %.2f)",
             ret.x, ret.y, ret.z, gamecam->position().x, gamecam->position().y, gamecam->position().z );
-          if ( mdl )
-            mdl->setTranslate( ret );
         }
 
         gamecam->applyInputZoom( static_cast<int>( input->movement().z ) );
@@ -155,17 +133,12 @@ namespace neko {
       else
       {
         auto& vp = viewports_[vpidx];
-        if ( input->mousebtn( 0 ) && mdl )
-        {
-          auto wc = viewports_[vpidx]->windowPointToWorld( mousePos_ );
-          mdl->setTranslate( wc );
-        }
         vp->camera()->applyInputZoom( static_cast<int>( input->movement().z ) );
       }
     }
 
     for ( auto& vp : viewports_ )
-      vp->camera()->update( delta, realTime );
+      vp->camera()->update( scene, delta, realTime );
   }
 
   bool Editor::draw( RendererPtr renderer, GameTime time, const Viewport& window, GameViewport& gameViewport )
@@ -182,6 +155,7 @@ namespace neko {
     ImGui::Begin( "Invisible", nullptr,
       ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground |
         ImGuiWindowFlags_NoSavedSettings );
+
     for ( int i = 0; i < 3; ++i )
     {
       renderer->draw( time, *viewports_[i]->camera(), *viewports_[i], renderer->builtins().screenFourthQuads_[i] );
@@ -190,8 +164,6 @@ namespace neko {
       auto bottomright = topleft + vp->sizef();
       if ( topleft.y < mainMenuHeight_ )
         topleft.y = mainMenuHeight_;
-
-      // clang-format off
 
       ImGui::GetBackgroundDrawList()->AddRect( topleft, bottomright, ImColor( 0.0f, 0.5f, 0.8f ) );
       auto mousepoint = vp->mapPointByWindow( mousePos_ );
@@ -208,12 +180,11 @@ namespace neko {
 
     auto vp = &gameViewport;
     renderer->draw( time, *gameViewport.camera(), gameViewport, renderer->builtins().screenFourthQuads_[3] );
-          ImGui::GetForegroundDrawList()->AddText( gameViewport.posf() + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ),
-        utils::ilprinf( "game - camera %.2f %.2f %.2f dir %.2f %.2f %.2f aspect %.2f",
-          vp->camera()->position().x, vp->camera()->position().y, vp->camera()->position().z,
-          vp->camera()->direction().x, vp->camera()->direction().y, vp->camera()->direction().z,
-          vp->camera()->aspect() )
-          .c_str() );
+    ImGui::GetBackgroundDrawList()->AddText( gameViewport.posf() + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ),
+      utils::ilprinf( "game - camera %.2f %.2f %.2f dir %.2f %.2f %.2f aspect %.2f", vp->camera()->position().x,
+        vp->camera()->position().y, vp->camera()->position().z, vp->camera()->direction().x, vp->camera()->direction().y,
+        vp->camera()->direction().z, vp->camera()->aspect() )
+        .c_str() );
 
     ImGui::End();
     ImGui::PopStyleVar( 2 );

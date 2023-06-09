@@ -9,6 +9,7 @@
 #include "gui.h"
 #include "viewport.h"
 #include "specialrenderers.h"
+#include "components.h"
 
 namespace neko {
 
@@ -78,7 +79,7 @@ namespace neko {
     vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const override;
     vec3 ndcPointToWorld( vec3 ndc_viewcoord ) const override;
   public:
-    EditorViewport( SceneManager* manager, EditorPtr editor, vec2 resolution, const EditorViewportDefinition& def );
+    EditorViewport( EditorPtr editor, vec2 resolution, const EditorViewportDefinition& def );
     ~EditorViewport();
     void resize( int width, int height, const Viewport& windowViewport );
     inline void panning( bool isPanning ) { panning_ = isPanning; }
@@ -149,7 +150,7 @@ namespace neko {
     inline vec3& clearColorRef() { return clearColor_; }
     inline vec4& gridColorRef() { return gridColor_; }
     void shutdown();
-    void updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SceneManager& scene, const Viewport& window,
+    void updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene, const Viewport& window,
       GameViewport& gameViewport );
     bool draw( RendererPtr renderer, GameTime time, const Viewport& window, GameViewport& gameViewport );
   };
@@ -183,7 +184,7 @@ namespace neko {
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;
-    SceneNode* target_;
+    Entity target_ = c::null;
     shared_ptr<OrbitCamera> camera_;
     RendererPtr renderer_;
     Viewport windowViewport_;
@@ -192,6 +193,7 @@ namespace neko {
     EditorPtr editor_;
     std::queue<uint64_t> updateAccounts_;
     platform::RWLock logicLock_;
+    SManagerPtr scene_;
     void preInitialize();
     void printInfo();
     void resize( size_t width, size_t height );

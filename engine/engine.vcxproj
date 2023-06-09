@@ -82,7 +82,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)newtype\include;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)newtype\include;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -141,7 +141,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)newtype\include;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)newtype\include;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;INTEL_SUCKS;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -202,7 +202,7 @@
       <SDLCheck>
       </SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)newtype\include;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)newtype\include;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -286,13 +286,17 @@
     </ClCompile>
     <ClCompile Include="..\shared\src\exception.cpp" />
     <ClCompile Include="..\shared\src\platform_windows.cpp" />
+    <ClCompile Include="src\basicgamecamera.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\console.cpp" />
     <ClCompile Include="src\consolewindow_windows.cpp" />
+    <ClCompile Include="src\c_camera_system.cpp" />
+    <ClCompile Include="src\c_manager.cpp" />
     <ClCompile Include="src\director.cpp" />
     <ClCompile Include="src\dynamicmesh.cpp" />
     <ClCompile Include="src\editor.cpp" />
     <ClCompile Include="src\editorgridrenderer.cpp" />
+    <ClCompile Include="src\editororthocamera.cpp" />
     <ClCompile Include="src\editorviewport.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\filesystem.cpp" />
@@ -300,6 +304,7 @@
     <ClCompile Include="src\gameviewport.cpp" />
     <ClCompile Include="src\imguistyle.cpp" />
     <ClCompile Include="src\js_text.cpp" />
+    <ClCompile Include="src\ortbicamera.cpp" />
     <ClCompile Include="src\particlemanager.cpp" />
     <ClCompile Include="src\text.cpp" />
     <ClCompile Include="src\font.cpp" />
@@ -337,7 +342,6 @@
     <ClCompile Include="src\renderbuffer.cpp" />
     <ClCompile Include="src\renderer.cpp" />
     <ClCompile Include="src\rendersynccontext.cpp" />
-    <ClCompile Include="src\scenenode.cpp" />
     <ClCompile Include="src\script.cpp" />
     <ClCompile Include="src\scripting.cpp" />
     <ClCompile Include="src\scriptingcontext.cpp" />
@@ -382,6 +386,7 @@
     <ClInclude Include="include\bounds.h" />
     <ClInclude Include="include\buffers.h" />
     <ClInclude Include="include\camera.h" />
+    <ClInclude Include="include\components.h" />
     <ClInclude Include="include\console.h" />
     <ClInclude Include="include\consolelistener.h" />
     <ClInclude Include="include\consolewindow.h" />
@@ -420,7 +425,6 @@
     <ClInclude Include="include\MyGUI_NekoRTTexture.h" />
     <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\nekosimd.h" />
-    <ClInclude Include="include\objectbase.h" />
     <ClInclude Include="include\particles.h" />
     <ClInclude Include="include\plane.h" />
     <ClInclude Include="include\renderbuffer.h" />
@@ -444,7 +448,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\data\fonts.json" />
+    <None Include="..\bin\data\includes.json" />
     <None Include="..\bin\data\materials.json" />
+    <None Include="..\bin\data\pipelines.json" />
     <None Include="..\bin\scripts\.eslintrc.json" />
     <None Include="..\bin\scripts\initialization.js" />
     <None Include="..\bin\shaders\dbg_depthvis2d.frag" />

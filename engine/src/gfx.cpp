@@ -217,7 +217,10 @@ namespace neko {
   {
     renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
     renderer_->preInitialize();
-    target_ = renderer_->createSceneNode( nullptr );
+
+    scene_ = make_shared<SManager>();
+    target_ = scene_->createNode( "target" );
+    scene_->reg().emplace<c::transform>( target_ );
 
     setOpenGLDebugLogging( g_CVar_gl_debuglog.as_i() > 0 );
 
@@ -243,7 +246,7 @@ namespace neko {
     ImGui_ImplWin32_Init( window_->getSystemHandle() );
     ImGui_ImplOpenGL3_Init( c_imguiGlslVersion );
 
-    camera_ = make_shared<OrbitCamera>( renderer_.get(), realResolution, target_,
+    camera_ = make_shared<OrbitCamera>( realResolution, target_,
     vec3( 5.0f, 3.0f, 5.0f ), // vecOffset
     60.0f, // fov
     true, // reverse
@@ -362,7 +365,7 @@ namespace neko {
   void Gfx::updateRealTime( GameTime realTime, GameTime delta, Engine& engine )
   {
     if ( editor_->enabled() )
-      editor_->updateRealtime( realTime, delta, input_, *renderer_, windowViewport_, gameViewport_ );
+      editor_->updateRealtime( realTime, delta, input_, *scene_, windowViewport_, gameViewport_ );
     else
     {
       if ( input_->mousebtn( 2 ) )
@@ -373,7 +376,7 @@ namespace neko {
       camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
     }
 
-    camera_->update( delta, realTime );
+    camera_->update( *scene_, delta, realTime );
   }
 
   void Gfx::clear( const vec4& color )
@@ -398,6 +401,8 @@ namespace neko {
       renderer_->shaders().initialize();
       flags_.reloadShaders = false;
     }
+
+    scene_->update();
 
     renderer_->update( delta, time );
     
@@ -484,7 +489,7 @@ namespace neko {
     if ( !editor_->draw( renderer_, time, windowViewport_, gameViewport_ ) )
       renderer_->drawGame( time, *camera_, &windowViewport_, gameViewport_ );
 
-    if ( show_demo_window && false )
+    if ( show_demo_window )
       ImGui::ShowDemoWindow( &show_demo_window );
 
     auto gamma = g_CVar_vid_gamma.as_f();
@@ -498,8 +503,17 @@ namespace neko {
         ImGuiColorEditFlags_DisplayHSV );
     ImGui::Text( "Rendering" );
     ImGui::Separator();
+    scene_->cams().imguiCameraSelector();
     ImGui::DragFloat( "Gamma", &gamma, 0.0025f, 0.0f, 10.0f );
     g_CVar_vid_gamma.set( gamma );
+    ImGui::End();
+
+    ImGui::Begin( "Scene Graph" );
+    scene_->imguiSceneGraph();
+    ImGui::End();
+
+    ImGui::Begin( "Nodes" );
+    scene_->imguiSelectedNodes();
     ImGui::End();
 
     auto gameMainTexture = renderer_->getMergedMainFramebuffer();
@@ -550,11 +564,8 @@ namespace neko {
   {
     messaging_->remove( this );
 
-    if ( target_ )
-    {
-      renderer_->destroySceneNode( target_ );
-      target_ = nullptr;
-    }
+    scene_.reset();
+    target_ = c::null;
 
     input_->shutdown();
 

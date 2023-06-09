@@ -143,6 +143,9 @@
 # pragma warning( pop )
 #endif
 
+// EnTT
+#include <entt.hpp>
+
 // JSON
 #include <json.hpp>
 

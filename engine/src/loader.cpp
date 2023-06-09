@@ -91,7 +91,7 @@ namespace neko {
     finishedFontsEvent_.reset();
   }
 
-  void ThreadedLoader::getFinishedModels( vector<SceneNode*>& models )
+  void ThreadedLoader::getFinishedModels( vector<MeshNodePtr>& models )
   {
     if ( !finishedModelsEvent_.check() )
       return;

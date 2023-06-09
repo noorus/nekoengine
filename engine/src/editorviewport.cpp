@@ -60,8 +60,7 @@ namespace neko {
     vp_.reset();
   }
 
-  EditorViewport::EditorViewport(
-    SceneManager* manager, EditorPtr editor, vec2 resolution, const EditorViewportDefinition& def ):
+  EditorViewport::EditorViewport( EditorPtr editor, vec2 resolution, const EditorViewportDefinition& def ):
     name_( def.name ),
     editor_( editor )
   {
@@ -70,7 +69,7 @@ namespace neko {
       math::abs( def.eye.y ) > 0.1f ? 0.0f : 1.0f,
       math::abs( def.eye.z ) > 0.1f ? 0.0f : 1.0f,
       1.0f );
-    camera_ = make_unique<EditorOrthoCamera>( manager, resolution, def );
+    camera_ = make_unique<EditorOrthoCamera>( resolution, def );
     grid_ = make_unique<EditorGridRenderer>();
     axesGizmo_ = make_unique<AxesPointerRenderer>();
   }

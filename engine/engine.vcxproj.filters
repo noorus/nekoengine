@@ -124,6 +124,12 @@
     <Filter Include="Source Files\gfx\editor">
       <UniqueIdentifier>{2c3d41cb-ba37-4499-a4e9-15b7fb70f179}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\game">
+      <UniqueIdentifier>{19906571-987b-45d8-9d23-f156a84ebe42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\components">
+      <UniqueIdentifier>{c98f4238-3db5-4d33-a767-745964feca6f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -267,9 +273,6 @@
     <ClCompile Include="src\fontmanager.cpp">
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenenode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\glformats.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
@@ -362,6 +365,21 @@
     </ClCompile>
     <ClCompile Include="src\imguistyle.cpp">
       <Filter>Source Files\gfx\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\editororthocamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ortbicamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\c_manager.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\c_camera_system.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\basicgamecamera.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -581,9 +599,6 @@
     <ClInclude Include="include\js_text.h">
       <Filter>Header Files\scripting</Filter>
     </ClInclude>
-    <ClInclude Include="include\objectbase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\buffers.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
@@ -607,6 +622,9 @@
     </ClInclude>
     <ClInclude Include="include\specialrenderers.h">
       <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\components.h">
+      <Filter>Header Files\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -727,6 +745,12 @@
     </None>
     <None Include="..\bin\shaders\editor_bgline.frag">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\data\includes.json">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="..\bin\data\pipelines.json">
+      <Filter>Data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

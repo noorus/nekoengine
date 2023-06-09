@@ -67,7 +67,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(ProjectDir)include;$(SolutionDir)extern\steamworks\sdk\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(ProjectDir)include;$(SolutionDir)extern\steamworks\sdk\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -97,7 +97,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(ProjectDir)include;$(SolutionDir)extern\steamworks\sdk\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)extern;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)shared\include;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(ProjectDir)include;$(SolutionDir)extern\steamworks\sdk\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
     </ClCompile>
     <Link>

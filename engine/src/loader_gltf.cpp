@@ -152,17 +152,22 @@ namespace neko::loaders {
     return { a.x, a.y, a.z, a.w };
   }
 
-  void gltf_traverseTree( SceneNode* out, const tinygltf::Node& node, const vector<DumbBufferStructure>& buffers, const tinygltf::Model& model, int depth = 0 )
+  void gltf_traverseTree( MeshNodePtr out, const tinygltf::Node& node, const vector<DumbBufferStructure>& buffers,
+    const tinygltf::Model& model, int depth = 0 )
   {
-    out->setTranslate( gltf_toVec3( node.translation, vec3( 0.0f ) ) );
-    out->setScale( gltf_toVec3( node.scale, vec3( 1.0f ) ) );
-    out->setRotate( gltf_toQuat( node.rotation ) );
-    out->name( node.name );
-    Locator::console().printf( Console::srcLoader, "gltf: node %s depth %i trans %f,%f,%f scl %f,%f,%f mesh %i", node.name.c_str(), depth, out->translation().x, out->translation().x, out->translation().y, out->scaling().x, out->scaling().y, out->scaling().z, node.mesh );
+    out->name = node.name;
+
+    out->scale = gltf_toVec3( node.scale, vec3( 1.0f ) );
+    out->rotate = gltf_toQuat( node.rotation );
+    out->translate = gltf_toVec3( node.translation, vec3( 0.0f ) );
+
+    Locator::console().printf( Console::srcLoader, "gltf: node %s depth %i trans %f,%f,%f scl %f,%f,%f mesh %i",
+      node.name.c_str(), depth, out->translate.x, out->translate.x, out->translate.y, out->scale.x, out->scale.y,
+      out->scale.z, node.mesh );
+
     if ( node.mesh >= 0 )
     {
       auto& mesh = model.meshes[node.mesh];
-      out->mesh_ = make_shared<ModelLoadOutput>();
       for ( auto& primitive : mesh.primitives )
       {
         if ( primitive.indices < 0 )
@@ -220,24 +225,24 @@ namespace neko::loaders {
           v.texcoord = gltf_mesh_vec2( * ( tc_data + i ) );
           v.color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
           v.bitangent = vec3( 0.0f );
-          out->mesh_->vertices_.push_back( v );
+          out->vertices.push_back( v );
         }
-        out->mesh_->indices_.resize( indices.count );
+        out->indices.resize( indices.count );
         for ( int i = 0; i < indices.count; i++ )
         {
           switch ( indices.componentType )
           {
             case TINYGLTF_COMPONENT_TYPE_BYTE:
             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
-              out->mesh_->indices_[i] = static_cast<GLuint>( *( (unsigned char*)( index_data ) + i ) );
+              out->indices[i] = static_cast<GLuint>( *( (unsigned char*)( index_data ) + i ) );
               break;
             case TINYGLTF_COMPONENT_TYPE_SHORT:
             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
-              out->mesh_->indices_[i] = static_cast<GLuint>( *( (unsigned short*)( index_data ) + i ) );
+              out->indices[i] = static_cast<GLuint>( *( (unsigned short*)( index_data ) + i ) );
               break;
             case TINYGLTF_COMPONENT_TYPE_INT:
             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
-              out->mesh_->indices_[i] = static_cast<GLuint>( *( (unsigned int*)( index_data ) + i ) );
+              out->indices[i] = static_cast<GLuint>( *( (unsigned int*)( index_data ) + i ) );
               break;
           }
         }
@@ -246,14 +251,14 @@ namespace neko::loaders {
     }
     for ( auto childindex : node.children )
     {
-      auto child = new SceneNode( out );
+      auto child = make_shared<MeshNode>();
       auto& childnode = model.nodes[childindex];
       gltf_traverseTree( child, childnode, buffers, model, depth + 1 );
-      out->children_.push_back( child );
+      out->children.insert( child );
     }
   }
 
-  void loadGLTFModel( const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, SceneNode* out )
+  void loadGLTFModel( const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, MeshNodePtr out )
   {
     tinygltf::TinyGLTF context;
     tinygltf::Model model;

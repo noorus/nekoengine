@@ -9,7 +9,6 @@
 #include <nlohmann/json.hpp>
 #include "shaders.h"
 #include "resources.h"
-#include "objectbase.h"
 
 namespace neko {
 
@@ -109,7 +108,7 @@ namespace neko {
 
   using TextMeshPtr = unique_ptr<TextRenderBuffer>;
 
-  class Text: public TransformableObject {
+  class Text {
   private:
     newtype::Manager* mgr_;
     FontPtr font_;

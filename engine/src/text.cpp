@@ -50,10 +50,10 @@ namespace neko {
     const auto sid = text_->styleid();
     if ( mesh_ && font_ && font_->usable( sid ) )
     {
-      mesh_->draw( renderer->shaders(),
+      /* mesh_->draw( renderer->shaders(),
         transform_.asModel4(),
         font_->style( sid ).material_->textureHandle( 0 )
-      );
+      );*/
     }
   }
 

@@ -32,6 +32,8 @@
 #undef min
 #undef max
 
+#include <entt.hpp>
+
 #pragma warning( push )
 #pragma warning( disable : 28251 )
 #include <moodycamel/readerwriterqueue.h>
@@ -128,6 +130,8 @@ namespace neko {
 
   using std::ignore;
 
+  using Entity = entt::entity;
+
 #ifdef NEKO_MATH_DOUBLE
   using Real = double;
   namespace numbers {
@@ -190,25 +194,6 @@ namespace neko {
   using Radians = Real;
   using Degrees = Real;
 
-  //! @brief Scale, Rotate, Translate
-  struct srt
-  {
-    vec3 scale { numbers::zero, numbers::zero, numbers::zero };
-    quat rotate = quatIdentity;
-    vec3 translate { numbers::zero, numbers::zero, numbers::zero };
-    inline mat4 apply( const mat4& model )
-    {
-      auto out = glm::scale( model, scale );
-      out *= glm::toMat4( rotate );
-      return glm::translate( out, translate );
-    }
-    inline mat4 asModel4()
-    {
-      mat4 model( numbers::one );
-      return apply( model );
-    }
-  };
-
   using GameTime = double;
 
   using StringVector = vector<utf8String>;
@@ -221,11 +206,13 @@ namespace neko {
   using vec3u = glm::u64vec3;
   using vec4u = glm::u64vec4;
 
-  // These are for when you need 32 bits no matter what our Real is.
-  // Mainly used for shaders.
   using vec2f = glm::fvec2;
   using vec3f = glm::fvec3;
   using vec4f = glm::fvec4;
+
+  using vec2d = glm::dvec2;
+  using vec3d = glm::dvec3;
+  using vec4d = glm::dvec4;
 
   using json = nlohmann::json;
 

@@ -6,8 +6,6 @@
 
 namespace neko {
 
-  class SceneNode;
-
   // Unused atm
   struct AnimationEntry
   {
@@ -18,7 +16,8 @@ namespace neko {
 
   namespace loaders {
 
-    void loadGLTFModel( const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, SceneNode* out );
+    void loadGLTFModel(
+      const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, MeshNodePtr out );
 
   }
 
@@ -46,7 +45,7 @@ namespace neko {
       vector<FontLoadStyleSpec> styles_;
     } fontfaceLoad;
     struct ModelLoad {
-      SceneNode* node_ = nullptr;
+      MeshNodePtr node_;
       utf8String path_;
     } modelLoad;
     struct AnimationLoad {
@@ -65,7 +64,7 @@ namespace neko {
       fontfaceLoad.size_ = pointSize;
       fontfaceLoad.styles_ = { { newtype::FontRender_Normal, 0.0 } };
     }
-    LoadTask( SceneNode* modelRootNode, const utf8String& path ): type_( Load_Model )
+    LoadTask( MeshNodePtr modelRootNode, const utf8String& path ): type_( Load_Model )
     {
       modelLoad.node_ = modelRootNode;
       modelLoad.path_ = path;
@@ -91,7 +90,7 @@ namespace neko {
     platform::RWLock finishedTasksLock_;
     LoadTaskVector newTasks_;
     MaterialVector finishedMaterials_;
-    vector<SceneNode*> finishedModels_;
+    vector<MeshNodePtr> finishedModels_;
     FontVector finishedFonts_;
     AnimationVector finishedAnimations_;
     void handleNewTasks();
@@ -103,7 +102,7 @@ namespace neko {
     void stop();
     void getFinishedMaterials( MaterialVector& materials );
     void getFinishedFonts( FontVector& fonts );
-    void getFinishedModels( vector<SceneNode*>& models );
+    void getFinishedModels( vector<MeshNodePtr>& models );
     void getFinishedAnimations( AnimationVector& animations );
     void addLoadTask( const LoadTaskVector& resources );
     ~ThreadedLoader();
