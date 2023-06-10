@@ -23,6 +23,9 @@ namespace neko {
     near_ = cam.nearDist;
     far_ = cam.farDist;
     exposure_ = cam.exposure;
+
+    view_ = glm::lookAtRH( position_, { 0.0f, 0.0f, 0.0f }, up() );
+    projection_ = glm::perspective( glm::radians( fov_ ), aspect(), near_, far_ );
   }
 
   vec3 BasicGameCamera::direction() const

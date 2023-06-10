@@ -218,13 +218,13 @@ namespace neko {
     renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
     renderer_->preInitialize();
 
-    scene_ = make_shared<SManager>();
-    target_ = scene_->createNode( "target" );
-    scene_->reg().emplace<c::transform>( target_ );
-
     setOpenGLDebugLogging( g_CVar_gl_debuglog.as_i() > 0 );
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
+
+    scene_ = make_shared<SManager>( realResolution );
+    auto cam = scene_->createCamera( "gamecam" );
+    scene_->tn( cam ).translate = { 5.0f, 3.0f, 0.0f };
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -246,18 +246,7 @@ namespace neko {
     ImGui_ImplWin32_Init( window_->getSystemHandle() );
     ImGui_ImplOpenGL3_Init( c_imguiGlslVersion );
 
-    camera_ = make_shared<OrbitCamera>( realResolution, target_,
-    vec3( 5.0f, 3.0f, 5.0f ), // vecOffset
-    60.0f, // fov
-    true, // reverse
-    10.0f, // sens
-    5.0f, // mindist
-    50.0f, // maxdist
-    2.0f, // rotdecel
-    5.0f, // zoomaccel
-    2.0f ); // zoomdecel
-
-    gameViewport_.setCamera( camera_ );
+    gameViewport_.setCameraData( scene_->cams().getActiveData() );
 
     editor_ = make_shared<Editor>();
     editor_->initialize( renderer_, realResolution );
@@ -301,7 +290,7 @@ namespace neko {
     editor_->resize( windowViewport_, gameViewport_ );
 
     auto realResolution = vec2( (Real)width, (Real)height );
-    camera_->setViewport( realResolution );
+    scene_->cams().setResolution( realResolution );
 
     //glViewport( 0, 0, static_cast<GLsizei>( width ), static_cast<GLsizei>( height ) );
 
@@ -364,19 +353,11 @@ namespace neko {
 
   void Gfx::updateRealTime( GameTime realTime, GameTime delta, Engine& engine )
   {
+    scene_->cams().update();
+    gameViewport_.setCameraData( scene_->cams().getActiveData() );
+
     if ( editor_->enabled() )
       editor_->updateRealtime( realTime, delta, input_, *scene_, windowViewport_, gameViewport_ );
-    else
-    {
-      if ( input_->mousebtn( 2 ) )
-        camera_->applyInputPanning( input_->movement() );
-      else if ( input_->mousebtn( 1 ) )
-        camera_->applyInputRotation( input_->movement() );
-
-      camera_->applyInputZoom( static_cast<int>( input_->movement().z ) );
-    }
-
-    camera_->update( *scene_, delta, realTime );
   }
 
   void Gfx::clear( const vec4& color )
@@ -487,7 +468,11 @@ namespace neko {
     }
 
     if ( !editor_->draw( renderer_, time, windowViewport_, gameViewport_ ) )
-      renderer_->drawGame( time, *camera_, &windowViewport_, gameViewport_ );
+    {
+      auto camera = scene_->cams().getActive();
+      if ( camera )
+        renderer_->drawGame( time, *camera, &windowViewport_, gameViewport_ );
+    }
 
     if ( show_demo_window )
       ImGui::ShowDemoWindow( &show_demo_window );
@@ -565,7 +550,6 @@ namespace neko {
     messaging_->remove( this );
 
     scene_.reset();
-    target_ = c::null;
 
     input_->shutdown();
 
@@ -573,8 +557,6 @@ namespace neko {
 
     editor_->shutdown();
     editor_.reset();
-
-    camera_.reset();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplWin32_Shutdown();

@@ -16,9 +16,9 @@ namespace neko {
 
   using namespace gl;
 
-  void GameViewport::setCamera( CameraPtr camera )
+  void GameViewport::setCameraData( const c::CameraData* data )
   {
-    camera_ = camera;
+    camdata_ = data;
   }
 
   void GameViewport::resize( int width, int height, const Viewport& windowViewport )
@@ -54,8 +54,8 @@ namespace neko {
 
   Real GameViewport::drawopExposure() const
   {
-    if ( camera_ )
-      return camera_->exposure();
+    if ( camdata_ && camdata_->instance )
+      return camdata_->instance->exposure();
 
     return 1.0f;
   }
@@ -66,7 +66,7 @@ namespace neko {
 
   const CameraPtr GameViewport::drawopGetCamera() const
   {
-    return camera_;
+    return ( camdata_ && camdata_->instance ? camdata_->instance : CameraPtr() );
   }
 
   vec3 GameViewport::ndcPointToWorld( vec2 ndc_viewcoord ) const
@@ -76,8 +76,10 @@ namespace neko {
 
   vec3 GameViewport::ndcPointToWorld( vec3 ndc_viewcoord ) const
   {
+    if ( !camdata_ || !camdata_->instance )
+      return {};
     auto in = vec4( ndc_viewcoord, 1.0f );
-    auto m = glm::inverse( camera_->projection() * camera_->view() );
+    auto m = glm::inverse( camdata_->instance->projection() * camdata_->instance->view() );
     auto out = m * in;
     assert( out.w != 0.0f );
     out.w = 1.0f / out.w;

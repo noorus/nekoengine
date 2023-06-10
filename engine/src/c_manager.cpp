@@ -5,19 +5,16 @@ namespace neko {
 
   namespace c {
 
-    manager::manager()
+    manager::manager( vec2 viewportResolution )
     {
       registry_.on_construct<transform>().connect<&registry::emplace_or_replace<dirty_transform>>();
       registry_.on_update<transform>().connect<&registry::emplace_or_replace<dirty_transform>>();
 
-      camsys_ = make_unique<camera_system>( this );
+      camsys_ = make_unique<camera_system>( this, viewportResolution );
 
       root_ = registry_.create();
       registry_.emplace<node>( root_, "root" );
       registry_.emplace<transform>( root_ );
-
-      createCamera( "cam1" );
-      createCamera( "cam2 lolo bolo" );
     }
 
     entity manager::createNode( entity parent, string_view name )

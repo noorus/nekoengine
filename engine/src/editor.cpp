@@ -116,7 +116,7 @@ namespace neko {
       }
       else if ( vpidx == 3 )
       {
-        auto gamecam = static_cast<OrbitCamera*>( gameViewport.camera().get() );
+        /* auto gamecam = static_cast<OrbitCamera*>( gameViewport.camera().get() );
         if ( input->mouseButtons().isPressed( PANBTN ) )
           gamecam->applyInputPanning( input->movement() );
         else if ( input->mousebtn( 1 ) )
@@ -128,7 +128,7 @@ namespace neko {
             ret.x, ret.y, ret.z, gamecam->position().x, gamecam->position().y, gamecam->position().z );
         }
 
-        gamecam->applyInputZoom( static_cast<int>( input->movement().z ) );
+        gamecam->applyInputZoom( static_cast<int>( input->movement().z ) );*/
       }
       else
       {
@@ -179,12 +179,14 @@ namespace neko {
     }
 
     auto vp = &gameViewport;
-    renderer->draw( time, *gameViewport.camera(), gameViewport, renderer->builtins().screenFourthQuads_[3] );
-    ImGui::GetBackgroundDrawList()->AddText( gameViewport.posf() + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ),
-      utils::ilprinf( "game - camera %.2f %.2f %.2f dir %.2f %.2f %.2f aspect %.2f", vp->camera()->position().x,
-        vp->camera()->position().y, vp->camera()->position().z, vp->camera()->direction().x, vp->camera()->direction().y,
-        vp->camera()->direction().z, vp->camera()->aspect() )
-        .c_str() );
+    utf8String title = "game";
+    if ( vp->camera() )
+    {
+      title = utils::ilprinf( "game - camera %s", vp->cameraData()->name.c_str() );
+      renderer->draw( time, *vp->camera(), *vp, renderer->builtins().screenFourthQuads_[3] );
+
+    }
+    ImGui::GetBackgroundDrawList()->AddText( gameViewport.posf() + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ), title.c_str() );
 
     ImGui::End();
     ImGui::PopStyleVar( 2 );

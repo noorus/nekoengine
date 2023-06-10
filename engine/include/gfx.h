@@ -91,11 +91,12 @@ namespace neko {
 
   class GameViewport: public Viewport, public ViewportDrawParameters {
   protected:
-    CameraPtr camera_;
+    const c::CameraData* camdata_;
     vec2 windowResolution_ = { 0.0f, 0.0f };
   public:
-    void setCamera( CameraPtr camera );
-    inline CameraPtr camera() const { return camera_; }
+    void setCameraData( const c::CameraData* data );
+    inline CameraPtr camera() const { return ( camdata_ ? camdata_->instance : CameraPtr() ); }
+    inline const c::CameraData* cameraData() const { return camdata_; }
     void resize( int width, int height, const Viewport& windowViewport );
   public:
     // ViewportDrawParameters interface implementation
@@ -184,8 +185,6 @@ namespace neko {
   protected:
     Info info_;
     unique_ptr<sf::Window> window_;
-    Entity target_ = c::null;
-    shared_ptr<OrbitCamera> camera_;
     RendererPtr renderer_;
     Viewport windowViewport_;
     GameViewport gameViewport_;

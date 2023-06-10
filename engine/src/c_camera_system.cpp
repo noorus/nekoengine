@@ -1,12 +1,15 @@
 #include "pch.h"
 #include "components.h"
+#include "camera.h"
 
 namespace neko {
 
   namespace c {
 
-    camera_system::camera_system( manager* m ): mgr_( m )
+    camera_system::camera_system( manager* m, vec2 resolution ): mgr_( m )
     {
+      setResolution( resolution );
+
       mgr_->reg().on_construct<camera>().connect<&camera_system::updateCameraList>( this );
       mgr_->reg().on_update<camera>().connect<&camera_system::updateCameraList>( this );
       mgr_->reg().on_destroy<camera>().connect<&camera_system::updateCameraList>( this );
@@ -19,12 +22,41 @@ namespace neko {
       mgr_->reg().on_destroy<camera>().disconnect<&camera_system::updateCameraList>( this );
     }
 
+    void camera_system::setResolution( vec2 res )
+    {
+      resolution_ = res;
+    }
+
+    void camera_system::update()
+    {
+      if ( !valid( selectedCamera_ ) )
+        return;
+      cameras_.at( selectedCamera_ ).instance->update( *mgr_, 0.0f, 0.0f );
+    }
+
+    const shared_ptr<BasicGameCamera> camera_system::getActive() const
+    {
+      if ( !valid( selectedCamera_ ) )
+        return {};
+      return cameras_.at( selectedCamera_ ).instance;
+    }
+
+    const CameraData* camera_system::getActiveData() const
+    {
+      if ( !valid( selectedCamera_ ) )
+        return nullptr;
+      return &cameras_.at( selectedCamera_ );
+    }
+
     void camera_system::imguiCameraSelector()
     {
       ImGuiComboFlags cflags = ImGuiComboFlags_None;
       const c::CameraData* current = ( selectedCamera_ == c::null || cameras_.find( selectedCamera_ ) == cameras_.end() )
                                      ? nullptr
                                      : &cameras_.at( selectedCamera_ );
+
+      auto prevSelected = selectedCamera_;
+
       if ( ImGui::BeginCombo( "Camera", current ? current->name.data() : "none", cflags ) )
       {
         bool selected = ( current ? true : false );
@@ -37,6 +69,11 @@ namespace neko {
             selectedCamera_ = key;
           if ( selected )
             ImGui::SetItemDefaultFocus();
+        }
+        if ( selectedCamera_ != prevSelected && valid( selectedCamera_ ) )
+        {
+          mgr_->markDirty( selectedCamera_ );
+          cameras_.at( selectedCamera_ ).instance->setViewport( resolution_ );
         }
         ImGui::EndCombo();
       }
@@ -62,6 +99,7 @@ namespace neko {
         CameraData d;
         d.ent = entity;
         d.name = n.name;
+        d.instance = make_shared<BasicGameCamera>( resolution_, *mgr_, d.ent );
         cameras_[entity] = move( d );
       }
     }

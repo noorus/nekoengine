@@ -7,6 +7,8 @@
 
 namespace neko {
 
+  class BasicGameCamera;
+
   namespace c {
 
     using entt::registry;
@@ -82,7 +84,8 @@ namespace neko {
     struct CameraData
     {
       entity ent;
-      string_view name;
+      utf8String name;
+      shared_ptr<BasicGameCamera> instance;
     };
 
     using CameraDataMap = map<entity, CameraData>;
@@ -92,11 +95,20 @@ namespace neko {
       manager* mgr_ = nullptr;
       CameraDataMap cameras_;
       Entity selectedCamera_ = c::null;
+      vec2 resolution_ { 0.0f, 0.0f };
+      inline bool valid( entity cam ) const
+      {
+        return ( cam == null || cam == tombstone || cameras_.find( selectedCamera_ ) == cameras_.end() ) ? false : true;
+      }
       void updateCameraList( registry& r, entity e );
     public:
-      camera_system( manager* m );
+      camera_system( manager* m, vec2 resolution );
+      void update();
+      const shared_ptr<BasicGameCamera> getActive() const;
+      const CameraData* getActiveData() const;
       ~camera_system();
       inline const CameraDataMap& cameras() const { return cameras_; }
+      void setResolution( vec2 res );
       void imguiCameraSelector();
       void imguiCameraEditor( entity e );
     };
@@ -110,7 +122,7 @@ namespace neko {
       void imguiSceneGraphRecurse( entity e, entity& clicked );
       void imguiNodeEditor( entity e );
     public:
-      manager();
+      manager( vec2 viewportResolution );
       inline registry& reg() { return registry_; }
       inline node& nd( entity e ) { return registry_.get<node>( e ); } //!< Get node by entity
       inline entity en( const node& n ) const { return entt::to_entity( registry_, n ); } //!< Get entity by node
@@ -128,10 +140,7 @@ namespace neko {
 
   }
 
-  class SManager : public c::manager {
-  public:
-
-  };
+  using SManager = c::manager;
 
   using SManagerPtr = shared_ptr<SManager>;
 
