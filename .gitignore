@@ -339,3 +339,4 @@ lib/*.exe
 assets*
 publish*
 /bin/imgui.ini
+junk/*
