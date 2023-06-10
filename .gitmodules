@@ -1,3 +1,6 @@
 [submodule "newtype"]
 	path = newtype
 	url = https://github.com/nyandev/newtype.git
+[submodule "nil"]
+	path = nil
+	url = git@github.com:noorus/nil.git
