@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Windows">
+      <UniqueIdentifier>{ecfd2fe6-9b6c-423a-b24c-f44b256cccef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Windows\DirectInput">
+      <UniqueIdentifier>{d2da3447-93c5-4a9c-b426-d9e645bdc5ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Windows\RawInput">
+      <UniqueIdentifier>{5049182a-6a83-4555-832d-410404347522}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Windows\XInput">
+      <UniqueIdentifier>{f3c7ac48-8052-4e9a-b485-b868f0bfaf8d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\nil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nilUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nilTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nilWindowsPNP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nilException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nilComponents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nilWindows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nilCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nilConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\nilPredefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Exception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Keyboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Mouse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DeviceInstance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Types.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\directinput\DirectInputController.cpp">
+      <Filter>Source Files\Windows\DirectInput</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\directinput\DirectInputDevice.cpp">
+      <Filter>Source Files\Windows\DirectInput</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\rawinput\RawInputDevice.cpp">
+      <Filter>Source Files\Windows\RawInput</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\rawinput\RawInputKeyboard.cpp">
+      <Filter>Source Files\Windows\RawInput</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\rawinput\RawInputMouse.cpp">
+      <Filter>Source Files\Windows\RawInput</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\xinput\XInput.cpp">
+      <Filter>Source Files\Windows\XInput</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\xinput\XInputController.cpp">
+      <Filter>Source Files\Windows\XInput</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\xinput\XInputDevice.cpp">
+      <Filter>Source Files\Windows\XInput</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\EventMonitor.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\HIDManager.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\HIDRecord.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\WindowsSystem.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\ExternalModule.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\windows\rawinput\RawInputController.cpp">
+      <Filter>Source Files\Windows\RawInput</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
