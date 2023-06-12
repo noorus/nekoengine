@@ -3,6 +3,12 @@
 
 namespace neko {
 
+  template <class T>
+  class ShareableBase: public enable_shared_from_this<T> {
+  public:
+    inline shared_ptr<T> ptr() noexcept { return this->shared_from_this(); }
+  };
+
   class Subsystem;
   using SubsystemPtr = shared_ptr<Subsystem>;
 

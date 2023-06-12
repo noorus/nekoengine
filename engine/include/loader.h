@@ -21,8 +21,10 @@ namespace neko {
 
   }
 
-  struct FontLoadStyleSpec {
-    newtype::FontRendering rendering;
+  struct FontLoadSpec
+  {
+    Real size;
+    FontRendering rendering;
     Real thickness;
   };
 
@@ -41,8 +43,7 @@ namespace neko {
     struct FontfaceLoad {
       FontPtr font_;
       utf8String path_;
-      Real size_ = 0.0f;
-      vector<FontLoadStyleSpec> styles_;
+      vector<FontLoadSpec> specs_;
     } fontfaceLoad;
     struct ModelLoad {
       MeshNodePtr node_;
@@ -57,12 +58,11 @@ namespace neko {
       textureLoad.material_ = move( material );
       textureLoad.paths_.swap( paths );
     }
-    LoadTask( FontPtr font, const utf8String& path, Real pointSize ): type_( Load_Fontface )
+    LoadTask( FontPtr font, const utf8String& path, vector<FontLoadSpec>& specs ): type_( Load_Fontface )
     {
       fontfaceLoad.font_ = move( font );
       fontfaceLoad.path_ = path;
-      fontfaceLoad.size_ = pointSize;
-      fontfaceLoad.styles_ = { { newtype::FontRender_Normal, 0.0 } };
+      fontfaceLoad.specs_ = specs;
     }
     LoadTask( MeshNodePtr modelRootNode, const utf8String& path ): type_( Load_Model )
     {
@@ -93,6 +93,9 @@ namespace neko {
     vector<MeshNodePtr> finishedModels_;
     FontVector finishedFonts_;
     AnimationVector finishedAnimations_;
+    void loadFontFace( LoadTask::FontfaceLoad& task );
+    void loadModel( LoadTask::ModelLoad& task );
+    void loadTexture( LoadTask::TextureLoad& task );
     void handleNewTasks();
   private:
     static bool threadProc( platform::Event& running, platform::Event& wantStop, void* argument );

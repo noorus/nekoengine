@@ -59,6 +59,11 @@ namespace neko {
       return rdist( reng );
     }
 
+    inline bool epsilonCompare( const vec3& a, const vec3& b )
+    {
+      return glm::all( glm::epsilonEqual( a, b, vec3( 0.01f ) ) );
+    }
+
     //! \fn inline Real round( Real value )
     //! \brief Rounds to the nearest non-decimal value.
     //! \param value The value.

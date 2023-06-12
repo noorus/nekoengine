@@ -73,6 +73,52 @@ namespace neko {
       inline const mat4 model() const { return cached_transform; } //!< Model matrix e.g. the cached transform matrix
     };
 
+    struct TextInputUserData
+    {
+      utf8String* str = nullptr;
+      ImGuiInputTextCallback chaincb = nullptr;
+      void* chaincb_ud = nullptr;
+    };
+
+    struct dirty_text
+    {
+    };
+
+    struct text
+    {
+      utf8String content;
+      utf8String fontName;
+      Real size = 10.0f;
+      TextInputUserData int_ud_;
+    };
+
+    struct TextData
+    {
+      entity ent = null;
+      TextPtr instance {};
+      bool dirty = false;
+      TextData(): ent( null ), instance(), dirty( false ) {}
+      TextData( entity e ): ent( e ) {}
+    };
+
+    using TextDataMap = map<entity, TextData>;
+
+    class text_system {
+    protected:
+      manager* mgr_ = nullptr;
+      TextDataMap texts_;
+      void addText( registry& r, entity e );
+      void updateText( registry& r, entity e );
+      void removeText( registry& r, entity e );
+    public:
+      text_system( manager* m );
+      void update( FontManager& fntmgr );
+      void draw( Renderer& renderer );
+      ~text_system();
+      inline const TextDataMap& texts() const { return texts_; }
+      void imguiTextEditor( entity e );
+    };
+
     struct camera
     {
       Real fovy = 60.0f;
@@ -119,6 +165,7 @@ namespace neko {
       entity root_ { null };
       set<entity> imguiSelectedNodes_;
       unique_ptr<camera_system> camsys_;
+      unique_ptr<text_system> txtsys_;
       void imguiSceneGraphRecurse( entity e, entity& clicked );
       void imguiNodeEditor( entity e );
     public:
@@ -128,14 +175,17 @@ namespace neko {
       inline entity en( const node& n ) const { return entt::to_entity( registry_, n ); } //!< Get entity by node
       inline transform& tn( entity e ) { return registry_.get<transform>( e ); } //!< Get transform by entity
       inline camera& cam( entity e ) { return registry_.get<camera>( e ); } //!< Get camera by entity
+      inline text& tt( entity e ) { return registry_.get<text>( e ); } //!< Get text by entity
       entity createNode( entity parent, string_view name );
       entity createNode( string_view name );
       entity createCamera( string_view name );
+      entity createText( string_view name );
       void update();
       void markDirty( entity e );
       void imguiSceneGraph();
       void imguiSelectedNodes();
       inline camera_system& cams() const { return *camsys_; }
+      inline text_system& texts() const { return *txtsys_; }
     };
 
   }

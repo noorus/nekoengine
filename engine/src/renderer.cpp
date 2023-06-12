@@ -359,13 +359,13 @@ namespace neko {
 
     console_->printf( Console::srcGfx, "Renderer::uploadModels got %d new models", nodes.size() );
 
-    for ( auto node : nodes )
+    for ( auto& node : nodes )
       uploadModelsEnterNode( node );
 
     // sceneGraph_.insert( nodes.begin(), nodes.end() );
   }
 
-  void Renderer::update( GameTime delta, GameTime time )
+  void Renderer::update( SManager& scene, GameTime delta, GameTime time )
   {
     // Upload any new textures. Could this be parallellized?
     uploadTextures();
@@ -379,6 +379,8 @@ namespace neko {
 
     uploadModels();
 
+    scene.texts().update( *fonts_ );
+    fonts_->update();
     fonts_->prepareRender();
 
     // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point at which we try to create the VAO.
@@ -535,7 +537,7 @@ namespace neko {
     }
   }
 
-  void Renderer::sceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams )
+  void Renderer::sceneDraw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams )
   {
     auto wire = ( drawparams.drawopShouldDrawWireframe() );
 
@@ -611,6 +613,8 @@ namespace neko {
     particles_->draw( *shaders_, *materials_ );
     origoTest_->draw( *shaders_, { 0.0f, 0.0f, 5.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } );
 
+    scene.texts().draw( *this );
+
     if ( drawparams.drawopShouldDrawSky() && false )
     {
       setGLDrawState( true, true, true, wire );
@@ -674,7 +678,8 @@ namespace neko {
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
   }
 
-  void Renderer::drawGame( GameTime time, Camera& camera, const Viewport* viewport, const ViewportDrawParameters& params )
+  void Renderer::drawGame(
+    GameTime time, SManager& scene, Camera& camera, const Viewport* viewport, const ViewportDrawParameters& params )
   {
     if ( !ctx_.ready() )
       return;
@@ -702,7 +707,7 @@ namespace neko {
       prepareSceneDraw( time, params );
       params.drawopPreSceneDraw( *shaders_ );
       prepareSceneDraw( time, camera, params );
-      sceneDraw( time, camera, params );
+      sceneDraw( time, scene, camera, params );
       prepareSceneDraw( time, params );
       params.drawopPostSceneDraw( *shaders_ );
       main->end();
@@ -761,7 +766,7 @@ namespace neko {
   }
 
   void Renderer::draw(
-    GameTime time, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad )
+    GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad )
   {
     // check that the drawcontext is ready (fbo's available etc)
     if ( !ctx_.ready() )
@@ -800,7 +805,7 @@ namespace neko {
       prepareSceneDraw( time, camera, drawparams );
       drawparams.drawopPreSceneDraw( *shaders_ );
       prepareSceneDraw( time, camera, drawparams );
-      sceneDraw( time, camera, drawparams );
+      sceneDraw( time, scene, camera, drawparams );
       prepareSceneDraw( time, drawparams );
       drawparams.drawopPostSceneDraw( *shaders_ );
       if ( ctx_.fboMainMultisampled_ )

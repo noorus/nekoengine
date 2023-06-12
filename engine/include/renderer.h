@@ -14,6 +14,7 @@
 #include "viewport.h"
 #include "gfx.h"
 #include "specialrenderers.h"
+#include "console.h"
 
 namespace MyGUI {
 #ifndef NEKO_NO_GUI
@@ -124,7 +125,7 @@ namespace neko {
     void sceneDrawEnterNode( MeshNodePtr node, shaders::Pipeline& pipeline );
     void prepareSceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );
     void prepareSceneDraw( GameTime time, const ViewportDrawParameters& drawparams );
-    void sceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );
+    void sceneDraw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams );
     void clearErrors();
     void setCameraUniforms( Camera& camera, uniforms::Camera& uniform );
     TexturePtr loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering );
@@ -142,15 +143,16 @@ namespace neko {
         return ctx_.mergedMain_->texture( 0 );
       return {};
     }
-    void update( GameTime delta, GameTime time );
+    void update( SManager& scene, GameTime delta, GameTime time );
     void uploadTextures();
     void uploadModels();
     void setUserData( uint64_t id, const utf8String name, rainet::Image& image );
     void jsRestart();
     inline shaders::Shaders& shaders() noexcept { return *( shaders_.get() ); }
-    void drawGame( GameTime time, Camera& camera, const Viewport* viewport, const ViewportDrawParameters& params );
+    void drawGame(
+      GameTime time, SManager& scene, Camera& camera, const Viewport* viewport, const ViewportDrawParameters& params );
     void draw(
-      GameTime time, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad );
+      GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad );
     void reset( size_t width, size_t height );
     ~Renderer();
   };

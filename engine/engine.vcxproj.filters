@@ -384,6 +384,18 @@
     <ClCompile Include="src\ortbicamera.cpp">
       <Filter>Source Files\gfx\cameras</Filter>
     </ClCompile>
+    <ClCompile Include="src\textureatlas.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fontface.cpp">
+      <Filter>Source Files\gfx\fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fontstyle.cpp">
+      <Filter>Source Files\gfx\fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\c_text_system.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">
@@ -590,9 +602,6 @@
     <ClInclude Include="include\filesystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\newtype\include\newtype.h">
-      <Filter>Header Files\extern</Filter>
-    </ClInclude>
     <ClInclude Include="..\shared\include\rainet.h">
       <Filter>Header Files\extern</Filter>
     </ClInclude>
@@ -628,6 +637,9 @@
     </ClInclude>
     <ClInclude Include="include\components.h">
       <Filter>Header Files\game</Filter>
+    </ClInclude>
+    <ClInclude Include="include\textureatlas.h">
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

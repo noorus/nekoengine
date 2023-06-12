@@ -1,6 +1,7 @@
 [
   {
     "name": "demo_font",
-    "file": "SourceHanSansJP-Bold.otf"
+    "file": "SourceHanSansJP-Bold.otf",
+    "preloadSizes": [8.0, 9.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0, 24.0]
   }
 ]

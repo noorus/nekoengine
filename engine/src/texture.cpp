@@ -80,6 +80,7 @@ namespace neko {
     else
       glTextureStorage2D( handle, 1, internalFormat, (GLsizei)width, (GLsizei)height );
 
+    // (GLuint texture, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void * pixels)
     if ( data )
       glTextureSubImage2D( handle, 0, 0, 0, (GLsizei)width, (GLsizei)height, format, internalType, data );
 

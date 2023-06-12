@@ -9,7 +9,8 @@ namespace neko {
       Generic,
       Graphics,
       Audio,
-      Scripting
+      Scripting,
+      Fonts
     };
   public:
     Memory();

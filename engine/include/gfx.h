@@ -153,7 +153,7 @@ namespace neko {
     void shutdown();
     void updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene, const Viewport& window,
       GameViewport& gameViewport );
-    bool draw( RendererPtr renderer, GameTime time, const Viewport& window, GameViewport& gameViewport );
+    bool draw( RendererPtr renderer, SManager& scene, GameTime time, const Viewport& window, GameViewport& gameViewport );
   };
 
   class Gfx:

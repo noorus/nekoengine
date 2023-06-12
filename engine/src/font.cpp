@@ -9,71 +9,73 @@
 
 namespace neko {
 
-  const static unicodeString g_prerenderGlyphs = utils::uniFrom( "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" );
-
-  Font::Font( newtype::Manager* manager, const utf8String& name ):
-  LoadedResourceBase<Font>( name ), mgr_( manager )
+  Font::Font( FontManagerPtr manager, IDType i, const utf8String& name ):
+    LoadedResourceBase<Font>( name ), manager_( manager ), id_( i )
   {
-    font_ = mgr_->createFont();
-    font_->user( this );
   }
 
-  void Font::loadFace( span<uint8_t> buffer, newtype::FaceID faceIndex, Real size )
+  FontFacePtr Font::loadFace( span<uint8_t> source, FaceID faceIndex, Real size )
   {
-    assert( font_ );
-    face_ = mgr_->loadFace( font_, buffer, faceIndex, size );
+    // Make a safety copy in our own memory
+    // Loading new styles on the fly later could still access this memory
+    // and we won't rely on the host keeping that available and alive
+    // Of course, if multiple faces are actually loaded from different blobs
+    // despite belonging to the same font, this copy will only contain the
+    // last loaded one - but that's pretty suspect behavior anyway, don't do it
+    data_ = make_unique<Buffer>( source );
+
+    auto ftlib = manager_->ft();
+
+    FT_Open_Args args = { 0 };
+    args.flags = FT_OPEN_MEMORY;
+    args.memory_base = data_->data();
+    args.memory_size = (FT_Long)data_->length();
+
+    auto fc = make_shared<FontFace>( ptr(), ftlib, &args, faceIndex, size );
+    faces_[faceIndex] = fc;
+
+    loaded_ = true;
+
+    return move( fc );
   }
 
-  newtype::StyleID Font::loadStyle( newtype::FontRendering rendering, Real thickness )
+  void Font::unload()
   {
-    assert( face_ );
-    auto sid = mgr_->loadStyle( face_, rendering, thickness, g_prerenderGlyphs );
-    styles_[sid].id_ = sid;
-    Locator::console().printf(
-      Console::srcEngine, "Font %s has style 0x%x (%i, thickness %.2f)", name_.c_str(), sid, rendering, thickness );
-    return sid;
+    faces_.clear();
+    data_.reset();
+    loaded_ = false;
   }
 
-  newtype::IDType Font::id() const
+  FontLoadState Font::loaded() const
   {
-    return font_->id();
+    return ( loaded_ ? FontLoad_Loaded : FontLoad_NotReady );
   }
 
   Font::~Font()
   {
-    // Make sure to free the face ref so it gets destroyed before the font
-    // ...hopefully
-    face_.reset();
-    mgr_->unloadFont( font_ );
-    font_.reset();
-  }
-
-  bool Font::usable( newtype::StyleID style ) const
-  {
-    if ( !font_ || !font_->loaded() )
-      return false;
-    if ( !face_ || styles_.find( style ) == styles_.end() )
-      return false;
-    return ( !face_->style( style )->dirty() );
+    unload();
   }
 
   void Font::update( Renderer* renderer )
   {
-    if ( !font_->loaded() )
+    if ( !loaded() || faces_.empty() )
       return;
-    for ( auto& entry : styles_ )
+    for ( auto& face : faces_ )
     {
-      auto styleId = entry.first;
-      auto style = face_->style( styleId );
-      if ( !style->dirty() )
+      if ( !face.second || face.second->styles().empty() )
         continue;
-      char tmp[64];
-      sprintf_s( tmp, 64, "font/%I64i/%016I64x", font_->id(), styleId );
-      entry.second.material_ = renderer->createTextureWithData( tmp,
-        style->texture().dimensions().x, style->texture().dimensions().y,
-        PixFmtColorR8, style->texture().data(),
-        Texture::ClampBorder, Texture::Nearest );
-      style->markClean();
+      for ( auto& pr : face.second->styles() )
+      {
+        if ( pr.second->dirty() || !pr.second->material_ )
+        {
+          char tmp[64];
+          sprintf_s( tmp, 64, "font/%I64i/%016I64x", id_, pr.first );
+          pr.second->material_ =
+            renderer->createTextureWithData( tmp, pr.second->atlas().dimensions().x, pr.second->atlas().dimensions().y,
+              PixFmtColorR8, pr.second->atlas().data(), Texture::ClampBorder, Texture::Nearest );
+          pr.second->markClean();
+        }
+      }
     }
   }
 

@@ -10,6 +10,7 @@
 
 namespace neko {
 
+  /*
   using namespace gl;
 
   void TextManager::addJSText( js::Text* text )
@@ -60,6 +61,6 @@ namespace neko {
   void TextManager::teardown()
   {
     jsReset();
-  }
+  }*/
 
 }

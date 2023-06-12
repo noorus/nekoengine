@@ -8,60 +8,50 @@
 
 namespace neko {
 
-#ifdef _DEBUG
-  const wchar_t* c_newtypeLibraryName = L"newtype_d.dll";
-#else
-  const wchar_t* c_newtypeLibraryName = L"newtype.dll";
-#endif
-
-  void NewtypeLibrary::load( newtype::Host* host )
+  void* ftMemoryAllocate( FT_Memory memory, long size )
   {
-    module_ = LoadLibraryW( c_newtypeLibraryName );
-    if ( !module_ )
-      NEKO_EXCEPT( "Newtype load failed" );
-    pfnNewtypeInitialize = reinterpret_cast<newtype::fnNewtypeInitialize>( GetProcAddress( module_, "newtypeInitialize" ) );
-    pfnNewtypeShutdown = reinterpret_cast<newtype::fnNewtypeShutdown>( GetProcAddress( module_, "newtypeShutdown" ) );
-    if ( !pfnNewtypeInitialize || !pfnNewtypeShutdown )
-      NEKO_EXCEPT( "Newtype export resolution failed" );
-    manager_ = pfnNewtypeInitialize( newtype::c_headerVersion, host );
-    if ( !manager_ )
-      NEKO_EXCEPT( "Newtype init failed" );
+    return Locator::memory().alloc( Memory::Sector::Fonts, size );
   }
 
-  void NewtypeLibrary::unload()
+  void* ftMemoryReallocate( FT_Memory memory, long currentSize, long newSize, void* block )
   {
-    if ( manager_ && pfnNewtypeShutdown )
-      pfnNewtypeShutdown( manager_ );
-    if ( module_ )
-      FreeLibrary( module_ );
-    module_ = nullptr;
+    return Locator::memory().realloc( Memory::Sector::Fonts, block, newSize );
   }
 
-  void* FontManager::newtypeMemoryAllocate( uint32_t size )
+  void ftMemoryFree( FT_Memory memory, void* block )
   {
-    return Locator::memory().alloc( Memory::Sector::Graphics, size );
-  }
-
-  void* FontManager::newtypeMemoryReallocate( void* address, uint32_t newSize )
-  {
-    return Locator::memory().realloc( Memory::Sector::Graphics, address, newSize );
-  }
-
-  void FontManager::newtypeMemoryFree( void* address )
-  {
-    Locator::memory().free( Memory::Sector::Graphics, address );
+    Locator::memory().free( Memory::Sector::Fonts, block );
   }
 
   FontManager::FontManager( ThreadedLoaderPtr loader ):
   LoadedResourceManagerBase<Font>( loader )
   {
+    ftMemAllocator_.user = this;
+    ftMemAllocator_.alloc = ftMemoryAllocate;
+    ftMemAllocator_.realloc = ftMemoryReallocate;
+    ftMemAllocator_.free = ftMemoryFree;
   }
 
   void FontManager::initializeLogic()
   {
-    nt_.load( this );
+    assert( !freeType_ );
 
-    Locator::console().printf( Console::srcGfx, "Newtype reported: %s", nt_.mgr()->versionString().c_str() );
+    auto fterr = FT_New_Library( &ftMemAllocator_, &freeType_ );
+    if ( fterr )
+      NEKO_FREETYPE_EXCEPT( "FreeType library creation failed", fterr );
+
+    FT_Add_Default_Modules( freeType_ );
+
+    FT_Library_Version( freeType_, &ftVersion_.major, &ftVersion_.minor, &ftVersion_.patch );
+    hb_version( &hbVersion_.major, &hbVersion_.minor, &hbVersion_.patch );
+
+    hb_icu_get_unicode_funcs();
+
+    ftVersion_.trueTypeSupport = FT_Get_TrueType_Engine_Type( freeType_ );
+
+    Locator::console().printf( Console::srcGfx, "Using FreeType v%i.%i.%i HarfBuzz v%i.%i.%i",
+      ftVersion_.major, ftVersion_.minor,
+      ftVersion_.patch, hbVersion_.major, hbVersion_.minor, hbVersion_.patch );
   }
 
   void FontManager::initializeRender( Renderer* renderer )
@@ -71,37 +61,40 @@ namespace neko {
 
   FontPtr FontManager::createFont( const utf8String& name )
   {
-    auto fnt = make_shared<Font>( nt_.mgr(), name );
+    auto font = make_shared<Font>( ptr(), fontIndex_++, name );
+    fonts_[name] = font;
 
-    assert( fonts_.find( fnt->id() ) == fonts_.end() );
-    fonts_[fnt->id()] = fnt;
-
-    Locator::console().printf( Console::srcEngine, "Created font %s", fnt->name().c_str() );
-
-    return fnt;
+    return move( font );
   }
 
-  TextPtr FontManager::createText( const utf8String& fontName, newtype::StyleID style )
+  FontFacePtr FontManager::loadFace( FontPtr font, span<uint8_t> buffer, FaceID faceIndex, Real size )
   {
-    auto& font = map_[fontName];
-
-    // FIXME style is not used, because atm the caller cannot know valid style IDs as they are not exposed
-    auto txt = make_shared<Text>( nt_.mgr(), font, font->styles().begin()->first );
-
-    assert( texts_.find( txt->id() ) == texts_.end() );
-    texts_[txt->id()] = txt;
-
-    return txt;
+    return font->loadFace( buffer, faceIndex, size );
   }
 
-  void FontManager::newtypeFontTextureCreated( newtype::Font& ntfont, newtype::StyleID style, newtype::Texture& texture )
+  StyleID FontManager::loadStyle(
+    FontFacePtr face, FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs )
   {
-    auto font = reinterpret_cast<Font*>( ntfont.user() );
+    return face->loadStyle( rendering, thickness, prerenderGlyphs );
   }
 
-  void FontManager::newtypeFontTextureDestroyed( newtype::Font& ntfont, newtype::StyleID style, newtype::Texture& texture )
+  void FontManager::unloadFont( FontPtr font )
   {
-    auto font = reinterpret_cast<Font*>( ntfont.user() );
+    font->unload();
+    for ( auto it = fonts_.begin(); it != fonts_.end(); )
+      if ( ( *it ).second->id() == font->id() )
+        it = fonts_.erase( it );
+      else
+        ++it;
+  }
+
+  TextPtr FontManager::createText( FontFacePtr face, StyleID style )
+  {
+    auto nid = textIndex_++;
+    Text::Features feats { .ligatures = true, .kerning = true };
+    auto text = make_shared<Text>( ptr(), nid, face, style, feats );
+    texts_[nid] = text;
+    return move( text );
   }
 
   void FontManager::prepareLogic( GameTime time )
@@ -128,7 +121,17 @@ namespace neko {
       auto font = createFont( name );
       auto filename = obj["file"].get<utf8String>();
       map_[font->name()] = font;
-      loader_->addLoadTask( { LoadTask( font, filename, 24.0f ) } );
+      auto sizes = obj["preloadSizes"];
+      if ( !sizes.is_array() )
+        NEKO_EXCEPT( "preloadSizes is not an array" );
+      vector<FontLoadSpec> specs;
+      for ( const auto& size : sizes )
+      {
+        if ( !size.is_number() )
+          NEKO_EXCEPT( "preloadSizes array entry is not a number" );
+        specs.emplace_back( size.get<Real>(), FontRender_Normal, 0.0f );
+      }
+      loader_->addLoadTask( { LoadTask( font, filename, specs ) } );
     }
     else
       NEKO_EXCEPT( "Font JSON is not an array or an object" );
@@ -157,30 +160,42 @@ namespace neko {
 
     for ( auto& newFont : fonts )
     {
-      if ( fonts_.find( newFont->id() ) == fonts_.end() )
-        fonts_[newFont->id()] = newFont;
-      else if ( fonts_[newFont->id()] != newFont )
+      if ( fonts_.find( newFont->name() ) == fonts_.end() )
+        fonts_[newFont->name()] = newFont;
+      else if ( fonts_[newFont->name()] != newFont )
         NEKO_EXCEPT( "Loader-returned font already exists" );
     }
 
-    for ( const auto& entry : fonts_ )
+    for ( const auto& [key, font] : fonts_ )
     {
-      entry.second->update( renderer_ );
+      font->update( renderer_ );
     }
 
-    for ( const auto& entry : texts_ )
+    /* for ( const auto& entry : texts_ )
     {
       entry.second->update( renderer_ );
-    }
+    }*/
+  }
+
+  void FontManager::update()
+  {
+    for ( auto it = texts_.begin(); it != texts_.end(); )
+      if ( ( *it ).second->dead() )
+        it = texts_.erase( it );
+      else
+      {
+        it->second->update( *renderer_ );
+        ++it;
+      }
   }
 
   void FontManager::draw()
   {
-    assert( renderer_ );
+    /* assert( renderer_ );
     for ( auto& entry : texts_ )
     {
       entry.second->draw( renderer_ );
-    }
+    }*/
   }
 
   void FontManager::shutdownRender()
@@ -194,12 +209,15 @@ namespace neko {
   void FontManager::shutdownLogic()
   {
     fonts_.clear();
+    if ( freeType_ )
+    {
+      FT_Done_Library( freeType_ );
+      freeType_ = nullptr;
+    }
   }
 
   FontManager::~FontManager()
   {
-    fonts_.clear();
-    nt_.unload();
   }
 
 }

@@ -7,53 +7,151 @@
 
 namespace neko {
 
-  Text::Text( newtype::Manager* manager, FontPtr font, newtype::StyleID style ):
-  mgr_( manager ), font_( font )
-  {
-    text_ = mgr_->createText( font_->face(), style );
+  // clang-format off
+
+  namespace features {
+
+    const hb_tag_t KernTag = HB_TAG( 'k', 'e', 'r', 'n' ); // kerning operations
+    const hb_tag_t LigaTag = HB_TAG( 'l', 'i', 'g', 'a' ); // standard ligature substitution
+    const hb_tag_t CligTag = HB_TAG( 'c', 'l', 'i', 'g' ); // contextual ligature substitution
+
+    static hb_feature_t LigatureOff = { LigaTag, 0, 0, std::numeric_limits<unsigned int>::max() };
+    static hb_feature_t LigatureOn = { LigaTag, 1, 0, std::numeric_limits<unsigned int>::max() };
+    static hb_feature_t KerningOff = { KernTag, 0, 0, std::numeric_limits<unsigned int>::max() };
+    static hb_feature_t KerningOn = { KernTag, 1, 0, std::numeric_limits<unsigned int>::max() };
+    static hb_feature_t CligOff = { CligTag, 0, 0, std::numeric_limits<unsigned int>::max() };
+    static hb_feature_t CligOn = { CligTag, 1, 0, std::numeric_limits<unsigned int>::max() };
+
   }
 
-  void Text::content( unicodeString text )
+  Text::Text( FontManagerPtr manager, IDType id, FontFacePtr face, StyleID style, const Text::Features& features ):
+  manager_( manager ), id_( id ), face_( move( face ) ), style_( style )
   {
-    if ( text.compare( content_ ) == 0 )
+    hbbuf_ = make_unique<HBBuffer>( "en" );
+
+    features_.push_back( features.kerning ? features::KerningOn : features::KerningOff );
+    features_.push_back( features.ligatures ? features::LigatureOn : features::LigatureOff );
+    features_.push_back( features.ligatures ? features::CligOn : features::CligOff );
+  }
+
+  void Text::text( const unicodeString& text )
+  {
+    if ( text.compare( text_ ) == 0 || text_ == text )
       return;
-    content_ = move( text );
-    text_->text( content_ );
+
+    text_ = text;
+    dirty_ = true;
   }
 
-  newtype::IDType Text::id() const
+  const unicodeString& Text::text()
   {
-    return text_->id();
+    return text_;
   }
 
-  void Text::update( Renderer* renderer )
+  void Text::face( FontFacePtr newFace, StyleID newStyle )
   {
-    text_->update();
-    if ( text_->dirty() && mesh_ )
+    if ( face_ == newFace && style_ == newStyle )
+      return;
+
+    face_ = newFace;
+    style_ = newStyle;
+    dirty_ = true;
+  }
+
+  void Text::regenerate()
+  {
+    if ( !dirty_ || !face_ || !face_->font()->loaded() )
+      return;
+
+    auto style = face_->style( style_ );
+
+    // TODO handle special case where textdata doesn't exist (= generate empty mesh)
+
+    hbbuf_->setFrom( face_->hbfnt_, features_, text_ );
+
+    vec3 position( 0.0f );
+
+    const auto ascender = face_->ascender();
+    const auto descender = face_->descender();
+
+    position.y += ascender + descender;
+
+    vertices_.clear();
+    indices_.clear();
+
+    for ( unsigned int i = 0; i < hbbuf_->count(); ++i )
+    {
+      auto codepoint = text_.charAt( i );
+      auto glyphindex = hbbuf_->glyphInfo()[i].codepoint;
+      const auto& gpos = hbbuf_->glyphPosition()[i];
+
+      const auto chartype = u_charType( codepoint );
+      if ( chartype == U_CONTROL_CHAR && glyphindex == 0 )
+      {
+        position.x = 0.0f;
+        position.y += ( ascender - descender );
+        continue;
+      }
+      auto glyph = style->getGlyph( manager_->ft(), face_->face_, glyphindex );
+      auto offset = vec2( gpos.x_offset, gpos.y_offset ) / c_fmagic;
+      auto advance = vec2( gpos.x_advance, gpos.y_advance ) / c_fmagic;
+
+      auto p0 = vec2(
+        ( position.x + offset.x + glyph->bearing.x ),
+        math::ifloor( position.y - offset.y - glyph->bearing.y ) );
+
+      auto p1 = vec2(
+        ( p0.x + glyph->width ),
+        (int)( p0.y + glyph->height ) );
+
+      auto color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+
+      auto index = static_cast<VertexIndex>( vertices_.size() );
+      vertices_.emplace_back( vec3( p0.x, p0.y, position.z ), vec2( glyph->coords[0].x, glyph->coords[0].y ), color );
+      vertices_.emplace_back( vec3( p0.x, p1.y, position.z ), vec2( glyph->coords[0].x, glyph->coords[1].y ), color );
+      vertices_.emplace_back( vec3( p1.x, p1.y, position.z ), vec2( glyph->coords[1].x, glyph->coords[1].y ), color );
+      vertices_.emplace_back( vec3( p1.x, p0.y, position.z ), vec2( glyph->coords[1].x, glyph->coords[0].y ), color );
+
+      Indices idcs = { index + 0, index + 1, index + 2, index + 0, index + 2, index + 3 };
+      indices_.insert( indices_.end(), idcs.begin(), idcs.end() );
+
+      position += vec3( advance, 0.0f );
+    }
+
+    dirty_ = false;
+  }
+
+  void Text::update( Renderer& renderer )
+  {
+    bool wasDirty = dirty_;
+    regenerate();
+   
+    if ( wasDirty && mesh_ )
       mesh_.reset();
-    if ( !text_->dirty() && !mesh_ )
+    if ( !mesh_ && !vertices_.empty() && !indices_.empty() )
     {
       mesh_ = make_unique<TextRenderBuffer>(
-        static_cast<gl::GLuint>( text_->mesh().vertices_.size() ),
-        static_cast<gl::GLuint>( text_->mesh().indices_.size() ) );
+        static_cast<gl::GLuint>( vertices_.size() ),
+        static_cast<gl::GLuint>( indices_.size() ) );
       const auto& verts = mesh_->buffer().lock();
       const auto& indcs = mesh_->indices().lock();
-      memcpy( verts.data(), text_->mesh().vertices_.data(), text_->mesh().vertices_.size() * sizeof( newtype::Vertex ) );
-      memcpy( indcs.data(), text_->mesh().indices_.data(), text_->mesh().indices_.size() * sizeof( GLuint ) );
+      memcpy( verts.data(), vertices_.data(), vertices_.size() * sizeof( Vertex ) );
+      memcpy( indcs.data(), indices_.data(), indices_.size() * sizeof( GLuint ) );
       mesh_->buffer().unlock();
       mesh_->indices().unlock();
     }
   }
 
-  void Text::draw( Renderer* renderer )
+  void Text::draw( Renderer& renderer, const mat4& modelMatrix )
   {
-    const auto sid = text_->styleid();
-    if ( mesh_ && font_ && font_->usable( sid ) )
+    if ( !mesh_ || !face_ )
+      return;
+    auto style = face_->style( style_ );
+    if ( style && style->material_ )
     {
-      /* mesh_->draw( renderer->shaders(),
-        transform_.asModel4(),
-        font_->style( sid ).material_->textureHandle( 0 )
-      );*/
+      mesh_->draw( renderer.shaders(), modelMatrix,
+        style->material_->textureHandle( 0 )
+      );
     }
   }
 

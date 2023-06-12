@@ -385,7 +385,7 @@ namespace neko {
 
     scene_->update();
 
-    renderer_->update( delta, time );
+    renderer_->update( *scene_, delta, time );
     
     {
       char stats[256];
@@ -467,11 +467,11 @@ namespace neko {
       ImGui::EndMainMenuBar();
     }
 
-    if ( !editor_->draw( renderer_, time, windowViewport_, gameViewport_ ) )
+    if ( !editor_->draw( renderer_, *scene_, time, windowViewport_, gameViewport_ ) )
     {
       auto camera = scene_->cams().getActive();
       if ( camera )
-        renderer_->drawGame( time, *camera, &windowViewport_, gameViewport_ );
+        renderer_->drawGame( time, *scene_, *camera, &windowViewport_, gameViewport_ );
     }
 
     if ( show_demo_window )
@@ -573,7 +573,7 @@ namespace neko {
   void Gfx::jsRestart()
   {
     renderer_->jsRestart();
-    renderer_->update( 0.0, 0.0 );
+    renderer_->update( *scene_, 0.0, 0.0 );
   }
 
   void Gfx::restart( Engine& engine )

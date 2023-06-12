@@ -11,10 +11,13 @@ namespace neko {
       registry_.on_update<transform>().connect<&registry::emplace_or_replace<dirty_transform>>();
 
       camsys_ = make_unique<camera_system>( this, viewportResolution );
+      txtsys_ = make_unique<text_system>( this );
 
       root_ = registry_.create();
       registry_.emplace<node>( root_, "root" );
       registry_.emplace<transform>( root_ );
+
+      auto txt = createText( "pooooop" );
     }
 
     entity manager::createNode( entity parent, string_view name )
@@ -55,6 +58,17 @@ namespace neko {
       auto e = createNode( root_, name );
       registry_.emplace<transform>( e );
       registry_.emplace<camera>( e );
+      return e;
+    }
+
+    entity manager::createText( string_view name )
+    {
+      auto e = createNode( root_, name );
+      registry_.emplace<transform>( e );
+      auto& t = registry_.emplace<text>( e );
+      t.fontName = "demo_font";
+      t.size = 18.0f;
+      t.int_ud_.str = &t.content;
       return e;
     }
 
@@ -128,6 +142,10 @@ namespace neko {
       if ( registry_.any_of<camera>( e ) )
       {
         camsys_->imguiCameraEditor( e );
+      }
+      if ( registry_.any_of<text>( e ) )
+      {
+        txtsys_->imguiTextEditor( e );
       }
     }
 

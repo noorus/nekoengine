@@ -1,5 +1,4 @@
 #include "pch.h"
-#ifndef NEKO_NO_SCRIPTING
 
 #include "gfx_types.h"
 #include "materials.h"
@@ -85,5 +84,3 @@ namespace neko {
   }
 
 }
-
-#endif
