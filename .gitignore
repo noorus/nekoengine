@@ -323,20 +323,10 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 
-bin/*.exp
-bin/*.lib
-bin/*.pdb
-bin/*.dll
-bin/*.exe
-
-lib/*.exp
-lib/*.lib
-lib/*.pdb
-lib/*.dll
-lib/*.exe
-
 *.lnk
 assets*
 publish*
 /bin/imgui.ini
 junk/*
+
+!extern/
