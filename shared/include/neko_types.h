@@ -130,6 +130,21 @@ namespace neko {
 
   using std::ignore;
 
+  enum LogSource : unsigned long
+  {
+    srcError = 0,
+    srcEngine,
+    srcGfx,
+    srcSound,
+    srcLoader,
+    srcScripting,
+    srcInput,
+    srcGame,
+    srcGUI,
+    srcMessaging,
+    srcSteam
+  };
+
   using Entity = entt::entity;
 
 #ifdef NEKO_MATH_DOUBLE

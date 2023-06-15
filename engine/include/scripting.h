@@ -108,7 +108,7 @@ namespace neko {
     js::V8Value requireScript( const utf8String& filename );
   };
 
-  class Scripting: public Subsystem, public v8::ArrayBuffer::Allocator {
+  class Scripting: public Subsystem<Scripting, srcScripting>, public v8::ArrayBuffer::Allocator {
     friend class ScriptingContext;
   protected:
     unique_ptr<v8::Platform> platform_;

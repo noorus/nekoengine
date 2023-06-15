@@ -3,6 +3,7 @@
 #include "neko_platform.h"
 #include "locator.h"
 #include "filesystem.h"
+#include "neatlywrappedsteamapi.h"
 
 namespace neko {
 
@@ -70,6 +71,72 @@ namespace neko {
     inline void toLowercase( wstring& str )
     {
       std::transform( str.begin(), str.end(), str.begin(), ::towlower );
+    }
+
+    inline utf8String render( steam::EResult steamResult )
+    {
+      static thread_local char buf[256];
+      if ( steam::c_steamEResultDescriptionMap.find( steamResult ) != steam::c_steamEResultDescriptionMap.end() )
+        sprintf_s<256>( buf, "Result %u - %s", steamResult, steam::c_steamEResultDescriptionMap.at( steamResult ).c_str() );
+      else
+        sprintf_s<256>( buf, "Result %u", steamResult );
+      return buf;
+    }
+
+    inline utf8String render(
+      steam::EAccountType type, steam::EUniverse universe, steam::AccountID_t id, unsigned int instance = 0 )
+    {
+      static thread_local char buf[37];
+      switch ( type )
+      {
+        case steam::k_EAccountTypeAnonGameServer:
+          sprintf_s<37>( buf, "[A:%u:%u:%u]", universe, id, instance );
+          break;
+        case steam::k_EAccountTypeGameServer:
+          sprintf_s<37>( buf, "[G:%u:%u]", universe, id );
+          break;
+        case steam::k_EAccountTypeMultiseat:
+          sprintf_s<37>( buf, "[M:%u:%u:%u]", universe, id, instance );
+          break;
+        case steam::k_EAccountTypePending:
+          sprintf_s<37>( buf, "[P:%u:%u]", universe, id );
+          break;
+        case steam::k_EAccountTypeContentServer:
+          sprintf_s<37>( buf, "[C:%u:%u]", universe, id );
+          break;
+        case steam::k_EAccountTypeClan:
+          sprintf_s<37>( buf, "[g:%u:%u]", universe, id );
+          break;
+        case steam::k_EAccountTypeChat:
+          switch ( instance & ~steam::k_EChatAccountInstanceMask )
+          {
+            case steam::k_EChatInstanceFlagClan:
+              sprintf_s<37>( buf, "[c:%u:%u]", universe, id );
+              break;
+            case steam::k_EChatInstanceFlagLobby:
+              sprintf_s<37>( buf, "[L:%u:%u]", universe, id );
+              break;
+            default:
+              sprintf_s<37>( buf, "[T:%u:%u]", universe, id );
+              break;
+          }
+          break;
+        case steam::k_EAccountTypeInvalid:
+          sprintf_s<37>( buf, "[I:%u:%u]", universe, id );
+          break;
+        case steam::k_EAccountTypeIndividual:
+          sprintf_s<37>( buf, "[U:%u:%u]", universe, id );
+          break;
+        default:
+          sprintf_s<37>( buf, "[i:%u:%u]", universe, id );
+          break;
+      }
+      return utf8String( buf );
+    }
+
+    inline utf8String render( const steam::CSteamID& id )
+    {
+      return render( id.GetEAccountType(), id.GetEUniverse(), id.GetAccountID(), id.GetUnAccountInstance() );
     }
 
     inline utf8String beautifyDuration( chrono::seconds input_seconds, bool verbose = false )

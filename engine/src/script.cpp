@@ -33,7 +33,7 @@ namespace neko {
     Isolate::Scope isolateScope( isolate );
     HandleScope handleScope( isolate );
 
-    globalContext_->console_->printf( Console::srcScripting, "Compiling %s", name_.c_str() );
+    globalContext_->console_->printf( srcScripting, "Compiling %s", name_.c_str() );
 
     status_ = Status_Unknown;
 
@@ -62,7 +62,7 @@ namespace neko {
     script_.Reset( isolate, script.ToLocalChecked() );
     status_ = Status_Compiled;
 
-    globalContext_->console_->printf( Console::srcScripting, "%s compiled succesfully!", name_.c_str() );
+    globalContext_->console_->printf( srcScripting, "%s compiled succesfully!", name_.c_str() );
 
     return true;
   }
@@ -78,7 +78,7 @@ namespace neko {
 
     if ( message.IsEmpty() )
     {
-      globalContext_->console_->printf( Console::srcScripting, "V8 Exception: %s", *exception );
+      globalContext_->console_->printf( srcScripting, "V8 Exception: %s", *exception );
     }
     else
     {
@@ -88,10 +88,10 @@ namespace neko {
       v8::String::Utf8Value sourceLine( isolate, message->GetSourceLine( context ).ToLocalChecked() );
       auto lineNumber = message->GetLineNumber( context ).FromJust();
 
-      globalContext_->console_->printf( Console::srcScripting, "V8 Script exception!" );
-      globalContext_->console_->printf( Console::srcScripting, "● %s", *exception );
-      globalContext_->console_->printf( Console::srcScripting, "In %s line %d:", *scriptName, lineNumber );
-      globalContext_->console_->printf( Console::srcScripting, "→ %s", *sourceLine );
+      globalContext_->console_->printf( srcScripting, "V8 Script exception!" );
+      globalContext_->console_->printf( srcScripting, "● %s", *exception );
+      globalContext_->console_->printf( srcScripting, "In %s line %d:", *scriptName, lineNumber );
+      globalContext_->console_->printf( srcScripting, "→ %s", *sourceLine );
     }
   }
 
@@ -110,7 +110,7 @@ namespace neko {
     if ( script_.IsEmpty() )
       return esc.Escape( js::V8Value::New( isolate, retval_ ) );
 
-    globalContext_->console_->printf( Console::srcScripting, "Executing %s", name_.c_str() );
+    globalContext_->console_->printf( srcScripting, "Executing %s", name_.c_str() );
 
     TryCatch tryCatch( isolate );
 
@@ -133,7 +133,7 @@ namespace neko {
 
     status_ = Status_Executed;
 
-    globalContext_->console_->printf( Console::srcScripting, "Executed %s", name_.c_str() );
+    globalContext_->console_->printf( srcScripting, "Executed %s", name_.c_str() );
 
     return esc.Escape( js::V8Value::New( isolate, retval_ ) );
   }

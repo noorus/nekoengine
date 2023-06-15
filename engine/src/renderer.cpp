@@ -187,7 +187,7 @@ namespace neko {
 
       for ( auto& vendor : vendors )
         if ( !vendor.extensions.empty() )
-          console.printf( Console::srcGfx, "%s Extensions: %s", vendor.name.c_str(), vendor.extensions.c_str() );
+          console.printf( srcGfx, "%s Extensions: %s", vendor.name.c_str(), vendor.extensions.c_str() );
     }
 
     // Max buffer sizes
@@ -227,7 +227,7 @@ namespace neko {
     }
     if ( !errorCount )
       return;
-    console_->printf( Console::srcGfx, "Cleared %d GL errors...", errorCount );
+    console_->printf( srcGfx, "Cleared %d GL errors...", errorCount );
   }
 
   Renderer::Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console ):
@@ -238,11 +238,11 @@ namespace neko {
     clearErrors();
     glStartupFetchAndCheck( info_, *console_.get(), g_CVar_gl_dump.as_b() );
 
-    console_->printf( Console::srcGfx, "Buffer alignments are %i/texture %i/uniform",
+    console_->printf( srcGfx, "Buffer alignments are %i/texture %i/uniform",
       info_.textureBufferAlignment, info_.uniformBufferAlignment );
-    console_->printf( Console::srcGfx, "Maximums are %i/texture %i/renderbuffer %ix%i/framebuffer",
+    console_->printf( srcGfx, "Maximums are %i/texture %i/renderbuffer %ix%i/framebuffer",
       info_.maxTextureSize, info_.maxRenderbufferSize, info_.maxFramebufferWidth, info_.maxFramebufferHeight );
-    console_->printf( Console::srcGfx, "Maximum anisotropy is %.1f", info_.maxAnisotropy );
+    console_->printf( srcGfx, "Maximum anisotropy is %.1f", info_.maxAnisotropy );
   }
 
   void Renderer::preInitialize()
@@ -325,7 +325,7 @@ namespace neko {
     MaterialVector mats;
     loader_->getFinishedMaterials( mats );
     if ( !mats.empty() )
-      console_->printf( Console::srcGfx, "Renderer::uploadTextures got %d new materials", mats.size() );
+      console_->printf( srcGfx, "Renderer::uploadTextures got %d new materials", mats.size() );
     for ( auto& mat : mats )
     {
       if ( !mat->loaded() )
@@ -357,7 +357,7 @@ namespace neko {
     if ( nodes.empty() )
       return;
 
-    console_->printf( Console::srcGfx, "Renderer::uploadModels got %d new models", nodes.size() );
+    console_->printf( srcGfx, "Renderer::uploadModels got %d new models", nodes.size() );
 
     for ( auto& node : nodes )
       uploadModelsEnterNode( node );

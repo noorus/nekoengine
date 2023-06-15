@@ -5,7 +5,6 @@
 #include "console.h"
 #include "messaging.h"
 #include "director.h"
-#include "rainet.h"
 
 namespace neko {
 
@@ -45,10 +44,7 @@ namespace neko {
 
   //! \class Engine
   //! The main engine class that makes the world go round
-  class Engine: public enable_shared_from_this<Engine>, public nocopy, public Listener
-#ifndef NEKO_NO_RAINET
-    , public rainet::Host
-#endif
+  class Engine: public ShareableBase<Engine>, public nocopy, public Listener
   {
   public:
     //! Possible signal values interpreted by the engine's gameloop
@@ -76,10 +72,8 @@ namespace neko {
     FontManagerPtr fonts_;
     MessagingPtr messaging_;
     DirectorPtr director_;
+    SteamPtr steam_;
     EngineInfo info_;
-#ifndef NEKO_NO_RAINET
-    RainetLibrary rainet_;
-#endif
     Environment env_;
   protected:
     struct State {
@@ -105,14 +99,6 @@ namespace neko {
   protected:
     //! Message listener callback.
     void onMessage( const Message& msg ) override;
-#ifndef NEKO_NO_RAINET
-    //! Rainet callbacks.
-    void onDiscordDebugPrint( const utf8String& message ) override;
-    void onSteamDebugPrint( const utf8String& message ) override;
-    void onSteamOverlayToggle( bool enabled ) override;
-    void onSteamStatsUpdated( rainet::StateUpdateIndex index ) override;
-    void onAccountUpdated( const rainet::Account& user ) override;
-#endif
   public:
     inline const EngineInfo& info() const noexcept { return info_; }
     inline ConsolePtr console() noexcept { return console_; }
@@ -128,12 +114,8 @@ namespace neko {
     inline DirectorPtr director() noexcept { return director_; }
     inline Sync& sync() noexcept { return sync_; }
     inline const utf8String& listFlags();
-    const rainet::GameInstallationState& installationInfo();
     inline const Stats& stats() const noexcept { return stats_; }
     inline const bool devmode() const noexcept { return state_.devMode; }
-#ifndef NEKO_NO_RAINET
-    inline rainet::System* rainet() { return rainet_.engine_; }
-#endif
   public:
     //! Constructor.
     Engine( ConsolePtr console, const Environment& env );

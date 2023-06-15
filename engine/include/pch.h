@@ -162,6 +162,9 @@
 # pragma warning( pop )
 #endif
 
+// Steamworks
+#include "neatlywrappedsteamapi.h"
+
 // EnTT
 #include <entt.hpp>
 

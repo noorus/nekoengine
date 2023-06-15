@@ -14,12 +14,12 @@ namespace neko {
     nodes_.emplace_back( 1, 1, size_.x - 2 );
     data_.resize( size_.x * size_.y * depth_ );
     memset( data_.data(), 0, data_.size() );
-    Locator::console().printf( Console::srcGfx, "TextureAtlas created, size %I64i buffer 0x%I64X", data_.size(), data_.data() );
+    Locator::console().printf( srcGfx, "TextureAtlas created, size %I64i buffer 0x%I64X", data_.size(), data_.data() );
   }
 
   TextureAtlas::~TextureAtlas()
   {
-    Locator::console().printf( Console::srcGfx, "TextureAtlas going down, size %I64i buffer 0x%I64X", data_.size(), data_.data() );
+    Locator::console().printf( srcGfx, "TextureAtlas going down, size %I64i buffer 0x%I64X", data_.size(), data_.data() );
   }
 
   PixelFormat TextureAtlas::format() const

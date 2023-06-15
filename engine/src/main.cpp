@@ -71,7 +71,7 @@ inline int runMain( const std::vector<std::wstring>& arguments )
 
   platform::performanceInitializeGameThread();
 
-  console->printf( Console::srcEngine, R"(Documents directory is %s)", platform::wideToUtf8( env.documentsPath_ ).c_str() );
+  console->printf( srcEngine, R"(Documents directory is %s)", platform::wideToUtf8( env.documentsPath_ ).c_str() );
 
   EnginePtr engine = make_shared<Engine>( console, env );
 
@@ -86,7 +86,7 @@ inline int runMain( const std::vector<std::wstring>& arguments )
         auto varname = platform::wideToUtf8( arguments[i - 1].substr( 1 ) );
         auto var = console->getVariable( varname );
         if ( !var )
-          console->printf( Console::srcEngine, R"(Command line "%S": Variable %s not found)", arguments[i - 1].c_str(), varname.c_str() );
+          console->printf( srcEngine, R"(Command line "%S": Variable %s not found)", arguments[i - 1].c_str(), varname.c_str() );
         else
           var->set( platform::wideToUtf8( arguments[i] ) );
       }
@@ -98,7 +98,7 @@ inline int runMain( const std::vector<std::wstring>& arguments )
         console->executeFile( platform::wideToUtf8( arguments[i] ) );
     }
     else
-      console->printf( Console::srcEngine, R"(Unknown command line "%S")", arguments[i].c_str() );
+      console->printf( srcEngine, R"(Unknown command line "%S")", arguments[i].c_str() );
     i++;
   }
 
@@ -114,7 +114,7 @@ inline int runMain( const std::vector<std::wstring>& arguments )
   {
     g_exceptionReporter( e.getFullDescription() );
     if ( Locator::hasConsole() )
-      Locator::console().print( Console::srcEngine, "Shutting down gracefully..." );
+      Locator::console().print( srcEngine, "Shutting down gracefully..." );
     failure = true;
   }
 #endif

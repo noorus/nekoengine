@@ -49,11 +49,11 @@ namespace neko {
       if ( restartEvent_.check() )
       {
         restartEvent_.reset();
-        console_->printf( Console::srcGfx, "Restarting renderer" );
+        console_->printf( srcGfx, "Restarting renderer" );
         gfx_->logicLock_.lock();
         gfx_->jsRestart();
         gfx_->logicLock_.unlock();
-        console_->printf( Console::srcGfx, "Restart done" );
+        console_->printf( srcGfx, "Restart done" );
         restartedEvent_.set();
         continue;
       }

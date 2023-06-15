@@ -22,7 +22,7 @@ namespace neko {
   GLuint Renderer::implCreateFramebuffer( size_t width, size_t height )
   {
     if ( width > (size_t)info_.maxFramebufferWidth || height > (size_t)info_.maxFramebufferHeight )
-      console_->printf( Console::srcGfx,
+      console_->printf( srcGfx,
         "Warning: Requested framebuffer width or height (%i, %i) exceeds maximum supported values (%i, %i)",
         width, height, info_.maxFramebufferWidth, info_.maxFramebufferHeight );
 

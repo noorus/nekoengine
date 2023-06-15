@@ -35,38 +35,38 @@ namespace neko {
 
   void GfxInput::onDeviceConnected( nil::Device* device )
   {
-    console_->printf( Console::srcInput, "Device connected: %s", device->getName().c_str() );
+    console_->printf( srcInput, "Device connected: %s", device->getName().c_str() );
     if ( device->getType() != nil::Device::Device_Controller )
       device->enable();
   }
 
   void GfxInput::onDeviceDisconnected( nil::Device* device )
   {
-    console_->printf( Console::srcInput, "Device disconnected: %s", device->getName().c_str() );
+    console_->printf( srcInput, "Device disconnected: %s", device->getName().c_str() );
   }
 
   void GfxInput::onMouseEnabled( nil::Device* device, nil::Mouse* instance )
   {
-    // console_->printf( Console::srcInput, "Mouse enabled: %s", device->getName().c_str() );
+    // console_->printf( srcInput, "Mouse enabled: %s", device->getName().c_str() );
     instance->addListener( this );
     mouseButtons_.reset( instance->getState().buttons );
   }
 
   void GfxInput::onMouseDisabled( nil::Device* device, nil::Mouse* instance )
   {
-    // console_->printf( Console::srcInput, "Mouse disabled: %s", device->getName().c_str() );
+    // console_->printf( srcInput, "Mouse disabled: %s", device->getName().c_str() );
     mouseButtons_.reset( instance->getState().buttons );
   }
 
   void GfxInput::onKeyboardEnabled( nil::Device* device, nil::Keyboard* instance )
   {
-    // console_->printf( Console::srcInput, "Keyboard enabled: %s", device->getName().c_str() );
+    // console_->printf( srcInput, "Keyboard enabled: %s", device->getName().c_str() );
     instance->addListener( this );
   }
 
   void GfxInput::onKeyboardDisabled( nil::Device* device, nil::Keyboard* instance )
   {
-    // console_->printf( Console::srcInput, "Keyboard disabled: %s", device->getName().c_str() );
+    // console_->printf( srcInput, "Keyboard disabled: %s", device->getName().c_str() );
   }
 
   void GfxInput::onControllerEnabled( nil::Device* device, nil::Controller* instance )
@@ -98,7 +98,7 @@ namespace neko {
     {
 #endif
       mouseButtons_.markPressed( button );
-      Locator::console().print(Console::srcInput, "Mouse button pressed" );
+      Locator::console().print(srcInput, "Mouse button pressed" );
 #ifndef NEKO_NO_GUI
     }
     else if ( button < 5 )
@@ -116,7 +116,7 @@ namespace neko {
     {
 #endif
       mouseButtons_.markReleased( button );
-      Locator::console().print( Console::srcInput, "Mouse button released" );
+      Locator::console().print( srcInput, "Mouse button released" );
 #ifndef NEKO_NO_GUI
     }
 #endif

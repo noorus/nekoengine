@@ -161,7 +161,7 @@ namespace neko::loaders {
     out->rotate = gltf_toQuat( node.rotation );
     out->translate = gltf_toVec3( node.translation, vec3( 0.0f ) );
 
-    Locator::console().printf( Console::srcLoader, "gltf: node %s depth %i trans %f,%f,%f scl %f,%f,%f mesh %i",
+    Locator::console().printf( srcLoader, "gltf: node %s depth %i trans %f,%f,%f scl %f,%f,%f mesh %i",
       node.name.c_str(), depth, out->translate.x, out->translate.x, out->translate.y, out->scale.x, out->scale.y,
       out->scale.z, node.mesh );
 
@@ -173,7 +173,7 @@ namespace neko::loaders {
         if ( primitive.indices < 0 )
           continue;
         const auto& indices = model.accessors[primitive.indices];
-        Locator::console().printf( Console::srcLoader, "gltf: mesh primitive indices %i count %i mode %i", primitive.indices, indices.count, primitive.mode );
+        Locator::console().printf( srcLoader, "gltf: mesh primitive indices %i count %i mode %i", primitive.indices, indices.count, primitive.mode );
         int pos_acc = -1;
         int pos_count = -1;
         int norm_acc = -1;
@@ -207,7 +207,7 @@ namespace neko::loaders {
               NEKO_EXCEPT( "GLTF texcoord accessor is not a vec2" );
             tc_acc = accessor.bufferView;
           }
-          Locator::console().printf( Console::srcLoader, "gltf: mesh primitive attribute %s buffer %i name %s viewname %s componenttype %i size %i", attribute.first.c_str(), accessor.bufferView, buffers[accessor.bufferView].bufferName_.c_str(), buffers[accessor.bufferView].viewName_.c_str(), buffers[accessor.bufferView].componentType_, buffers[accessor.bufferView].data_.size() );
+          Locator::console().printf( srcLoader, "gltf: mesh primitive attribute %s buffer %i name %s viewname %s componenttype %i size %i", attribute.first.c_str(), accessor.bufferView, buffers[accessor.bufferView].bufferName_.c_str(), buffers[accessor.bufferView].viewName_.c_str(), buffers[accessor.bufferView].componentType_, buffers[accessor.bufferView].data_.size() );
         }
         if ( pos_acc < 0 || norm_acc < 0 || tang_acc < 0 || tc_acc < 0 )
           NEKO_EXCEPT( "GLTF mesh is missing pos, norm, tang or texcoord array" );
@@ -272,7 +272,7 @@ namespace neko::loaders {
     auto meshcount = model.meshes.size();
     auto matcount = model.materials.size();
     auto skincount = model.skins.size();
-    Locator::console().printf( Console::srcLoader,
+    Locator::console().printf( srcLoader,
       "gltf: tinygltf loaded %s, %i nodes %i meshes %i materials %i skins",
       filename.c_str(), nodecount, meshcount, matcount, skincount );
     if ( !model.nodes.empty() )

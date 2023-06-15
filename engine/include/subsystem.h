@@ -4,15 +4,6 @@
 
 namespace neko {
 
-  class Subsystem: public nocopy {
-  protected:
-    EnginePtr engine_;
-  public:
-    Subsystem( EnginePtr engine );
-    virtual void preUpdate( GameTime time );
-    virtual void tick( GameTime tick, GameTime time );
-    virtual void postUpdate( GameTime delta, GameTime tick );
-    virtual ~Subsystem();
-  };
+
 
 }

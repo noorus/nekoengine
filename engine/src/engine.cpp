@@ -9,6 +9,7 @@
 #include "messaging.h"
 #include "input.h"
 #include "director.h"
+#include "steam.h"
 
 namespace neko {
 
@@ -66,39 +67,9 @@ namespace neko {
 #ifdef NEKO_NO_SCRIPTING
       "noscripting "
 #endif
-#ifdef NEKO_NO_RAINET
-      "norainet "
-#endif
       "windows";
     return flags;
   }
-
-#ifndef NEKO_NO_RAINET
-  void RainetLibrary::load( rainet::Host* host )
-  {
-    module_ = LoadLibraryW( c_rainetLibraryName );
-    if ( !module_ )
-      NEKO_EXCEPT( "Rainet load failed" );
-    pfnInitialize = reinterpret_cast<rainet::fnInitialize>( GetProcAddress( module_, "rainetInitialize" ) );
-    pfnShutdown = reinterpret_cast<rainet::fnShutdown>( GetProcAddress( module_, "rainetShutdown" ) );
-    if ( !pfnInitialize || !pfnShutdown )
-      NEKO_EXCEPT( "Rainet export resolution failed" );
-    engine_ = pfnInitialize( rainet::c_headerVersion, host );
-    if ( !engine_ )
-      NEKO_EXCEPT( "Rainet init failed" );
-  }
-
-  void RainetLibrary::unload()
-  {
-    if ( engine_ && pfnShutdown )
-    {
-      pfnShutdown( engine_ );
-      engine_ = nullptr;
-    }
-    if ( module_ )
-      FreeLibrary( module_ );
-  }
-#endif
 
   void parseSettingsJSON( const json& settings, EngineSettings& out )
   {
@@ -114,7 +85,7 @@ namespace neko {
     if ( settings.find( "discord" ) != settings.end() )
     {
       auto& discord = settings["discord"];
-      out.discordAppID = utils::parseUint64( discord["appid"].get<utf8String>().c_str() );
+      out.discordAppID = utils::parseUint64( discord["appid"].get<utf8String>() );
       if ( out.discordAppID )
         out.useDiscord = true;
     }
@@ -124,21 +95,18 @@ namespace neko {
   {
     console_->setEngine( shared_from_this() );
 
-    console_->printf( Console::srcEngine, "Build flags: %s", listFlags().c_str() );
+    console_->printf( srcEngine, "Build flags: %s", listFlags().c_str() );
 
     auto settingstext = Locator::fileSystem().openFile( Dir_User, c_engineSettingsFilename )->readFullString();
     parseSettingsJSON( json::parse( settingstext ), settings_ );
+
+    steam_ = make_shared<Steam>( ptr(), settings_.steamAppID );
 
     platform::PerformanceTimer timer;
 
     UVersionInfo icuVersion;
     u_getVersion( icuVersion );
-    console_->printf( Console::srcEngine, "Using ICU v%d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
-
-#ifndef NEKO_NO_RAINET
-    rainet_.load( this );
-    rainet_.engine_->initialize( settings_.discordAppID, settings_.steamAppID );
-#endif
+    console_->printf( srcEngine, "Using ICU v%d.%d.%d", icuVersion[0], icuVersion[1], icuVersion[2] );
 
     loader_ = make_shared<ThreadedLoader>();
     loader_->start();
@@ -154,23 +122,21 @@ namespace neko {
     timer.start();
     fonts_ = make_shared<FontManager>( loader_ );
     fonts_->initializeLogic();
-    console_->printf( Console::srcGfx, "Font manager init took %dms", (int)timer.stop() );
+    console_->printf( srcGfx, "Font manager init took %dms", (int)timer.stop() );
 
     timer.start();
     renderer_ = make_shared<ThreadedRenderer>( shared_from_this(), loader_, fonts_, messaging_, director_, console_ );
     renderer_->start();
-    console_->printf( Console::srcGfx, "Renderer init took %dms", (int)timer.stop() );
+    console_->printf( srcGfx, "Renderer init took %dms", (int)timer.stop() );
 
 #ifndef NEKO_NO_SCRIPTING
     timer.start();
     scripting_ = make_shared<Scripting>( shared_from_this() );
     scripting_->initialize();
-    console_->printf( Console::srcScripting, "Scripting init took %dms", (int)timer.stop() );
+    console_->printf( srcScripting, "Scripting init took %dms", (int)timer.stop() );
 #endif
 
-#ifndef NEKO_NO_RAINET
-    rainet_.engine_->update( 0.0, 0.0 );
-#endif
+    steam_->tick( 0.0, 0.0 );
 
 #ifndef NEKO_NO_SCRIPTING
     scripting_->postInitialize();
@@ -209,7 +175,7 @@ namespace neko {
         break;
       case M_Debug_PauseTime:
         state_.timePaused = !state_.timePaused;
-        console_->printf( Console::srcEngine, "Time %s", state_.timePaused ? "paused" : "unpaused" );
+        console_->printf( srcEngine, "Time %s", state_.timePaused ? "paused" : "unpaused" );
         break;
     }
   }
@@ -218,17 +184,17 @@ namespace neko {
 
   void Engine::onDiscordDebugPrint( const utf8String& message )
   {
-    console_->printf( Console::srcEngine, "Discord: %s", message.c_str() );
+    console_->printf( srcEngine, "Discord: %s", message.c_str() );
   }
 
   void Engine::onSteamDebugPrint( const utf8String& message )
   {
-    console_->printf( Console::srcEngine, "Steam: %s", message.c_str() );
+    console_->printf( srcEngine, "Steam: %s", message.c_str() );
   }
 
   void Engine::onSteamOverlayToggle( bool enabled )
   {
-    console_->printf( Console::srcEngine, "Steam: Overlay toggle %s", enabled ? "true" : "false" );
+    console_->printf( srcEngine, "Steam: Overlay toggle %s", enabled ? "true" : "false" );
     if ( enabled != state_.steamOverlay )
     {
       messaging_->send( M_Extern_SteamOverlay, 1, enabled );
@@ -276,18 +242,6 @@ namespace neko {
 #endif
   }
 
-  const rainet::GameInstallationState& Engine::installationInfo()
-  {
-#ifndef NEKO_NO_RAINET
-    if ( rainet_.engine_->startedFromSteam() )
-      return rainet_.engine_->steamInstallation();
-    return rainet_.engine_->localInstallation();
-#else
-    static rainet::GameInstallationState fuckyou = { .installPath_ = platform::wideToUtf8( platform::getCurrentDirectory() ) };
-    return fuckyou;
-#endif
-  }
-
   void Engine::run()
   {
     clock_.init();
@@ -299,17 +253,12 @@ namespace neko {
 
     const auto maxSleepytimeMs = math::ifloor( (double)c_logicMaxFrameMicroseconds / 1000.0 );
 
-    console_->printf( Console::srcEngine, "Logic: targeting %.02f FPS, logic step %.02fms, max frame time %I64uus, max sleep %ims",
+    console_->printf( srcEngine, "Logic: targeting %.02f FPS, logic step %.02fms, max frame time %I64uus, max sleep %ims",
       (float)c_logicFPS, static_cast<float>( c_logicStep * 1000.0 ), c_logicMaxFrameMicroseconds, maxSleepytimeMs );
 
     // this thing is just for silly stats
     platform::PerformanceTimer overallTime;
     overallTime.start();
-
-#ifndef NEKO_NO_RAINET
-    rainet_.engine_->update( time_, 0.0 );
-    rainet_.engine_->changeActivity_AlphaDevelop();
-#endif
 
     while ( signal_ != Signal_Stop )
     {
@@ -353,9 +302,7 @@ namespace neko {
       sync_.gameTime.store( time_ );
       sync_.realTime.store( realTime_ );
 
-#ifndef NEKO_NO_RAINET
-      rainet_.engine_->update( time_, delta );
-#endif
+      steam_->tick( delta, time_ );
 
 #ifndef NEKO_NO_SCRIPTING
       scripting_->postUpdate( delta, time_ );
@@ -364,7 +311,7 @@ namespace neko {
       auto us = clock_.peekMicroseconds();
       if ( us >= c_logicMaxFrameMicroseconds )
       {
-        console_->printf( Console::srcEngine, "WARNING: Logic frame exceeded max time (%I64uus)", us );
+        console_->printf( srcEngine, "WARNING: Logic frame exceeded max time (%I64uus)", us );
       }
       else
       {
@@ -375,11 +322,9 @@ namespace neko {
       }
     }
 
-#ifndef NEKO_NO_RAINET
     auto secondsDebugged = static_cast<float>( overallTime.stop() / 1000.0 );
-    rainet_.engine_->statAdd( "dev_debugTime", secondsDebugged );
-    rainet_.engine_->uploadStats();
-#endif
+    steam_->statAdd( "dev_debugTime", secondsDebugged );
+    steam_->uploadStats();
   }
 
   void Engine::shutdown()
@@ -406,9 +351,7 @@ namespace neko {
     messaging_.reset();
     Locator::provideMessaging( MessagingPtr() );
 
-#ifndef NEKO_NO_RAINET
-    rainet_.unload();
-#endif
+    steam_.reset();
 
     console_->resetEngine();
   }

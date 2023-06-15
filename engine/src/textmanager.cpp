@@ -35,7 +35,7 @@ namespace neko {
     renderCtx.syncTextsFromRenderer( inTexts, outTexts );
     if ( !inTexts.empty() || !outTexts.empty() )
     {
-      Locator::console().printf( Console::srcGfx,
+      Locator::console().printf( srcGfx,
         "TextManager::jsUpdate adding %i texts, removing %i texts",
         inTexts.size(), outTexts.size() );
     }

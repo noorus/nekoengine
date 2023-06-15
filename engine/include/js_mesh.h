@@ -26,7 +26,7 @@ namespace neko {
       Mesh( const JSMesh& source ): local_( source ) {}
       inline void setFrom( const JSMesh& other )
       {
-        Locator::console().printf( neko::Console::srcScripting,
+        Locator::console().printf( neko::srcScripting,
           "js::Mesh(0x%I64X) setFrom JSMesh(0x%I64X)", this, reinterpret_cast<const void*>( &other ) );
         // TODO better; this is destructive
         local_.vbo_->copy( *other.vbo_ );

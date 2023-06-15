@@ -207,7 +207,7 @@ namespace neko {
       face->loadStyle( spec.rendering, spec.size, spec.thickness, g_prerenderGlyphs );
     }
 
-    Locator::console().printf( Console::srcLoader, "Loaded font %s (%s) with %i sizes", task.font_->name().c_str(),
+    Locator::console().printf( srcLoader, "Loaded font %s (%s) with %i sizes", task.font_->name().c_str(),
       task.path_.c_str(), task.specs_.size() );
 
     finishedTasksLock_.lock();
@@ -253,7 +253,7 @@ namespace neko {
         if ( lodepng::decode( rawData, width, height, input.data(), input.size(), LCT_RGBA, 8 ) == 0 )
         {
           Locator::console().printf(
-            Console::srcLoader, "Loaded texture %s, %ix%i, rgba8", target.c_str(), width, height );
+            srcLoader, "Loaded texture %s, %ix%i, rgba8", target.c_str(), width, height );
           layer.image_.width_ = width;
           layer.image_.height_ = height;
           layer.image_.format_ = PixFmtColorRGBA8;
@@ -282,7 +282,7 @@ namespace neko {
         if ( exr_values )
         {
           Locator::console().printf(
-            Console::srcLoader, "Loaded texture %s, %ix%i, rgba32f", target.c_str(), exr_width, exr_height );
+            srcLoader, "Loaded texture %s, %ix%i, rgba32f", target.c_str(), exr_width, exr_height );
           layer.image_.width_ = exr_width;
           layer.image_.height_ = exr_height;
           layer.image_.data_.resize( static_cast<uint64_t>( exr_width ) * exr_height * 4 * sizeof( float ) );
@@ -302,7 +302,7 @@ namespace neko {
           auto bps = TinyTIFFReader_getBitsPerSample( tiff, 0 );
           auto sf = TinyTIFFReader_getSampleFormat( tiff );
           auto spp = TinyTIFFReader_getSamplesPerPixel( tiff );
-          Locator::console().printf( Console::srcLoader, "Loaded texture %s, %ix%i %ibit %ix%s", target.c_str(),
+          Locator::console().printf( srcLoader, "Loaded texture %s, %ix%i %ibit %ix%s", target.c_str(),
             layer.image_.width_, layer.image_.height_, bps, spp,
             sf == TINYTIFF_SAMPLEFORMAT_FLOAT ? "float"
             : sf == TINYTIFF_SAMPLEFORMAT_INT ? "int"

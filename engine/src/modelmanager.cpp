@@ -33,7 +33,7 @@ namespace neko {
     renderCtx.syncModelsFromRenderer( inModels, outModels );
     if ( !inModels.empty() || !outModels.empty() )
     {
-      Locator::console().printf( Console::srcGfx,
+      Locator::console().printf( srcGfx,
         "ModelManager::jsUpdate adding %i models, removing %i models",
         inModels.size(), outModels.size() );
     }

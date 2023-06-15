@@ -39,7 +39,7 @@ namespace neko {
     virtual void onMessage( const Message& msg ) = 0;
   };
 
-  class Messaging: public Subsystem {
+  class Messaging: public Subsystem<Messaging, srcMessaging> {
   public:
     struct ListenEntry
     {

@@ -95,7 +95,7 @@ namespace neko {
     renderCtx.syncMeshesFromRenderer( inMeshes, outMeshes );
     if ( !inMeshes.empty() || !outMeshes.empty() )
     {
-      Locator::console().printf( Console::srcGfx,
+      Locator::console().printf( srcGfx,
         "MeshManager::jsUpdate adding %i meshes, removing %i meshes",
         inMeshes.size(), outMeshes.size() );
     }

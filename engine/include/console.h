@@ -108,19 +108,6 @@ namespace neko {
 
   class Console: public enable_shared_from_this<Console> {
     friend class ConBase;
-  public:
-    //! Message source types.
-    enum Source: unsigned long {
-      srcError = 0,   //!< Error message
-      srcEngine,      //!< Message from the engine
-      srcGfx,         //!< Message from the graphics subsystem
-      srcSound,       //!< Message from the sound subsystem
-      srcLoader,      //!< Message from the loader subsystem
-      srcScripting,   //!< Message from the scripting subsystem
-      srcInput,       //!< Message from the input subsystem
-      srcGame,        //!< Message from the game logic
-      srcGUI          //!< Message from the gui subsystem
-    };
   private:
     unique_ptr<TextFileWriter> fileOut_;
     CVarList cvars_; //!< Registered commands & variables
@@ -135,7 +122,7 @@ namespace neko {
     ConCmdPtr findCmd_;
     ConCmdPtr execCmd_;
     EnginePtr engine_;
-    map<Source, ConsoleSource> sources_;
+    map<LogSource, ConsoleSource> sources_;
     void writeStartBanner( const EngineInfo& info );
     void writeStopBanner();
     //! Registers a console variable or command.
@@ -157,9 +144,9 @@ namespace neko {
     //! Removes a listener.
     void removeListener( ConsoleListener* listener );
     //! Registers a message source.
-    Source registerSource( const string& name, vec3 color );
+    LogSource registerSource( const string& name, vec3 color );
     //! Unregisters a message source.
-    void unregisterSource( Source source );
+    void unregisterSource( LogSource source );
     //! Automatic completion search for given command line.
     void autoComplete( const string& line, CVarList& matches );
     void start( const EngineInfo& info, const Environment& env );
@@ -168,11 +155,11 @@ namespace neko {
     //! Queues a command for execution on next update call.
     void executeBuffered();
     //! Prints a message.
-    void print( Source source, const char* str );
+    void print( LogSource source, const char* str );
     //! Prints a message.
-    inline void print( Source source, const utf8String& str ) { print( source, str.c_str() ); }
+    inline void print( LogSource source, const utf8String& str ) { print( source, str.c_str() ); }
     //! Prints a C-style formatted message.
-    void printf( Source source, const char* str, ... );
+    void printf( LogSource source, const char* str, ... );
     //! Prints an error message.
     void errorPrintf( const char* str, ... );
     //! Executes a command line.

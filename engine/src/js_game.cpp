@@ -103,7 +103,7 @@ namespace neko {
         if ( !scene.second.initialized_ )
         {
           getScriptContext( context->GetIsolate() )->console_->printf(
-            neko::Console::srcScripting, "Initializing scene %s", scene.second.name().c_str() );
+            neko::srcScripting, "Initializing scene %s", scene.second.name().c_str() );
           scene.second.initialize( context, time );
           scene.second.initialized_ = true;
         }

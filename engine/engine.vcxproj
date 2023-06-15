@@ -82,7 +82,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)extern\steamworks\sdk\public;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -113,8 +113,8 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)extern\custom_fthb\lib\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>nil64_d.lib;icuind.lib;icudtd.lib;icuucd.lib;libbz2-static.lib;freetyped.lib;harfbuzz.lib;harfbuzz-icu.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)extern\custom_fthb\lib\$(ConfigurationName);$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)extern\steamworks\sdk\redistributable_bin\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>nil64_d.lib;icuind.lib;icudtd.lib;icuucd.lib;libbz2-static.lib;freetyped.lib;harfbuzz.lib;harfbuzz-icu.lib;steam_api64.lib;discord_game_sdk.dll.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
@@ -141,7 +141,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)extern\steamworks\sdk\public;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;INTEL_SUCKS;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -172,7 +172,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)extern\custom_fthb\lib\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)extern\custom_fthb\lib\$(ConfigurationName);$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)extern\steamworks\sdk\redistributable_bin\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>nil64_d.lib;icui18n_d.dll.lib;icuuc_d.dll.lib;libbz2d.lib;newtype_d.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
@@ -202,7 +202,7 @@
       <SDLCheck>
       </SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)extern\steamworks\sdk\public;$(SolutionDir)..\SDK\glm\include\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -231,8 +231,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)extern\custom_fthb\lib\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>nil64.lib;icuin.lib;icudt.lib;icuuc.lib;libbz2-static.lib;freetype.lib;harfbuzz.lib;harfbuzz-icu.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)..\SDK\glbinding\lib\;$(SolutionDir)..\SDK\sfml\lib;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\lib\$(PlatformTarget);$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\lib\$(PlatformTarget);$(SolutionDir)..\SDK\v8\lib\$(Configuration);$(SolutionDir)..\SDK\libpng\lib;$(SolutionDir)..\SDK\zlib\lib;$(SolutionDir)..\SDK\bzip2\lib;$(SolutionDir)..\SDK\MyGUI\lib\$(Configuration);$(SolutionDir)extern\custom_fthb\lib\$(ConfigurationName);$(SolutionDir)extern\discord\lib\x86_64;$(SolutionDir)extern\steamworks\sdk\redistributable_bin\win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>nil64.lib;icuin.lib;icudt.lib;icuuc.lib;libbz2-static.lib;freetype.lib;harfbuzz.lib;harfbuzz-icu.lib;steam_api64.lib;discord_game_sdk.dll.lib;winmm.lib;comctl32.lib;gdiplus.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>
       </AdditionalManifestDependencies>
       <SubSystem>Windows</SubSystem>
@@ -316,6 +316,8 @@
     <ClCompile Include="src\js_text.cpp" />
     <ClCompile Include="src\ortbicamera.cpp" />
     <ClCompile Include="src\particlemanager.cpp" />
+    <ClCompile Include="src\steam.cpp" />
+    <ClCompile Include="src\steamresult.cpp" />
     <ClCompile Include="src\text.cpp" />
     <ClCompile Include="src\font.cpp" />
     <ClCompile Include="src\framebuffer.cpp" />
@@ -374,6 +376,53 @@
   <ItemGroup>
     <ClInclude Include="..\extern\lodepng\lodepng.h" />
     <ClInclude Include="..\extern\miniz\miniz.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamapplist.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamapps.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamappticket.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamclient.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamcontroller.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamdualsense.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamfriends.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgamecoordinator.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgameserver.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgameserverstats.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamhtmlsurface.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamhttp.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteaminput.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteaminventory.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammasterserverupdater.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammatchmaking.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammusic.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammusicremote.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworking.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingmessages.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingsockets.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingutils.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamparentalsettings.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamps3overlayrenderer.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamremoteplay.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamremotestorage.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamscreenshots.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamugc.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamuser.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamuserstats.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamutils.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamvideo.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\matchmakingtypes.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamclientpublic.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamdatagram_tickets.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamencryptedappticket.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamhttpenums.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamnetworkingfakeip.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamnetworkingtypes.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamps3params.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamtypes.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamuniverse.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_common.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_flat.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_internal.h" />
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_gameserver.h" />
     <ClInclude Include="..\extern\tinyexr\tinyexr.h" />
     <ClInclude Include="..\extern\tinygltf\tiny_gltf.h" />
     <ClInclude Include="..\extern\tinytiff\tiff_definitions_internal.h" />
@@ -392,7 +441,6 @@
     <ClInclude Include="..\shared\include\neko_platform_windows.h" />
     <ClInclude Include="..\shared\include\neko_pooledtypes.h" />
     <ClInclude Include="..\shared\include\neko_types.h" />
-    <ClInclude Include="..\shared\include\rainet.h" />
     <ClInclude Include="include\bounds.h" />
     <ClInclude Include="include\buffers.h" />
     <ClInclude Include="include\camera.h" />
@@ -433,6 +481,7 @@
     <ClInclude Include="include\modelmanager.h" />
     <ClInclude Include="include\MyGUI_NekoPlatform.h" />
     <ClInclude Include="include\MyGUI_NekoRTTexture.h" />
+    <ClInclude Include="include\neatlywrappedsteamapi.h" />
     <ClInclude Include="include\nekomath.h" />
     <ClInclude Include="include\nekosimd.h" />
     <ClInclude Include="include\particles.h" />
@@ -444,6 +493,7 @@
     <ClInclude Include="include\shaders.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\specialrenderers.h" />
+    <ClInclude Include="include\steam.h" />
     <ClInclude Include="include\subsystem.h" />
     <ClInclude Include="include\surface.h" />
     <ClInclude Include="include\text.h" />
@@ -498,6 +548,7 @@
     <None Include="..\bin\shaders\text.frag" />
     <None Include="..\bin\shaders\text_2d.vert" />
     <None Include="..\bin\shaders\text_3d.vert" />
+    <None Include="..\extern\steamworks\sdk\public\steam\steam_api.json" />
     <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>

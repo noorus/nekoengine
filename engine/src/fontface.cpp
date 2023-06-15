@@ -43,7 +43,7 @@ namespace neko {
     assert( sidx.value == id );
 #endif
 
-    Locator::console().printf( Console::srcGfx, "FONT setting style id %I64X to 0x%I64X", style->id(), *style );
+    Locator::console().printf( srcGfx, "FONT setting style id %I64X to 0x%I64X", style->id(), *style );
     styles_[style->id()] = style;
     return style->id();
   }

@@ -124,7 +124,7 @@ namespace neko {
         else if ( input->mouseButtons().wasPressed( 0 ) )
         {
           auto ret = gameViewport.windowPointToWorld( vec3( mousePos_, 0.8f ) );
-          Locator::console().printf( Console::srcGame, "Gameviewport click %.2f %.2f %.2f (camera %.2f %.2f %.2f)",
+          Locator::console().printf( srcGame, "Gameviewport click %.2f %.2f %.2f (camera %.2f %.2f %.2f)",
             ret.x, ret.y, ret.z, gamecam->position().x, gamecam->position().y, gamecam->position().z );
         }
 

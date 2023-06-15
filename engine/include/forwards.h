@@ -9,13 +9,38 @@ namespace neko {
     inline shared_ptr<T> ptr() noexcept { return this->shared_from_this(); }
   };
 
-  class Subsystem;
-  using SubsystemPtr = shared_ptr<Subsystem>;
-
   struct EngineInfo;
 
   class Engine;
   using EnginePtr = shared_ptr<Engine>;
+
+  template <class T>
+  class SystemBase: public nocopy, public ShareableBase<T> {
+  public:
+    //
+  };
+
+  template <class T, LogSource VLogSource>
+  class Subsystem: public SystemBase<T> {
+  private:
+    Subsystem<T, VLogSource>() = delete;
+  protected:
+    EnginePtr engine_;
+  public:
+    Subsystem<T, VLogSource>( EnginePtr engine ): engine_( engine ) { assert( engine_ ); }
+    template <typename... Params>
+    void log( Params&&... params )
+    {
+      engine_->console()->printf( VLogSource, std::forward<Params>( params )... );
+    }
+    virtual void preUpdate( GameTime time ) {}
+    virtual void tick( GameTime tick, GameTime time ) {}
+    virtual void postUpdate( GameTime delta, GameTime tick ) {}
+    virtual ~Subsystem() {}
+  };
+
+  class Steam;
+  using SteamPtr = shared_ptr<Steam>;
 
   class Gfx;
   using GfxPtr = shared_ptr<Gfx>;

@@ -49,7 +49,7 @@ namespace neko {
 
     ftVersion_.trueTypeSupport = FT_Get_TrueType_Engine_Type( freeType_ );
 
-    Locator::console().printf( Console::srcGfx, "Using FreeType v%i.%i.%i HarfBuzz v%i.%i.%i",
+    Locator::console().printf( srcGfx, "Using FreeType v%i.%i.%i HarfBuzz v%i.%i.%i",
       ftVersion_.major, ftVersion_.minor,
       ftVersion_.patch, hbVersion_.major, hbVersion_.minor, hbVersion_.patch );
   }
@@ -156,7 +156,7 @@ namespace neko {
     FontVector fonts;
     loader_->getFinishedFonts( fonts );
     if ( !fonts.empty() )
-      Locator::console().printf( Console::srcGfx, "FontManager::prepareRender got %d new fonts", fonts.size() );
+      Locator::console().printf( srcGfx, "FontManager::prepareRender got %d new fonts", fonts.size() );
 
     for ( auto& newFont : fonts )
     {

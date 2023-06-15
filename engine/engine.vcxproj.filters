@@ -136,6 +136,15 @@
     <Filter Include="Source Files\extern\imguizmoquat">
       <UniqueIdentifier>{fbf4b9b7-b619-4682-bb19-7aeff6dee388}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\steam">
+      <UniqueIdentifier>{7b33a010-4316-4332-bc09-80115a172e19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\steam\sdk">
+      <UniqueIdentifier>{1bb9b1c7-6580-43b8-9858-65f4cef05e6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\steam">
+      <UniqueIdentifier>{42433fa8-bef7-4a49-9456-0d3048df1df1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -408,6 +417,12 @@
     <ClCompile Include="src\imguihelpers.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
+    <ClCompile Include="src\steam.cpp">
+      <Filter>Source Files\steam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\steamresult.cpp">
+      <Filter>Source Files\steam</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">
@@ -614,9 +629,6 @@
     <ClInclude Include="include\filesystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\shared\include\rainet.h">
-      <Filter>Header Files\extern</Filter>
-    </ClInclude>
     <ClInclude Include="include\resources.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
@@ -652,6 +664,153 @@
     </ClInclude>
     <ClInclude Include="include\textureatlas.h">
       <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\neatlywrappedsteamapi.h">
+      <Filter>Header Files\steam</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamapplist.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamapps.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamappticket.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamclient.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamcontroller.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamdualsense.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamfriends.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgamecoordinator.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgameserver.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamgameserverstats.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamhtmlsurface.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamhttp.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteaminput.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteaminventory.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammasterserverupdater.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammatchmaking.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammusic.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteammusicremote.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworking.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingmessages.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingsockets.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamnetworkingutils.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamparentalsettings.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamps3overlayrenderer.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamremoteplay.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamremotestorage.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamscreenshots.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamugc.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamuser.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamuserstats.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamutils.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\isteamvideo.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\matchmakingtypes.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_common.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_flat.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_api_internal.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steam_gameserver.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamclientpublic.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamdatagram_tickets.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamencryptedappticket.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamhttpenums.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamnetworkingfakeip.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamnetworkingtypes.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamps3params.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamtypes.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\steamworks\sdk\public\steam\steamuniverse.h">
+      <Filter>Header Files\steam\sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="include\steam.h">
+      <Filter>Header Files\steam</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -778,6 +937,9 @@
     </None>
     <None Include="..\bin\data\pipelines.json">
       <Filter>Data</Filter>
+    </None>
+    <None Include="..\extern\steamworks\sdk\public\steam\steam_api.json">
+      <Filter>Header Files\steam\sdk</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

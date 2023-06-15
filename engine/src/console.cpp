@@ -138,7 +138,7 @@ namespace neko {
 
   constexpr vec3 rgbToVec3( uint8_t r, uint8_t g, uint8_t b )
   {
-    return vec3( (Real)r / 255.0f, (Real)g / 255.0f, (Real)b / 255.0f );
+    return { (Real)r / 255.0f, (Real)g / 255.0f, (Real)b / 255.0f };
   }
 
   Console::Console()
@@ -153,6 +153,8 @@ namespace neko {
     registerSource( "input", rgbToVec3( 219, 38, 122 ) );
     registerSource( "game", rgbToVec3( 4, 127, 77 ) );
     registerSource( "gui", rgbToVec3( 79, 115, 44 ) );
+    registerSource( "messaging", rgbToVec3( 79, 115, 44 ) );
+    registerSource( "steam", rgbToVec3( 79, 115, 44 ) );
 
     // Create core commands
     listCmd_ = make_unique<ConCmd>( "list", "List all cvars.", callbackList );
@@ -169,16 +171,16 @@ namespace neko {
       []( ConBase* a, ConBase* b ) -> bool { return ( _stricmp( a->name().c_str(), b->name().c_str() ) <= 0 ); } );
   }
 
-  Console::Source Console::registerSource( const string& name, vec3 color )
+  LogSource Console::registerSource( const string& name, vec3 color )
   {
     ScopedRWLock lock( &lock_ );
     ConsoleSource tmp = { name, color };
-    auto index = (Console::Source)sources_.size();
+    auto index = static_cast<LogSource>( sources_.size() );
     sources_[index] = tmp;
     return index;
   }
 
-  void Console::unregisterSource( Source source )
+  void Console::unregisterSource( LogSource source )
   {
     ScopedRWLock lock( &lock_ );
     sources_.erase( source );
@@ -339,7 +341,7 @@ namespace neko {
   thread_local char tls_consolePrintfBuffer[c_consolePrintfBufferSize];
   thread_local char tls_consolePrintBuffer[c_consolePrintfBufferSize + 32];
 
-  void Console::print( Source source, const char* str )
+  void Console::print( LogSource source, const char* str )
   {
     auto& src = sources_[source];
     auto time = ( engine_ ? (float)engine_->time() : 0.0f );
@@ -359,7 +361,7 @@ namespace neko {
 #endif
   }
 
-  void Console::printf( Source source, const char* str, ... )
+  void Console::printf( LogSource source, const char* str, ... )
   {
     va_list va_alist;
     va_start( va_alist, str );

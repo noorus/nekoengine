@@ -18,7 +18,7 @@ namespace neko {
   {
     storedFaceSize_ = makeStoredFaceSize( size_ );
 
-    Locator::console().printf(Console::srcGfx,"FontStyle CONSTRUCTOR 0x%I64X size %f w majic %i", this, size_,  math::iround( size_ * c_fmagic ) );
+    Locator::console().printf(srcGfx,"FontStyle CONSTRUCTOR 0x%I64X size %f w majic %i", this, size_,  math::iround( size_ * c_fmagic ) );
 
     auto fterr = FT_Set_Char_Size( face_->face_, 0, math::iround( size_ * c_fmagic ), c_dpi, c_dpi );
     if ( fterr )
@@ -196,7 +196,7 @@ namespace neko {
 
   FontStyle::~FontStyle()
   {
-    Locator::console().printf(Console::srcGfx,"FontStyle DESTRUCTOR 0x%I64X", this );
+    Locator::console().printf(srcGfx,"FontStyle DESTRUCTOR 0x%I64X", this );
     if ( hbfnt_ )
       hb_font_destroy( hbfnt_ );
     atlas_.reset();

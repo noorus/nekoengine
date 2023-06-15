@@ -44,7 +44,7 @@ namespace neko {
           msg.append( *str );
       }
 
-      console_->print( neko::Console::srcScripting, msg );
+      console_->print( neko::srcScripting, msg );
     }
 
     void Console::js_getVariable( Isolate* isolate, const V8CallbackArgs& args )

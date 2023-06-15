@@ -65,12 +65,12 @@ namespace neko {
 
   void Gfx::printInfo()
   {
-    console_->print( Console::srcGfx, "GL Vendor: " + info_.vendor_ );
-    console_->print( Console::srcGfx, "GL Version: " + info_.version_ );
-    console_->print( Console::srcGfx, "GL Renderer: " + info_.renderer_ );
+    console_->print( srcGfx, "GL Vendor: " + info_.vendor_ );
+    console_->print( srcGfx, "GL Version: " + info_.version_ );
+    console_->print( srcGfx, "GL Renderer: " + info_.renderer_ );
 
 #ifdef IMGUI_VERSION
-    console_->print( Console::srcGfx, "Using Dear ImGui v" IMGUI_VERSION );
+    console_->print( srcGfx, "Using Dear ImGui v" IMGUI_VERSION );
 #endif
   }
 
@@ -119,7 +119,7 @@ namespace neko {
       NEKO_EXCEPT( "OpenGL Error" );
     }
     else
-      gfx->console_->printf( Console::srcGfx, "OpenGL Debug: %s (%d)", message, id );
+      gfx->console_->printf( srcGfx, "OpenGL Debug: %s (%d)", message, id );
   }
 
   void Gfx::setOpenGLDebugLogging( const bool enable )
@@ -273,7 +273,7 @@ namespace neko {
     auto newwindowsize = vec2i( width, height );
     if ( newwindowsize != windowViewport_.size() )
     {
-      console_->printf( Console::srcGfx, "Resizing viewport to %dx%d", newwindowsize.x, newwindowsize.y );
+      console_->printf( srcGfx, "Resizing viewport to %dx%d", newwindowsize.x, newwindowsize.y );
       windowViewport_.resize( newwindowsize );
       flags_.editorResized = true;
     }
@@ -281,7 +281,7 @@ namespace neko {
     auto newfbosize = vec2i( g_CVar_vid_viewportwidth.as_i(), g_CVar_vid_viewportheight.as_i() );
     if ( newfbosize != gameViewport_.size() )
     {
-      console_->printf( Console::srcGfx, "Resizing main fbo to %dx%d", newfbosize.x, newfbosize.y );
+      console_->printf( srcGfx, "Resizing main fbo to %dx%d", newfbosize.x, newfbosize.y );
       gameViewport_.resize( static_cast<int>( newfbosize.x ), static_cast<int>( newfbosize.y ), windowViewport_ );
       flags_.mainbufResized = true;
     }

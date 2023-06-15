@@ -30,7 +30,7 @@ namespace neko {
 
   Scripting::Scripting( EnginePtr engine ): Subsystem( move( engine ) ), v8::ArrayBuffer::Allocator()
   {
-    engine_->console()->printf( Console::srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
+    engine_->console()->printf( srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
 
     rootDirectory_ = platform::getCurrentDirectory();
     dataDirectory_ = rootDirectory_ + c_v8BaseDirectory;

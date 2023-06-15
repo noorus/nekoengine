@@ -41,7 +41,7 @@ namespace neko {
     {
       GLboolean hasCompiler;
       glGetBooleanv( GL_SHADER_COMPILER, &hasCompiler );
-      console_->printf( Console::srcGfx, "Shader compiler supported: %s", hasCompiler == GL_TRUE ? "yes" : "no" );
+      console_->printf( srcGfx, "Shader compiler supported: %s", hasCompiler == GL_TRUE ? "yes" : "no" );
       if ( hasCompiler != GL_TRUE )
         NEKO_EXCEPT( "Shader compiler is not present on this platform" );
 
@@ -127,7 +127,7 @@ namespace neko {
         glGetInfoLogARB( target, blen, &slen, compiler_log );
         auto log = string( compiler_log );
         Locator::memory().free( Memory::Sector::Graphics, compiler_log );
-        console_->printf( Console::srcGfx, "GL Shader error: %s", log.c_str() );
+        console_->printf( srcGfx, "GL Shader error: %s", log.c_str() );
       }
     }
 
@@ -270,7 +270,7 @@ namespace neko {
     {
       auto source = readSource( filename );
 
-      console_->printf( Console::srcGfx, "Compiling %s shader: %s", c_shaderTypes[type].name.c_str(), name.c_str() );
+      console_->printf( srcGfx, "Compiling %s shader: %s", c_shaderTypes[type].name.c_str(), name.c_str() );
 
       shader = make_unique<Shader>( type );
       compileShader( *shader, source );
