@@ -10,7 +10,12 @@
 //  
 //  This software is distributed under the terms of the BSD 2-Clause license
 //------------------------------------------------------------------------------
+#include "pch.h"
 #include "imGuIZMOquat.h"
+
+#pragma warning( disable : 4244 )
+#pragma warning( disable : 4081 )
+#pragma warning( disable : 4305 )
 
 ImVector<vec3> imguiGizmo::sphereVtx;
 ImVector<int>  imguiGizmo::sphereTess;
@@ -359,7 +364,7 @@ inline ImU32 addLightEffect(const vec4 &color, float light, float atten)
     vec3 a(atten>.25  ? .25f : atten);
     vec3 c(((vec3(color) + l*.5f) * l) *.75f + a*vec3(color)*.45f +a*.25f);
 
-    const float alpha = color.a * ImGui::GetStyle().Alpha; //ImGui::GetCo(ImGuiCol_FrameBg).w;
+    const float alpha = color.w * ImGui::GetStyle().Alpha; //ImGui::GetCo(ImGuiCol_FrameBg).w;
     return ImGui::ColorConvertFloat4ToU32(ImVec4(c.x, c.y, c.z, alpha));
 }
 

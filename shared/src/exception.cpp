@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "neko_exception.h"
 #ifdef NEKO_PLATFORM_WINDOWS
+# define NOMINMAX
+# define WIN32_LEAN_AND_MEAN
 # include "windows.h"
 #endif
 

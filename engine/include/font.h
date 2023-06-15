@@ -10,6 +10,7 @@
 #include "resources.h"
 #include "textureatlas.h"
 #include "pch.h"
+#include "buffers.h"
 
 namespace neko {
 
@@ -132,21 +133,6 @@ namespace neko {
 
   using GlyphMap = map<GlyphIndex, Glyph>;
 
-#pragma pack( push, 1 )
-  struct Vertex
-  {
-    vec3 position;
-    vec2 texcoord;
-    vec4 color;
-    Vertex( vec3 pos, vec2 tc, vec4 clr ): position( pos ), texcoord( tc ), color( clr ) {}
-  };
-#pragma pack( pop )
-
-  using VertexIndex = unsigned int;
-
-  using Vertices = vector<Vertex>;
-  using Indices = vector<VertexIndex>;
-
   enum FontLoadState
   {
     FontLoad_NotReady = 0,
@@ -207,7 +193,7 @@ namespace neko {
     friend class Font;
     friend class Text;
   private:
-    FontPtr font_;
+    FontFacePtr face_;
     uint32_t storedFaceSize_;
     FT_Long storedFaceIndex_;
     FontRendering rendering_;
@@ -216,16 +202,25 @@ namespace neko {
     GlyphMap glyphs_;
     bool dirty_ = false;
     MaterialPtr material_;
+    hb_font_t* hbfnt_ = nullptr;
+    Real size_ = 0.0f;
+    Real ascender_ = 0.0f;
+    Real descender_ = 0.0f;
   protected:
     void initEmptyGlyph();
+    void postLoad();
     void loadGlyph( FT_Library ft, FT_Face face, GlyphIndex index, bool hinting );
   public:
-    FontStyle( FontFacePtr face, FT_Library ft, FT_Face ftface, uint32_t size, vec2i atlasSize,
+    FontStyle( FontFacePtr face, FT_Library ft, FT_Face ftface, Real size, vec2i atlasSize,
       FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs );
-    StyleID id() const;
+    inline StyleID id() const { return makeStyleID( storedFaceIndex_, storedFaceSize_, rendering_, outlineThickness_ ); }
+    inline FontFacePtr face() const noexcept { return face_; }
+    inline Real size() const noexcept { return size_; }
+    inline Real ascender() const noexcept { return ascender_; }
+    inline Real descender() const noexcept { return descender_; }
     Glyph* getGlyph( FT_Library ft, FT_Face face, GlyphIndex index );
-    bool dirty() const;
-    void markClean();
+    inline bool dirty() const { return dirty_; }
+    inline void markClean() { dirty_ = false; }
     const TextureAtlas& atlas() const;
     virtual ~FontStyle();
   };
@@ -240,21 +235,13 @@ namespace neko {
     FontPtr font_;
     FT_Library ft_ = nullptr;
     FT_Face face_ = nullptr;
-    hb_font_t* hbfnt_ = nullptr;
-    Real size_ = 0.0f;
-    Real ascender_ = 0.0f;
-    Real descender_ = 0.0f;
     FontStyleMap styles_;
   protected:
     void forceUCS2Charmap();
-    void postLoad();
   public:
-    FontFace( FontPtr font, FT_Library ft, FT_Open_Args* args, FaceID faceIndex, Real size );
-    Real size() const;
-    Real ascender() const;
-    Real descender() const;
+    FontFace( FontPtr font, FT_Library ft, FT_Open_Args* args, FaceID faceIndex );
     FontStylePtr style( StyleID id );
-    StyleID loadStyle( FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs );
+    StyleID loadStyle( FontRendering rendering, Real size, Real thickness, const unicodeString& prerenderGlyphs );
     inline FontPtr font() { return font_; }
     inline const FontStyleMap& styles() const noexcept { return styles_; }
     virtual ~FontFace();
@@ -274,7 +261,7 @@ namespace neko {
     FontFaceMap faces_;
     unique_ptr<Buffer> data_;
     IDType id_;
-    FontFacePtr loadFace( span<uint8_t> source, FaceID faceIndex, Real size );
+    FontFacePtr loadFace( span<uint8_t> source, FaceID faceIndex );
     void unload();
   public:
     Font( FontManagerPtr manager, IDType i, const utf8String& name );
@@ -284,47 +271,6 @@ namespace neko {
     inline const FontFaceMap& faces() const noexcept { return faces_; }
     void update( Renderer* renderer );
     virtual ~Font();
-  };
-
-  class TextRenderBuffer {
-  protected:
-    using BufferType = MappedGLBuffer<Vertex>;
-    using IndicesType = MappedGLBuffer<gl::GLuint>;
-    unique_ptr<BufferType> buffer_;
-    unique_ptr<IndicesType> indices_;
-    GLuint vao_ = 0;
-  public:
-    TextRenderBuffer( GLuint maxVertices, GLuint maxIndices )
-    {
-      buffer_ = make_unique<BufferType>( maxVertices );
-      indices_ = make_unique<IndicesType>( maxIndices );
-      gl::glCreateVertexArrays( 1, &vao_ );
-      gl::glVertexArrayElementBuffer( vao_, indices_->id() );
-      neko::AttribWriter attribs;
-      attribs.add( gl::GL_FLOAT, 3 ); // vec3 position
-      attribs.add( gl::GL_FLOAT, 2 ); // vec2 texcoord
-      attribs.add( gl::GL_FLOAT, 4 ); // vec4 color
-      attribs.write( vao_ );
-      gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
-    }
-    inline BufferType& buffer() { return *buffer_; }
-    inline IndicesType& indices() { return *indices_; }
-    void draw( shaders::Shaders& shaders, const mat4& model, gl::GLuint texture )
-    {
-      gl::glBindVertexArray( vao_ );
-      auto& pipeline = shaders.usePipeline( "text2d" );
-      pipeline.setUniform( "model", model );
-      pipeline.setUniform( "tex", 0 );
-      gl::glBindTextureUnit( 0, texture );
-      gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
-      gl::glBindVertexArray( 0 );
-    }
-    ~TextRenderBuffer()
-    {
-      gl::glDeleteVertexArrays( 1, &vao_ );
-      indices_.reset();
-      buffer_.reset();
-    }
   };
 
   using TextMeshPtr = unique_ptr<TextRenderBuffer>;
@@ -377,8 +323,7 @@ namespace neko {
     // hb_direction_t direction_;
     // hb_buffer_t* hbbuf_ = nullptr;
     bool dirty_ = false;
-    FontFacePtr face_;
-    StyleID style_;
+    FontStylePtr style_;
     vector<hb_feature_t> features_;
     unique_ptr<HBBuffer> hbbuf_;
     unicodeString text_;
@@ -389,16 +334,16 @@ namespace neko {
     bool dead_ = false;
   public:
     Text() = delete;
-    Text( FontManagerPtr manager, IDType id, FontFacePtr face, StyleID style, const Text::Features& features );
+    Text( FontManagerPtr manager, IDType id, FontStylePtr style, const Text::Features& features );
     void text( const unicodeString& text );
     const unicodeString& text();
     inline void content( unicodeString t ) { text( t ); }
     inline const unicodeString& content() noexcept { return text_; }
     void update( Renderer& renderer );
     bool dirty() const noexcept { return dirty_; }
-    FontFacePtr face() { return face_; }
-    void face( FontFacePtr newFace, StyleID newStyle );
-    StyleID styleid() const noexcept { return style_; }
+    FontStylePtr style() { return style_; }
+    void style( FontStylePtr newStyle );
+    StyleID styleid() const noexcept { return style_->id(); }
     void regenerate();
     inline IDType id() const noexcept { return id_; }
     void draw( Renderer& renderer, const mat4& modelMatrix );
@@ -454,12 +399,12 @@ namespace neko {
     void loadFile( const utf8String& filename );
     // Font overrides
     FontPtr createFont( const utf8String& name );
-    FontFacePtr loadFace( FontPtr font, span<uint8_t> buffer, FaceID faceIndex, Real size );
+    FontFacePtr loadFace( FontPtr font, span<uint8_t> buffer, FaceID faceIndex );
     StyleID loadStyle(
-      FontFacePtr face, FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs );
+      FontFacePtr face, Real size, FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs );
     void unloadFont( FontPtr font );
     // Text overrides
-    TextPtr createText( FontFacePtr face, StyleID style );
+    TextPtr createText( FontStylePtr style );
     // Other overrides
     inline FontPtr font( const utf8String& name )
     {

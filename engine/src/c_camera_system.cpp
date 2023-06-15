@@ -41,6 +41,23 @@ namespace neko {
       return cameras_.at( selectedCamera_ ).instance;
     }
 
+    void camera_system::setActive( shared_ptr<BasicGameCamera> cam )
+    {
+      for ( auto& [key, value] : cameras_ )
+        if ( value.instance == cam )
+        {
+          selectedCamera_ = key;
+          return;
+        }
+      NEKO_EXCEPT( "Camera doesn't exist in system map" );
+    }
+
+    void camera_system::setActive( entity e )
+    {
+      assert( valid( e ) );
+      selectedCamera_ = e;
+    }
+
     const CameraData* camera_system::getActiveData() const
     {
       if ( !valid( selectedCamera_ ) )
@@ -79,14 +96,42 @@ namespace neko {
       }
     }
 
+    const char* c_projectionNames[camera::CameraProjection::MAX_CameraProjection] = { "perspective", "orthographic" };
+
     void camera_system::imguiCameraEditor( entity e )
     {
       auto& c = mgr_->reg().get<camera>( e );
-      ComponentImguiWrap wrap( "Camera", 200.0f );
-      ImGui::DragFloat( "FOV", &c.fovy, 0.1f, 0.1f, 200.0f, "%.4f", ImGuiSliderFlags_None );
-      ImGui::DragFloat( "Near clip", &c.nearDist, 0.1f, 0.1f, 100.0f, "%.4f", ImGuiSliderFlags_Logarithmic );
-      ImGui::DragFloat( "Far clip", &c.farDist, 0.1f, 0.1f, 500.0f, "%.4f", ImGuiSliderFlags_Logarithmic );
-      ImGui::DragFloat( "Exposure", &c.exposure, 0.1f, 0.0f, 100.0f, "%.4f", ImGuiSliderFlags_Logarithmic );
+      ig::ComponentChildWrapper wrap( "Camera", 200.0f );
+
+      auto selected = static_cast<int>( c.projection );
+      if ( ImGui::BeginCombo( "projection", c_projectionNames[selected], ImGuiComboFlags_None ) )
+      {
+        for ( int i = 0; i < camera::CameraProjection::MAX_CameraProjection; ++i )
+        {
+          bool dummy = ( selected == i );
+          if ( ImGui::Selectable( c_projectionNames[i], &dummy ) )
+            selected = i;
+          if ( dummy )
+            ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+      }
+      c.projection = static_cast<camera::CameraProjection>( selected );
+
+      ig::normalSelector( "up", c.up_sel, c.up );
+
+      if ( c.projection == camera::CameraProjection::Perspective )
+      {
+        ImGui::DragFloat( "fov", &c.perspective_fovy, 0.1f, 0.1f, 200.0f, "%.4f", ImGuiSliderFlags_None );
+      }
+      else if ( c.projection == camera::CameraProjection::Orthographic )
+      {
+        ImGui::DragFloat( "radius", &c.orthographic_radius, 0.1f, 0.1f, 2048.0f, "%.4f", ImGuiSliderFlags_None );
+      }
+
+      ImGui::DragFloat( "nearclip", &c.nearDist, 0.1f, 0.1f, 100.0f, "%.4f", ImGuiSliderFlags_Logarithmic );
+      ImGui::DragFloat( "farclip", &c.farDist, 0.1f, 0.1f, 500.0f, "%.4f", ImGuiSliderFlags_Logarithmic );
+      ImGui::DragFloat( "exposure", &c.exposure, 0.1f, 0.0f, 100.0f, "%.4f", ImGuiSliderFlags_Logarithmic );
     }
 
     void camera_system::updateCameraList( registry& r, entity e )

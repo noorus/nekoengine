@@ -43,8 +43,12 @@ namespace neko {
   protected:
     Entity ent_ = c::null;
     vec3 direction_ { 0.0f, 0.0f, -1.0f };
+    Real aspect_ = 1.0f;
+    vec3 up_ { 0.0f, 1.0f, 0.0f };
+    void _reposition();
   public:
     BasicGameCamera( vec2 viewport, SManager& manager, Entity e );
+    void setViewport( vec2 resolution ) override;
     void update( SManager& manager, GameTime delta, GameTime time ) override;
     vec3 direction() const override;
     vec3 right() const override;

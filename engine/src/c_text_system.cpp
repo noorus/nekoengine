@@ -114,26 +114,27 @@ namespace neko {
         }
 
         Real bestDelta = 0.0f;
-        FontFacePtr bestFace;
+        FontStylePtr bestStyle;
         for ( const auto& [fid, face] : fnt->faces() )
         {
-          auto delta = math::abs( t.size - face->size() );
-          if ( !bestFace || delta < bestDelta )
+          for ( const auto& [sid, style] : face->styles() )
           {
-            bestFace = face;
-            bestDelta = delta;
+            auto delta = math::abs( t.size - style->size() );
+            if ( !bestStyle || delta < bestDelta )
+            {
+              bestStyle = style;
+              bestDelta = delta;
+            }
           }
         }
 
-        if ( !bestFace )
+        if ( !bestStyle )
           continue;
 
-        auto style = makeStyleID( 0, bestFace->size(), FontRender_Normal, 0.0f );
-
         if ( !data.instance )
-          data.instance = fntmgr.createText( bestFace, style );
+          data.instance = fntmgr.createText( bestStyle );
         else
-          data.instance->face( bestFace, style );
+          data.instance->style( bestStyle );
 
         data.instance->content( utils::uniFrom( t.content ) );
 
@@ -143,7 +144,7 @@ namespace neko {
 
     void text_system::imguiTextEditor( entity e )
     {
-      ComponentImguiWrap wrap( "Text", 200.0f );
+      ig::ComponentChildWrapper wrap( "Text", 200.0f );
 
       auto& c = mgr_->reg().get<text>( e );
 

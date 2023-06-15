@@ -67,15 +67,15 @@ namespace neko {
     return move( font );
   }
 
-  FontFacePtr FontManager::loadFace( FontPtr font, span<uint8_t> buffer, FaceID faceIndex, Real size )
+  FontFacePtr FontManager::loadFace( FontPtr font, span<uint8_t> buffer, FaceID faceIndex )
   {
-    return font->loadFace( buffer, faceIndex, size );
+    return font->loadFace( buffer, faceIndex );
   }
 
   StyleID FontManager::loadStyle(
-    FontFacePtr face, FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs )
+    FontFacePtr face, Real size, FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs )
   {
-    return face->loadStyle( rendering, thickness, prerenderGlyphs );
+    return face->loadStyle( rendering, size, thickness, prerenderGlyphs );
   }
 
   void FontManager::unloadFont( FontPtr font )
@@ -88,11 +88,11 @@ namespace neko {
         ++it;
   }
 
-  TextPtr FontManager::createText( FontFacePtr face, StyleID style )
+  TextPtr FontManager::createText( FontStylePtr style )
   {
     auto nid = textIndex_++;
     Text::Features feats { .ligatures = true, .kerning = true };
-    auto text = make_shared<Text>( ptr(), nid, face, style, feats );
+    auto text = make_shared<Text>( ptr(), nid, style, feats );
     texts_[nid] = text;
     return move( text );
   }

@@ -9,6 +9,8 @@
 
 # pragma warning( push )
 # pragma warning( disable : 26454 )
+# define WIN32_LEAN_AND_MEAN
+# define NOMINMAX
 # include <windows.h>
 # include <unknwn.h>
 # define max( a, b ) ( ( ( a ) > ( b ) ) ? ( a ) : ( b ) )
@@ -735,5 +737,8 @@ namespace neko {
   }
 
 }
+
+#undef min
+#undef max
 
 #endif

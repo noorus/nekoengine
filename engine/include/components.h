@@ -1,6 +1,7 @@
 #pragma once
 #include <entt.hpp>
 #include "neko_types.h"
+#include "buffers.h"
 
 #undef near
 #undef far
@@ -9,18 +10,24 @@ namespace neko {
 
   class BasicGameCamera;
 
-  namespace c {
+  namespace ig {
 
-    using entt::registry;
-    using entt::entity;
-    using entt::null;
-    using entt::get;
-    using entt::tombstone;
+    enum PredefinedNormal : int
+    {
+      PredefNormal_PlusY,
+      PredefNormal_MinusY,
+      PredefNormal_PlusX,
+      PredefNormal_MinusX,
+      PredefNormal_PlusZ,
+      PredefNormal_MinusZ,
+      MAX_PredefNormal
+    };
 
-    class manager;
+    vec3 valueForNormalIndex( int idx );
+    bool normalSelector( const char* label, int& in_out, vec3& value_out );
 
     template <typename T>
-    inline bool igDragVector( const char* label, const T& v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f,
+    inline bool dragVector( const char* label, const T& v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f,
       const char* format = "%.3f", ImGuiSliderFlags flags = 0 )
     {
       if constexpr ( std::is_same_v<T::value_type, float> )
@@ -31,9 +38,9 @@ namespace neko {
           static_cast<int>( v.length() ), v_speed, &v_min, &v_max, format, flags );
     }
 
-    class ComponentImguiWrap {
+    class ComponentChildWrapper {
     public:
-      ComponentImguiWrap( const char* title, float height )
+      ComponentChildWrapper( const char* title, float height )
       {
         ImGui::BeginChild( title, ImVec2( 0, height ), true, ImGuiWindowFlags_MenuBar );
         if ( ImGui::BeginMenuBar() )
@@ -43,8 +50,21 @@ namespace neko {
           ImGui::EndMenuBar();
         }
       }
-      ~ComponentImguiWrap() { ImGui::EndChild(); }
+      ~ComponentChildWrapper() { ImGui::EndChild(); }
     };
+
+  }
+
+
+  namespace c {
+
+    using entt::registry;
+    using entt::entity;
+    using entt::null;
+    using entt::get;
+    using entt::tombstone;
+
+    class manager;
 
     struct node
     {
@@ -71,6 +91,46 @@ namespace neko {
       vec3 derived_translate { numbers::zero, numbers::zero, numbers::zero };
       mat4 cached_transform { numbers::one };
       inline const mat4 model() const { return cached_transform; } //!< Model matrix e.g. the cached transform matrix
+    };
+
+    struct renderable
+    {
+    };
+
+    struct dirty_primitive
+    {
+    };
+
+    struct primitive
+    {
+      enum class PrimitiveType
+      {
+        Plane = 0,
+        Box,
+        Sphere
+      } type;
+      unique_ptr<BasicIndexedVertexbuffer> mesh;
+      union Values
+      {
+        struct Plane
+        {
+          vec2 dimensions;
+          glm::i32vec2 segments;
+          int normal_sel = ig::PredefNormal_PlusY;
+          vec3 normal;
+        } plane;
+        struct Box
+        {
+          vec3 dimensions;
+          vec2u segments;
+          bool inverted;
+        } box;
+        struct Sphere
+        {
+          Real diameter;
+          vec2u segments;
+        } sphere;
+      } values;
     };
 
     struct TextInputUserData
@@ -121,10 +181,19 @@ namespace neko {
 
     struct camera
     {
-      Real fovy = 60.0f;
+      enum CameraProjection
+      {
+        Perspective = 0,
+        Orthographic,
+        MAX_CameraProjection
+      } projection = CameraProjection::Perspective;
+      Real perspective_fovy = 60.0f;
+      Real orthographic_radius = 10.0f;
       Real nearDist = 0.1f;
       Real farDist = 100.0f;
       Real exposure = 1.0f;
+      int up_sel = ig::PredefNormal_PlusY;
+      vec3 up;
     };
 
     struct CameraData
@@ -144,19 +213,35 @@ namespace neko {
       vec2 resolution_ { 0.0f, 0.0f };
       inline bool valid( entity cam ) const
       {
-        return ( cam == null || cam == tombstone || cameras_.find( selectedCamera_ ) == cameras_.end() ) ? false : true;
+        return ( cam == null || cam == tombstone || cameras_.find( cam ) == cameras_.end() ) ? false : true;
       }
       void updateCameraList( registry& r, entity e );
     public:
       camera_system( manager* m, vec2 resolution );
       void update();
       const shared_ptr<BasicGameCamera> getActive() const;
+      void setActive( shared_ptr<BasicGameCamera> cam );
+      void setActive( entity e );
       const CameraData* getActiveData() const;
       ~camera_system();
       inline const CameraDataMap& cameras() const { return cameras_; }
       void setResolution( vec2 res );
       void imguiCameraSelector();
       void imguiCameraEditor( entity e );
+    };
+
+    class primitive_system {
+    protected:
+      manager* mgr_ = nullptr;
+      void addPrimitive( registry& r, entity e );
+      void updatePrimitive( registry& r, entity e );
+      void removePrimitive( registry& r, entity e );
+    public:
+      primitive_system( manager* m );
+      void update();
+      void draw( shaders::Shaders& shaders, const Material& mat );
+      ~primitive_system();
+      void imguiPrimitiveEditor( entity e );
     };
 
     class manager {
@@ -166,6 +251,7 @@ namespace neko {
       set<entity> imguiSelectedNodes_;
       unique_ptr<camera_system> camsys_;
       unique_ptr<text_system> txtsys_;
+      unique_ptr<primitive_system> primsys_;
       void imguiSceneGraphRecurse( entity e, entity& clicked );
       void imguiNodeEditor( entity e );
     public:
@@ -176,16 +262,20 @@ namespace neko {
       inline transform& tn( entity e ) { return registry_.get<transform>( e ); } //!< Get transform by entity
       inline camera& cam( entity e ) { return registry_.get<camera>( e ); } //!< Get camera by entity
       inline text& tt( entity e ) { return registry_.get<text>( e ); } //!< Get text by entity
+      inline primitive& pt( entity e ) { return registry_.get<primitive>( e ); }
       entity createNode( entity parent, string_view name );
+      entity createRenderable( entity parent, string_view name );
       entity createNode( string_view name );
       entity createCamera( string_view name );
       entity createText( string_view name );
+      entity createPlane( string_view name );
       void update();
       void markDirty( entity e );
       void imguiSceneGraph();
       void imguiSelectedNodes();
       inline camera_system& cams() const { return *camsys_; }
       inline text_system& texts() const { return *txtsys_; }
+      inline primitive_system& primitives() const { return *primsys_; }
     };
 
   }

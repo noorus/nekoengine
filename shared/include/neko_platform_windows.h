@@ -2,6 +2,8 @@
 #include "neko_types.h"
 #include "neko_exception.h"
 //#include "consolelistener.h"
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shlobj.h>
 

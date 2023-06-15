@@ -12,12 +12,14 @@ namespace neko {
 
       camsys_ = make_unique<camera_system>( this, viewportResolution );
       txtsys_ = make_unique<text_system>( this );
+      primsys_ = make_unique<primitive_system>( this );
 
       root_ = registry_.create();
       registry_.emplace<node>( root_, "root" );
       registry_.emplace<transform>( root_ );
 
       auto txt = createText( "pooooop" );
+      auto plane = createPlane( "lolplane" );
     }
 
     entity manager::createNode( entity parent, string_view name )
@@ -48,6 +50,14 @@ namespace neko {
       return e;
     }
 
+    entity manager::createRenderable( entity parent, string_view name )
+    {
+      auto e = createNode( root_, name );
+      registry_.emplace<transform>( e );
+      registry_.emplace<renderable>( e );
+      return e;
+    }
+
     entity manager::createNode( string_view name )
     {
       return createNode( root_, name );
@@ -57,7 +67,8 @@ namespace neko {
     {
       auto e = createNode( root_, name );
       registry_.emplace<transform>( e );
-      registry_.emplace<camera>( e );
+      auto& c = registry_.emplace<camera>( e );
+      c.up = ig::valueForNormalIndex( c.up_sel );
       return e;
     }
 
@@ -69,6 +80,18 @@ namespace neko {
       t.fontName = "demo_font";
       t.size = 18.0f;
       t.int_ud_.str = &t.content;
+      return e;
+    }
+
+    entity manager::createPlane( string_view name )
+    {
+      auto e = createRenderable( root_, name );
+      auto& p = registry_.emplace<primitive>( e );
+      p.type = primitive::PrimitiveType::Plane;
+      p.values.plane.dimensions = { 10.0f, 10.0f };
+      p.values.plane.segments = { 10, 10 };
+      p.values.plane.normal_sel = ig::PredefNormal_PlusY;
+      p.values.plane.normal = ig::valueForNormalIndex( p.values.plane.normal_sel );
       return e;
     }
 
@@ -130,12 +153,15 @@ namespace neko {
       ImGui::Text( "Next %i", node.next );
       ImGui::Text( "Previous %i", node.prev );
       ImGui::TextUnformatted( "Components" );
+      
       if ( registry_.any_of<transform>( e ) )
       {
-        const auto& t = tn( e );
-        ComponentImguiWrap wrap( "Transform", 100.0f );
-        igDragVector( "Translate", t.translate, 0.1f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
-        igDragVector( "Scale", t.scale, 0.01f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
+        auto& t = tn( e );
+        auto ww = ImGui::GetContentRegionAvail().x * 0.5f;
+        ig::ComponentChildWrapper wrap( "Transform", 120.0f + ww );
+        ig::dragVector( "translate", t.translate, 0.1f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
+        ig::dragVector( "scale", t.scale, 0.01f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
+        ImGui::gizmo3D( "rotation", t.rotate, ww );
         // a bit wasteful but hardly an issue
         markDirty( e );
       }
@@ -146,6 +172,10 @@ namespace neko {
       if ( registry_.any_of<text>( e ) )
       {
         txtsys_->imguiTextEditor( e );
+      }
+      if ( registry_.any_of<primitive>( e ) )
+      {
+        primsys_->imguiPrimitiveEditor( e );
       }
     }
 

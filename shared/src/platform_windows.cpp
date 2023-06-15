@@ -13,6 +13,7 @@
 #define max( a, b ) ( ( ( a ) > ( b ) ) ? ( a ) : ( b ) )
 #define min( a, b ) ( ( ( a ) < ( b ) ) ? ( a ) : ( b ) )
 #include <gdiplus.h>
+#include <timeapi.h>
 
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>

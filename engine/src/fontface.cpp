@@ -9,8 +9,8 @@
 
 namespace neko {
 
-  FontFace::FontFace( FontPtr font, FT_Library ft, FT_Open_Args* args, FaceID faceIndex, Real size ):
-    ft_( ft ), font_( font ), size_( size )
+  FontFace::FontFace( FontPtr font, FT_Library ft, FT_Open_Args* args, FaceID faceIndex ):
+    ft_( ft ), font_( font )
   {
     auto fterr = FT_Open_Face( ft, args, faceIndex, &face_ );
     if ( fterr || !face_ )
@@ -24,31 +24,17 @@ namespace neko {
 
     if ( !FT_IS_SCALABLE( face_ ) )
       NEKO_EXCEPT( "Font is not scalable; bitmap fonts unsupported" );
-
-    fterr = FT_Set_Char_Size( face_, 0, math::iround( size_ * c_fmagic ), c_dpi, c_dpi );
-    if ( fterr )
-      NEKO_FREETYPE_EXCEPT( "FreeType font character point size setting failed", fterr );
-
-    FT_Matrix matrix = { (int)( ( 1.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ),
-      (int)( ( 1.0 ) * 0x10000L ) };
-
-    FT_Set_Transform( face_, &matrix, nullptr );
-
-    hbfnt_ = hb_ft_font_create_referenced( face_ );
-    hb_ft_font_set_funcs( hbfnt_ ); // Doesn't create_referenced already call this?
-
-    postLoad();
   }
 
-  StyleID FontFace::loadStyle( FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs )
+  StyleID FontFace::loadStyle( FontRendering rendering, Real sz, Real thickness, const unicodeString& prerenderGlyphs )
   {
-    auto id = makeStyleID( face_->face_index, size_, rendering, thickness );
+    auto id = makeStyleID( face_->face_index, sz, rendering, thickness );
     if ( styles_.find( id ) != styles_.end() )
       return id;
 
     auto atlasSize = vec2i( 1024 );
 
-    auto style = make_shared<FontStyle>( ptr(), ft_, face_, makeStoredFaceSize( size_ ), atlasSize, rendering, thickness, prerenderGlyphs );
+    auto style = make_shared<FontStyle>( ptr(), ft_, face_, sz, atlasSize, rendering, thickness, prerenderGlyphs );
 
 #ifdef _DEBUG
     auto cmp = style->id();
@@ -57,6 +43,7 @@ namespace neko {
     assert( sidx.value == id );
 #endif
 
+    Locator::console().printf( Console::srcGfx, "FONT setting style id %I64X to 0x%I64X", style->id(), *style );
     styles_[style->id()] = style;
     return style->id();
   }
@@ -75,29 +62,6 @@ namespace neko {
     }
   }
 
-  void FontFace::postLoad()
-  {
-    auto metrics = face_->size->metrics;
-    ascender_ = static_cast<Real>( metrics.ascender >> 6 );
-    descender_ = static_cast<Real>( metrics.descender >> 6 );
-    size_ = static_cast<Real>( metrics.height >> 6 );
-  }
-
-  Real FontFace::size() const
-  {
-    return size_;
-  }
-
-  Real FontFace::ascender() const
-  {
-    return ascender_;
-  }
-
-  Real FontFace::descender() const
-  {
-    return descender_;
-  }
-
   FontStylePtr FontFace::style( StyleID id )
   {
     auto it = styles_.find( id );
@@ -109,8 +73,6 @@ namespace neko {
   FontFace::~FontFace()
   {
     styles_.clear();
-    if ( hbfnt_ )
-      hb_font_destroy( hbfnt_ );
   }
 
 }

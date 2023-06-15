@@ -225,6 +225,7 @@ namespace neko {
     scene_ = make_shared<SManager>( realResolution );
     auto cam = scene_->createCamera( "gamecam" );
     scene_->tn( cam ).translate = { 5.0f, 3.0f, 0.0f };
+    scene_->cams().setActive( cam );
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

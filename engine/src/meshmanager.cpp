@@ -297,29 +297,29 @@ namespace neko {
       if ( vbo->type_ == VBO_2D )
       {
         AttribWriter attribs;
-        attribs.add( GL_FLOAT, 2 ); // vec2 position
-        attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
+        attribs.add( Attrib_Pos2D ); // vec2 position
+        attribs.add( Attrib_Texcoord2D ); // vec2 texcoord
         attribs.write( ids[i] );
         glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
       }
       else if ( vbo->type_ == VBO_3D )
       {
         AttribWriter attribs;
-        attribs.add( GL_FLOAT, 3 ); // vec3 position
-        attribs.add( GL_FLOAT, 3 ); // vec3 normal
-        attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
-        attribs.add( GL_FLOAT, 4 ); // vec4 color
-        attribs.add( GL_FLOAT, 4 ); // vec4 tangent
-        attribs.add( GL_FLOAT, 3 ); // vec3 bitangent
+        attribs.add( Attrib_Pos3D ); // vec3 position
+        attribs.add( Attrib_Normal3D ); // vec3 normal
+        attribs.add( Attrib_Texcoord2D ); // vec2 texcoord
+        attribs.add( Attrib_Color4D ); // vec4 color
+        attribs.add( Attrib_Tangent4D ); // vec4 tangent
+        attribs.add( Attrib_Bitangent3D ); // vec3 bitangent
         attribs.write( ids[i] );
         glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
       }
       else if ( dirties[i]->vbo_->type_ == VBO_MyGUI )
       {
         AttribWriter attribs;
-        attribs.add( GL_FLOAT, 3 ); // vec3 position
-        attribs.add( GL_UNSIGNED_BYTE, 4, true ); // b4 color
-        attribs.add( GL_FLOAT, 2 ); // vec2 texcoord
+        attribs.add( Attrib_Pos3D ); // vec3 position
+        attribs.add( Attrib_Color4D, gl::GL_UNSIGNED_BYTE, true ); // b4 color
+        attribs.add( Attrib_Texcoord2D ); // vec2 texcoord
         attribs.write( ids[i] );
         glVertexArrayVertexBuffer( ids[i], 0, vbo->id_, 0, attribs.stride() );
       }

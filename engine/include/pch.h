@@ -19,6 +19,8 @@
 
 # include <sdkddkver.h>
 
+# define WIN32_LEAN_AND_MEAN
+# define NOMINMAX
 # include <windows.h>
 # include <shellapi.h>
 # include <shlobj.h>
@@ -28,10 +30,6 @@
 //#include <psapi.h>
 //#include <dbghelp.h>
 # include <avrt.h>
-
-# define WIN32_LEAN_AND_MEAN
-# define NOMINMAX
-# include <windows.h>
 
 // VC++ Runtime Headers
 # ifdef _DEBUG
@@ -173,3 +171,7 @@
 // Local types
 #include "neko_types.h"
 #include "nekomath.h"
+
+// ImGuiZMO
+#include "vgConfig.h"
+#include "imGuIZMOquat.h"

@@ -10,7 +10,7 @@
 #endif
 
 // Set this to print extra verbose info/warnings during compilation.
-#define NEKO_VERBOSE_COMPILE
+#undef NEKO_VERBOSE_COMPILE
 
 // Set this to use doubles for all math primitives. Otherwise using floats.
 // Will most likely break things.

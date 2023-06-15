@@ -201,10 +201,10 @@ namespace neko {
   {
     vector<uint8_t> input;
     Locator::fileSystem().openFile( Dir_Fonts, task.path_ )->readFullVector( input );
+    auto face = task.font_->loadFace( input, 0 );
     for ( const auto& spec : task.specs_ )
     {
-      auto face = task.font_->loadFace( input, 0, spec.size );
-      face->loadStyle( spec.rendering, spec.thickness, g_prerenderGlyphs );
+      face->loadStyle( spec.rendering, spec.size, spec.thickness, g_prerenderGlyphs );
     }
 
     Locator::console().printf( Console::srcLoader, "Loaded font %s (%s) with %i sizes", task.font_->name().c_str(),

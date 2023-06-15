@@ -56,7 +56,7 @@
 //      If you enable GLM use, automatically is enabled also VGM_USES_TEMPLATE
 //          if you can, I recommend to use GLM
 //------------------------------------------------------------------------------
-//#define VGIZMO_USES_GLM
+#define VGIZMO_USES_GLM
 
 //------------------------------------------------------------------------------
 // uncomment to use LeftHanded 
@@ -81,7 +81,7 @@
 //
 // Default ==> vgMath.h add: using namespace vgm | glm;
 //------------------------------------------------------------------------------
-//#define VGM_DISABLE_AUTO_NAMESPACE
+#define VGM_DISABLE_AUTO_NAMESPACE
 
 //------------------------------------------------------------------------------
 // uncomment to use HLSL name types (in addition!)
@@ -110,7 +110,7 @@
 //
 // Default ==> Pan & Dolly enabled 
 //------------------------------------------------------------------------------
-//#define IMGUIZMO_USE_ONLY_ROT
+#define IMGUIZMO_USE_ONLY_ROT
 
 //------------------------------------------------------------------------------
 // imGuiZmo.quat - v3.0 and later - (used only inside it)

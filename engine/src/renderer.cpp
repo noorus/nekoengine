@@ -379,6 +379,8 @@ namespace neko {
 
     uploadModels();
 
+    scene.primitives().update();
+
     scene.texts().update( *fonts_ );
     fonts_->update();
     fonts_->prepareRender();
@@ -614,6 +616,7 @@ namespace neko {
     origoTest_->draw( *shaders_, { 0.0f, 0.0f, 5.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } );
 
     scene.texts().draw( *this );
+    scene.primitives().draw( *shaders_, *builtin_.placeholderTexture_ );
 
     if ( drawparams.drawopShouldDrawSky() && false )
     {

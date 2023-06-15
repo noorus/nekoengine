@@ -24,8 +24,8 @@ namespace neko {
 
   }
 
-  Text::Text( FontManagerPtr manager, IDType id, FontFacePtr face, StyleID style, const Text::Features& features ):
-  manager_( manager ), id_( id ), face_( move( face ) ), style_( style )
+  Text::Text( FontManagerPtr manager, IDType id, FontStylePtr style, const Text::Features& features ):
+  manager_( manager ), id_( id ), style_( style )
   {
     hbbuf_ = make_unique<HBBuffer>( "en" );
 
@@ -48,31 +48,28 @@ namespace neko {
     return text_;
   }
 
-  void Text::face( FontFacePtr newFace, StyleID newStyle )
+  void Text::style( FontStylePtr newStyle )
   {
-    if ( face_ == newFace && style_ == newStyle )
+    if ( style_ == newStyle )
       return;
 
-    face_ = newFace;
     style_ = newStyle;
     dirty_ = true;
   }
 
   void Text::regenerate()
   {
-    if ( !dirty_ || !face_ || !face_->font()->loaded() )
+    if ( !dirty_ || !style_ || !style_->face()->font()->loaded() )
       return;
-
-    auto style = face_->style( style_ );
-
+    
     // TODO handle special case where textdata doesn't exist (= generate empty mesh)
 
-    hbbuf_->setFrom( face_->hbfnt_, features_, text_ );
+    hbbuf_->setFrom( style_->hbfnt_, features_, text_ );
 
     vec3 position( 0.0f );
 
-    const auto ascender = face_->ascender();
-    const auto descender = face_->descender();
+    const auto ascender = style_->ascender();
+    const auto descender = style_->descender();
 
     position.y += ascender + descender;
 
@@ -92,7 +89,7 @@ namespace neko {
         position.y += ( ascender - descender );
         continue;
       }
-      auto glyph = style->getGlyph( manager_->ft(), face_->face_, glyphindex );
+      auto glyph = style_->getGlyph( manager_->ft(), style_->face_->face_, glyphindex );
       auto offset = vec2( gpos.x_offset, gpos.y_offset ) / c_fmagic;
       auto advance = vec2( gpos.x_advance, gpos.y_advance ) / c_fmagic;
 
@@ -144,13 +141,12 @@ namespace neko {
 
   void Text::draw( Renderer& renderer, const mat4& modelMatrix )
   {
-    if ( !mesh_ || !face_ )
+    if ( !mesh_ || !style_ )
       return;
-    auto style = face_->style( style_ );
-    if ( style && style->material_ )
+    if ( style_ && style_->material_ )
     {
       mesh_->draw( renderer.shaders(), modelMatrix,
-        style->material_->textureHandle( 0 )
+        style_->material_->textureHandle( 0 )
       );
     }
   }

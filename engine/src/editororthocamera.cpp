@@ -17,7 +17,6 @@ namespace neko {
   void EditorOrthoCamera::setViewport( vec2 resolution )
   {
     resolution_ = resolution;
-    auto scale = 0.1f;
     _reposition();
   }
 

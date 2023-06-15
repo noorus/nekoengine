@@ -68,15 +68,30 @@ namespace neko {
     }
   };
 
+  enum AttributeType
+  {
+    Attrib_Pos2D = 0,
+    Attrib_Pos3D,
+    Attrib_Texcoord2D,
+    Attrib_Normal3D,
+    Attrib_Color4D,
+    Attrib_OrientationQuat,
+    Attrib_Scale3D,
+    Attrib_Tangent3D,
+    Attrib_Tangent4D,
+    Attrib_Bitangent3D
+  };
+
   class AttribWriter: public nocopy {
   private:
     struct Record {
-      GLenum type_;
+      AttributeType type_;
+      GLenum stype_;
       GLsizei count_;
       size_t size_;
       bool normalize_;
-      Record( GLenum type, GLsizei count, size_t size, bool normalize = false ):
-      type_( type ), count_( count ), size_( size ), normalize_( normalize )
+      Record( AttributeType type, GLenum stype, GLsizei count, size_t size, bool normalize = false ):
+      type_( type ), stype_( stype ), count_( count ), size_( size ), normalize_( normalize )
       {
       }
     };
@@ -85,7 +100,62 @@ namespace neko {
   public:
     AttribWriter(): stride_( 0 ) {}
     inline GLsizei stride() const { return stride_; }
-    void add( GLenum type, GLsizei count, bool normalize = false )
+    void add( AttributeType type, GLenum datatype = gl::GL_FLOAT, bool normalize = false )
+    {
+      GLsizei count = 0;
+      if ( type == Attrib_Pos2D )
+      {
+        count = 2;
+      }
+      else if ( type == Attrib_Pos3D )
+      {
+        count = 3;
+      }
+      else if ( type == Attrib_Texcoord2D )
+      {
+        count = 2;
+      }
+      else if ( type == Attrib_Normal3D )
+      {
+        count = 3;
+      }
+      else if ( type == Attrib_Color4D )
+      {
+        count = 4;
+      }
+      else if ( type == Attrib_OrientationQuat )
+      {
+        count = 4;
+      }
+      else if ( type == Attrib_Scale3D )
+      {
+        count = 3;
+      }
+      else if ( type == Attrib_Tangent3D )
+      {
+        count = 3;
+      }
+      else if ( type == Attrib_Tangent4D )
+      {
+        count = 4;
+      }
+      else if ( type == Attrib_Bitangent3D )
+      {
+        count = 3;
+      }
+      else
+        NEKO_EXCEPT( "Unknown vertex attribute type supplied to writer" );
+      GLsizei size = 0;
+      if ( datatype == gl::GL_FLOAT )
+        size = ( count * sizeof( float ) );
+      else if ( datatype == gl::GL_UNSIGNED_BYTE )
+        size = ( count * sizeof( uint8_t ) );
+      else
+        NEKO_EXCEPT( "Unsupported vertex attribute type in writer" );
+      recs_.emplace_back( type, datatype, count, size, normalize );
+      stride_ += size;
+    }
+    /* void add( GLenum type, GLsizei count, bool normalize = false )
     {
       GLsizei size = 0;
       if ( type == gl::GL_FLOAT )
@@ -97,7 +167,7 @@ namespace neko {
 
       recs_.emplace_back( type, count, size, normalize );
       stride_ += size;
-    }
+    }*/
     void write( GLuint handle )
     {
       GLuint ptr = 0;
@@ -105,7 +175,7 @@ namespace neko {
       {
         gl::glEnableVertexArrayAttrib( handle, i );
         gl::glVertexArrayAttribBinding( handle, i, 0 );
-        gl::glVertexArrayAttribFormat( handle, i, recs_[i].count_, recs_[i].type_, recs_[i].normalize_ ? gl::GL_TRUE : gl::GL_FALSE, ptr );
+        gl::glVertexArrayAttribFormat( handle, i, recs_[i].count_, recs_[i].stype_, recs_[i].normalize_ ? gl::GL_TRUE : gl::GL_FALSE, ptr );
         ptr += (GLuint)recs_[i].size_;
       }
     }

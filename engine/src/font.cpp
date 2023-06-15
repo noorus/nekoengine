@@ -14,7 +14,7 @@ namespace neko {
   {
   }
 
-  FontFacePtr Font::loadFace( span<uint8_t> source, FaceID faceIndex, Real size )
+  FontFacePtr Font::loadFace( span<uint8_t> source, FaceID faceIndex )
   {
     // Make a safety copy in our own memory
     // Loading new styles on the fly later could still access this memory
@@ -31,7 +31,7 @@ namespace neko {
     args.memory_base = data_->data();
     args.memory_size = (FT_Long)data_->length();
 
-    auto fc = make_shared<FontFace>( ptr(), ftlib, &args, faceIndex, size );
+    auto fc = make_shared<FontFace>( ptr(), ftlib, &args, faceIndex );
     faces_[faceIndex] = fc;
 
     loaded_ = true;
@@ -69,11 +69,19 @@ namespace neko {
         if ( pr.second->dirty() || !pr.second->material_ )
         {
           char tmp[64];
-          sprintf_s( tmp, 64, "font/%I64i/%016I64x", id_, pr.first );
+          sprintf_s( tmp, 64, "font%I64i_%016I64x.png", id_, pr.first );
           pr.second->material_ =
             renderer->createTextureWithData( tmp, pr.second->atlas().dimensions().x, pr.second->atlas().dimensions().y,
               PixFmtColorR8, pr.second->atlas().data(), Texture::ClampBorder, Texture::Nearest );
           pr.second->markClean();
+          platform::FileWriter writer( tmp );
+          vector<uint8_t> buffer;
+          lodepng::encode( buffer,
+            pr.second->atlas().data(),
+            static_cast<unsigned int>( pr.second->atlas().dimensions().x ),
+            static_cast<unsigned int>( pr.second->atlas().dimensions().y ),
+            LCT_GREY, 8 );
+          writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) );
         }
       }
     }

@@ -11,21 +11,39 @@ namespace neko {
 
   // clang-format off
 
-  FontStyle::FontStyle( FontFacePtr face, FT_Library ft, FT_Face ftface, uint32_t size, vec2i atlasSize,
-  FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs ):
-  font_( face->font() ), storedFaceSize_( size ), storedFaceIndex_( ftface->face_index ),
+  FontStyle::FontStyle( FontFacePtr face, FT_Library ft, FT_Face ftface, Real size, vec2i atlasSize,
+  FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs ): size_( size ),
+  face_( face ), storedFaceIndex_( ftface->face_index ),
   rendering_( rendering ), outlineThickness_( thickness )
   {
+    storedFaceSize_ = makeStoredFaceSize( size_ );
+
+    Locator::console().printf(Console::srcGfx,"FontStyle CONSTRUCTOR 0x%I64X size %f w majic %i", this, size_,  math::iround( size_ * c_fmagic ) );
+
+    auto fterr = FT_Set_Char_Size( face_->face_, 0, math::iround( size_ * c_fmagic ), c_dpi, c_dpi );
+    if ( fterr )
+      NEKO_FREETYPE_EXCEPT( "FreeType font character point size setting failed", fterr );
+
+    FT_Matrix matrix = { (int)( ( 1.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ),
+      (int)( ( 1.0 ) * 0x10000L ) };
+
+    FT_Set_Transform( face_->face_, &matrix, nullptr );
+
+    hbfnt_ = hb_ft_font_create_referenced( face_->face_ );
+    hb_ft_font_set_funcs( hbfnt_ ); // Doesn't create_referenced already call this?
+
     atlas_ = make_shared<TextureAtlas>( atlasSize, 1 );
     initEmptyGlyph();
 
     if ( !prerenderGlyphs.isEmpty() )
     {
       HBBuffer prerenderBuf( "en" );
-      prerenderBuf.setFrom( face->hbfnt_, {}, prerenderGlyphs );
+      prerenderBuf.setFrom( hbfnt_, {}, prerenderGlyphs );
       for ( unsigned int i = 0; i < prerenderBuf.count(); ++i )
         getGlyph( ft, ftface, prerenderBuf.glyphInfo()[i].codepoint );
     }
+
+    postLoad();
   }
 
   void FontStyle::initEmptyGlyph()
@@ -162,14 +180,12 @@ namespace neko {
     return nullptr;
   }
 
-  bool FontStyle::dirty() const
+  void FontStyle::postLoad()
   {
-    return dirty_;
-  }
-
-  void FontStyle::markClean()
-  {
-    dirty_ = false;
+    auto metrics = face_->face_->size->metrics;
+    ascender_ = static_cast<Real>( metrics.ascender >> 6 );
+    descender_ = static_cast<Real>( metrics.descender >> 6 );
+    size_ = static_cast<Real>( metrics.height >> 6 );
   }
 
   const TextureAtlas& FontStyle::atlas() const
@@ -180,12 +196,10 @@ namespace neko {
 
   FontStyle::~FontStyle()
   {
+    Locator::console().printf(Console::srcGfx,"FontStyle DESTRUCTOR 0x%I64X", this );
+    if ( hbfnt_ )
+      hb_font_destroy( hbfnt_ );
     atlas_.reset();
-  }
-
-  StyleID FontStyle::id() const
-  {
-    return makeStyleID( storedFaceIndex_, storedFaceSize_, rendering_, outlineThickness_ );
   }
 
 }

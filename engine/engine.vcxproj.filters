@@ -133,6 +133,9 @@
     <Filter Include="Source Files\gfx\cameras">
       <UniqueIdentifier>{81347a0b-6ac5-4c17-be04-8202fe5ba20c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\extern\imguizmoquat">
+      <UniqueIdentifier>{fbf4b9b7-b619-4682-bb19-7aeff6dee388}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -394,6 +397,15 @@
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
     <ClCompile Include="src\c_text_system.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\c_primitive_system.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\imguizmo-quat\imGuIZMO.quat\imGuIZMOquat.cpp">
+      <Filter>Source Files\extern\imguizmoquat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imguihelpers.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
   </ItemGroup>

@@ -4,6 +4,9 @@
 #include <windows.h>
 #include <shlobj.h>
 
+#undef min
+#undef max
+
 namespace neko {
 
   enum FileSeek
