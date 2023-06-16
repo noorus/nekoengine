@@ -21,12 +21,6 @@ namespace neko {
   const char* c_engineLogName = "nekoengine";
   const uint32_t c_engineVersion[3] = { 0, 1, 3 };
 
-#ifdef _DEBUG
-  const wchar_t* c_rainetLibraryName = L"rainet_d.dll";
-#else
-  const wchar_t* c_rainetLibraryName = L"rainet.dll";
-#endif
-
   const char* c_engineSettingsFilename = "engineconf.json";
 
   static void concmdQuit( Console* console, ConCmd* command, StringVector& arguments )

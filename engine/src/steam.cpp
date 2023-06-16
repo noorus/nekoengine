@@ -5,12 +5,26 @@
 
 namespace neko {
 
+  Steam* Steam::instance_ = nullptr;
+
+  extern "C" void Steam::staticSteamAPIWarningHook( int severity, const char* message )
+  {
+    if ( instance_ && message )
+      instance_->onSteamAPIWarning( severity, message );
+  }
+
+  const char* c_ownershipStrings[] = { "NotOwned", "Owned", "TempFamilySharing", "TempFreeWeekend" };
+
   Steam::Steam( EnginePtr engine, uint32_t appID ): Subsystem<Steam, LogSource::srcSteam>( engine ), appID_( appID )
   {
+    instance_ = this;
+
     if ( !SteamAPI_Init() )
       return;
 
     SteamAPI_ManualDispatch_Init();
+
+    utils()->SetWarningMessageHook( staticSteamAPIWarningHook );
 
     initialized_ = true;
 
@@ -18,6 +32,14 @@ namespace neko {
       onSteamConnected();
 
     recheckLaunchCommandline();
+
+    auto sid = utils()->GetAppID();
+    if ( sid != appID_ )
+      NEKO_EXCEPT( "Steam returned wrong app ID" );
+
+    localUser_.id_ = user()->GetSteamID();
+    localUser_.name_ = friends()->GetFriendPersonaName( localUser_.id_ );
+    localUser_.displayName_ = localUser_.name_;
 
     {
       if ( apps()->BIsSubscribed() )
@@ -36,8 +58,19 @@ namespace neko {
 
       app_.purchaseTime_ = apps()->GetEarliestPurchaseUnixTime( appID_ );
     }
+
+    log( "App ID: %i, Ownership: %s, Beta: %s, Branch: %s, Build ID: %i, Purchase time: %I64i", appID_,
+      c_ownershipStrings[static_cast<int>(app_.ownership_)], app_.beta_ ? "yes" : "no", app_.branchName_.c_str(), app_.buildID_, app_.purchaseTime_ );
+
+    log( "LocalUser: %s %s %s", utils::render( localUser_.id_ ).c_str(), localUser_.name_.c_str(),
+      localUser_.displayName_.c_str() );
     
     refreshStats();
+  }
+
+  void Steam::onSteamAPIWarning( int severity, const char* message )
+  {
+    log( "Steam API warning severity %i: %s", severity, message );
   }
 
   void Steam::setState( SteamState newState )
@@ -78,6 +111,15 @@ namespace neko {
       else if ( callEquals<steam::UserStatsReceived_t>( callback ) )
       {
         onUserStatsReceived( reinterpret_cast<steam::UserStatsReceived_t*>( callback.m_pubParam ) );
+      }
+      else if ( callEquals<steam::GameOverlayActivated_t>( callback ) )
+      {
+        auto cb = reinterpret_cast<steam::GameOverlayActivated_t*>( callback.m_pubParam );
+        if ( cb )
+        {
+          auto active = static_cast<uintptr_t>( cb->m_bActive );
+          engine_->msgs()->send( M_Extern_SteamOverlay, 1, active );
+        }
       }
       else if ( callEquals<steam::SteamAPICallCompleted_t>( callback ) )
       {
@@ -152,6 +194,7 @@ namespace neko {
       return;
     if ( cb->m_nGameID != appID_ )
       return;
+    log( "Received stats" );
     SteamStats sts;
     sts.id_ = cb->m_steamIDUser.ConvertToUint64();
     int ret = 0;
@@ -216,6 +259,7 @@ namespace neko {
 
   void Steam::uploadStats()
   {
+    log( "Uploading stats" );
     stats()->StoreStats();
   }
 

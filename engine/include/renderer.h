@@ -10,7 +10,6 @@
 #include "modelmanager.h"
 #include "scripting.h"
 #include "shaders.h"
-#include "rainet.h"
 #include "viewport.h"
 #include "gfx.h"
 #include "specialrenderers.h"
@@ -146,7 +145,6 @@ namespace neko {
     void update( SManager& scene, GameTime delta, GameTime time );
     void uploadTextures();
     void uploadModels();
-    void setUserData( uint64_t id, const utf8String name, rainet::Image& image );
     void jsRestart();
     inline shaders::Shaders& shaders() noexcept { return *( shaders_.get() ); }
     void drawGame(

@@ -23,19 +23,6 @@ namespace neko {
     utf8String branchName_;
   };
 
-  struct Image
-  {
-    size_t width_;
-    size_t height_;
-    std::vector<uint8_t> buffer_;
-    Image(): width_( 0 ), height_( 0 ) {}
-    Image( const Image& other ): width_( other.width_ ), height_( other.height_ )
-    {
-      buffer_.resize( other.buffer_.size() );
-      memcpy( buffer_.data(), other.buffer_.data(), buffer_.size() );
-    }
-  };
-
   using SteamSnowflake = uint64_t;
   using DcSnowflake = uint64_t;
 
@@ -88,15 +75,17 @@ namespace neko {
       CallType_NumberOfCurrentPlayers
     };
   protected:
+    static Steam* instance_;
     bool initialized_ = false;
     SteamState state_ = Steam_Disconnected;
     uint32_t appID_ = 0;
     AppState app_;
     SteamUser localUser_;
     map<SteamSnowflake, SteamUser> friends_;
-    map<SteamSnowflake, Image> userImages_;
     map<SteamSnowflake, SteamStats> userStats_;
     optional<int> globalPlayercount_ = 0;
+    static void __cdecl staticSteamAPIWarningHook( int severity, const char* message );
+    void onSteamAPIWarning( int severity, const char* message );
     void onSteamConnected();
     void onSteamDisconnected( steam::SteamServersDisconnected_t* result );
     void onUserStatsReceived( steam::UserStatsReceived_t* result );
@@ -110,6 +99,7 @@ namespace neko {
     void preUpdate( GameTime time ) override;
     void tick( GameTime tick, GameTime time ) override;
     void postUpdate( GameTime delta, GameTime tick ) override;
+    inline const SteamUser& me() const noexcept { return localUser_; }
     inline const SteamStats* myStats() const
     {
       const auto myid = localUser_.id_.ConvertToUint64();
@@ -124,6 +114,7 @@ namespace neko {
     inline const AppState& state() { return app_; }
     inline steam::ISteamApps* apps() { return steam::SteamApps(); }
     inline steam::ISteamUser* user() { return steam::SteamUser(); }
+    inline steam::ISteamFriends* friends() { return steam::SteamFriends(); }
     inline steam::ISteamUserStats* stats() { return steam::SteamUserStats(); }
     inline steam::ISteamClient* client() { return steam::SteamClient(); }
     inline steam::ISteamUtils* utils() { return steam::SteamUtils(); }

@@ -20,16 +20,6 @@ namespace neko {
     utf8String compiler;
   };
 
-//   struct RainetLibrary {
-//   public:
-//     HMODULE module_;
-//     rainet::System* engine_;
-//     rainet::fnInitialize pfnInitialize;
-//     rainet::fnShutdown pfnShutdown;
-//     void load( rainet::Host* host );
-//     void unload();
-//   };
-
   struct Stats {
     atomic<int> i_launches = 0;
     atomic<float> f_timeWasted = 0.0f;
