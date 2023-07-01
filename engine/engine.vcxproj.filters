@@ -145,6 +145,9 @@
     <Filter Include="Source Files\steam">
       <UniqueIdentifier>{42433fa8-bef7-4a49-9456-0d3048df1df1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\extern\imguizmo">
+      <UniqueIdentifier>{53a6e734-9f63-4f3d-9153-4c1ae2e72789}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -423,6 +426,9 @@
     <ClCompile Include="src\steamresult.cpp">
       <Filter>Source Files\steam</Filter>
     </ClCompile>
+    <ClCompile Include="..\extern\imguizmo\ImGuizmo.cpp">
+      <Filter>Source Files\extern\imguizmo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">
@@ -465,9 +471,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\locator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\gfx.h">
@@ -811,6 +814,12 @@
     </ClInclude>
     <ClInclude Include="include\steam.h">
       <Filter>Header Files\steam</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rect.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\camera.h">
+      <Filter>Header Files\gfx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

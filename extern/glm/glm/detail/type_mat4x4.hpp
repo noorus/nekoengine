@@ -109,6 +109,10 @@ namespace glm
 		GLM_FUNC_DECL mat<4, 4, T, Q> & operator--();
 		GLM_FUNC_DECL mat<4, 4, T, Q> operator++(int);
 		GLM_FUNC_DECL mat<4, 4, T, Q> operator--(int);
+
+#ifdef GLM_MAT4_EXTRA_STUFF
+    GLM_MAT4_EXTRA_STUFF
+#endif
 	};
 
 	// -- Unary operators --

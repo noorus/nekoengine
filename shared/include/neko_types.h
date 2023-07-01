@@ -50,6 +50,32 @@
 #ifndef _DEBUG
 # define GLM_FORCE_INLINE // Force inlining in release build
 #endif
+
+// clang-format off
+#define GLM_VEC2_EXTRA_STUFF \
+  static constexpr vec<2, T, Q> unit_x() { return { static_cast<T>( 1.0 ), static_cast<T>( 0.0 ) }; } \
+  static constexpr vec<2, T, Q> unit_y() { return { static_cast<T>( 0.0 ), static_cast<T>( 1.0 ) }; }
+#define GLM_VEC3_EXTRA_STUFF \
+  static constexpr vec<3, T, Q> unit_x() { return { static_cast<T>( 1.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ) }; } \
+  static constexpr vec<3, T, Q> unit_y() { return { static_cast<T>( 0.0 ), static_cast<T>( 1.0 ), static_cast<T>( 0.0 ) }; } \
+  static constexpr vec<3, T, Q> unit_z() { return { static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 1.0 ) }; }
+#define GLM_VEC4_EXTRA_STUFF \
+  static constexpr vec<4, T, Q> unit_x() { return { static_cast<T>( 1.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ) }; } \
+  static constexpr vec<4, T, Q> unit_y() { return { static_cast<T>( 0.0 ), static_cast<T>( 1.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ) }; } \
+  static constexpr vec<4, T, Q> unit_z() { return { static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 1.0 ), static_cast<T>( 0.0 ) }; } \
+  static constexpr vec<4, T, Q> unit_w() { return { static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 1.0 ) }; }
+#define GLM_MAT3_EXTRA_STUFF \
+  static constexpr mat<3, 3, T, Q> zero() { return { static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), \
+                                                     static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), \
+                                                     static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ) }; }
+#define GLM_MAT4_EXTRA_STUFF \
+  static constexpr mat<4, 4, T, Q> zero() { return { static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), \
+                                                     static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), \
+                                                     static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), \
+                                                     static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ) }; }
+#define GLM_QUAT_EXTRA_STUFF \
+  static constexpr qua<T, Q> identity() { return qua<T, Q>( static_cast<T>( 1.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ), static_cast<T>( 0.0 ) ); }
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
@@ -149,48 +175,48 @@ namespace neko {
 
 #ifdef NEKO_MATH_DOUBLE
   using Real = double;
-  namespace numbers {
-    constexpr Real zero = 0.0;
-    constexpr Real one = 1.0;
-    constexpr Real two = 2.0;
-    constexpr Real three = 3.0;
-    constexpr Real six = 6.0;
-    constexpr Real ten = 10.0;
-    constexpr Real fifteen = 15.0;
-    constexpr Real pi = std::numbers::pi_v<double>;
-  }
   using vec2 = glm::dvec2;
   using vec3 = glm::dvec3;
   using vec4 = glm::dvec4;
   using mat2 = glm::dmat2x2;
   using mat3 = glm::dmat3x3;
   using mat4 = glm::dmat4x4;
+  using mat34 = glm::dmat3x4;
   using quaternion = glm::dquat;
 #else
   using Real = float;
-  namespace numbers {
-    constexpr Real zero = 0.0f;
-    constexpr Real one = 1.0f;
-    constexpr Real two = 2.0f;
-    constexpr Real three = 3.0f;
-    constexpr Real six = 6.0f;
-    constexpr Real ten = 10.0f;
-    constexpr Real fifteen = 15.0f;
-    constexpr Real pi = std::numbers::pi_v<float>;
-    constexpr Real e = std::numbers::e_v<float>;
-    constexpr Real ln2 = std::numbers::ln2_v<float>;
-    constexpr Real ln10 = std::numbers::ln10_v<float>;
-    constexpr Real sqrt2 = std::numbers::sqrt2_v<float>;
-    constexpr Real g = 9.80665f; // standard gravity m/s
-  }
   using vec2 = glm::fvec2;
   using vec3 = glm::fvec3;
   using vec4 = glm::fvec4;
   using mat2 = glm::fmat2x2;
   using mat3 = glm::fmat3x3;
   using mat4 = glm::fmat4x4;
+  using mat34 = glm::fmat3x4;
   using quaternion = glm::fquat;
 #endif
+
+  namespace numbers {
+    constexpr Real zero = static_cast<Real>( 0.0 );
+    constexpr Real half = static_cast<Real>( 0.5 );
+    constexpr Real one = static_cast<Real>( 1.0 );
+    constexpr Real two = static_cast<Real>( 2.0 );
+    constexpr Real three = static_cast<Real>( 3.0 );
+    constexpr Real six = static_cast<Real>( 6.0 );
+    constexpr Real ten = static_cast<Real>( 10.0 );
+    constexpr Real fifteen = static_cast<Real>( 15.0 );
+    constexpr Real minus_one = static_cast<Real>( -1.0 );
+    constexpr Real pi = std::numbers::pi_v<Real>;
+    constexpr Real e = std::numbers::e_v<Real>;
+    constexpr Real ln2 = std::numbers::ln2_v<Real>;
+    constexpr Real ln10 = std::numbers::ln10_v<Real>;
+    constexpr Real sqrt2 = std::numbers::sqrt2_v<Real>;
+    constexpr Real g = static_cast<Real>( 9.80665 ); // standard gravity m/s
+  }
+
+  using quat = quaternion;
+
+  using Radians = Real;
+  using Degrees = Real;
 
   constexpr vec4 rgba( int r, int g, int b, double a )
   {
@@ -200,14 +226,6 @@ namespace neko {
       static_cast<Real>( b ) / 255.0f,
       static_cast<Real>( a ) };
   }
-
-  using quat = quaternion;
-  constexpr quaternion quatIdentity = quaternion( numbers::one, numbers::zero, numbers::zero, numbers::zero );
-  constexpr vec3 vec3UnitX = vec3( numbers::one, numbers::zero, numbers::zero );
-  constexpr vec3 vec3UnitY = vec3( numbers::zero, numbers::one, numbers::zero );
-  constexpr vec3 vec3UnitZ = vec3( numbers::zero, numbers::zero, numbers::one );
-  using Radians = Real;
-  using Degrees = Real;
 
   using GameTime = double;
 

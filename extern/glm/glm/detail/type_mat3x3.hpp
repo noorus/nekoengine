@@ -104,6 +104,10 @@ namespace glm
 		GLM_FUNC_DECL mat<3, 3, T, Q> & operator--();
 		GLM_FUNC_DECL mat<3, 3, T, Q> operator++(int);
 		GLM_FUNC_DECL mat<3, 3, T, Q> operator--(int);
+
+#ifdef GLM_MAT3_EXTRA_STUFF
+    GLM_MAT3_EXTRA_STUFF
+#endif
 	};
 
 	// -- Unary operators --

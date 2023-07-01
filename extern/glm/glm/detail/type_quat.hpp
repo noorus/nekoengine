@@ -130,6 +130,10 @@ namespace glm
 		GLM_FUNC_DECL GLM_CONSTEXPR qua<T, Q>& operator*=(U s);
 		template<typename U>
 		GLM_FUNC_DECL GLM_CONSTEXPR qua<T, Q>& operator/=(U s);
+
+#ifdef GLM_QUAT_EXTRA_STUFF
+    GLM_QUAT_EXTRA_STUFF
+#endif
 	};
 
 	// -- Unary bit operators --
