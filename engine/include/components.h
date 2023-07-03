@@ -26,6 +26,8 @@ namespace neko {
     vec3 valueForNormalIndex( int idx );
     bool normalSelector( const char* label, int& in_out, vec3& value_out );
 
+    bool orientationEditor( const char* label, quat& in_out );
+
     template <typename T>
     inline bool dragVector( const char* label, const T& v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f,
       const char* format = "%.3f", ImGuiSliderFlags flags = 0 )
@@ -84,10 +86,10 @@ namespace neko {
     struct transform
     {
       vec3 scale { numbers::one, numbers::one, numbers::one };
-      quat rotate = quatIdentity;
+      quat rotate = quat::identity();
       vec3 translate { numbers::zero, numbers::zero, numbers::zero };
       vec3 derived_scale { numbers::one, numbers::one, numbers::one };
-      quat derived_rotate = quatIdentity;
+      quat derived_rotate = quat::identity();
       vec3 derived_translate { numbers::zero, numbers::zero, numbers::zero };
       mat4 cached_transform { numbers::one };
       inline const mat4 model() const { return cached_transform; } //!< Model matrix e.g. the cached transform matrix
@@ -157,7 +159,7 @@ namespace neko {
       entity ent = null;
       TextPtr instance {};
       bool dirty = false;
-      TextData(): ent( null ), instance(), dirty( false ) {}
+      TextData(): ent( null ), dirty( false ) {}
       TextData( entity e ): ent( e ) {}
     };
 
@@ -187,13 +189,21 @@ namespace neko {
         Orthographic,
         MAX_CameraProjection
       } projection = CameraProjection::Perspective;
-      Real perspective_fovy = 60.0f;
+      Real perspective_fovy = 30.0f;
       Real orthographic_radius = 10.0f;
+      enum CameraTracking
+      {
+        Free = 0,
+        Node,
+        MAX_CameraTracking
+      } tracking = CameraTracking::Free;
+      Real free_dist = 100.0f;
+      entity node_target = null;
       Real nearDist = 0.1f;
-      Real farDist = 100.0f;
+      Real farDist = 10.0f;
       Real exposure = 1.0f;
       int up_sel = ig::PredefNormal_PlusY;
-      vec3 up;
+      vec3 up = { 0.0f, 1.0f, 0.0f };
     };
 
     struct CameraData
@@ -253,6 +263,7 @@ namespace neko {
       unique_ptr<text_system> txtsys_;
       unique_ptr<primitive_system> primsys_;
       void imguiSceneGraphRecurse( entity e, entity& clicked );
+      void imguiNodeSelectorRecurse( entity e, entity& selected );
       void imguiNodeEditor( entity e );
     public:
       manager( vec2 viewportResolution );
@@ -263,16 +274,28 @@ namespace neko {
       inline camera& cam( entity e ) { return registry_.get<camera>( e ); } //!< Get camera by entity
       inline text& tt( entity e ) { return registry_.get<text>( e ); } //!< Get text by entity
       inline primitive& pt( entity e ) { return registry_.get<primitive>( e ); }
+      inline bool validAndTransform( entity e )
+      {
+        if ( e == null || e == tombstone )
+          return false;
+        return registry_.any_of<transform>( e );
+      }
+      inline const bool nodeSelected( entity e ) const
+      {
+        return imguiSelectedNodes_.contains( e );
+      }
       entity createNode( entity parent, string_view name );
       entity createRenderable( entity parent, string_view name );
       entity createNode( string_view name );
       entity createCamera( string_view name );
       entity createText( string_view name );
       entity createPlane( string_view name );
+      inline entity& root() { return root_; }
       void update();
       void markDirty( entity e );
       void imguiSceneGraph();
       void imguiSelectedNodes();
+      void imguiNodeSelector( const char* title, entity& selected );
       inline camera_system& cams() const { return *camsys_; }
       inline text_system& texts() const { return *txtsys_; }
       inline primitive_system& primitives() const { return *primsys_; }

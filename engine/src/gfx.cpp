@@ -426,6 +426,7 @@ namespace neko {
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplWin32_NewFrame();
+    // ImGuizmo::BeginFrame();
     ImGui::NewFrame();
 
     clear( vec4( editor_->clearColorRef(), 1.0f ) );

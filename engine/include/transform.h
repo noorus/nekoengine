@@ -9,7 +9,7 @@ namespace neko {
   class Transform {
   protected:
     vec3 translate_ = vec3( 0.0f );
-    quaternion rotate_ = quatIdentity;
+    quaternion rotate_ = quat::identity();
     vec3 scale_ = vec3( 1.0f );
     mat4 mat_ = mat4( 1.0f ); //!< Cached model matrix
     bool dirty_ = true;

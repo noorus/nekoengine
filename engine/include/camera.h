@@ -2,39 +2,30 @@
 #include "forwards.h"
 #include "neko_types.h"
 #include "components.h"
+#include "frustum.h"
 
 namespace neko {
-
-#undef near
-#undef far
 
   class Camera {
   protected:
     vec2 resolution_;
     vec3 position_ { 0.0f };
     mat4 view_;
-    mat4 projection_;
-    Real fov_;
-    Real near_ = 0.1f;
-    Real far_ = 100.0f;
     Real exposure_ = 1.0f;
+    Frustum frustum_;
   public:
-    Camera( vec2 viewport, Real fov );
+    Camera( vec2 viewport );
     virtual ~Camera();
     virtual void setViewport( vec2 resolution );
     virtual void update( SManager& manager, GameTime delta, GameTime time ) = 0;
     inline const vec2& resolution() const noexcept { return resolution_; }
     inline const mat4& view() const noexcept { return view_; }
-    inline const mat4& projection() const noexcept { return projection_; }
     inline const vec3& position() const noexcept { return position_; }
+    inline const Frustum& frustum() const { return frustum_; }
     const mat4 model() const noexcept;
-    inline Real near() const noexcept { return near_; }
-    inline Real far() const noexcept { return far_; }
     inline Real exposure() const noexcept { return exposure_; }
     void exposure( Real exp );
     virtual vec3 direction() const = 0;
-    inline Real fovy() const { return fov_; }
-    virtual Real aspect() const;
     virtual vec3 right() const = 0;
     virtual vec3 up() const = 0;
   };
@@ -43,9 +34,7 @@ namespace neko {
   protected:
     Entity ent_ = c::null;
     vec3 direction_ { 0.0f, 0.0f, -1.0f };
-    Real aspect_ = 1.0f;
-    vec3 up_ { 0.0f, 1.0f, 0.0f };
-    void _reposition();
+    vec3 up_ = vec3::unit_y();
   public:
     BasicGameCamera( vec2 viewport, SManager& manager, Entity e );
     void setViewport( vec2 resolution ) override;
@@ -67,19 +56,14 @@ namespace neko {
   protected:
     vec3 eye_;
     vec3 up_;
-    Real aspect_ = 1.0f;
     Real orthoRadius_ = 14.0f;
-    void _reposition();
   public:
     EditorOrthoCamera( vec2 resolution, const EditorViewportDefinition& def );
     void setViewport( vec2 resolution ) override;
     void update( SManager& manager, GameTime delta, GameTime time ) override;
-    inline Real radius() noexcept { return orthoRadius_; }
-    void radius( Real radius );
     vec3 direction() const override;
     virtual void applyInputPanning( const vec2& worldmov );
     virtual void applyInputZoom( int zoom );
-    Real aspect() const override;
     vec3 right() const override;
     vec3 up() const override;
   };
@@ -95,7 +79,7 @@ namespace neko {
     }
   };
 
-  class OrbitCamera: public Camera {
+  /* class OrbitCamera: public Camera {
   protected:
     Entity target_;
     vec3 offset_; //!< Offset from target
@@ -136,6 +120,6 @@ namespace neko {
     vec3 direction() const override;
     vec3 right() const override;
     vec3 up() const override;
-  };
+  };*/
 
 }

@@ -21,13 +21,13 @@ namespace neko {
   class Particles {
   protected:
     static constexpr size_t c_particleCount = Count;
-    neko_avx_align vec4 positions_[c_particleCount];
-    neko_avx_align glm::f32quat orientations_[c_particleCount];
-    neko_avx_align vec4 velocities_[c_particleCount];
-    neko_avx_align vec4 acceleration_[c_particleCount];
-    neko_avx_align float masses_[c_particleCount];
-    neko_avx_align vec3 sizes_[c_particleCount];
-    neko_avx_align vec4 colors_[c_particleCount];
+    neko_avx2_align vec4 positions_[c_particleCount];
+    neko_avx2_align glm::f32quat orientations_[c_particleCount];
+    neko_avx2_align vec4 velocities_[c_particleCount];
+    neko_avx2_align vec4 acceleration_[c_particleCount];
+    neko_avx2_align float masses_[c_particleCount];
+    neko_avx2_align vec3 sizes_[c_particleCount];
+    neko_avx2_align vec4 colors_[c_particleCount];
     bool gravity_ = false;
     unique_ptr<PointRenderBuffer<Count>> buffer_;
     GameTime time_ = 0.0;
@@ -120,8 +120,8 @@ namespace neko {
     using Base::masses_;
     using Base::sizes_;
     using Base::colors_;
-    neko_avx_align vec3 axes_[c_particleCount];
-    neko_avx_align float rot_[c_particleCount];
+    neko_avx2_align vec3 axes_[c_particleCount];
+    neko_avx2_align float rot_[c_particleCount];
     aabb box_;
     unique_ptr<LineRenderBuffer<24>> boxviz_;
   public:

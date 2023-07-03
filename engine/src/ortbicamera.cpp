@@ -6,14 +6,15 @@
 
 namespace neko {
 
-  OrbitCamera::OrbitCamera( vec2 resolution, Entity target, const vec3& offset, Degrees fov,
+  /* OrbitCamera::OrbitCamera( vec2 resolution, Entity target, const vec3& offset, Degrees fov,
     bool reverse, Real sensitivity, Real fMinDistance, Real fMaxDistance, Real fRotationDeceleration, Real zoomAccel,
     Real zoomDecel ):
     Camera( resolution, fov ),
     sensitivity_( sensitivity ), target_( target ), offset_( offset ), distanceMin_( fMinDistance ),
     distanceMax_( fMaxDistance ), deceleration_( fRotationDeceleration ), zoom_( zoomAccel, zoomDecel ),
-    rotation_( quatIdentity ), rotationInput_( 0.0f ), clampTop_( 0.05f ), clampBottom_( glm::radians( 175.0f ) ),
-    clampRotation_( quatIdentity ), clamp_( false ), direction_( 0.0f ), reverseAxes_( reverse ), rotationProgress_( 0.0f ),
+    rotation_( quat::identity() ), rotationInput_( 0.0f ), clampTop_( 0.05f ), clampBottom_( glm::radians( 175.0f ) ),
+    clampRotation_( quat::identity() ), clamp_( false ), direction_( 0.0f ), reverseAxes_( reverse ),
+    rotationProgress_( 0.0f ),
     movementInput_( 0.0f )
   {
     assert( math::length( offset_ ) > distanceMin_ && math::length( offset_ ) < distanceMax_ );
@@ -63,7 +64,7 @@ namespace neko {
       Radians rot_y = glm::radians( rotationInput_.y );
 
       auto reset = false;
-      auto angle_y = math::angleBetween( offset_, vec3UnitY );
+      auto angle_y = math::angleBetween( offset_, vec3::unit_y() );
       if ( rot_y > angle_y - clampTop_ )
       {
         rot_y = angle_y - clampTop_;
@@ -75,7 +76,7 @@ namespace neko {
         reset = true;
       }
       auto rotX = glm::angleAxis( rot_y, localX );
-      auto rotY = glm::angleAxis( glm::radians( rotationInput_.x ), vec3UnitY );
+      auto rotY = glm::angleAxis( glm::radians( rotationInput_.x ), vec3::unit_y() );
       if ( reset )
         rotation_ = rotX * rotY;
       else
@@ -88,12 +89,12 @@ namespace neko {
       if ( rotationProgress_ > 1.0f )
         clamp_ = false;
       else
-        offset_ = glm::slerp( clampRotation_, quatIdentity, rotationProgress_ ) * offset_;
+        offset_ = glm::slerp( clampRotation_, quat::identity(), rotationProgress_ ) * offset_;
     }
 
-    if ( rotation_ != quatIdentity )
+    if ( rotation_ != quat::identity() )
     {
-      rotation_ = glm::slerp( rotation_, quatIdentity, deceleration_ * static_cast<Real>( delta ) );
+      rotation_ = glm::slerp( rotation_, quat::identity(), deceleration_ * static_cast<Real>( delta ) );
       offset_ = rotation_ * offset_;
     }
 
@@ -182,7 +183,7 @@ namespace neko {
   void OrbitCamera::setClampTop( Radians clamp )
   {
     clampTop_ = clamp;
-    auto angle = math::angleBetween( offset_, vec3UnitY );
+    auto angle = math::angleBetween( offset_, vec3::unit_y() );
     if ( angle < clampTop_ )
     {
       auto axis = math::normalize( vec3( -offset_.z, 0, offset_.x ) );
@@ -195,7 +196,7 @@ namespace neko {
   void OrbitCamera::setClampBottom( Radians clamp )
   {
     clampBottom_ = clamp;
-    auto angle = math::angleBetween( offset_, vec3UnitY );
+    auto angle = math::angleBetween( offset_, vec3::unit_y() );
     if ( angle > clampBottom_ )
     {
       auto axis = math::normalize( vec3( -offset_.z, 0, offset_.x ) );
@@ -203,6 +204,6 @@ namespace neko {
       clampRotation_ = glm::angleAxis( angle - clampBottom_, axis );
       clamp_ = true;
     }
-  }
+  }*/
 
 }

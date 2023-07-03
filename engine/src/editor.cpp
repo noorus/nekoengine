@@ -174,7 +174,7 @@ namespace neko {
           mousepoint.x, mousepoint.y,
           vp->camera()->position().x, vp->camera()->position().y, vp->camera()->position().z,
           vp->camera()->direction().x, vp->camera()->direction().y, vp->camera()->direction().z,
-          vp->camera()->aspect(), vp->camera()->radius(),
+          vp->camera()->frustum().aspect(), vp->camera()->frustum().radius(),
           ndc.x, ndc.y, ndc.z )
           .c_str() );
     }
@@ -183,9 +183,8 @@ namespace neko {
     utf8String title = "game";
     if ( vp->camera() )
     {
-      title = utils::ilprinf( "game - camera %s", vp->cameraData()->name.c_str() );
+      title = vp->debugString();
       renderer->draw( time, scene, *vp->camera(), *vp, renderer->builtins().screenFourthQuads_[3] );
-
     }
     ImGui::GetBackgroundDrawList()->AddText( gameViewport.posf() + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ), title.c_str() );
 

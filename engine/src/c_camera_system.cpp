@@ -97,28 +97,29 @@ namespace neko {
     }
 
     const char* c_projectionNames[camera::CameraProjection::MAX_CameraProjection] = { "perspective", "orthographic" };
+    const char* c_trackingNames[camera::CameraTracking::MAX_CameraTracking] = { "free", "node" };
 
     void camera_system::imguiCameraEditor( entity e )
     {
       auto& c = mgr_->reg().get<camera>( e );
-      ig::ComponentChildWrapper wrap( "Camera", 200.0f );
+      ig::ComponentChildWrapper wrap( "Camera", 240.0f );
 
-      auto selected = static_cast<int>( c.projection );
-      if ( ImGui::BeginCombo( "projection", c_projectionNames[selected], ImGuiComboFlags_None ) )
       {
-        for ( int i = 0; i < camera::CameraProjection::MAX_CameraProjection; ++i )
+        auto selected = static_cast<int>( c.projection );
+        if ( ImGui::BeginCombo( "projection", c_projectionNames[selected], ImGuiComboFlags_None ) )
         {
-          bool dummy = ( selected == i );
-          if ( ImGui::Selectable( c_projectionNames[i], &dummy ) )
-            selected = i;
-          if ( dummy )
-            ImGui::SetItemDefaultFocus();
+          for ( int i = 0; i < camera::CameraProjection::MAX_CameraProjection; ++i )
+          {
+            bool dummy = ( selected == i );
+            if ( ImGui::Selectable( c_projectionNames[i], &dummy ) )
+              selected = i;
+            if ( dummy )
+              ImGui::SetItemDefaultFocus();
+          }
+          ImGui::EndCombo();
         }
-        ImGui::EndCombo();
+        c.projection = static_cast<camera::CameraProjection>( selected );
       }
-      c.projection = static_cast<camera::CameraProjection>( selected );
-
-      ig::normalSelector( "up", c.up_sel, c.up );
 
       if ( c.projection == camera::CameraProjection::Perspective )
       {
@@ -128,6 +129,34 @@ namespace neko {
       {
         ImGui::DragFloat( "radius", &c.orthographic_radius, 0.1f, 0.1f, 2048.0f, "%.4f", ImGuiSliderFlags_None );
       }
+
+      {
+        auto selected = static_cast<int>( c.tracking );
+        if ( ImGui::BeginCombo( "tracking", c_trackingNames[selected], ImGuiComboFlags_None ) )
+        {
+          for ( int i = 0; i < camera::CameraProjection::MAX_CameraProjection; ++i )
+          {
+            bool dummy = ( selected == i );
+            if ( ImGui::Selectable( c_trackingNames[i], &dummy ) )
+              selected = i;
+            if ( dummy )
+              ImGui::SetItemDefaultFocus();
+          }
+          ImGui::EndCombo();
+        }
+        c.tracking = static_cast<camera::CameraTracking>( selected );
+      }
+
+      if ( c.tracking == camera::CameraTracking::Free )
+      {
+        ImGui::DragFloat( "free dist", &c.free_dist, 0.1f, 0.1f, 1000.0f, "%.4f", ImGuiSliderFlags_None );
+      }
+      else if ( c.tracking == camera::CameraTracking::Node )
+      {
+        mgr_->imguiNodeSelector( "target note", c.node_target );
+      }
+
+      ig::normalSelector( "up", c.up_sel, c.up );
 
       ImGui::DragFloat( "nearclip", &c.nearDist, 0.1f, 0.1f, 100.0f, "%.4f", ImGuiSliderFlags_Logarithmic );
       ImGui::DragFloat( "farclip", &c.farDist, 0.1f, 0.1f, 500.0f, "%.4f", ImGuiSliderFlags_Logarithmic );

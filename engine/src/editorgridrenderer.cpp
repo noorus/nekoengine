@@ -68,13 +68,16 @@ namespace neko {
 
   void EditorGridRenderer::update( const EditorViewport& viewport, EditorOrthoCamera& camera )
   {
-    if ( camera.radius() < 1.0f )
+    if ( camera.frustum().type() != Projection_Orthographic )
+      return;
+
+    if ( camera.frustum().radius() < 1.0f )
     {
       drawCount_ = 0;
       return;
     }
 
-    auto area = math::ceil( camera.aspect() * camera.radius() );
+    auto area = math::ceil( camera.frustum().aspect() * camera.frustum().radius() );
     auto normal = math::normalize( -camera.direction() );
     auto origin = camera.position(); // viewport.ndcPointToWorld( { 0.0f, 0.0f, 0.0f } );
 

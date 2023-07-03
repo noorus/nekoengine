@@ -128,6 +128,7 @@ namespace neko {
     void clearErrors();
     void setCameraUniforms( Camera& camera, uniforms::Camera& uniform );
     TexturePtr loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering );
+    void drawSceneRecurse( SManager& scene, Camera& cam, const ViewportDrawParameters& drawparams, c::entity e );
   public:
     Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
     inline const StaticData& builtins() noexcept { return builtin_; }

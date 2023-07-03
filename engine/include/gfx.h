@@ -26,6 +26,8 @@ namespace neko {
     virtual const CameraPtr drawopGetCamera() const = 0;
     virtual void drawopPreSceneDraw( shaders::Shaders& shaders ) const = 0;
     virtual void drawopPostSceneDraw( shaders::Shaders& shaders ) const = 0;
+    virtual vec2 drawopViewportPosition() const = 0;
+    virtual vec2 drawopViewportSize() const = 0;
   };
 
   class Editor;
@@ -74,6 +76,8 @@ namespace neko {
     Real drawopExposure() const override;
     void drawopPreSceneDraw( shaders::Shaders& shaders ) const override;
     void drawopPostSceneDraw( shaders::Shaders& shaders ) const override;
+    vec2 drawopViewportPosition() const override;
+    vec2 drawopViewportSize() const override;
     const CameraPtr drawopGetCamera() const override;
     // Viewport interface implementation
     vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const override;
@@ -93,8 +97,11 @@ namespace neko {
   protected:
     const c::CameraData* camdata_;
     vec2 windowResolution_ = { 0.0f, 0.0f };
+    utf8String debugStr_;
+    void _update();
   public:
     void setCameraData( const c::CameraData* data );
+    inline const utf8String& debugString() const { return debugStr_; }
     inline CameraPtr camera() const { return ( camdata_ ? camdata_->instance : CameraPtr() ); }
     inline const c::CameraData* cameraData() const { return camdata_; }
     void resize( int width, int height, const Viewport& windowViewport );
@@ -108,6 +115,8 @@ namespace neko {
     Real drawopExposure() const override;
     void drawopPreSceneDraw( shaders::Shaders& shaders ) const override;
     void drawopPostSceneDraw( shaders::Shaders& shaders ) const override;
+    vec2 drawopViewportPosition() const override;
+    vec2 drawopViewportSize() const override;
     const CameraPtr drawopGetCamera() const override;
     // Viewport interface implementation
     vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const override;

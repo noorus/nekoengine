@@ -35,7 +35,8 @@ namespace neko {
     vp_ = vp;
     startPos_ = remapNormal( vp_->mapPointByWindow( wincoord ) );
     dragging_ = true;
-    worlddims_ = { vp_->camera()->radius() * vp_->camera()->aspect(), vp_->camera()->radius() };
+    auto& f = vp_->camera()->frustum();
+    worlddims_ = { f.radius() * f.aspect(), f.radius() };
   }
 
   void ViewportDragOperation::update( vec2 wincoord )
@@ -127,6 +128,16 @@ namespace neko {
     axesGizmo_->draw( shaders, viewportPointToWorld( { 40.0f, 70.0f, 0.0f } ), vec3( 0.0f, 1.0f, 0.0f ), vec3( 1.0f, 0.0f, 0.0f ) );
   }
 
+  vec2 EditorViewport::drawopViewportPosition() const
+  {
+    return position_;
+  }
+
+  vec2 EditorViewport::drawopViewportSize() const
+  {
+    return { static_cast<Real>( width_ ), static_cast<Real>( height_ ) };
+  }
+
   const CameraPtr EditorViewport::drawopGetCamera() const
   {
     return camera_;
@@ -140,7 +151,7 @@ namespace neko {
   vec3 EditorViewport::ndcPointToWorld( vec3 ndc_viewcoord ) const
   {
     auto in = vec4( ndc_viewcoord, 1.0f );
-    auto m = glm::inverse( camera_->projection() * camera_->view() );
+    auto m = glm::inverse( camera_->frustum().projection() * camera_->view() );
     auto out = m * in;
     assert( out.w != 0.0f );
     out.w = 1.0f / out.w;

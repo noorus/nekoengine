@@ -1,6 +1,7 @@
 #pragma once
 #include "neko_types.h"
 #include <algorithm>
+#include "nekosimd.h"
 
 #ifdef NEKO_MATH_DOUBLE
 # define NEKO_MATH_FUNC_ROUND ::round
@@ -28,7 +29,21 @@
 # define NEKO_MATH_FUNC_ABS ::abs
 #endif
 
+// Unfortunately the names "near" and "far" cannot be used within
+// functions in this header because it interferes with some Windows internals
+// (even though we undo the damage in most other parts of the engine)
+
 namespace neko {
+
+  constexpr Radians radians( Degrees r )
+  {
+    return glm::radians( r );
+  }
+
+  constexpr Degrees degrees( Radians r )
+  {
+    return glm::degrees( r );
+  }
 
   namespace math {
 
@@ -46,6 +61,8 @@ namespace neko {
     using glm::toMat4;
     using glm::translate;
     using glm::scale;
+
+    using std::atan2;
 
     using std::max;
     using std::min;
@@ -243,6 +260,55 @@ namespace neko {
       return normalize( perp );
     }
 
+    /* this is broken, not sure how
+    * but currently we don't need anything that glm::perspective wouldn't provide
+    inline mat4 buildPerspective( Real left, Real right, Real bottom, Real top, Real znear, Real zfar )
+    {
+      // assert( znear > 0.0f && zfar > 0.0f );
+      auto invw = ( numbers::one / ( right - left ) );
+      auto invh = ( numbers::one / ( top - bottom ) );
+      auto invd = ( numbers::one / ( zfar - znear ) );
+      auto a = ( numbers::two * znear * invw );
+      auto b = ( numbers::two * znear * invh );
+      auto c = ( ( right + left ) * invw );
+      auto d = ( ( top + bottom ) * invh );
+      auto q = -( zfar + znear ) * invd;
+      auto qn = -numbers::two * ( zfar * znear ) * invd;
+      auto ret = mat4::zero();
+      ret[0][0] = a;
+      ret[0][2] = c;
+      ret[1][1] = b;
+      ret[1][2] = d;
+      ret[2][2] = q;
+      ret[2][3] = qn;
+      ret[3][2] = static_cast<Real>( -1.0 );
+      return ret;
+    }*/
+
+    inline mat4 buildOrthographic( Real left, Real right, Real bottom, Real top, Real znear, Real zfar )
+    {
+      return glm::ortho( left, right, bottom, top, znear, zfar );
+      /*// assert( znear > 0.0f && zfar > 0.0f );
+      auto invw = ( numbers::one / ( right - left ) );
+      auto invh = ( numbers::one / ( top - bottom ) );
+      auto invd = ( numbers::one / ( zfar - znear ) );
+      auto a = ( numbers::two * invw );
+      auto b = ( numbers::two * invh );
+      auto c = - ( right + left ) * invw;
+      auto d = - ( top + bottom ) * invh;
+      auto q = - numbers::two * invd;
+      auto qn = - ( zfar + znear ) * invd;
+      auto ret = mat4::zero();
+      ret[0][0] = a;
+      ret[0][3] = c;
+      ret[1][1] = b;
+      ret[1][3] = d;
+      ret[2][2] = q;
+      ret[2][3] = qn;
+      ret[3][3] = static_cast<Real>( 1.0 );
+      return ret;*/
+    }
+
     //! \fn inline T projection( T v, T normal )
     //! \brief Vector projection.
     //! \param a The vector.
@@ -362,5 +428,42 @@ namespace neko {
     }
 
   }
+
+  struct rotator
+  {
+    Real roll = numbers::zero;
+    Real pitch = numbers::zero;
+    Real yaw = numbers::zero;
+    rotator( const quat& q )
+    {
+      auto rs = numbers::two * ( q.w * q.x + q.y * q.z );
+      auto rc = numbers::one - numbers::two * ( q.x * q.x + q.y * q.y );
+      roll = degrees( math::atan2( rs, rc ) );
+      auto pd = ( q.w * q.y - q.x * q.z );
+      auto ps = math::sqrt( numbers::one + numbers::two * pd );
+      auto pc = math::sqrt( numbers::one - numbers::two * pd );
+      pitch = degrees( numbers::two * math::atan2( ps, pc ) - numbers::pi / numbers::two );
+      auto ys = numbers::two * ( q.w * q.z + q.x * q.y );
+      auto yc = numbers::one - numbers::two * ( q.y * q.y + q.z * q.z );
+      yaw = degrees( math::atan2( ys, yc ) );
+    }
+    inline quat toQ() const
+    {
+      simd::vec4f sines, cosines;
+      simd::vec4f src(
+        radians( roll * numbers::half ),
+        radians( pitch * numbers::half ),
+        radians( yaw * numbers::half ),
+        0.0f );
+      src.sincos( sines, cosines );
+
+      quat q {};
+      q.w = cosines.e0 * cosines.e1 * cosines.e2 + sines.e0 * sines.e1 * sines.e2;
+      q.x = sines.e0 * cosines.e1 * cosines.e2 - cosines.e0 * sines.e1 * sines.e2;
+      q.y = cosines.e0 * sines.e1 * cosines.e2 + sines.e0 * cosines.e1 * sines.e2;
+      q.z = cosines.e0 * cosines.e1 * sines.e2 - sines.e0 * sines.e1 * cosines.e2;
+      return q;
+    }
+  };
 
 }

@@ -7,7 +7,7 @@
 namespace neko {
 
   EditorOrthoCamera::EditorOrthoCamera( vec2 resolution, const EditorViewportDefinition& def ):
-    Camera( resolution, 90.0f )
+    Camera( resolution )
   {
     position_ = def.position;
     eye_ = math::normalize( def.eye );
@@ -17,15 +17,6 @@ namespace neko {
   void EditorOrthoCamera::setViewport( vec2 resolution )
   {
     resolution_ = resolution;
-    _reposition();
-  }
-
-  void EditorOrthoCamera::_reposition()
-  {
-    aspect_ = resolution_.x / resolution_.y;
-    auto diam = orthoRadius_;
-    projection_ = glm::ortho(
-      -( ( diam * 0.5f ) * aspect_ ), ( ( diam * 0.5f ) * aspect_ ), -( diam * 0.5f ), ( diam * 0.5f ), -1000.0f, 1000.0f );
   }
 
   void EditorOrthoCamera::applyInputPanning( const vec2& worldmov )
@@ -33,33 +24,28 @@ namespace neko {
     auto xmov = ( right() * ( worldmov.x ) );
     auto ymov = ( up() * ( worldmov.y ) );
     position_ += ( xmov + ymov );
-    _reposition();
   }
 
   void EditorOrthoCamera::applyInputZoom( int zoom )
   {
     orthoRadius_ += -( (Real)zoom / (Real)WHEEL_DELTA );
-    _reposition();
   }
 
   void EditorOrthoCamera::update( SManager& manager, GameTime delta, GameTime time )
   {
     view_ = glm::lookAt( position_, position_ + ( eye_ * 100.0f ), up() );
+
+    frustum_.near( -1000.0f );
+    frustum_.far( 1000.0f );
+    frustum_.aspect( resolution_.x / resolution_.y );
+    frustum_.type( Projection_Orthographic );
+    frustum_.radius( orthoRadius_ );
+    frustum_.update( view_, model() );
   }
 
   vec3 EditorOrthoCamera::direction() const
   {
     return eye_;
-  }
-
-  void EditorOrthoCamera::radius( Real radius )
-  {
-    orthoRadius_ = radius;
-  }
-
-  Real EditorOrthoCamera::aspect() const
-  {
-    return aspect_;
   }
 
   vec3 EditorOrthoCamera::right() const

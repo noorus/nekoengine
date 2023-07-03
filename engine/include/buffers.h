@@ -152,6 +152,13 @@ namespace neko {
       gl::glDrawArrays( mode, base, count );
       gl::glBindVertexArray( 0 );
     }
+    void draw( shaders::Pipeline& pipeline, const mat4& mdl, GLsizei count, GLint base, gl::GLenum mode )
+    {
+      gl::glBindVertexArray( vao_ );
+      pipeline.setUniform( "model", mdl );
+      gl::glDrawArrays( mode, base, count );
+      gl::glBindVertexArray( 0 );
+    }
     ~LineRenderBuffer()
     {
       gl::glDeleteVertexArrays( 1, &vao_ );

@@ -17,6 +17,9 @@ namespace neko::ig {
     {  0.0f,  0.0f,  1.0f },
     {  0.0f,  0.0f, -1.0f }
   };
+  const quat c_predefQuatValues[] = {
+    math::quaternionFrom( 0, { 1.0f, 0.0f, 0.0f })
+  };
 
   // clang-format on
 
@@ -50,6 +53,11 @@ namespace neko::ig {
       return changed;
     }
 
+    return false;
+  }
+
+  bool orientationEditor( const char* label, quat& in_out )
+  {
     return false;
   }
 

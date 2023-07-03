@@ -122,6 +122,42 @@ namespace neko {
       }
     }
 
+    void manager::imguiNodeSelectorRecurse( entity e, entity& selected )
+    {
+      const auto& en = nd( e );
+
+      auto is_selected = ( selected == e );
+      if ( ImGui::Selectable( en.name.c_str(), &is_selected ) )
+        selected = e;
+      if ( is_selected )
+        ImGui::SetItemDefaultFocus();
+
+      {
+        auto sub = en.first;
+        while ( sub != null )
+        {
+          imguiNodeSelectorRecurse( sub, selected );
+          sub = nd( sub ).next;
+        }
+      }
+    }
+
+    void manager::imguiNodeSelector( const char* title, entity& val )
+    {
+      ImGuiComboFlags cflags = ImGuiComboFlags_None;
+
+      auto prevSelected = val;
+
+      if ( ImGui::BeginCombo( title, val != c::null ? nd( val ).name.c_str() : "[null]", cflags ) )
+      {
+        bool selected = ( val == c::null ? true : false );
+        if ( ImGui::Selectable( "[null]", &selected ) )
+          val = c::null;
+        imguiNodeSelectorRecurse( root_, val );
+        ImGui::EndCombo();
+      }
+    }
+
     void manager::imguiSceneGraph()
     {
       entity clicked = null;
@@ -145,13 +181,10 @@ namespace neko {
     {
       if ( e == null )
         return;
+
       auto node = nd( e );
       ImGui::Text( "ID: %i", static_cast<uint32_t>( e ) );
       ImGui::Text( "Name: %s", node.name.c_str() );
-      ImGui::Text( "Children %i", node.children );
-      ImGui::Text( "First %i", node.first );
-      ImGui::Text( "Next %i", node.next );
-      ImGui::Text( "Previous %i", node.prev );
       ImGui::TextUnformatted( "Components" );
       
       if ( registry_.any_of<transform>( e ) )
@@ -162,6 +195,8 @@ namespace neko {
         ig::dragVector( "translate", t.translate, 0.1f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
         ig::dragVector( "scale", t.scale, 0.01f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
         ImGui::gizmo3D( "rotation", t.rotate, ww );
+        ImGui::SameLine();
+        //ImGui::Button( "+X" )
         // a bit wasteful but hardly an issue
         markDirty( e );
       }

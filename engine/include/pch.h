@@ -175,6 +175,9 @@
 #include "neko_types.h"
 #include "nekomath.h"
 
-// ImGuiZMO
+// ImGuizmo
+#include "ImGuizmo.h"
+
+// ImGuiZMOquat
 #include "vgConfig.h"
 #include "imGuIZMOquat.h"

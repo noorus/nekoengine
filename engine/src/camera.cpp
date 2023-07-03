@@ -6,7 +6,7 @@
 
 namespace neko {
 
-  Camera::Camera( vec2 resolution, Degrees fov ): fov_( fov )
+  Camera::Camera( vec2 resolution )
   {
     setViewport( resolution );
   }
@@ -18,12 +18,6 @@ namespace neko {
   void Camera::setViewport( vec2 resolution )
   {
     resolution_ = resolution;
-    projection_ = glm::perspective( glm::radians( fov_ ), aspect(), near_, far_ );
-  }
-
-  Real Camera::aspect() const
-  {
-    return ( resolution_.x / resolution_.y );
   }
 
   const mat4 Camera::model() const noexcept

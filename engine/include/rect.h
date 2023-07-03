@@ -21,6 +21,8 @@ namespace neko {
       right_ = right;
       bottom_ = bottom;
     }
+    inline Real width() const { return math::abs( right_ - left_ ); }
+    inline Real height() const { return math::abs( bottom_ - top_ ); }
     inline vec2 minBound() const
     {
       return { left_, top_ };

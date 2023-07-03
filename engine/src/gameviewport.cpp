@@ -16,15 +16,22 @@ namespace neko {
 
   using namespace gl;
 
+  void GameViewport::_update()
+  {
+    debugStr_ = utils::ilprinf( "game | %ix%i | %s", width_, height_, camdata_->name.c_str() );
+  }
+
   void GameViewport::setCameraData( const c::CameraData* data )
   {
     camdata_ = data;
+    _update();
   }
 
   void GameViewport::resize( int width, int height, const Viewport& windowViewport )
   {
     windowResolution_ = windowViewport.sizef();
     Viewport::resize( width, height );
+    _update();
   }
 
   bool GameViewport::drawopShouldDrawSky() const
@@ -64,6 +71,16 @@ namespace neko {
 
   void GameViewport::drawopPostSceneDraw( shaders::Shaders& shaders ) const {}
 
+  vec2 GameViewport::drawopViewportPosition() const
+  {
+    return position_;
+  }
+
+  vec2 GameViewport::drawopViewportSize() const
+  {
+    return { static_cast<Real>( width_ ), static_cast<Real>( height_ ) };
+  }
+
   const CameraPtr GameViewport::drawopGetCamera() const
   {
     return ( camdata_ && camdata_->instance ? camdata_->instance : CameraPtr() );
@@ -79,7 +96,7 @@ namespace neko {
     if ( !camdata_ || !camdata_->instance )
       return {};
     auto in = vec4( ndc_viewcoord, 1.0f );
-    auto m = glm::inverse( camdata_->instance->projection() * camdata_->instance->view() );
+    auto m = glm::inverse( camdata_->instance->frustum().projection() * camdata_->instance->view() );
     auto out = m * in;
     assert( out.w != 0.0f );
     out.w = 1.0f / out.w;

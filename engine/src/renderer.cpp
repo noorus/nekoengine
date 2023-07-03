@@ -14,6 +14,7 @@
 #include "math_aabb.h"
 #include "text.h"
 #include "filesystem.h"
+#include "frustum.h"
 
 namespace neko {
 
@@ -452,11 +453,11 @@ namespace neko {
   void Renderer::setCameraUniforms( Camera& camera, uniforms::Camera& uniform )
   {
     uniform.position = vec4( camera.position(), 1.0f );
-    uniform.projection = camera.projection();
+    uniform.projection = camera.frustum().projection();
     uniform.view = camera.view();
     uniform.model = camera.model();
-    uniform.nearDist = camera.near();
-    uniform.farDist = camera.far();
+    uniform.nearDist = camera.frustum().near();
+    uniform.farDist = camera.frustum().far();
     uniform.exposure = camera.exposure();
   }
 
@@ -539,6 +540,49 @@ namespace neko {
     }
   }
 
+  inline vec2 toScreen( const vec3& pt, const mat4& model, const ViewportDrawParameters& dp )
+  {
+    const auto mvp = dp.drawopGetCamera()->frustum().projection() * dp.drawopGetCamera()->view() * mat4( 1.0f );
+    const auto clip = mvp * vec4( pt, 1.0f );
+    const auto ndc = vec3( clip ) / clip.w;
+    vec2 ss = { ( ndc.x + 1.0f ) * 0.5f, ( 1.0f - ndc.y ) * 0.5f };
+    auto vp = dp.drawopViewportPosition();
+    auto vs = dp.drawopViewportSize();
+    return ( vp + ( ss * vs ) );
+  }
+
+  static vector<c::CameraData*> g_cams;
+
+  void Renderer::drawSceneRecurse( SManager& scene, Camera& cam, const ViewportDrawParameters& drawparams, c::entity e )
+  {
+    const auto& en = scene.nd( e );
+
+    if ( scene.validAndTransform( e ) )
+    {
+      const auto& et = scene.tn( e );
+      auto pt = toScreen( et.translate, et.model(), drawparams );
+      auto nx = drawparams.drawopViewportPosition();
+      auto mx = nx + drawparams.drawopViewportSize();
+      auto dl = ImGui::GetBackgroundDrawList();
+      dl->PushClipRect( nx, mx, false );
+      if ( pt.x >= nx.x && pt.y >= nx.y && pt.x < mx.x && pt.y < mx.y )
+      {
+        dl->AddRect( pt - 10.0f, pt + 10.0f, ImColor( 0.1f, 0.1f, 0.1f ), 0.0f, ImDrawFlags_None, 3.0f );
+        dl->AddRect( pt - 10.0f, pt + 10.0f, ImColor( 0.5f, 0.5f, 0.5f ), 0.0f, ImDrawFlags_None, 1.0f );
+        dl->AddText( pt + 1.0f, ImColor( 0.0f, 0.0f, 0.0f ), en.name.c_str() );
+        dl->AddText( pt, ImColor( 1.0f, 1.0f, 1.0f ), en.name.c_str() );
+      }
+      dl->PopClipRect();
+    }
+
+    auto sub = en.first;
+    while ( sub != c::null )
+    {
+      drawSceneRecurse( scene, cam, drawparams, sub );
+      sub = scene.nd( sub ).next;
+    }
+  }
+
   void Renderer::sceneDraw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams )
   {
     auto wire = ( drawparams.drawopShouldDrawWireframe() );
@@ -587,6 +631,28 @@ namespace neko {
       auto& pipeline = useMaterial( "demo_uvtest" );
       //for ( auto node : sceneGraph_ )
       //  sceneDrawEnterNode( node, pipeline );
+    }
+
+    drawSceneRecurse( scene, camera, drawparams, scene.root() );
+
+    for ( const auto& cm : scene.cams().cameras() )
+    {
+      if ( !cm.second.instance )
+        continue;
+
+      LineRenderBuffer<24> boxviz_;
+      auto verts = boxviz_.buffer().lock();
+      const auto color = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+
+      for ( size_t i = 0; i < 24; ++i )
+        verts[i].color = color;
+
+      size_t i = 0;
+      cm.second.instance->frustum().feedVertsTo( verts, i );
+
+      boxviz_.buffer().unlock();
+      auto ppl = &shaders_->usePipeline( "dbg_line" );
+      boxviz_.draw( *ppl, cm.second.instance->model(), 24, 0, gl::GL_LINES );
     }
 
     glEnable( GL_LINE_SMOOTH );
@@ -710,7 +776,7 @@ namespace neko {
       prepareSceneDraw( time, params );
       params.drawopPreSceneDraw( *shaders_ );
       prepareSceneDraw( time, camera, params );
-      sceneDraw( time, scene, camera, params );
+      sceneDraw( time, scene, camera, params ); 
       prepareSceneDraw( time, params );
       params.drawopPostSceneDraw( *shaders_ );
       main->end();

@@ -259,6 +259,8 @@ namespace neko {
 
   void Steam::uploadStats()
   {
+    if ( !stats() )
+      return;
     log( "Uploading stats" );
     stats()->StoreStats();
   }
