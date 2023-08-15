@@ -1,9 +1,6 @@
 // dear imgui: FreeType font builder (used as a replacement for the stb_truetype builder)
 // (code)
 
-#include "pch.h"
-#if 0
-
 // Get the latest version at https://github.com/ocornut/imgui/tree/master/misc/freetype
 // Original code by @vuhdo (Aleksei Skriabin). Improvements by @mikesart. Maintained since 2019 by @ocornut.
 
@@ -943,5 +940,3 @@ static FT_Error ImGuiLunasvgPortPresetSlot(FT_GlyphSlot slot, FT_Bool cache, FT_
 #endif
 
 #endif // #ifndef IMGUI_DISABLE
-
-#endif
