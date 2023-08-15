@@ -11,14 +11,14 @@
 
 namespace neko {
 
-  GfxInput::GfxInput( ConsolePtr console ): console_( console ), movement_( 0 )
+  GfxInput::GfxInput( ConsolePtr console ): console_( console )
   {
   }
 
   void GfxInput::initialize( HWND window )
   {
     window_ = window;
-    #if 0
+
     system_ = nil::System::create(
       platform::g_instance,
       window,
@@ -30,7 +30,6 @@ namespace neko {
     for ( auto& device : system_->getDevices() )
       if ( device->getType() != nil::Device::Device_Controller )
         device->enable();
-    #endif
   }
 
   void GfxInput::onDeviceConnected( nil::Device* device )
@@ -42,7 +41,7 @@ namespace neko {
 
   void GfxInput::onDeviceDisconnected( nil::Device* device )
   {
-    console_->printf( srcInput, "Device disconnected: %s", device->getName().c_str() );
+    // console_->printf( srcInput, "Device disconnected: %s", device->getName().c_str() );
   }
 
   void GfxInput::onMouseEnabled( nil::Device* device, nil::Mouse* instance )
@@ -98,7 +97,6 @@ namespace neko {
     {
 #endif
       mouseButtons_.markPressed( button );
-      Locator::console().print(srcInput, "Mouse button pressed" );
 #ifndef NEKO_NO_GUI
     }
     else if ( button < 5 )
@@ -116,7 +114,6 @@ namespace neko {
     {
 #endif
       mouseButtons_.markReleased( button );
-      Locator::console().print( srcInput, "Mouse button released" );
 #ifndef NEKO_NO_GUI
     }
 #endif
@@ -154,7 +151,6 @@ namespace neko {
 
   void GfxInput::update()
   {
-    #if 0
     moved_ = false;
     resetMovement();
     mouseButtons_.reset();
@@ -176,7 +172,6 @@ namespace neko {
 #endif
       moved_ = false;
     }
-    #endif
   }
 
   void GfxInput::shutdown()

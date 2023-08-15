@@ -3,7 +3,6 @@
 
 // Implemented features:
 //  [X] Renderer: User texture binding. Use 'GLuint' OpenGL texture identifier as void*/ImTextureID. Read the FAQ about ImTextureID!
-//  [X] Renderer: Multi-viewport support (multiple windows). Enable with 'io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable'.
 
 // You can use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this.
 // Prefer including the entire imgui/ repository into your project (either as a copy or as a submodule), and only build the backends you need.
@@ -20,7 +19,6 @@
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
-//  2023-XX-XX: Platform: Added support for multiple windows via the ImGuiPlatformIO interface.
 //  2022-10-11: Using 'nullptr' instead of 'NULL' as per our switch to C++11.
 //  2021-12-08: OpenGL: Fixed mishandling of the the ImDrawCmd::IdxOffset field! This is an old bug but it never had an effect until some internal rendering changes in 1.86.
 //  2021-06-29: Reorganized backend to pull data from a single structure to facilitate usage with multiple-contexts (all g_XXXX access changed to bd->XXXX).
@@ -39,11 +37,15 @@
 //  2016-09-05: OpenGL: Fixed save and restore of current scissor rectangle.
 
 #include "imgui.h"
+#ifndef IMGUI_DISABLE
 #include "imgui_impl_opengl2.h"
-#if defined(_MSC_VER) && _MSC_VER <= 1500 // MSVC 2008 or earlier
-#include <stddef.h>     // intptr_t
-#else
 #include <stdint.h>     // intptr_t
+
+// Clang/GCC warnings with -Weverything
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-macros"                      // warning: macro is not used
+#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
 #endif
 
 // Include OpenGL header (without an OpenGL loader) requires a bit of fiddling
@@ -74,10 +76,6 @@ static ImGui_ImplOpenGL2_Data* ImGui_ImplOpenGL2_GetBackendData()
     return ImGui::GetCurrentContext() ? (ImGui_ImplOpenGL2_Data*)ImGui::GetIO().BackendRendererUserData : nullptr;
 }
 
-// Forward Declarations
-static void ImGui_ImplOpenGL2_InitPlatformInterface();
-static void ImGui_ImplOpenGL2_ShutdownPlatformInterface();
-
 // Functions
 bool    ImGui_ImplOpenGL2_Init()
 {
@@ -88,10 +86,6 @@ bool    ImGui_ImplOpenGL2_Init()
     ImGui_ImplOpenGL2_Data* bd = IM_NEW(ImGui_ImplOpenGL2_Data)();
     io.BackendRendererUserData = (void*)bd;
     io.BackendRendererName = "imgui_impl_opengl2";
-    io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;    // We can create multi-viewports on the Renderer side (optional)
-
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        ImGui_ImplOpenGL2_InitPlatformInterface();
 
     return true;
 }
@@ -102,7 +96,6 @@ void    ImGui_ImplOpenGL2_Shutdown()
     IM_ASSERT(bd != nullptr && "No renderer backend to shutdown, or already shutdown?");
     ImGuiIO& io = ImGui::GetIO();
 
-    ImGui_ImplOpenGL2_ShutdownPlatformInterface();
     ImGui_ImplOpenGL2_DestroyDeviceObjects();
     io.BackendRendererName = nullptr;
     io.BackendRendererUserData = nullptr;
@@ -297,30 +290,10 @@ void    ImGui_ImplOpenGL2_DestroyDeviceObjects()
     ImGui_ImplOpenGL2_DestroyFontsTexture();
 }
 
-//--------------------------------------------------------------------------------------------------------
-// MULTI-VIEWPORT / PLATFORM INTERFACE SUPPORT
-// This is an _advanced_ and _optional_ feature, allowing the backend to create and handle multiple viewports simultaneously.
-// If you are new to dear imgui or creating a new binding for dear imgui, it is recommended that you completely ignore this section first..
-//--------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-static void ImGui_ImplOpenGL2_RenderWindow(ImGuiViewport* viewport, void*)
-{
-    if (!(viewport->Flags & ImGuiViewportFlags_NoRendererClear))
-    {
-        ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
-    ImGui_ImplOpenGL2_RenderDrawData(viewport->DrawData);
-}
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
-static void ImGui_ImplOpenGL2_InitPlatformInterface()
-{
-    ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-    platform_io.Renderer_RenderWindow = ImGui_ImplOpenGL2_RenderWindow;
-}
-
-static void ImGui_ImplOpenGL2_ShutdownPlatformInterface()
-{
-    ImGui::DestroyPlatformWindows();
-}
+#endif // #ifndef IMGUI_DISABLE

@@ -76,7 +76,7 @@ namespace neko {
     }
 
     gameViewport.move( static_cast<int>( halfsize.x ), static_cast<int>( halfsize.y ) );
-    //gameViewport.resize( static_cast<GLsizei>( halfsize.x ), static_cast<GLsizei>( halfsize.y ), windowViewport );
+    gameViewport.resize( static_cast<GLsizei>( halfsize.x ), static_cast<GLsizei>( halfsize.y ), windowViewport );
     //gameViewport.camera()->setViewport( vec2( static_cast<Real>( halfsize.x ), static_cast<Real>( halfsize.y ) ) );
   }
 

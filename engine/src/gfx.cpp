@@ -231,14 +231,14 @@ namespace neko {
     ImGui::CreateContext();
     auto& igIO = ImGui::GetIO();
     igIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    igIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    //igIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     //igIO.ConfigFlags |= ImGuiConfigFlags_IsSRGB;
     //igIO.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ImGui::StyleColorsDark();
     setImGuiStyle( ImGui::GetStyle() );
 
     auto& igStyle = ImGui::GetStyle();
-    if ( igIO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
+    if ( igIO.ConfigFlags & false ) // ImGuiConfigFlags_ViewportsEnable )
     {
       igStyle.WindowRounding = 0.0f;
       igStyle.Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -325,7 +325,7 @@ namespace neko {
       {
         messaging_->send( M_Window_GainedFocus );
       }
-      else if ( evt.type == sf::Event::KeyPressed )
+      else if ( evt.type == sf::Event::KeyPressed && !discardKeyboard )
       {
         if ( evt.key.code == sf::Keyboard::F5 )
           messaging_->send( M_Debug_ReloadScript );
@@ -426,7 +426,7 @@ namespace neko {
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplWin32_NewFrame();
-    // ImGuizmo::BeginFrame();
+    //ImGuizmo::BeginFrame();
     ImGui::NewFrame();
 
     clear( vec4( editor_->clearColorRef(), 1.0f ) );
@@ -513,7 +513,7 @@ namespace neko {
       ImGui::SetNextWindowSizeConstraints( wndsize, wndsize );
       ImGui::Begin( "Game", nullptr,
         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
-          ImGuiWindowFlags_NoDocking );
+          0 ); //ImGuiWindowFlags_NoDocking );
       ImGui::Image( reinterpret_cast<ImTextureID>( static_cast<intptr_t>( gameMainTexture->handle() ) ), wndsize,
         ImVec2( 0, 1 ), ImVec2( 1, 0 ) );
       ImGui::End();
@@ -526,11 +526,13 @@ namespace neko {
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
+    #if 0
     if ( ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
     {
       ImGui::UpdatePlatformWindows();
       ImGui::RenderPlatformWindowsDefault();
     }
+    #endif
 
     window_->display();
   }

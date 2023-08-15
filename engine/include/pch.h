@@ -135,6 +135,7 @@
 #include FT_BITMAP_H
 #include FT_BBOX_H
 #include FT_CACHE_H
+#include FT_SYNTHESIS_H
 #include FT_LCD_FILTER_H
 #include FT_TRUETYPE_IDS_H
 #include FT_TRUETYPE_TABLES_H
@@ -149,8 +150,10 @@
 #include <nil.h>
 
 // Dear ImGui
+#define IMGUI_USER_CONFIG "gfx_imconfig.h"
 #define IM_VEC2_CLASS_EXTRA constexpr ImVec2( const neko::vec2& _v ): x( _v.x ), y( _v.y ) {}
 #include <imgui.h>
+#include "imstb_rectpack.h"
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_win32.h>
 
@@ -176,7 +179,7 @@
 #include "nekomath.h"
 
 // ImGuizmo
-#include "ImGuizmo.h"
+//#include "ImGuizmo.h"
 
 // ImGuiZMOquat
 #include "vgConfig.h"

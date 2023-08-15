@@ -2,9 +2,8 @@
 // This needs to be used along with a Platform Backend (e.g. GLFW, SDL, Win32, custom..)
 
 // Implemented features:
-//  [X] Renderer: Large meshes support (64k+ vertices) with 16-bit indices.
-//  [x] Renderer: Multi-viewport / platform windows. With issues (flickering when creating a new viewport).
 //  [!] Renderer: User texture binding. Use 'VkDescriptorSet' as ImTextureID. Read the FAQ about ImTextureID! See https://github.com/ocornut/imgui/pull/914 for discussions.
+//  [X] Renderer: Large meshes support (64k+ vertices) with 16-bit indices.
 
 // Important: on 32-bit systems, user texture binding is only supported if your imconfig file has '#define ImTextureID ImU64'.
 // See imgui_impl_vulkan.cpp file for details.
@@ -25,6 +24,7 @@
 // Read comments in imgui_impl_vulkan.h.
 
 #pragma once
+#ifndef IMGUI_DISABLE
 #include "imgui.h"      // IMGUI_IMPL_API
 
 // [Configuration] in order to use a custom Vulkan function loader:
@@ -60,6 +60,12 @@ struct ImGui_ImplVulkan_InitInfo
     uint32_t                        MinImageCount;          // >= 2
     uint32_t                        ImageCount;             // >= MinImageCount
     VkSampleCountFlagBits           MSAASamples;            // >= VK_SAMPLE_COUNT_1_BIT (0 -> default to VK_SAMPLE_COUNT_1_BIT)
+
+    // Dynamic Rendering (Optional)
+    bool                            UseDynamicRendering;    // Need to explicitly enable VK_KHR_dynamic_rendering extension to use this, even for Vulkan 1.3.
+    VkFormat                        ColorAttachmentFormat;  // Required for dynamic rendering
+
+    // Allocation, Debugging
     const VkAllocationCallbacks*    Allocator;
     void                            (*CheckVkResultFn)(VkResult err);
 };
@@ -140,6 +146,7 @@ struct ImGui_ImplVulkanH_Window
     VkPresentModeKHR    PresentMode;
     VkRenderPass        RenderPass;
     VkPipeline          Pipeline;               // The window pipeline may uses a different VkRenderPass than the one passed in ImGui_ImplVulkan_InitInfo
+    bool                UseDynamicRendering;
     bool                ClearEnable;
     VkClearValue        ClearValue;
     uint32_t            FrameIndex;             // Current frame being rendered to (0 <= FrameIndex < FrameInFlightCount)
@@ -156,3 +163,4 @@ struct ImGui_ImplVulkanH_Window
     }
 };
 
+#endif // #ifndef IMGUI_DISABLE

@@ -69,8 +69,8 @@ namespace neko {
     colors[ImGuiCol_TabActive] = ImVec4( 0.20f, 0.41f, 0.68f, 1.00f );
     colors[ImGuiCol_TabUnfocused] = ImVec4( 0.07f, 0.10f, 0.15f, 0.97f );
     colors[ImGuiCol_TabUnfocusedActive] = ImVec4( 0.14f, 0.26f, 0.42f, 1.00f );
-    colors[ImGuiCol_DockingPreview] = ImVec4( 0.26f, 0.59f, 0.98f, 0.70f );
-    colors[ImGuiCol_DockingEmptyBg] = ImVec4( 0.20f, 0.20f, 0.20f, 1.00f );
+    //&&colors[ImGuiCol_DockingPreview] = ImVec4( 0.26f, 0.59f, 0.98f, 0.70f );
+    //colors[ImGuiCol_DockingEmptyBg] = ImVec4( 0.20f, 0.20f, 0.20f, 1.00f );
     colors[ImGuiCol_PlotLines] = ImVec4( 0.61f, 0.61f, 0.61f, 1.00f );
     colors[ImGuiCol_PlotLinesHovered] = ImVec4( 1.00f, 0.43f, 0.35f, 1.00f );
     colors[ImGuiCol_PlotHistogram] = ImVec4( 0.90f, 0.70f, 0.00f, 1.00f );

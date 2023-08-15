@@ -64,12 +64,12 @@ namespace neko {
 
   class GfxInput: public nocopy, public nil::SystemListener, public nil::MouseListener, public nil::KeyboardListener {
   public:
-    HWND window_;
-    bool moved_;
-    POINT mousePosition_;
+    HWND window_ = 0;
+    bool moved_ = false;
+    POINT mousePosition_ { 0, 0 };
     ConsolePtr console_;
-    vec2i windowSize_;
-    vec3i movement_;
+    vec2i windowSize_ { 0, 0 };
+    vec3i movement_ { 0, 0, 0 };
     ButtonTracker<5> mouseButtons_;
   protected:
     nil::SystemPtr system_;
