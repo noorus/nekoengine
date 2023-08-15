@@ -48,6 +48,8 @@
 #include FT_GLYPH_H             // <freetype/ftglyph.h>
 #include FT_SYNTHESIS_H         // <freetype/ftsynth.h>
 
+#  define STB_RECT_PACK_IMPLEMENTATION
+
 #ifdef IMGUI_ENABLE_FREETYPE_LUNASVG
 #include FT_OTSVG_H             // <freetype/otsvg.h>
 #include FT_BBOX_H              // <freetype/ftbbox.h>

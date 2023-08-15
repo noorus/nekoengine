@@ -152,8 +152,8 @@
 // Dear ImGui
 #define IMGUI_USER_CONFIG "gfx_imconfig.h"
 #define IM_VEC2_CLASS_EXTRA constexpr ImVec2( const neko::vec2& _v ): x( _v.x ), y( _v.y ) {}
-#include <imgui.h>
 #include "imstb_rectpack.h"
+#include <imgui.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_win32.h>
 
