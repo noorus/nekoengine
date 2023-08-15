@@ -231,14 +231,14 @@ namespace neko {
     ImGui::CreateContext();
     auto& igIO = ImGui::GetIO();
     igIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    //igIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    igIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     //igIO.ConfigFlags |= ImGuiConfigFlags_IsSRGB;
     //igIO.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ImGui::StyleColorsDark();
     setImGuiStyle( ImGui::GetStyle() );
 
     auto& igStyle = ImGui::GetStyle();
-    if ( igIO.ConfigFlags & false ) // ImGuiConfigFlags_ViewportsEnable )
+    if ( igIO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
     {
       igStyle.WindowRounding = 0.0f;
       igStyle.Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -526,13 +526,12 @@ namespace neko {
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
-    #if 0
+
     if ( ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
     {
       ImGui::UpdatePlatformWindows();
       ImGui::RenderPlatformWindowsDefault();
     }
-    #endif
 
     window_->display();
   }

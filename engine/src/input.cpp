@@ -19,6 +19,7 @@ namespace neko {
   {
     window_ = window;
 
+#if 0
     system_ = nil::System::create(
       platform::g_instance,
       window,
@@ -30,6 +31,7 @@ namespace neko {
     for ( auto& device : system_->getDevices() )
       if ( device->getType() != nil::Device::Device_Controller )
         device->enable();
+#endif
   }
 
   void GfxInput::onDeviceConnected( nil::Device* device )
@@ -151,6 +153,7 @@ namespace neko {
 
   void GfxInput::update()
   {
+#if 0
     moved_ = false;
     resetMovement();
     mouseButtons_.reset();
@@ -172,6 +175,7 @@ namespace neko {
 #endif
       moved_ = false;
     }
+#endif
   }
 
   void GfxInput::shutdown()

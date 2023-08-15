@@ -1,6 +1,8 @@
 // dear imgui, v1.89.9 WIP
 // (demo code)
 
+#include "pch.h"
+
 // Help:
 // - Read FAQ at http://dearimgui.com/faq
 // - Call and read ImGui::ShowDemoWindow() in imgui_demo.cpp. All applications in examples/ are doing that.

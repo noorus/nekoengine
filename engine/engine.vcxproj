@@ -261,7 +261,11 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">26812;4819; 4005;</DisableSpecificWarnings>
     </ClCompile>
     <ClCompile Include="..\extern\imguizmo\ImGuizmo.cpp" />
-    <ClCompile Include="..\extern\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\extern\imgui\backends\imgui_impl_opengl3.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CRT_SECURE_NO_WARNINGS;DEBUG;_DEBUG;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CRT_SECURE_NO_WARNINGS;NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='ShittyDebug|x64'">_CRT_SECURE_NO_WARNINGS;DEBUG;_DEBUG;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;INTEL_SUCKS;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
     <ClCompile Include="..\extern\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="..\extern\imgui\imgui.cpp" />
     <ClCompile Include="..\extern\imgui\imgui_demo.cpp" />

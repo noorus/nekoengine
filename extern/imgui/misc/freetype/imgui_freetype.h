@@ -3,7 +3,6 @@
 
 #pragma once
 #include "imgui.h"      // IMGUI_API
-#ifndef IMGUI_DISABLE
 
 // Forward declarations
 struct ImFontAtlas;

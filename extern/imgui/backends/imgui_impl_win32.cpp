@@ -1,6 +1,8 @@
 // dear imgui: Platform Backend for Windows (standard windows API for 32-bits AND 64-bits applications)
 // This needs to be used along with a Renderer (e.g. DirectX11, OpenGL3, Vulkan..)
 
+#include "pch.h"
+
 // Implemented features:
 //  [X] Platform: Clipboard support (for Win32 this is actually part of core dear imgui)
 //  [X] Platform: Mouse support. Can discriminate Mouse/TouchScreen/Pen.
