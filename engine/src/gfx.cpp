@@ -244,7 +244,7 @@ namespace neko {
       igStyle.Colors[ImGuiCol_WindowBg].w = 1.0f;
     }
 
-    ImGui_ImplWin32_Init( window_->getSystemHandle() );
+    ImGui_ImplWin32_InitForOpenGL( window_->getSystemHandle() );
     ImGui_ImplOpenGL3_Init( c_imguiGlslVersion );
 
     gameViewport_.setCameraData( scene_->cams().getActiveData() );

@@ -88,7 +88,7 @@ namespace neko {
     mousePos_ = vec2( static_cast<Real>( input->mousePosition_.x ), static_cast<Real>( input->mousePosition_.y ) );
 
     auto& igIO = ImGui::GetIO();
-    if ( !igIO.WantCaptureMouse )
+    if ( dragOp_.ongoing() || !igIO.WantCaptureMouse )
     {
       auto vpidx = GAMEVP;
       if ( !dragOp_.ongoing() )
