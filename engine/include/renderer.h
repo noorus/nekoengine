@@ -41,6 +41,7 @@ namespace neko {
     int64_t textureBufferAlignment = 0; //!< Minimum alignment for texture buffer sizes and offsets
     int64_t uniformBufferAlignment = 0; //!< Minimum alignment for uniform buffer sizes and offsets
     float maxAnisotropy = 0.0f; //!< Maximum anisotropy level, usually 16.0
+    int64_t maxArrayTextureLayers = 0; //!< Maximum array texture layers
   };
 
   class MeshNode;
@@ -72,16 +73,22 @@ namespace neko {
       StaticMeshPtr skybox_;
       StaticMeshPtr unitQuad_;
     } builtin_;
-    GLuint implCreateTexture2D( size_t width, size_t height,
+    GLuint implCreateTexture2D( int width, int height,
+      GLGraphicsFormat format, GLGraphicsFormat internalFormat,
+      GLGraphicsFormat internalType, const void* data,
+      GLWrapMode wrap = GLenum::GL_CLAMP_TO_EDGE,
+      Texture::Filtering filtering = Texture::Linear,
+      int samples = 1 );
+    GLuint implCreateTexture2DArray( int width, int height, int depth,
       GLGraphicsFormat format, GLGraphicsFormat internalFormat,
       GLGraphicsFormat internalType, const void* data,
       GLWrapMode wrap = GLenum::GL_CLAMP_TO_EDGE,
       Texture::Filtering filtering = Texture::Linear,
       int samples = 1 );
     void implDeleteTexture( GLuint handle );
-    GLuint implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format, int samples = 1 );
+    GLuint implCreateRenderbuffer( int width, int height, GLGraphicsFormat format, int samples = 1 );
     void implDeleteRenderbuffer( GLuint handle );
-    GLuint implCreateFramebuffer( size_t width, size_t height );
+    GLuint implCreateFramebuffer( int width, int height );
     void implDeleteFramebuffer( GLuint handle );
     shaders::Pipeline& useMaterial( const utf8String& name );
     void bindVao( GLuint id );
@@ -104,6 +111,7 @@ namespace neko {
     platform::RWLock loadLock_;
     MaterialManagerPtr materials_;
     ParticleSystemManagerPtr particles_;
+    SpriteManagerPtr sprites_;
     shared_ptr<AxesPointerRenderer> origoTest_;
     DirectorPtr director_;
     vec2 resolution_;
@@ -133,9 +141,11 @@ namespace neko {
     Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
     inline const StaticData& builtins() noexcept { return builtin_; }
     void preInitialize();
-    void initialize( size_t width, size_t height );
+    void initialize( int width, int height );
     void shutdown();
-    MaterialPtr createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
+    MaterialPtr createTextureWithData( const utf8String& name, int width, int height, PixelFormat format,
+      const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge,
+      const Texture::Filtering filtering = Texture::Linear );
     inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
     inline TexturePtr getMergedMainFramebuffer()
     {
@@ -152,7 +162,7 @@ namespace neko {
       GameTime time, SManager& scene, Camera& camera, const Viewport* viewport, const ViewportDrawParameters& params );
     void draw(
       GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad );
-    void reset( size_t width, size_t height );
+    void reset( int width, int height );
     ~Renderer();
   };
 

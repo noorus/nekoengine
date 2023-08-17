@@ -213,6 +213,9 @@ namespace neko {
     // Uniform buffer alignments
     glvGetI64( GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, info.textureBufferAlignment );
     glvGetI64( GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, info.uniformBufferAlignment );
+
+    // Array textures
+    glvGetI64( GL_MAX_ARRAY_TEXTURE_LAYERS, info.maxArrayTextureLayers );
   }
 
   void Renderer::clearErrors()
@@ -242,8 +245,8 @@ namespace neko {
 
     console_->printf( srcGfx, "Buffer alignments are %i/texture %i/uniform",
       info_.textureBufferAlignment, info_.uniformBufferAlignment );
-    console_->printf( srcGfx, "Maximums are %i/texture %i/renderbuffer %ix%i/framebuffer",
-      info_.maxTextureSize, info_.maxRenderbufferSize, info_.maxFramebufferWidth, info_.maxFramebufferHeight );
+    console_->printf( srcGfx, "Maximums are %i/texture %i/renderbuffer %ix%i/framebuffer %i/2dlayers",
+      info_.maxTextureSize, info_.maxRenderbufferSize, info_.maxFramebufferWidth, info_.maxFramebufferHeight, info_.maxArrayTextureLayers );
     console_->printf( srcGfx, "Maximum anisotropy is %.1f", info_.maxAnisotropy );
   }
 
@@ -294,7 +297,7 @@ namespace neko {
     return make_shared<Texture>( this, w, h, PixFmtColorR8, output.data(), wrapping, filtering );
   }
 
-  void Renderer::initialize( size_t width, size_t height )
+  void Renderer::initialize( int width, int height )
   {
     resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
 
@@ -318,7 +321,7 @@ namespace neko {
     reset( width, height );
   }
 
-  void Renderer::reset( size_t width, size_t height )
+  void Renderer::reset( int width, int height )
   {
     resolution_ = vec2( static_cast<Real>( width ), static_cast<Real>( height ) );
     if ( ctx_.fboMainMultisampled_ )
@@ -416,7 +419,7 @@ namespace neko {
 #endif
   }
 
-  MaterialPtr Renderer::createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format,
+  MaterialPtr Renderer::createTextureWithData( const utf8String& name, int width, int height, PixelFormat format,
   const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
     return materials_->createTextureWithData( name, width, height, format, data, wrapping, filtering );

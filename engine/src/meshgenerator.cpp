@@ -88,8 +88,8 @@ namespace neko {
     auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
 
     auto orig = position + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
-    for ( auto i = 0; i <= segments.x; ++i )
-      for ( auto j = 0; j <= segments.y; ++j )
+    for ( unsigned int i = 0; i <= segments.x; ++i )
+      for ( unsigned int j = 0; j <= segments.y; ++j )
       {
         auto v = Vertex3D{
           orig + (Real)i * delta1 + (Real)j * delta2,
@@ -101,9 +101,9 @@ namespace neko {
 
     bool reverse = ( glm::dot( glm::cross( delta1, delta2 ), normal ) > 0.0f );
 
-    for ( auto i = 0; i < segments.x; ++i )
+    for ( unsigned int i = 0; i < segments.x; ++i )
     {
-      for ( auto j = 0; j < segments.y; ++j )
+      for ( unsigned int j = 0; j < segments.y; ++j )
       {
         auto base = previndices + ( ( i * segments.y + j ) * 6 );
         indices[base + 0] = offset;

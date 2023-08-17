@@ -20,7 +20,8 @@ namespace neko {
     { "worldparticle", Material::Type::WorldParticle }
   };
 
-  MaterialPtr MaterialManager::createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
+  MaterialPtr MaterialManager::createTextureWithData( const utf8String& name, int width, int height, PixelFormat format,
+    const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
     MaterialPtr mat = make_shared<Material>( name );
     mat->type_ = Material::UnlitSimple;

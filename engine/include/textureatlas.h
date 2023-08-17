@@ -16,10 +16,10 @@ namespace neko {
   public:
     TextureAtlas( const vec2i& size, int depth );
     ~TextureAtlas();
-    void setRegion( int x, int y, uint32_t width, uint32_t height, const uint8_t* data, size_t stride );
-    int fit( size_t index, uint32_t width, uint32_t height );
+    void setRegion( int x, int y, int width, int height, const uint8_t* data, size_t stride );
+    int fit( size_t index, int width, int height );
     void merge();
-    vec4i getRegion( uint32_t width, uint32_t height );
+    vec4i getRegion( int width, int height );
     void clear();
   public:
     inline int depth() const noexcept { return depth_; }

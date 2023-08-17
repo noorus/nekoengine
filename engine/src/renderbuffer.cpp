@@ -7,7 +7,7 @@ namespace neko {
 
   using namespace gl;
 
-  Renderbuffer::Renderbuffer( Renderer* renderer, size_t width, size_t height, PixelFormat format, int samples ):
+  Renderbuffer::Renderbuffer( Renderer* renderer, int width, int height, PixelFormat format, int samples ):
   Surface( renderer, width, height, format ), multisamples_( samples )
   {
     handle_ = renderer_->implCreateRenderbuffer( width_, height_, glFormat_, multisamples_ );
@@ -15,15 +15,15 @@ namespace neko {
   }
 
   //! Called by Renderbuffer::Renderbuffer()
-  GLuint Renderer::implCreateRenderbuffer( size_t width, size_t height, GLGraphicsFormat format, int samples )
+  GLuint Renderer::implCreateRenderbuffer( int width, int height, GLGraphicsFormat format, int samples )
   {
-    if ( width > (size_t)info_.maxRenderbufferSize || height > (size_t)info_.maxRenderbufferSize )
+    if ( width > info_.maxRenderbufferSize || height > info_.maxRenderbufferSize )
       console_->printf( srcGfx,
         "Warning: Requested renderbuffer width or height (%i, %i) exceeds maximum supported value (%i)",
         width, height, info_.maxRenderbufferSize );
 
-    width = math::min( width, (size_t)info_.maxRenderbufferSize );
-    height = math::min( height, (size_t)info_.maxRenderbufferSize );
+    width = math::min( width, static_cast<int>( info_.maxRenderbufferSize ) );
+    height = math::min( height, static_cast<int>( info_.maxRenderbufferSize ) );
 
     GLuint handle = 0;
     glCreateRenderbuffers( 1, &handle );

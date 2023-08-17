@@ -44,8 +44,10 @@ namespace neko {
     int multisamples_;
   public:
     Texture() = delete;
-    Texture( Renderer* renderer, size_t width, size_t height, PixelFormat format, const void* data,
+    Texture( Renderer* renderer, int width, int height, PixelFormat format, const void* data,
       const Wrapping wrapping, const Filtering filtering, int multisamples = 1 );
+    Texture( Renderer* renderer, int width, int height, int depth, PixelFormat format,
+      const void* data, const Wrapping wrapping, const Filtering filtering, int multisamples = 1 );
     ~Texture();
   };
 

@@ -19,7 +19,7 @@ namespace neko {
     inline size_t samples() const noexcept { return multisamples_; }
   public:
     Renderbuffer() = delete;
-    Renderbuffer( Renderer* renderer, size_t width, size_t height, PixelFormat format, int samples = 0 );
+    Renderbuffer( Renderer* renderer, int width, int height, PixelFormat format, int samples = 0 );
     ~Renderbuffer();
   };
 

@@ -6,11 +6,24 @@ namespace neko {
 
   using namespace gl;
 
-  Surface::Surface( Renderer* renderer, size_t width, size_t height, PixelFormat format ):
-  width_( width ), height_( height ), format_( format ), handle_( 0 ),
-  renderer_( renderer )
+  Surface::Surface( Renderer* renderer, int width, int height, PixelFormat format ):
+    width_( width ), height_( height ), format_( format ), handle_( 0 ), renderer_( renderer )
   {
     assert( renderer && width > 0 && height > 0 );
+    replaceFormats( format );
+  }
+
+  Surface::Surface( Renderer* renderer, int width, int height, int depth, PixelFormat format ):
+    width_( width ), height_( height ), depth_( depth ), format_( format ), handle_( 0 ),
+    renderer_( renderer )
+  {
+    assert( renderer && width > 0 && height > 0 && depth > 0 );
+    replaceFormats( format );
+  }
+
+  void Surface::replaceFormats( PixelFormat newfmt )
+  {
+    format_ = newfmt;
     if ( format_ == PixFmtColorRGB8 )
     {
       glFormat_ = GL_RGB;

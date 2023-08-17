@@ -83,7 +83,8 @@ namespace neko {
     Renderer* renderer_;
   public:
     MaterialManager( Renderer* renderer, ThreadedLoaderPtr loader );
-    MaterialPtr createTextureWithData( const utf8String& name, size_t width, size_t height, PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering );
+    MaterialPtr createTextureWithData( const utf8String& name, int width, int height, PixelFormat format,
+      const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering );
     void loadJSONRaw( const nlohmann::json& arr );
     void loadJSON( const utf8String& input );
     void loadFile( const utf8String& filename );

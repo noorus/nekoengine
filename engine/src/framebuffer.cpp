@@ -10,8 +10,8 @@ namespace neko {
   const PixelFormat c_depthFormat = PixFmtDepth32f;
 
   Framebuffer::Framebuffer( Renderer* renderer, size_t colorBufferCount, PixelFormat colorBufferFormat, bool depthBuffer, int multisamples ):
-  renderer_( renderer ), width_( 0 ), height_( 0 ), handle_( 0 ), colorbufcount_( colorBufferCount ),
-  available_( false ), multisamples_( multisamples ), savedViewport_{ 0 }, depth_( depthBuffer ), format_( colorBufferFormat )
+  renderer_( renderer ), colorbufcount_( colorBufferCount ),
+  multisamples_( multisamples ), savedViewport_{ 0 }, depth_( depthBuffer ), format_( colorBufferFormat )
   {
     assert( renderer_ );
     colorBuffers_.resize( colorBufferCount );
@@ -19,15 +19,15 @@ namespace neko {
   }
 
   //! Called by Framebuffer::create()
-  GLuint Renderer::implCreateFramebuffer( size_t width, size_t height )
+  GLuint Renderer::implCreateFramebuffer( int width, int height )
   {
-    if ( width > (size_t)info_.maxFramebufferWidth || height > (size_t)info_.maxFramebufferHeight )
+    if ( width > info_.maxFramebufferWidth || height > info_.maxFramebufferHeight )
       console_->printf( srcGfx,
         "Warning: Requested framebuffer width or height (%i, %i) exceeds maximum supported values (%i, %i)",
         width, height, info_.maxFramebufferWidth, info_.maxFramebufferHeight );
 
-    width = math::min( width, (size_t)info_.maxFramebufferWidth );
-    height = math::min( height, (size_t)info_.maxFramebufferHeight );
+    width = math::min( width, static_cast<int>( info_.maxFramebufferWidth ) );
+    height = math::min( height, static_cast<int>( info_.maxFramebufferHeight ) );
 
     GLuint handle = 0;
     glCreateFramebuffers( 1, &handle );
@@ -45,7 +45,7 @@ namespace neko {
 
 #define CONVGLENUM(en, add) (GLenum)((GLuint)en + add)
 
-  void Framebuffer::recreate( size_t width, size_t height )
+  void Framebuffer::recreate( int width, int height )
   {
     assert( width > 0 && height > 0 );
 

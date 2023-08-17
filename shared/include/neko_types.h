@@ -231,13 +231,13 @@ namespace neko {
 
   using StringVector = vector<utf8String>;
 
-  using vec2i = glm::i64vec2;
-  using vec3i = glm::i64vec3;
-  using vec4i = glm::i64vec4;
+  using vec2i = glm::i32vec2;
+  using vec3i = glm::i32vec3;
+  using vec4i = glm::i32vec4;
 
-  using vec2u = glm::u64vec2;
-  using vec3u = glm::u64vec3;
-  using vec4u = glm::u64vec4;
+  using vec2u = glm::u32vec2;
+  using vec3u = glm::u32vec3;
+  using vec4u = glm::u32vec4;
 
   using vec2f = glm::fvec2;
   using vec3f = glm::fvec3;

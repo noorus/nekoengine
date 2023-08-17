@@ -10,19 +10,23 @@ namespace neko {
   //! \brief A surface.
   class Surface: public nocopy {
   protected:
-    size_t width_; //!< Width in pixels.
-    size_t height_; //!< Height in pixels.
+    int width_; //!< Width in pixels.
+    int height_; //!< Height in pixels.
+    int depth_ = 0;
     PixelFormat format_; //!< Pixel format.
     GLGraphicsFormat glFormat_;
     GLGraphicsFormat internalFormat_;
     GLGraphicsFormat internalType_;
     GLuint handle_; //!< Internal GL handle.
     Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
+    void replaceFormats( PixelFormat newfmt );
   protected:
-    explicit Surface( Renderer* renderer, size_t width, size_t height, PixelFormat format );
+    explicit Surface( Renderer* renderer, int width, int height, PixelFormat format );
+    explicit Surface( Renderer* renderer, int width, int height, int depth, PixelFormat format );
   public:
-    inline size_t width() const noexcept { return width_; }
-    inline size_t height() const noexcept { return height_; }
+    inline int width() const noexcept { return width_; }
+    inline int height() const noexcept { return height_; }
+    inline int depth() const noexcept { return depth_; }
     inline PixelFormat format() const noexcept { return format_; }
     //! Get the native handle for usage. Do not store it elsewhere so as to not violate RAII.
     inline GLuint handle() const noexcept { return handle_; }

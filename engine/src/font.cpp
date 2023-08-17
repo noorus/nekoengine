@@ -70,9 +70,10 @@ namespace neko {
         {
           char tmp[64];
           sprintf_s( tmp, 64, "font%I64i_%016I64x.png", id_, pr.first );
-          pr.second->material_ =
-            renderer->createTextureWithData( tmp, pr.second->atlas().dimensions().x, pr.second->atlas().dimensions().y,
-              PixFmtColorR8, pr.second->atlas().data(), Texture::ClampBorder, Texture::Nearest );
+          pr.second->material_ = renderer->createTextureWithData( tmp,
+            static_cast<int>( pr.second->atlas().dimensions().x ),
+            static_cast<int>( pr.second->atlas().dimensions().y ),
+            PixFmtColorR8, pr.second->atlas().data(), Texture::ClampBorder, Texture::Nearest );
           pr.second->markClean();
           platform::FileWriter writer( tmp );
           vector<uint8_t> buffer;

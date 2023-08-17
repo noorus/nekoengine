@@ -56,7 +56,7 @@ namespace neko {
     dirty_ = false;
   }
 
-  void TextureAtlas::setRegion( int x, int y, uint32_t width, uint32_t height, const uint8_t* data, size_t stride )
+  void TextureAtlas::setRegion( int x, int y, int width, int height, const uint8_t* data, size_t stride )
   {
     assert( x > 0 && y > 0 && ( x < ( size_.x - 1 ) ) && ( y < ( size_.y - 1 ) ) );
     assert( ( x + width ) <= ( size_.x - 1 ) && ( y + height ) <= ( size_.y - 1 ) );
@@ -73,7 +73,7 @@ namespace neko {
     dirty_ = true;
   }
 
-  int TextureAtlas::fit( size_t index, uint32_t width, uint32_t height )
+  int TextureAtlas::fit( size_t index, int width, int height )
   {
     auto node = &nodes_[index];
     auto x = node->x;
@@ -114,15 +114,15 @@ namespace neko {
     }
   }
 
-  vec4i TextureAtlas::getRegion( uint32_t width, uint32_t height )
+  vec4i TextureAtlas::getRegion( int width, int height )
   {
     int best_index = -1;
-    uint32_t best_height = numeric_limits<uint32_t>::max();
-    uint32_t best_width = numeric_limits<uint32_t>::max();
+    int best_height = numeric_limits<int>::max();
+    int best_width = numeric_limits<int>::max();
 
     vec4i region { 0, 0, 0, 0 };
 
-    for ( uint32_t i = 0; i < nodes_.size(); ++i )
+    for ( int i = 0; i < nodes_.size(); ++i )
     {
       auto y = fit( i, width, height );
       if ( y >= 0 )
@@ -131,7 +131,7 @@ namespace neko {
         if ( ( ( y + height ) < best_height ) || ( ( ( y + height ) == best_height ) && ( node->z > 0 && (size_t)node->z < best_width ) ) )
         {
           best_height = ( y + height );
-          best_index = (int)i;
+          best_index = i;
           best_width = static_cast<uint32_t>( node->z );
           region.x = node->x;
           region.y = y;
@@ -151,8 +151,8 @@ namespace neko {
     vec3i node( region.x, region.y + height, width );
     nodes_.insert( nodes_.begin() + best_index, node );
 
-    size_t i;
-    for ( i = (size_t)best_index + 1; i < nodes_.size(); ++i )
+    int i;
+    for ( i = best_index + 1; i < nodes_.size(); ++i )
     {
       auto node = &nodes_[i];
       auto prev = &nodes_[i - 1];

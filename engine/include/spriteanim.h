@@ -4,6 +4,7 @@
 #include "gfx_types.h"
 #include "texture.h"
 #include "resources.h"
+#include "materials.h"
 
 namespace neko {
 

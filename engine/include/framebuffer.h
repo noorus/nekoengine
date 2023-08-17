@@ -16,9 +16,9 @@ namespace neko {
   //!   A framebuffer is not a surface, since it does not in itself store the buffered data.
   class Framebuffer {
   protected:
-    size_t width_; //!< Width in pixels.
-    size_t height_; //!< Height in pixels.
-    GLuint handle_; //!< Internal GL handle.
+    int width_ = 0; //!< Width in pixels.
+    int height_ = 0; //!< Height in pixels.
+    GLuint handle_ = 0; //!< Internal GL handle.
     Renderer* renderer_; //!< Raw pointer should be ok since the renderer should be the owner anyway.
     vector<TexturePtr> colorBuffers_;
     TexturePtr depthBuffer_;
@@ -27,14 +27,14 @@ namespace neko {
     vec4 clearColor_;
     GLuint sampler_ = 0;
     int savedViewport_[4];
-    mutable bool available_;
+    mutable bool available_ = false;
     bool depth_;
     PixelFormat format_;
     bool storedMultisampleEnable_ = false;
   public:
     Framebuffer() = delete;
     Framebuffer( Renderer* renderer, size_t colorBufferCount, PixelFormat colorBufferFormat, bool depthBuffer, int multisamples );
-    void recreate( size_t width, size_t height );
+    void recreate( int width, int height );
     void destroy();
     bool validate() const;
     void invalidate();
