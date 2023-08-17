@@ -1,0 +1,33 @@
+{
+  "mushroom": {
+    "idle-down": {
+      "animdef": "32x32-4-0",
+      "sheetpos": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "idle-up": {
+      "animdef": "32x32-4-0",
+      "sheetpos": {
+        "x": 0,
+        "y": 32
+      }
+    },
+    "idle-right": {
+      "animdef": "32x32-4-0",
+      "sheetpos": {
+        "x": 0,
+        "y": 64
+      }
+    },
+    "idle-left": {
+      "animdef": "32x32-4-0",
+      "sheetpos": {
+        "x": 0,
+        "y": 64
+      },
+      "flip-frames-x": [ 0, 1, 2, 3 ]
+    }
+  }
+}

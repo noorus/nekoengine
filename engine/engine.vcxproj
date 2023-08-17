@@ -322,6 +322,7 @@
     <ClCompile Include="src\js_text.cpp" />
     <ClCompile Include="src\ortbicamera.cpp" />
     <ClCompile Include="src\particlemanager.cpp" />
+    <ClCompile Include="src\spriteanim.cpp" />
     <ClCompile Include="src\steam.cpp" />
     <ClCompile Include="src\steamresult.cpp" />
     <ClCompile Include="src\text.cpp" />
@@ -501,6 +502,7 @@
     <ClInclude Include="include\shaders.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\specialrenderers.h" />
+    <ClInclude Include="include\spriteanim.h" />
     <ClInclude Include="include\steam.h" />
     <ClInclude Include="include\subsystem.h" />
     <ClInclude Include="include\surface.h" />
@@ -520,6 +522,8 @@
     <None Include="..\bin\data\includes.json" />
     <None Include="..\bin\data\materials.json" />
     <None Include="..\bin\data\pipelines.json" />
+    <None Include="..\bin\data\spriteanimdefs.json" />
+    <None Include="..\bin\data\spriteanimsets.json" />
     <None Include="..\bin\scripts\.eslintrc.json" />
     <None Include="..\bin\scripts\initialization.js" />
     <None Include="..\bin\shaders\dbg_depthvis2d.frag" />

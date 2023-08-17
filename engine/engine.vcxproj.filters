@@ -432,6 +432,9 @@
     <ClCompile Include="..\extern\imgui\misc\freetype\imgui_freetype.cpp">
       <Filter>Source Files\extern\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="src\spriteanim.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">
@@ -827,6 +830,9 @@
     <ClInclude Include="include\gfx_imconfig.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="include\spriteanim.h">
+      <Filter>Header Files\gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="engine.manifest" />
@@ -955,6 +961,12 @@
     </None>
     <None Include="..\extern\steamworks\sdk\public\steam\steam_api.json">
       <Filter>Header Files\steam\sdk</Filter>
+    </None>
+    <None Include="..\bin\data\spriteanimdefs.json">
+      <Filter>Data</Filter>
+    </None>
+    <None Include="..\bin\data\spriteanimsets.json">
+      <Filter>Data</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

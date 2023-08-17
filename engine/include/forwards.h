@@ -103,4 +103,7 @@ namespace neko {
   class ParticleSystemManager;
   using ParticleSystemManagerPtr = shared_ptr<ParticleSystemManager>;
 
+  class SpriteManager;
+  using SpriteManagerPtr = shared_ptr<SpriteManager>;
+
 }

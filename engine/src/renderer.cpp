@@ -14,6 +14,7 @@
 #include "math_aabb.h"
 #include "text.h"
 #include "filesystem.h"
+#include "spriteanim.h"
 #include "frustum.h"
 
 namespace neko {
@@ -279,6 +280,7 @@ namespace neko {
     builtin_.skybox_ = meshes_->createStatic( GL_TRIANGLES, skybox.first, skybox.second );
 
     particles_ = make_shared<ParticleSystemManager>();
+    sprites_ = make_shared<SpriteManager>( this );
     origoTest_ = make_shared<AxesPointerRenderer>();
   }
 
@@ -300,6 +302,10 @@ namespace neko {
 
     fonts_->initializeRender( this );
     fonts_->loadFile( R"(fonts.json)" );
+
+    sprites_->initialize();
+    sprites_->loadAnimdefFile( R"(spriteanimdefs.json)" );
+    sprites_->loadAnimsetFile( R"(spriteanimsets.json)" );
 
     //loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
     loader_->addLoadTask( { LoadTask( make_shared<MeshNode>(), R"(camera.gltf)" ) } );
@@ -989,6 +995,7 @@ namespace neko {
 
   void Renderer::shutdown()
   {
+    sprites_->shutdown();
     fonts_->shutdownRender();
   }
 
@@ -1001,6 +1008,8 @@ namespace neko {
 
     origoTest_.reset();
     particles_.reset();
+
+    sprites_.reset();
 
     ctx_.mergedMain_.reset();
     ctx_.fboMain_.reset();
