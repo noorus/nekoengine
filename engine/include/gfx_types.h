@@ -82,7 +82,35 @@ namespace neko {
     PixFmtColorR16f
   };
 
-  struct ImageData: public nocopy
+  class Pixmap : public nocopy {
+  private:
+    int width_ = 0;
+    int height_ = 0;
+    PixelFormat format_;
+    vector<uint8_t> data_;
+  public:
+    Pixmap( PixelFormat fmt );
+    Pixmap( int width, int height, PixelFormat fmt, uint8_t* data );
+    Pixmap( const Pixmap& from, int x, int y, int width, int height );
+    Pixmap( Pixmap&& rhs ) noexcept
+    {
+      width_ = rhs.width_;
+      height_ = rhs.height_;
+      format_ = rhs.format_;
+      data_.swap( rhs.data_ );
+    }
+    static Pixmap fromPNG( const vector<uint8_t>& input );
+    static Pixmap fromEXR( const vector<uint8_t>& input );
+    static Pixmap fromTIFF( const utf8String& filename );
+    void reset();
+    inline bool empty() const noexcept { return data_.empty(); }
+    inline int width() const noexcept { return width_; }
+    inline int height() const noexcept { return height_; }
+    inline PixelFormat format() const noexcept { return format_; }
+    inline const vector<uint8_t>& data() const noexcept { return data_; }
+  };
+
+  /* struct ImageData: public nocopy
   {
     unsigned int width_ = 0;
     unsigned int height_ = 0;
@@ -98,7 +126,7 @@ namespace neko {
       data_.swap( rhs.data_ );
       format_ = rhs.format_;
     }
-  };
+  };*/
 
   enum GLFormatSizeFlagBits
   {

@@ -343,10 +343,14 @@ namespace neko {
       for ( auto& layer : mat->layers_ )
       {
         assert( layer.hasHostCopy() );
-        layer.texture_ = make_shared<Texture>( this,
-          layer.image_.width_, layer.image_.height_,
-          layer.image_.format_, layer.image_.data_.data(),
-          mat->wantWrapping_, mat->wantFiltering_ );
+        layer.texture_ = make_shared<Texture>(
+          this,
+          layer.image_.width(),
+          layer.image_.height(),
+          layer.image_.format(),
+          layer.image_.data().data(),
+          mat->wantWrapping_,
+          mat->wantFiltering_ );
         layer.deleteHostCopy();
       }
     }

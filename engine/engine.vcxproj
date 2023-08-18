@@ -322,6 +322,7 @@
     <ClCompile Include="src\js_text.cpp" />
     <ClCompile Include="src\ortbicamera.cpp" />
     <ClCompile Include="src\particlemanager.cpp" />
+    <ClCompile Include="src\pixmap.cpp" />
     <ClCompile Include="src\spriteanim.cpp" />
     <ClCompile Include="src\steam.cpp" />
     <ClCompile Include="src\steamresult.cpp" />

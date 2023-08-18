@@ -9,23 +9,24 @@ namespace neko {
 
   struct MaterialLayer: public nocopy {
   public:
-    ImageData image_;
+    Pixmap image_;
     TexturePtr texture_;
   public:
-    inline const bool hasHostCopy() const noexcept { return !image_.data_.empty(); }
+    inline const bool hasHostCopy() const noexcept { return !image_.empty(); }
     inline void deleteHostCopy()
     {
-      image_.data_.clear();
+      image_.reset();
     }
     inline const bool uploaded() const noexcept { return ( texture_.get() != nullptr ); }
-    MaterialLayer() {}
+    MaterialLayer(): image_( PixFmtColorRGBA8 ) {}
+    MaterialLayer( Pixmap&& from ): image_( move( from ) ) {}
     // move constructor
     MaterialLayer( MaterialLayer&& rhs ) noexcept:
     image_( move( rhs.image_ ) ), texture_( rhs.texture_ )
     {
     }
-    inline size_t width() const noexcept { return image_.width_; }
-    inline size_t height() const noexcept { return image_.height_; }
+    inline int width() const noexcept { return image_.width(); }
+    inline int height() const noexcept { return image_.height(); }
   };
 
   using MaterialLayers = vector<MaterialLayer>;
