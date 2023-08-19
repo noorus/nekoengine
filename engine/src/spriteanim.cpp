@@ -5,6 +5,7 @@
 #include "console.h"
 #include "engine.h"
 #include "loader.h"
+#include "renderer.h"
 #include "materials.h"
 
 namespace neko {
@@ -62,6 +63,15 @@ namespace neko {
     loadAnimdefJSON( input );
   }
 
+  void SpriteManager::draw( GameTime time )
+  {
+    auto& mat = renderer_->useMaterial( "demo_shroom" );
+    auto ppl = &renderer_->shaders().usePipeline( "shroom" );
+    auto lr = math::iround( (Real)time ) % 4;
+    
+    ppl->setUniform( "tex_layer", 0 );
+  }
+
   inline vec2 readJSONVec2( const json& obj )
   {
     if ( !obj.is_object() )
@@ -71,6 +81,18 @@ namespace neko {
       ret.x = obj["x"].get<float>();
     if ( obj.contains( "y" ) )
       ret.y = obj["y"].get<float>();
+    return ret;
+  }
+
+  inline vec2i readJSONVec2i( const json& obj )
+  {
+    if ( !obj.is_object() )
+      NEKO_EXCEPT( "Expected JSON vec2i is not an object" );
+    vec2i ret = { 0, 0 };
+    if ( obj.contains( "x" ) )
+      ret.x = math::iround( obj["x"].get<float>() );
+    if ( obj.contains( "y" ) )
+      ret.y = math::iround( obj["y"].get<float>() );
     return ret;
   }
 
@@ -107,11 +129,24 @@ namespace neko {
         {
           SpriteAnimationSetDefinitionEntry def;
           def.name_ = key;
+          auto sheetname = value["sheet"].get<utf8String>();
           def.defName_ = value["animdef"].get<utf8String>();
           if ( value.contains( "sheetpos" ) )
-            def.sheetPos_ = readJSONVec2( value["sheetpos"] );
+            def.sheetPos_ = readJSONVec2i( value["sheetpos"] );
           if ( value.contains( "flip-frames-x" ) )
             def.flipFramesX_ = readJSONVector<int>( value["flip-frames-x"] );
+          auto mat = renderer_->materials().get( sheetname );
+          if ( mat )
+          {
+            const auto& adef = animdefs_.at( def.defName_ );
+            auto sheet = Pixmap::from( mat->layer( 0 ).image() );
+            sheet.flipVertical();
+            Pixmap cut( sheet, def.sheetPos_.x, def.sheetPos_.y, adef.frameCount() * adef.width(), adef.height() );
+            auto matname = setkey + "_" + def.name_;
+            cut.writePNG( matname + ".png" );
+            def.material_ = renderer_->createTextureWithData( matname, adef.width(), adef.height(),
+              adef.frameCount(), cut.format(), cut.data().data(), Texture::ClampBorder, Texture::Nearest );
+          }
           entries[key] = move( def );
         }
         setdefs_[setkey] = move( entries );

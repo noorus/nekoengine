@@ -28,7 +28,7 @@ namespace neko {
       NEKO_EXCEPT( "Unsupported pixel format passed to Pixmap" );
   }
 
-  Pixmap::Pixmap( int width, int height, PixelFormat fmt, uint8_t* data ):
+  Pixmap::Pixmap( int width, int height, PixelFormat fmt, const uint8_t* data ):
     width_( width ), height_( height ), format_( fmt )
   {
     assert( width_ > 0 && height_ > 0 );
@@ -44,23 +44,30 @@ namespace neko {
       memcpy( data_.data(), data, datasize );
   }
 
-  Pixmap::Pixmap( const Pixmap& from, int x, int y, int width, int height )
+  Pixmap::Pixmap( const Pixmap& from, int x, int y, int width, int height ):
+    width_( width ), height_( height ), format_( from.format() )
   {
-    assert( x >= 0 && y >= 0 && width > 0 && height > 0 );
-    if ( x + width > from.width() || y + height > from.height() )
+    assert( x >= 0 && y >= 0 && width_ > 0 && height_ > 0 );
+    if ( x + width_ > from.width() || y + height_ > from.height() )
       NEKO_EXCEPT( "Crop constructor's parameters would overshoot source dimensions" );
 
     auto stride = g_fmtInfo.at( format_ ).first * g_fmtInfo.at( format_ ).second;
-    data_.resize( width * height * stride );
+    data_.resize( width_ * height_ * stride );
 
     int dstrow = 0;
-    for ( int srcrow = y; srcrow < ( y + height ); ++srcrow )
+    for ( int srcrow = y; srcrow < ( y + height_ ); ++srcrow )
     {
       auto srcoffset = ( ( srcrow * from.width() * stride ) + ( x * stride ) );
-      auto dstoffset = ( ( dstrow * width * stride ) );
-      memcpy( data_.data() + dstoffset, from.data().data() + srcoffset, width * stride );
+      auto dstoffset = ( ( dstrow * width_ * stride ) );
+      memcpy( data_.data() + dstoffset, from.data().data() + srcoffset, width_ * stride );
       dstrow++;
     }
+  }
+
+  Pixmap Pixmap::from( const Pixmap& rhs )
+  {
+    Pixmap out( rhs.width(), rhs.height(), rhs.format(), rhs.data().data() );
+    return out;
   }
 
   Pixmap Pixmap::fromPNG( const vector<uint8_t>& input )
@@ -246,9 +253,9 @@ namespace neko {
           TinyTIFFReader_getSampleData( tiff, tiffSource.data(), s );
           if ( TinyTIFFReader_wasError( tiff ) )
             NEKO_EXCEPT( "TIFF reader error" );
-          for ( unsigned int y = 0; y < out.height_; ++y )
+          for ( auto y = 0; y < out.height_; ++y )
           {
-            for ( unsigned int x = 0; x < out.width_; ++x )
+            for ( auto x = 0; x < out.width_; ++x )
             {
               size_t p = ( y * out.width_ ) + x;
               size_t d = ( ( ( y * out.width_ ) + x ) * spp ) + s;
@@ -273,6 +280,34 @@ namespace neko {
     width_ = 0;
     height_ = 0;
     data_.clear();
+  }
+
+  void Pixmap::writePNG( const utf8String& filename ) const
+  {
+    platform::FileWriter writer( filename );
+    vector<uint8_t> buffer;
+    if ( format_ == PixFmtColorRGBA8 )
+      lodepng::encode( buffer, data_.data(), width_, height_, LCT_RGBA, 8 );
+    else if ( format_ == PixFmtColorRGB8 )
+      lodepng::encode( buffer, data_.data(), width_, height_, LCT_RGB, 8 );
+    else if ( format_ == PixFmtColorR8 )
+      lodepng::encode( buffer, data_.data(), width_, height_, LCT_GREY, 8 );
+    writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) );
+  }
+
+  void Pixmap::flipVertical()
+  {
+    auto stride = g_fmtInfo.at( format_ ).first * g_fmtInfo.at( format_ ).second;
+    auto line = width_ * stride;
+    vector<uint8_t> tmp( width_ * stride );
+    for ( auto i = 0; i < height_ / 2; ++i )
+    {
+      auto a = data_.data() + ( i * line );
+      auto b = data_.data() + ( ( height_ - i - 1 ) * line );
+      memcpy( tmp.data(), a, line );
+      memcpy( a, b, line );
+      memcpy( b, tmp.data(), line );
+    }
   }
 
 }

@@ -221,6 +221,7 @@ namespace neko {
     Glyph* getGlyph( FT_Library ft, FT_Face face, GlyphIndex index );
     inline bool dirty() const { return dirty_; }
     inline void markClean() { dirty_ = false; }
+    inline const MaterialPtr material() const { return material_; }
     const TextureAtlas& atlas() const;
     virtual ~FontStyle();
   };

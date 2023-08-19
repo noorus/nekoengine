@@ -65,6 +65,7 @@ namespace neko {
   {
     uint8_t r, g, b, a;
   };
+
 #pragma pack( pop )
 
   enum PixelFormat
@@ -90,7 +91,7 @@ namespace neko {
     vector<uint8_t> data_;
   public:
     Pixmap( PixelFormat fmt );
-    Pixmap( int width, int height, PixelFormat fmt, uint8_t* data );
+    Pixmap( int width, int height, PixelFormat fmt, const uint8_t* data );
     Pixmap( const Pixmap& from, int x, int y, int width, int height );
     Pixmap( Pixmap&& rhs ) noexcept
     {
@@ -99,34 +100,19 @@ namespace neko {
       format_ = rhs.format_;
       data_.swap( rhs.data_ );
     }
+    static Pixmap from( const Pixmap& rhs );
     static Pixmap fromPNG( const vector<uint8_t>& input );
     static Pixmap fromEXR( const vector<uint8_t>& input );
     static Pixmap fromTIFF( const utf8String& filename );
-    void reset();
     inline bool empty() const noexcept { return data_.empty(); }
     inline int width() const noexcept { return width_; }
     inline int height() const noexcept { return height_; }
     inline PixelFormat format() const noexcept { return format_; }
     inline const vector<uint8_t>& data() const noexcept { return data_; }
+    void writePNG( const utf8String& filename ) const;
+    void reset();
+    void flipVertical();
   };
-
-  /* struct ImageData: public nocopy
-  {
-    unsigned int width_ = 0;
-    unsigned int height_ = 0;
-    vector<uint8_t> data_;
-    PixelFormat format_ = PixFmtColorRGBA8;
-    gl::GLenum uploadedFormat_ = gl::GLenum::GL_NONE;
-    ImageData() {}
-    // move constructor
-    ImageData( ImageData&& rhs ) noexcept
-    {
-      width_ = rhs.width_;
-      height_ = rhs.height_;
-      data_.swap( rhs.data_ );
-      format_ = rhs.format_;
-    }
-  };*/
 
   enum GLFormatSizeFlagBits
   {

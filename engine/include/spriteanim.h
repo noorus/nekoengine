@@ -30,8 +30,9 @@ namespace neko {
   {
     utf8String name_;
     utf8String defName_;
-    vec2 sheetPos_ { 0.0f, 0.0f };
+    vec2i sheetPos_ { 0, 0 };
     vector<int> flipFramesX_ {};
+    MaterialPtr material_;
   };
 
   using SpriteAnimationSetDefinitionMap = map<utf8String, map<utf8String, SpriteAnimationSetDefinitionEntry>>;
@@ -41,8 +42,8 @@ namespace neko {
     MaterialPtr material_;
     vec2 frameDimensions_ { 0.0f, 0.0f };
     uint32_t frameCount_ = 0;
-  public:
-    vec2 uv() const;
+  public: // tex_layer
+    void draw( shaders::Shaders& shaders, const Material& mat );
   };
 
   using SpritePtr = shared_ptr<Sprite>;
@@ -56,6 +57,7 @@ namespace neko {
     SpriteManager( Renderer* renderer );
     void initialize();
     void shutdown();
+    void draw( GameTime time );
     void loadAnimdefJSONRaw( const nlohmann::json& arr );
     void loadAnimdefJSON( const utf8String& input );
     void loadAnimdefFile( const utf8String& filename );

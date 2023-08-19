@@ -75,14 +75,7 @@ namespace neko {
             static_cast<int>( pr.second->atlas().dimensions().y ),
             PixFmtColorR8, pr.second->atlas().data(), Texture::ClampBorder, Texture::Nearest );
           pr.second->markClean();
-          platform::FileWriter writer( tmp );
-          vector<uint8_t> buffer;
-          lodepng::encode( buffer,
-            pr.second->atlas().data(),
-            static_cast<unsigned int>( pr.second->atlas().dimensions().x ),
-            static_cast<unsigned int>( pr.second->atlas().dimensions().y ),
-            LCT_GREY, 8 );
-          writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) );
+          pr.second->material()->layer( 0 ).image().writePNG( tmp );
         }
       }
     }

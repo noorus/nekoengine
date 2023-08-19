@@ -90,7 +90,6 @@ namespace neko {
     void implDeleteRenderbuffer( GLuint handle );
     GLuint implCreateFramebuffer( int width, int height );
     void implDeleteFramebuffer( GLuint handle );
-    shaders::Pipeline& useMaterial( const utf8String& name );
     void bindVao( GLuint id );
     void bindTexture( GLuint unit, TexturePtr texture );
     void bindTextures( const vector<TexturePtr>& textures, GLuint firstUnit = 0 );
@@ -144,9 +143,13 @@ namespace neko {
     void initialize( int width, int height );
     void shutdown();
     MaterialPtr createTextureWithData( const utf8String& name, int width, int height, PixelFormat format,
-      const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge,
+      const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
+    MaterialPtr createTextureWithData( const utf8String& name, int width, int height, int depth,
+      PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge,
       const Texture::Filtering filtering = Texture::Linear );
     inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
+    inline MaterialManager& materials() noexcept { return *( materials_.get() ); }
+    shaders::Pipeline& useMaterial( const utf8String& name );
     inline TexturePtr getMergedMainFramebuffer()
     {
       if ( ctx_.ready() && ctx_.mergedMain_->available() )

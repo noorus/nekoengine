@@ -429,6 +429,12 @@ namespace neko {
     return materials_->createTextureWithData( name, width, height, format, data, wrapping, filtering );
   }
 
+  MaterialPtr Renderer::createTextureWithData( const utf8String& name, int width, int height, int depth,
+    PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
+  {
+    return materials_->createTextureWithData( name, width, height, depth, format, data, wrapping, filtering );
+  }
+
   shaders::Pipeline& Renderer::useMaterial( const utf8String& name )
   {
     GLuint empties[4] = { 0, 0, 0, 0 };

@@ -53,6 +53,16 @@
     ]
   },
   {
+    "name": "shroom",
+    "vert": "shroom.vert",
+    "frag": "shroom.frag",
+    "uniforms": [
+      "model",
+      "tex",
+      "tex_layer"
+    ]
+  },
+  {
     "name": "particle_world",
     "vert": "particle_world.vert",
     "geom": "particle_world.geom",

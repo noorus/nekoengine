@@ -34,6 +34,20 @@ namespace neko {
     return mat;
   }
 
+  MaterialPtr MaterialManager::createTextureWithData( const utf8String& name, int width, int height, int depth,
+    PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
+  {
+    MaterialPtr mat = make_shared<Material>( name );
+    mat->type_ = Material::UnlitSimple;
+    MaterialLayer layer( move( Pixmap( width * depth, height, format, static_cast<uint8_t*>( const_cast<void*>( data ) ) ) ) );
+    layer.texture_ = make_shared<Texture>(
+      renderer_, width, layer.height(), depth, layer.image_.format(), layer.image_.data().data(), wrapping, filtering );
+    mat->layers_.push_back( move( layer ) );
+    mat->loaded_ = true;
+    map_[name] = mat;
+    return mat;
+  }
+
   void MaterialManager::loadJSONRaw( const nlohmann::json& obj )
   {
     if ( obj.is_array() )

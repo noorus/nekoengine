@@ -27,6 +27,7 @@ namespace neko {
     }
     inline int width() const noexcept { return image_.width(); }
     inline int height() const noexcept { return image_.height(); }
+    inline const Pixmap& image() const noexcept { return image_; }
   };
 
   using MaterialLayers = vector<MaterialLayer>;
@@ -66,7 +67,7 @@ namespace neko {
     }
     inline const MaterialLayer& layer( size_t index ) const
     {
-      assert( index < layers_.size() && layers_[index].uploaded() );
+      assert( index < layers_.size() );
       return layers_[index];
     }
   };
@@ -84,8 +85,10 @@ namespace neko {
     Renderer* renderer_;
   public:
     MaterialManager( Renderer* renderer, ThreadedLoaderPtr loader );
-    MaterialPtr createTextureWithData( const utf8String& name, int width, int height, PixelFormat format,
-      const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering );
+    MaterialPtr createTextureWithData( const utf8String& name, int width, int height, PixelFormat format, const void* data,
+      const Texture::Wrapping wrapping, const Texture::Filtering filtering );
+    MaterialPtr createTextureWithData( const utf8String& name, int width, int height, int depth,
+      PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering );
     void loadJSONRaw( const nlohmann::json& arr );
     void loadJSON( const utf8String& input );
     void loadFile( const utf8String& filename );
