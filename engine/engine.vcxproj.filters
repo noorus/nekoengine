@@ -836,6 +836,9 @@
     <ClInclude Include="include\spriteanim.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
+    <ClInclude Include="include\json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="engine.manifest" />

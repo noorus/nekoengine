@@ -470,6 +470,7 @@
     <ClInclude Include="include\gfx_types.h" />
     <ClInclude Include="include\gui.h" />
     <ClInclude Include="include\input.h" />
+    <ClInclude Include="include\json.h" />
     <ClInclude Include="include\js_camera.h" />
     <ClInclude Include="include\js_console.h" />
     <ClInclude Include="include\js_game.h" />

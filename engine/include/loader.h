@@ -3,6 +3,7 @@
 #include "renderer.h"
 #include "font.h"
 #include "gfx_types.h"
+#include "spriteanim.h"
 
 namespace neko {
 
@@ -34,7 +35,8 @@ namespace neko {
       Load_Texture,
       Load_Fontface,
       Load_Model,
-      Load_Animation
+      Load_Animation,
+      Load_Spritesheet
     } type_;
     struct TextureLoad {
       MaterialPtr material_;
@@ -53,6 +55,10 @@ namespace neko {
       AnimationEntryPtr animation_;
       utf8String path_;
     } animationLoad;
+    struct SpritesheetLoad
+    {
+      SpriteAnimationSetDefinitionPtr def_;
+    } spriteLoad;
     LoadTask( MaterialPtr material, vector<utf8String> paths ): type_( Load_Texture )
     {
       textureLoad.material_ = move( material );
@@ -74,6 +80,10 @@ namespace neko {
       animationLoad.animation_ = move( animation );
       animationLoad.path_ = path;
     }
+    LoadTask( SpriteAnimationSetDefinitionPtr ptr ): type_( Load_Spritesheet )
+    {
+      spriteLoad.def_ = move( ptr );
+    }
   };
 
   using LoadTaskVector = vector<LoadTask>;
@@ -87,15 +97,19 @@ namespace neko {
     platform::Event finishedFontsEvent_;
     platform::Event finishedModelsEvent_;
     platform::Event finishedAnimationsEvent_;
+    platform::Event finishedSpritesheetsEvent_;
     platform::RWLock finishedTasksLock_;
     LoadTaskVector newTasks_;
     MaterialVector finishedMaterials_;
     vector<MeshNodePtr> finishedModels_;
     FontVector finishedFonts_;
     AnimationVector finishedAnimations_;
+    SpriteAnimationSetDefinitionVector finishedSpritesheets_;
     void loadFontFace( LoadTask::FontfaceLoad& task );
     void loadModel( LoadTask::ModelLoad& task );
-    void loadTexture( LoadTask::TextureLoad& task );
+    Pixmap loadTexture( const utf8String& path );
+    void loadMaterial( LoadTask::TextureLoad& task );
+    void loadSpritesheet( LoadTask::SpritesheetLoad& task );
     void handleNewTasks();
   private:
     static bool threadProc( platform::Event& running, platform::Event& wantStop, void* argument );
@@ -107,6 +121,7 @@ namespace neko {
     void getFinishedFonts( FontVector& fonts );
     void getFinishedModels( vector<MeshNodePtr>& models );
     void getFinishedAnimations( AnimationVector& animations );
+    void getFinishedSpritesheets( SpriteAnimationSetDefinitionVector& sheets );
     void addLoadTask( const LoadTaskVector& resources );
     ~ThreadedLoader();
   };

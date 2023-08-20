@@ -5,6 +5,7 @@
 #include "renderer.h"
 #include "console.h"
 #include "filesystem.h"
+#include "spriteanim.h"
 
 #include "lodepng.h"
 #include "tinytiffreader.hxx"
@@ -119,6 +120,19 @@ namespace neko {
     finishedAnimationsEvent_.reset();
   }
 
+  void ThreadedLoader::getFinishedSpritesheets( SpriteAnimationSetDefinitionVector& sheets )
+  {
+    if ( !finishedSpritesheetsEvent_.check() )
+      return;
+
+    finishedTasksLock_.lock();
+    sheets.swap( finishedSpritesheets_ );
+    finishedTasksLock_.unlock();
+
+    finishedSpritesheets_.clear();
+    finishedSpritesheetsEvent_.reset();
+  }
+
   using namespace gl;
 
   void ThreadedLoader::loadFontFace( LoadTask::FontfaceLoad& task )
@@ -162,37 +176,45 @@ namespace neko {
     finishedTasksLock_.unlock();
   }
 
-  void ThreadedLoader::loadTexture( LoadTask::TextureLoad& task )
+  Pixmap ThreadedLoader::loadTexture( const utf8String& path )
+  {
+    vector<uint8_t> input;
+    Locator::fileSystem().openFile( Dir_Textures, path )->readFullVector( input );
+
+    auto ext = utils::extractExtension( path );
+
+    if ( ext == L"png" )
+    {
+      auto pmp = Pixmap::fromPNG( input );
+      Locator::console().printf( srcLoader, "Loaded PNG texture %s, %ix%i, rgba8", path.c_str(), pmp.width(), pmp.height() );
+      return pmp;
+    }
+    else if ( ext == L"exr" )
+    {
+      auto pmp = Pixmap::fromEXR( input );
+      Locator::console().printf(
+        srcLoader, "Loaded EXR texture %s, %ix%i, rgba32f", path.c_str(), pmp.width(), pmp.height() );
+      return pmp;
+    }
+    else if ( ext == L"tif" )
+    {
+      auto pmp = Pixmap::fromTIFF( path );
+      Locator::console().printf( srcLoader, "Loaded TIFF texture %s, %ix%i", path.c_str(), pmp.width(), pmp.height() );
+      return pmp;
+    }
+    else
+      NEKO_EXCEPT( "Unsupport image format in load texture task" );
+
+    return Pixmap( PixFmtColorRGBA8 );
+  }
+
+  void ThreadedLoader::loadMaterial( LoadTask::TextureLoad& task )
   {
     for ( const auto& target : task.paths_ )
     {
-      vector<uint8_t> input;
-      Locator::fileSystem().openFile( Dir_Textures, target )->readFullVector( input );
-      vector<uint8_t> rawData;
+      MaterialLayer layer( loadTexture( target ) );
       task.material_->wantWrapping_ = Texture::Repeat;
-      auto ext = utils::extractExtension( target );
-      if ( ext == L"png" )
-      {
-        MaterialLayer layer( Pixmap::fromPNG( input ) );
-        Locator::console().printf( srcLoader, "Loaded PNG texture %s, %ix%i, rgba8", target.c_str(), layer.width(), layer.height() );
-        task.material_->layers_.push_back( move( layer ) );
-      }
-      else if ( ext == L"exr" )
-      {
-        MaterialLayer layer( Pixmap::fromEXR( input ) );
-        Locator::console().printf(
-          srcLoader, "Loaded EXR texture %s, %ix%i, rgba32f", target.c_str(), layer.width(), layer.height() );
-        task.material_->layers_.push_back( move( layer ) );
-      }
-      else if ( ext == L"tif" )
-      {
-        MaterialLayer layer( Pixmap::fromTIFF( target ) );
-        Locator::console().printf(
-          srcLoader, "Loaded TIFF texture %s, %ix%i", target.c_str(), layer.width(), layer.height() );
-        task.material_->layers_.push_back( move( layer ) );
-      }
-      else
-        NEKO_EXCEPT( "Unsupport image format in load texture task" );
+      task.material_->layers_.push_back( move( layer ) );
     }
 
     task.material_->loaded_ = true;
@@ -200,6 +222,31 @@ namespace neko {
     finishedTasksLock_.lock();
     finishedMaterials_.push_back( task.material_ );
     finishedTasksLock_.unlock();
+  }
+
+  void ThreadedLoader::loadSpritesheet( LoadTask::SpritesheetLoad& task )
+  {
+    map<utf8String, PixmapPtr> textures;
+    for ( const auto& [key, it] : task.def_->entries_ )
+    {
+      if ( it->material_ )
+        continue;
+
+      if ( !textures.contains( it->sheetName_ ) )
+      {
+        textures[it->sheetName_] = make_shared<Pixmap>( loadTexture( it->sheetName_ ) );
+        textures[it->sheetName_]->flipVertical();
+      }
+
+      auto sheet = textures.at( it->sheetName_ );
+      Pixmap cut( *sheet, it->sheetPos_.x, it->sheetPos_.y, it->definition_->frameCount() * it->definition_->width(),
+        it->definition_->height() );
+      auto matname = task.def_->name_ + "_" + it->name_;
+      cut.writePNG( matname + ".png" );
+    }
+    //const auto& adef = animdefs_.at( def.defName_ );
+    //def.material_ = renderer_->createTextureWithData( matname, adef.width(), adef.height(), adef.frameCount(), cut.format(),
+    //  cut.data().data(), Texture::ClampBorder, Texture::Nearest );
   }
 
   // Context: Worker thread
@@ -216,7 +263,7 @@ namespace neko {
     {
       if ( task.type_ == LoadTask::Load_Texture )
       {
-        loadTexture( task.textureLoad );
+        loadMaterial( task.textureLoad );
       }
       else if ( task.type_ == LoadTask::Load_Fontface )
       {
@@ -225,6 +272,10 @@ namespace neko {
       else if ( task.type_ == LoadTask::Load_Model )
       {
         loadModel( task.modelLoad );
+      }
+      else if ( task.type_ == LoadTask::Load_Spritesheet )
+      {
+        loadSpritesheet( task.spriteLoad );
       }
     }
 
@@ -239,6 +290,9 @@ namespace neko {
 
     if ( !finishedAnimations_.empty() )
       finishedAnimationsEvent_.set();
+
+    if ( !finishedSpritesheets_.empty() )
+      finishedSpritesheetsEvent_.set();
   }
 
   ThreadedLoader::~ThreadedLoader()

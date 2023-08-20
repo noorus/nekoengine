@@ -24,18 +24,33 @@ namespace neko {
     inline uint32_t frameCount() const noexcept { return frameCount_; }
   };
 
-  using SpriteAnimationDefinitionMap = map<utf8String, SpriteAnimationDefinition>;
+  using SpriteAnimationDefinitionPtr = shared_ptr<SpriteAnimationDefinition>;
+  using SpriteAnimationDefinitionMap = map<utf8String, SpriteAnimationDefinitionPtr>;
 
   struct SpriteAnimationSetDefinitionEntry
   {
-    utf8String name_;
-    utf8String defName_;
-    vec2i sheetPos_ { 0, 0 };
-    vector<int> flipFramesX_ {};
+    const utf8String name_;
+    const utf8String sheetName_;
+    const utf8String defName_;
+    const vec2i sheetPos_ { 0, 0 };
+    const vector<int> flipFramesX_ {};
+    SpriteAnimationDefinitionPtr definition_;
     MaterialPtr material_;
+  public:
+    SpriteAnimationSetDefinitionEntry( const utf8String& name, const utf8String& sheetname, const utf8String& defname,
+      const vec2i& sheetpos, const vector<int>& flipframesx );
   };
 
-  using SpriteAnimationSetDefinitionMap = map<utf8String, map<utf8String, SpriteAnimationSetDefinitionEntry>>;
+  using SpriteAnimationSetDefinitionEntryPtr = shared_ptr<SpriteAnimationSetDefinitionEntry>;
+
+  struct SpriteAnimationSetDefinition
+  {
+    utf8String name_;
+    map<utf8String, SpriteAnimationSetDefinitionEntryPtr> entries_;
+  };
+
+  using SpriteAnimationSetDefinitionPtr = shared_ptr<SpriteAnimationSetDefinition>;
+  using SpriteAnimationSetDefinitionVector = vector<SpriteAnimationSetDefinitionPtr>;
 
   class Sprite {
   private:
@@ -52,7 +67,7 @@ namespace neko {
   private:
     Renderer* renderer_ = nullptr;
     SpriteAnimationDefinitionMap animdefs_;
-    SpriteAnimationSetDefinitionMap setdefs_;
+    //SpriteAnimationSetDefinitionMap setdefs_;
   public:
     SpriteManager( Renderer* renderer );
     void initialize();

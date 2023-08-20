@@ -149,6 +149,7 @@ namespace neko {
       const Texture::Filtering filtering = Texture::Linear );
     inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
     inline MaterialManager& materials() noexcept { return *( materials_.get() ); }
+    inline ThreadedLoaderPtr loader() noexcept { return loader_; }
     shaders::Pipeline& useMaterial( const utf8String& name );
     inline TexturePtr getMergedMainFramebuffer()
     {

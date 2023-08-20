@@ -114,6 +114,8 @@ namespace neko {
     void flipVertical();
   };
 
+  using PixmapPtr = shared_ptr<Pixmap>;
+
   enum GLFormatSizeFlagBits
   {
     GL_FORMAT_SIZE_PACKED_BIT = 0x00000001,
