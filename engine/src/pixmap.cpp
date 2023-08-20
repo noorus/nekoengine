@@ -310,4 +310,25 @@ namespace neko {
     }
   }
 
+  void Pixmap::flipPartHorizontal( int x, int y, int width, int height )
+  {
+    auto stride = g_fmtInfo.at( format_ ).first * g_fmtInfo.at( format_ ).second;
+    auto line = width_ * stride;
+    if ( stride == 4 )
+    {
+      for ( auto i = y; i < ( y + height ); ++i )
+        for ( auto j = 0; j < width / 2; ++j )
+        {
+          auto base = data_.data() + ( i * line );
+          auto a = reinterpret_cast<uint32_t*>( base + ( ( x + j ) * stride ) );
+          auto b = reinterpret_cast<uint32_t*>( base + ( ( x + ( width - j - 1 ) ) * stride ) );
+          auto v = *a;
+          *a = *b;
+          *b = v;
+        }
+    }
+    else
+      NEKO_EXCEPT( "Unsupported stride in flipPartHorizontal" );
+  }
+
 }

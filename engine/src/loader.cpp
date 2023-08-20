@@ -241,7 +241,12 @@ namespace neko {
       auto sheet = textures.at( it->sheetName_ );
       Pixmap cut( *sheet, it->sheetPos_.x, it->sheetPos_.y, it->definition_->frameCount() * it->definition_->width(),
         it->definition_->height() );
+
       auto matname = task.def_->name_ + "_" + it->name_;
+
+      for ( auto i : it->flipFramesX_ )
+        cut.flipPartHorizontal( i * it->definition_->width(), 0, it->definition_->width(), it->definition_->height() );
+
       cut.writePNG( matname + ".png" );
     }
     //const auto& adef = animdefs_.at( def.defName_ );
