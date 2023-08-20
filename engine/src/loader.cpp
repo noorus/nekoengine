@@ -155,7 +155,7 @@ namespace neko {
 
   void ThreadedLoader::loadModel( LoadTask::ModelLoad& task )
   {
-    auto path = task.path_;
+    auto& path = task.path_;
 
     auto filename = utils::extractFilename( path );
     auto filepath = utils::extractFilepath( R"(assets\meshes\)" + path );
@@ -215,6 +215,8 @@ namespace neko {
       MaterialLayer layer( loadTexture( target ) );
       task.material_->wantWrapping_ = Texture::Repeat;
       task.material_->layers_.push_back( move( layer ) );
+      task.material_->width_ = layer.width();
+      task.material_->height_ = layer.height();
     }
 
     task.material_->loaded_ = true;
@@ -229,29 +231,59 @@ namespace neko {
     map<utf8String, PixmapPtr> textures;
     for ( const auto& [key, it] : task.def_->entries_ )
     {
-      if ( it->material_ )
-        continue;
-
       if ( !textures.contains( it->sheetName_ ) )
       {
         textures[it->sheetName_] = make_shared<Pixmap>( loadTexture( it->sheetName_ ) );
         textures[it->sheetName_]->flipVertical();
       }
 
-      auto sheet = textures.at( it->sheetName_ );
-      Pixmap cut( *sheet, it->sheetPos_.x, it->sheetPos_.y, it->definition_->frameCount() * it->definition_->width(),
-        it->definition_->height() );
+      auto w = it->definition_->width();
+      auto h = it->definition_->height();
 
-      auto matname = task.def_->name_ + "_" + it->name_;
+      auto& sheet = textures.at( it->sheetName_ );
+      if ( it->definition_->direction() == SpriteAnimationDefinition::Direction::Vertical )
+      {
+        Pixmap cut( *sheet, it->sheetPos_.x, it->sheetPos_.y, w,
+          it->definition_->frameCount() * h );
 
-      for ( auto i : it->flipFramesX_ )
-        cut.flipPartHorizontal( i * it->definition_->width(), 0, it->definition_->width(), it->definition_->height() );
+        for ( auto i : it->flipFramesX_ )
+          cut.flipRectHorizontal( 0, i * h, w, h );
 
-      cut.writePNG( matname + ".png" );
+        cut.flipVertical();
+        MaterialLayer layer( move( cut ) );
+        it->material_->layers_.push_back( move( layer ) );
+      }
+      else
+      {
+        Pixmap cut( w, h * it->definition_->frameCount(), sheet->format(), nullptr );
+
+        for ( int i = 0; i < it->definition_->frameCount(); ++i )
+        {
+          cut.blitRectFrom( *sheet, 0, i * h, it->sheetPos_.x + ( i * w ), it->sheetPos_.y, w, h );
+          cut.flipRectVertical( 0, i * h, w, h );
+          if ( utils::contains( it->flipFramesX_, i ) )
+            cut.flipRectHorizontal( 0, i * h, w, h );
+        }
+
+        MaterialLayer layer( move( cut ) );
+        it->material_->layers_.push_back( move( layer ) );
+      }
+
+      it->material_->wantWrapping_ = Texture::Wrapping::ClampBorder;
+      it->material_->wantFiltering_ = Texture::Filtering::Nearest;
+      it->material_->width_ = it->definition_->width();
+      it->material_->height_ = it->definition_->height();
+      it->material_->arrayDepth_ = it->definition_->frameCount();
+      it->material_->loaded_ = true;
+
+      finishedTasksLock_.lock();
+      finishedMaterials_.push_back( it->material_ );
+      finishedTasksLock_.unlock();
     }
-    //const auto& adef = animdefs_.at( def.defName_ );
-    //def.material_ = renderer_->createTextureWithData( matname, adef.width(), adef.height(), adef.frameCount(), cut.format(),
-    //  cut.data().data(), Texture::ClampBorder, Texture::Nearest );
+
+    finishedTasksLock_.lock();
+    finishedSpritesheets_.push_back( task.def_ );
+    finishedTasksLock_.unlock();
   }
 
   // Context: Worker thread

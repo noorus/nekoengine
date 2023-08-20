@@ -343,14 +343,29 @@ namespace neko {
       for ( auto& layer : mat->layers_ )
       {
         assert( layer.hasHostCopy() );
-        layer.texture_ = make_shared<Texture>(
-          this,
-          layer.image_.width(),
-          layer.image_.height(),
-          layer.image_.format(),
-          layer.image_.data().data(),
-          mat->wantWrapping_,
-          mat->wantFiltering_ );
+        if ( mat->arrayDepth_ == 1 )
+        {
+          layer.texture_ = make_shared<Texture>(
+            this,
+            layer.image_.width(),
+            layer.image_.height(),
+            layer.image_.format(),
+            layer.image_.data().data(),
+            mat->wantWrapping_,
+            mat->wantFiltering_ );
+        }
+        else
+        {
+          layer.texture_ = make_shared<Texture>(
+            this,
+            mat->width_,
+            mat->height_,
+            mat->arrayDepth_,
+            layer.image_.format(),
+            layer.image_.data().data(),
+            mat->wantWrapping_,
+            mat->wantFiltering_ );
+        }
         layer.deleteHostCopy();
       }
     }
@@ -360,7 +375,7 @@ namespace neko {
   {
     if ( !node->mesh )
       node->mesh = meshes_->createStatic( GL_TRIANGLES, node->vertices, node->indices );
-    for ( auto child : node->children )
+    for ( auto& child : node->children )
       uploadModelsEnterNode( child );
   }
 
@@ -993,6 +1008,20 @@ namespace neko {
       builtin_.screenQuad_->draw();
     }
 #endif
+
+    auto m = materials_->get( "mushroom_idle-down" );
+    if ( m && m->uploaded() )
+    {
+      setGLDrawState( false, false, true, false );
+      auto& pipeline = shaders_->usePipeline( "shroom" );
+      pipeline.setUniform( "tex", 0 );
+      auto lr = math::iround( (Real)time * 8.0f ) % 4;
+      pipeline.setUniform( "tex_layer", lr );
+      auto handle = m->textureHandle( 0 );
+      glBindTextures( 0, 1, &handle );
+      builtin_.screenFourthQuads_[3]->begin();
+      builtin_.screenFourthQuads_[3]->draw();
+    }
 
     fonts_->draw();
 

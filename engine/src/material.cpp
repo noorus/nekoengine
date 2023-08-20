@@ -48,6 +48,13 @@ namespace neko {
     return mat;
   }
 
+  MaterialPtr MaterialManager::createMaterial( const utf8String& name )
+  {
+    MaterialPtr mat = make_shared<Material>( name );
+    map_[name] = mat;
+    return mat;
+  }
+
   void MaterialManager::loadJSONRaw( const nlohmann::json& obj )
   {
     if ( obj.is_array() )

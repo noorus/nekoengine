@@ -19,12 +19,5 @@
     "layers": [
       "pink_sunrise_4k.exr"
     ]
-  },
-  {
-    "type": "unlit",
-    "name": "shroom",
-    "layers": [
-      "shroom.png"
-    ]
   }
 ]

@@ -50,6 +50,9 @@ namespace neko {
     } type_ = UnlitSimple;
     Texture::Wrapping wantWrapping_ = Texture::Repeat;
     Texture::Filtering wantFiltering_ = Texture::Mipmapped;
+    int width_ = 0;
+    int height_ = 0;
+    int arrayDepth_ = 1;
     MaterialLayers layers_;
     inline const bool uploaded() const noexcept
     {
@@ -89,6 +92,7 @@ namespace neko {
       const Texture::Wrapping wrapping, const Texture::Filtering filtering );
     MaterialPtr createTextureWithData( const utf8String& name, int width, int height, int depth,
       PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering );
+    MaterialPtr createMaterial( const utf8String& name );
     void loadJSONRaw( const nlohmann::json& arr );
     void loadJSON( const utf8String& input );
     void loadFile( const utf8String& filename );

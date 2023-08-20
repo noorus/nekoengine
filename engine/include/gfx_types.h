@@ -112,7 +112,9 @@ namespace neko {
     void writePNG( const utf8String& filename ) const;
     void reset();
     void flipVertical();
-    void flipPartHorizontal( int x, int y, int width, int height );
+    void flipRectHorizontal( int x, int y, int width, int height );
+    void flipRectVertical( int x, int y, int width, int height );
+    void blitRectFrom( const Pixmap& rhs, int dst_x, int dst_y, int src_x, int src_y, int width, int height );
   };
 
   using PixmapPtr = shared_ptr<Pixmap>;

@@ -310,7 +310,22 @@ namespace neko {
     }
   }
 
-  void Pixmap::flipPartHorizontal( int x, int y, int width, int height )
+  void Pixmap::flipRectVertical( int x, int y, int width, int height )
+  {
+    auto stride = g_fmtInfo.at( format_ ).first * g_fmtInfo.at( format_ ).second;
+    auto line = width * stride;
+    vector<uint8_t> tmp( line );
+    for ( auto i = 0; i < height / 2; ++i )
+    {
+      auto a = data_.data() + ( ( ( ( i + y ) * width_ ) + x ) * stride );
+      auto b = data_.data() + ( ( ( ( ( height - i - 1 ) + y ) * width_ ) + x ) * stride );
+      memcpy( tmp.data(), a, line );
+      memcpy( a, b, line );
+      memcpy( b, tmp.data(), line );
+    }
+  }
+
+  void Pixmap::flipRectHorizontal( int x, int y, int width, int height )
   {
     auto stride = g_fmtInfo.at( format_ ).first * g_fmtInfo.at( format_ ).second;
     auto line = width_ * stride;
@@ -328,7 +343,27 @@ namespace neko {
         }
     }
     else
-      NEKO_EXCEPT( "Unsupported stride in flipPartHorizontal" );
+      NEKO_EXCEPT( "Unsupported stride" );
+  }
+
+  void Pixmap::blitRectFrom( const Pixmap& rhs, int dst_x, int dst_y, int src_x, int src_y, int width, int height )
+  {
+    if ( rhs.format() != format_ )
+      NEKO_EXCEPT( "Pixel formats don't match" );
+
+    auto stride = g_fmtInfo.at( format_ ).first * g_fmtInfo.at( format_ ).second;
+
+    if ( stride == 4 )
+    {
+      for ( auto i = 0; i < height; ++i )
+      {
+        auto src = rhs.data().data() + ( ( ( ( src_y + i ) * rhs.width() ) + src_x ) * stride );
+        auto dst = data_.data() + ( ( ( ( dst_y + i ) * width_ ) + dst_x ) * stride );
+        memcpy( dst, src, width * stride );
+      }
+    }
+    else
+      NEKO_EXCEPT( "Unsupported stride" );
   }
 
 }

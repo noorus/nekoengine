@@ -57,7 +57,7 @@ namespace neko {
     // Filtering
     if ( filtering == Texture::Nearest )
     {
-      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR );
+      glTextureParameteri( handle, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
       glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     }
     else if ( filtering == Texture::Linear )
@@ -71,8 +71,9 @@ namespace neko {
       glTextureParameteri( handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     }
 
-    if ( info.maxAnisotropy > 1.0f )
-      glTextureParameterf( handle, GL_TEXTURE_MAX_ANISOTROPY, math::min( info.maxAnisotropy, 16.0f ) );
+    glTextureParameterf( handle, GL_TEXTURE_MAX_ANISOTROPY, 1.0f );
+    //if ( info.maxAnisotropy > 1.0f && false )
+    //  glTextureParameterf( handle, GL_TEXTURE_MAX_ANISOTROPY, math::min( info.maxAnisotropy, 16.0f ) );
   }
 
   //! Called by Texture::Texture()
@@ -136,6 +137,9 @@ namespace neko {
 
     if ( filtering == Texture::Mipmapped )
       glGenerateTextureMipmap( handle );
+
+    if ( samples < 2 )
+      setTextureParameters( handle, wrap, filtering, info_ );
 
     return handle;
   }

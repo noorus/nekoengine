@@ -11,17 +11,25 @@ namespace neko {
   class SpriteManager;
 
   struct SpriteAnimationDefinition {
-    friend SpriteManager; 
+    friend SpriteManager;
+  public:
+    enum Direction
+    {
+      Horizontal = 0,
+      Vertical
+    };
   private:
     utf8String name_;
     uint32_t width_ = 0;
     uint32_t height_ = 0;
     uint32_t frameCount_ = 0;
+    Direction direction_ = Horizontal;
   public:
     inline const utf8String& name() const noexcept { return name_; }
     inline uint32_t width() const noexcept { return width_; }
     inline uint32_t height() const noexcept { return height_; }
     inline uint32_t frameCount() const noexcept { return frameCount_; }
+    inline Direction direction() const noexcept { return direction_; }
   };
 
   using SpriteAnimationDefinitionPtr = shared_ptr<SpriteAnimationDefinition>;

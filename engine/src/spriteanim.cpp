@@ -110,6 +110,8 @@ namespace neko {
             flipx = njson::readVector<int>( value["flip-frames-x"] );
           auto def = make_shared<SpriteAnimationSetDefinitionEntry>( key, sheetname, defname, sheetpos, flipx );
           def->definition_ = animdefs_.at( def->defName_ );
+          auto matname = set->name_ + "_" + def->name_;
+          def->material_ = renderer_->materials().createMaterial( matname );
           set->entries_[def->name_] = def;
         }
         renderer_->loader()->addLoadTask( { LoadTask( set ) } );
