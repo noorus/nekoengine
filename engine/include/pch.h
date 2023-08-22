@@ -180,7 +180,7 @@
 #include "nekomath.h"
 
 // ImGuizmo
-//#include "ImGuizmo.h"
+#include "ImGuizmo.h"
 
 // ImGuiZMOquat
 #include "vgConfig.h"

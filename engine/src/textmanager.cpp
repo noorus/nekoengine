@@ -6,7 +6,6 @@
 #include "neko_exception.h"
 #include "console.h"
 #include "font.h"
-#include "text.h"
 
 namespace neko {
 

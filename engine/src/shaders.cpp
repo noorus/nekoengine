@@ -160,9 +160,6 @@ namespace neko {
 
       glAttachShader( program.id(), shader.id() );
       glLinkProgram( program.id() );
-      // I think it's fine to detach here?
-      // Technically we could even delete the shader after this
-      // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glCreateShaderProgram.xhtml
       glDetachShader( program.id(), shader.id() );
 
       GLint linked = 0;
@@ -181,9 +178,7 @@ namespace neko {
     utf8String Shaders::readSource( const utf8String& filename, int includeDepth )
     {
       if ( includeDepth > 3 )
-      {
         NEKO_EXCEPT( "Maximum include depth exceeded; circular dependency?" );
-      }
 
       utf8String source = Locator::fileSystem().openFile( Dir_Shaders, filename )->readFullString();
       stringstream ss( source );

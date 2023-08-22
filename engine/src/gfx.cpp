@@ -190,7 +190,8 @@ namespace neko {
 
   // clang-format off
 
-  static const vector<EditorViewportDefinition> g_editorViewportDefs = {
+  static const vector<EditorViewportDefinition> g_editorViewportDefs =
+  {
     {
       .name = "top",
       .position = vec3( 0.0f, 10.0f, 0.0f ),
@@ -426,19 +427,12 @@ namespace neko {
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplWin32_NewFrame();
-    //ImGuizmo::BeginFrame();
+    // ImGuizmo::BeginFrame();
     ImGui::NewFrame();
 
     clear( vec4( editor_->clearColorRef(), 1.0f ) );
 
     editor_->enabled( engine.devmode() );
-
-    /*
-          processing->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
-      processing->gamma = g_CVar_vid_gamma.as_f();
-      processing->resolution = resolution_;
-      processing->textproj = glm::ortho( 0.0f, resolution_.x, resolution_.y, 0.0f );
-    */
 
     if ( ImGui::BeginMainMenuBar() )
     {

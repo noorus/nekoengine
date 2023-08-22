@@ -60,23 +60,14 @@ namespace neko {
   using SpriteAnimationSetDefinitionPtr = shared_ptr<SpriteAnimationSetDefinition>;
   using SpriteAnimationSetDefinitionVector = vector<SpriteAnimationSetDefinitionPtr>;
 
-  class Sprite {
-  public:
-    void markDead();
-  };
-
-  using SpritePtr = shared_ptr<Sprite>;
-
   class SpriteManager {
   private:
     Renderer* renderer_ = nullptr;
     SpriteAnimationDefinitionMap animdefs_;
-    //SpriteAnimationSetDefinitionMap setdefs_;
   public:
     SpriteManager( Renderer* renderer );
     void initialize();
     void shutdown();
-    void draw( GameTime time );
     void loadAnimdefJSONRaw( const nlohmann::json& arr );
     void loadAnimdefJSON( const utf8String& input );
     void loadAnimdefFile( const utf8String& filename );

@@ -151,8 +151,7 @@ namespace neko {
     vec3i node( region.x, region.y + height, width );
     nodes_.insert( nodes_.begin() + best_index, node );
 
-    int i;
-    for ( i = best_index + 1; i < nodes_.size(); ++i )
+    for ( int i = best_index + 1; i < nodes_.size(); ++i )
     {
       auto node = &nodes_[i];
       auto prev = &nodes_[i - 1];

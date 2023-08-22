@@ -12,7 +12,6 @@
 #include "nekosimd.h"
 #include "particles.h"
 #include "math_aabb.h"
-#include "text.h"
 #include "filesystem.h"
 #include "specialrenderers.h"
 
@@ -79,7 +78,7 @@ namespace neko {
 
     auto area = math::ceil( camera.frustum().aspect() * camera.frustum().radius() );
     auto normal = math::normalize( -camera.direction() );
-    auto origin = camera.position(); // viewport.ndcPointToWorld( { 0.0f, 0.0f, 0.0f } );
+    auto& origin = camera.position(); // viewport.ndcPointToWorld( { 0.0f, 0.0f, 0.0f } );
 
     auto color = viewport.drawopGridColor();
 

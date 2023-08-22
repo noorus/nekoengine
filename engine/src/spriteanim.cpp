@@ -64,15 +64,6 @@ namespace neko {
     loadAnimdefJSON( input );
   }
 
-  void SpriteManager::draw( GameTime time )
-  {
-    auto& mat = renderer_->useMaterial( "demo_shroom" );
-    auto ppl = &renderer_->shaders().usePipeline( "shroom" );
-    auto lr = math::iround( (Real)time ) % 4;
-    
-    ppl->setUniform( "tex_layer", 0 );
-  }
-
   SpriteAnimationSetDefinitionEntry::SpriteAnimationSetDefinitionEntry( const utf8String& name,
     const utf8String& sheetname, const utf8String& defname, const vec2i& sheetpos, const vector<int>& flipframesx ):
     name_( name ), sheetName_( sheetname ), defName_( defname ), sheetPos_( sheetpos ), flipFramesX_( flipframesx )

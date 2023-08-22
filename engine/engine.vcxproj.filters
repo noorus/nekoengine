@@ -623,9 +623,6 @@
     <ClInclude Include="include\gui.h">
       <Filter>Header Files\gfx\gui</Filter>
     </ClInclude>
-    <ClInclude Include="include\text.h">
-      <Filter>Header Files\gfx</Filter>
-    </ClInclude>
     <ClInclude Include="include\js_camera.h">
       <Filter>Header Files\scripting</Filter>
     </ClInclude>

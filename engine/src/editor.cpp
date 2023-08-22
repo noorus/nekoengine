@@ -83,7 +83,7 @@ namespace neko {
   void Editor::updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene,
     const Viewport& window, GameViewport& gameViewport )
   {
-    size_t PANBTN = 2; // = input->mousebtn( 2 );
+    size_t PANBTN = 2;
     size_t GAMEVP = 3;
     mousePos_ = vec2( static_cast<Real>( input->mousePosition_.x ), static_cast<Real>( input->mousePosition_.y ) );
 
@@ -114,23 +114,7 @@ namespace neko {
         if ( input->mouseButtons().wasReleased( PANBTN ) )
           dragOp_.end();
       }
-      else if ( vpidx == 3 )
-      {
-        /* auto gamecam = static_cast<OrbitCamera*>( gameViewport.camera().get() );
-        if ( input->mouseButtons().isPressed( PANBTN ) )
-          gamecam->applyInputPanning( input->movement() );
-        else if ( input->mousebtn( 1 ) )
-          gamecam->applyInputRotation( input->movement() );
-        else if ( input->mouseButtons().wasPressed( 0 ) )
-        {
-          auto ret = gameViewport.windowPointToWorld( vec3( mousePos_, 0.8f ) );
-          Locator::console().printf( srcGame, "Gameviewport click %.2f %.2f %.2f (camera %.2f %.2f %.2f)",
-            ret.x, ret.y, ret.z, gamecam->position().x, gamecam->position().y, gamecam->position().z );
-        }
-
-        gamecam->applyInputZoom( static_cast<int>( input->movement().z ) );*/
-      }
-      else
+      else if ( vpidx < 3 )
       {
         auto& vp = viewports_[vpidx];
         vp->camera()->applyInputZoom( static_cast<int>( input->movement().z ) );

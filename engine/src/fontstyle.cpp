@@ -20,10 +20,14 @@ namespace neko {
     if ( fterr )
       NEKO_FREETYPE_EXCEPT( "FreeType font character point size setting failed", fterr );
 
-    //FT_Matrix matrix = { (int)( ( 1.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ),
-    //  (int)( ( 1.0 ) * 0x10000L ) };
+    FT_Matrix matrix = {
+      (int)( ( 1.0 ) * 0x10000L ),
+      (int)( ( 0.0 ) * 0x10000L ),
+      (int)( ( 0.0 ) * 0x10000L ),
+      (int)( ( 1.0 ) * 0x10000L )
+    };
 
-    FT_Set_Transform( face_->face_, nullptr, nullptr );
+    FT_Set_Transform( face_->face_, &matrix, nullptr );
 
     hbfnt_ = hb_ft_font_create_referenced( face_->face_ );
     hb_ft_font_set_funcs( hbfnt_ ); // Doesn't create_referenced already call this?

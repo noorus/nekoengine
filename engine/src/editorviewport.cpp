@@ -156,16 +156,6 @@ namespace neko {
     assert( out.w != 0.0f );
     out.w = 1.0f / out.w;
     return ( c_flipMat * ( out * out.w * axisMask_ ) );
-    // return vec3( out.x * out.w, out.y * out.w, out.z * out.w );
-    //return -vec3( out.z * out.w, out.y * out.w, out.x * out.w );
   }
-
-  /* vec3 EditorViewport::viewcoordPointToWorld( vec2 viewcoord ) const
-  {
-    auto vmp = vec4( viewcoord, 0.0f, 1.0f );
-    auto mat = glm::inverse( camera_->projection() * camera_->view() * camera_->model() );
-    auto wc = ( camera_->model() * mat * vmp ) * axisMask_;
-    return { wc.x, wc.y, wc.z }; // { -wc.z, -wc.y, -wc.x };
-  }*/
 
 }

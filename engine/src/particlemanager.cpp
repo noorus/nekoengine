@@ -12,7 +12,6 @@
 #include "nekosimd.h"
 #include "particles.h"
 #include "math_aabb.h"
-#include "text.h"
 #include "filesystem.h"
 #include "particles.h"
 

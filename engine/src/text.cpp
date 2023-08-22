@@ -3,7 +3,7 @@
 #include "font.h"
 #include "neko_exception.h"
 #include "console.h"
-#include "text.h"
+#include "renderer.h"
 
 namespace neko {
 

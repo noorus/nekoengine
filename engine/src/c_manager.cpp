@@ -204,7 +204,7 @@ namespace neko {
         ig::ComponentChildWrapper wrap( "Transform", 120.0f + ww );
         ig::dragVector( "translate", t.translate, 0.1f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
         ig::dragVector( "scale", t.scale, 0.01f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
-        // ImGui::gizmo3D( "rotation", t.rotate, ww );
+        ImGui::gizmo3D( "rotation", t.rotate, ww );
         //ImGui::SameLine();
         //ImGui::Button( "+X" )
         // a bit wasteful but hardly an issue

@@ -8,43 +8,6 @@ namespace neko {
 
   using namespace gl;
 
-  namespace ig {
-
-    int imguiInputText_Callback( ImGuiInputTextCallbackData* data )
-    {
-      auto ud = static_cast<c::TextInputUserData*>( data->UserData );
-      if ( data->EventFlag == ImGuiInputTextFlags_CallbackResize )
-      {
-        assert( data->Buf == ud->str->data() );
-        ud->str->resize( data->BufTextLen );
-        data->Buf = ud->str->data();
-      }
-      else if ( ud->chaincb )
-      {
-        data->UserData = ud->chaincb_ud;
-        return ud->chaincb( data );
-      }
-      return 0;
-    }
-
-    bool imguiInputText(
-      const char* label, utf8String* str, bool multiline, ImGuiInputTextCallback callback, void* user_data )
-    {
-      ImGuiInputTextFlags flags = ImGuiInputTextFlags_CallbackResize;
-
-      c::TextInputUserData ud;
-      ud.str = str;
-      ud.chaincb = callback;
-      ud.chaincb_ud = user_data;
-      if ( !multiline )
-        return ImGui::InputText( label, ud.str->data(), str->capacity() + 1, flags, imguiInputText_Callback, &ud );
-      else
-        return ImGui::InputTextMultiline( label, ud.str->data(), str->capacity() + 1,
-          ImVec2( -FLT_MIN, ImGui::GetTextLineHeight() * 4 ), flags, imguiInputText_Callback, &ud );
-    } 
-
-  }
-
   namespace c {
 
     text_system::text_system( manager* m ): mgr_( m )

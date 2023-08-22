@@ -12,7 +12,6 @@
 #include "nekosimd.h"
 #include "particles.h"
 #include "math_aabb.h"
-#include "text.h"
 #include "filesystem.h"
 #include "spriteanim.h"
 #include "frustum.h"
@@ -892,7 +891,6 @@ namespace neko {
       processing->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
       processing->gamma = g_CVar_vid_gamma.as_f();
       processing->resolution = resolution_;
-      processing->textproj = glm::ortho( 0.0f, resolution_.x, resolution_.y, 0.0f );
       shaders_->processing()->unlock();
     }
 
@@ -947,11 +945,6 @@ namespace neko {
       return;
     }*/
 
-    /* glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-    GLenum fb = GL_BACK;
-    glDrawBuffers( 1, &fb );
-    glClearBufferfv( GL_COLOR, 0, &vec4( 0.0f, 0.0f, 0.0f, 1.0f )[0] );*/
-
     if ( ctx_.fboMainMultisampled_ )
     {
       ctx_.fboMainMultisampled_->blitColorTo( 0, 0, *ctx_.fboMain_ );
@@ -985,33 +978,6 @@ namespace neko {
       viewportQuad->draw();
     }
 
-    /* for ( auto& text : texts_->texts() )
-    {
-      auto& txt = text.second->text();
-      if ( !txt.impl_ )
-        txt.impl_ = fonts_->createText( "demo_font", 0 );
-      txt.impl_->content( txt.content_ );
-      txt.impl_->setScale( txt.scale_->v() );
-      txt.impl_->setRotation( txt.rotate_->q() );
-      txt.impl_->setTranslation( txt.translate_->v() );
-      txt.impl_->update( this );
-      txt.impl_->draw( this );
-    }*/
-
-    // below here be debug shit
-    #if 0
-    if ( userData_.image_ && userData_.image_->uploaded() )
-    {
-      setGLDrawState( false, false, true );
-      auto& pipeline = shaders_->usePipeline( "passthrough2d" );
-      pipeline.setUniform( "tex", 0 );
-      GLuint handle = userData_.image_->textureHandle( 0 );
-      glBindTextures( 0, 1, &handle );
-      builtin_.screenQuad_->begin();
-      builtin_.screenQuad_->draw();
-    }
-#endif
-
     fonts_->draw();
 
 #ifndef NEKO_NO_GUI
@@ -1033,7 +999,7 @@ namespace neko {
   Renderer::~Renderer()
   {
     shutdown();
-#ifndef INTEL_SUCKS
+
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
 
@@ -1062,9 +1028,6 @@ namespace neko {
 
     if ( builtin_.emptyVAO_ )
       glDeleteVertexArrays( 1, &builtin_.emptyVAO_ );
-#else
-    ExitProcess( 0 );
-#endif
   }
 
 }
