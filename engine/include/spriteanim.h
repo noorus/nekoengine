@@ -20,15 +20,15 @@ namespace neko {
     };
   private:
     utf8String name_;
-    uint32_t width_ = 0;
-    uint32_t height_ = 0;
-    uint32_t frameCount_ = 0;
+    int width_ = 0;
+    int height_ = 0;
+    int frameCount_ = 0;
     Direction direction_ = Horizontal;
   public:
     inline const utf8String& name() const noexcept { return name_; }
-    inline uint32_t width() const noexcept { return width_; }
-    inline uint32_t height() const noexcept { return height_; }
-    inline uint32_t frameCount() const noexcept { return frameCount_; }
+    inline int width() const noexcept { return width_; }
+    inline int height() const noexcept { return height_; }
+    inline int frameCount() const noexcept { return frameCount_; }
     inline Direction direction() const noexcept { return direction_; }
   };
 
@@ -61,12 +61,7 @@ namespace neko {
   using SpriteAnimationSetDefinitionVector = vector<SpriteAnimationSetDefinitionPtr>;
 
   class Sprite {
-  private:
-    MaterialPtr material_;
-    vec2 frameDimensions_ { 0.0f, 0.0f };
-    uint32_t frameCount_ = 0;
-  public: // tex_layer
-    void draw( shaders::Shaders& shaders, const Material& mat );
+  public:
   };
 
   using SpritePtr = shared_ptr<Sprite>;

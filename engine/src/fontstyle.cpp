@@ -9,8 +9,6 @@
 
 namespace neko {
 
-  // clang-format off
-
   FontStyle::FontStyle( FontFacePtr face, FT_Library ft, FT_Face ftface, Real size, vec2i atlasSize,
   FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs ): size_( size ),
   face_( face ), storedFaceIndex_( ftface->face_index ),
@@ -18,16 +16,14 @@ namespace neko {
   {
     storedFaceSize_ = makeStoredFaceSize( size_ );
 
-    Locator::console().printf(srcGfx,"FontStyle CONSTRUCTOR 0x%I64X size %f w majic %i", this, size_,  math::iround( size_ * c_fmagic ) );
-
     auto fterr = FT_Set_Char_Size( face_->face_, 0, math::iround( size_ * c_fmagic ), c_dpi, c_dpi );
     if ( fterr )
       NEKO_FREETYPE_EXCEPT( "FreeType font character point size setting failed", fterr );
 
-    FT_Matrix matrix = { (int)( ( 1.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ),
-      (int)( ( 1.0 ) * 0x10000L ) };
+    //FT_Matrix matrix = { (int)( ( 1.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ), (int)( ( 0.0 ) * 0x10000L ),
+    //  (int)( ( 1.0 ) * 0x10000L ) };
 
-    FT_Set_Transform( face_->face_, &matrix, nullptr );
+    FT_Set_Transform( face_->face_, nullptr, nullptr );
 
     hbfnt_ = hb_ft_font_create_referenced( face_->face_ );
     hb_ft_font_set_funcs( hbfnt_ ); // Doesn't create_referenced already call this?
@@ -183,9 +179,17 @@ namespace neko {
   void FontStyle::postLoad()
   {
     auto metrics = face_->face_->size->metrics;
-    ascender_ = static_cast<Real>( metrics.ascender >> 6 );
-    descender_ = static_cast<Real>( metrics.descender >> 6 );
-    size_ = static_cast<Real>( metrics.height >> 6 );
+    auto fmt = FT_Get_Font_Format( face_->face_ );
+    if ( strcmp( fmt, "TrueType" ) == 0 )
+    {
+      ascender_ = static_cast<Real>( FT_MulFix( face_->face_->ascender, metrics.y_scale ) >> 6 );
+      descender_ = static_cast<Real>( FT_MulFix( face_->face_->descender, metrics.y_scale ) >> 6 );
+    }
+    else
+    {
+      ascender_ = static_cast<Real>( metrics.ascender >> 6 );
+      descender_ = static_cast<Real>( metrics.descender >> 6 );
+    }
   }
 
   const TextureAtlas& FontStyle::atlas() const
@@ -196,7 +200,6 @@ namespace neko {
 
   FontStyle::~FontStyle()
   {
-    Locator::console().printf(srcGfx,"FontStyle DESTRUCTOR 0x%I64X", this );
     if ( hbfnt_ )
       hb_font_destroy( hbfnt_ );
     atlas_.reset();

@@ -128,6 +128,7 @@
 #include FT_MODULE_ERRORS_H
 #include FT_SIZES_H
 #include FT_OUTLINE_H
+#include FT_FONT_FORMATS_H
 #include FT_RENDER_H
 #include FT_DRIVER_H
 #include FT_STROKER_H

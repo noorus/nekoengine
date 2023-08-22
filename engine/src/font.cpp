@@ -34,8 +34,6 @@ namespace neko {
     auto fc = make_shared<FontFace>( ptr(), ftlib, &args, faceIndex );
     faces_[faceIndex] = fc;
 
-    loaded_ = true;
-
     return move( fc );
   }
 
@@ -44,11 +42,6 @@ namespace neko {
     faces_.clear();
     data_.reset();
     loaded_ = false;
-  }
-
-  FontLoadState Font::loaded() const
-  {
-    return ( loaded_ ? FontLoad_Loaded : FontLoad_NotReady );
   }
 
   Font::~Font()
@@ -69,11 +62,11 @@ namespace neko {
         if ( pr.second->dirty() || !pr.second->material_ )
         {
           char tmp[64];
-          sprintf_s( tmp, 64, "font%I64i_%016I64x.png", id_, pr.first );
+          sprintf_s( tmp, 64, "font%I64i %.2f.png", id_, pr.second->size() );
           pr.second->material_ = renderer->createTextureWithData( tmp,
             static_cast<int>( pr.second->atlas().dimensions().x ),
-            static_cast<int>( pr.second->atlas().dimensions().y ),
-            PixFmtColorR8, pr.second->atlas().data(), Texture::ClampBorder, Texture::Nearest );
+            static_cast<int>( pr.second->atlas().dimensions().y ), PixFmtColorR8, pr.second->atlas().data(),
+            Texture::ClampBorder, Texture::Mipmapped );
           pr.second->markClean();
           pr.second->material()->layer( 0 ).image().writePNG( tmp );
         }

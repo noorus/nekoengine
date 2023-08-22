@@ -6,6 +6,8 @@
 
 namespace neko {
 
+  using namespace gl;
+
   static int InputTextCallback( ImGuiInputTextCallbackData* data )
   {
     auto ud = static_cast<c::TextInputUserData*>( data->UserData );
@@ -77,12 +79,16 @@ namespace neko {
 
     void text_system::draw( Renderer& renderer )
     {
+      glDisable( GL_LINE_SMOOTH );
+      glDisable( GL_POLYGON_SMOOTH );
       for ( auto& [eid, data] : texts_ )
       {
         if ( !data.instance || data.instance->dead() )
           continue;
         const auto& tfm = mgr_->tn( eid );
-        data.instance->draw( renderer, tfm.model() );
+        const auto& t = mgr_->tt( eid );
+        auto model = tfm.model() * glm::scale( vec3( t.size / data.instance->style()->size() ) );
+        data.instance->draw( renderer, model );
       }
     }
 
@@ -107,7 +113,7 @@ namespace neko {
         const auto& t = mgr_->tt( eid );
 
         auto fnt = fntmgr.font( t.fontName );
-        if ( !fnt )
+        if ( !fnt || !fnt->loaded() )
         {
           data.instance.reset();
           continue;
@@ -119,7 +125,9 @@ namespace neko {
         {
           for ( const auto& [sid, style] : face->styles() )
           {
-            auto delta = math::abs( t.size - style->size() );
+            auto delta = ( style->size() - t.size );
+            if ( delta < 0.0f )
+              delta = math::abs( delta ) * 0.5f;
             if ( !bestStyle || delta < bestDelta )
             {
               bestStyle = style;

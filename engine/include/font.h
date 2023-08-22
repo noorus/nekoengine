@@ -133,13 +133,6 @@ namespace neko {
 
   using GlyphMap = map<GlyphIndex, Glyph>;
 
-  enum FontLoadState
-  {
-    FontLoad_NotReady = 0,
-    FontLoad_Degraded,
-    FontLoad_Loaded
-  };
-
   enum FontRendering
   {
     FontRender_Normal = 0,
@@ -266,7 +259,6 @@ namespace neko {
     void unload();
   public:
     Font( FontManagerPtr manager, IDType i, const utf8String& name );
-    FontLoadState loaded() const;
     inline FontManagerPtr manager() { return manager_; }
     inline IDType id() const noexcept { return id_; }
     inline const FontFaceMap& faces() const noexcept { return faces_; }

@@ -16,6 +16,14 @@ namespace neko {
     if ( fterr || !face_ )
       NEKO_FREETYPE_EXCEPT( "FreeType font face load failed", fterr );
 
+    auto fmt = FT_Get_Font_Format( face_ );
+    utf8String name( font_->name() );
+    if ( face_->family_name )
+      name.append( " " + utf8String( face_->family_name ) );
+    if ( face_->style_name )
+      name.append( " " + utf8String( face_->style_name ) );
+    Locator::console().printf( LogSource::srcGfx, "Loaded %s font %s (face %i)", fmt, name.c_str(), faceIndex );
+    
     forceUCS2Charmap();
 
     fterr = FT_Select_Charmap( face_, FT_ENCODING_UNICODE );
@@ -36,14 +44,6 @@ namespace neko {
 
     auto style = make_shared<FontStyle>( ptr(), ft_, face_, sz, atlasSize, rendering, thickness, prerenderGlyphs );
 
-#ifdef _DEBUG
-    auto cmp = style->id();
-    FontStyleIndex sidx {};
-    sidx.value = cmp;
-    assert( sidx.value == id );
-#endif
-
-    Locator::console().printf( srcGfx, "FONT setting style id %I64X to 0x%I64X", style->id(), *style );
     styles_[style->id()] = style;
     return style->id();
   }

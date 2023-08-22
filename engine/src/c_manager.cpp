@@ -78,7 +78,8 @@ namespace neko {
       registry_.emplace<transform>( e );
       auto& t = registry_.emplace<text>( e );
       t.fontName = "demo_font";
-      t.size = 18.0f;
+      t.size = 12.0f;
+      t.content = "abcdefghijklmnopqrstuvwxyz";
       t.int_ud_.str = &t.content;
       return e;
     }

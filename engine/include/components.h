@@ -2,6 +2,8 @@
 #include <entt.hpp>
 #include "neko_types.h"
 #include "buffers.h"
+#include "spriteanim.h"
+#include "imgui.h"
 
 #undef near
 #undef far
@@ -56,7 +58,6 @@ namespace neko {
     };
 
   }
-
 
   namespace c {
 
@@ -179,6 +180,12 @@ namespace neko {
       ~text_system();
       inline const TextDataMap& texts() const { return texts_; }
       void imguiTextEditor( entity e );
+    };
+
+    struct sprite
+    {
+      SpritePtr instance {};
+      bool dirty = false;
     };
 
     struct camera

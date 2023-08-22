@@ -89,17 +89,18 @@ namespace neko {
         position.y += ( ascender - descender );
         continue;
       }
+
       auto glyph = style_->getGlyph( manager_->ft(), style_->face_->face_, glyphindex );
       auto offset = vec2( gpos.x_offset, gpos.y_offset ) / c_fmagic;
-      auto advance = vec2( gpos.x_advance, gpos.y_advance ) / c_fmagic;
+      auto advance = ( vec2( gpos.x_advance, gpos.y_advance ) / c_fmagic );
 
       auto p0 = vec2(
         ( position.x + offset.x + glyph->bearing.x ),
-        math::ifloor( position.y - offset.y - glyph->bearing.y ) );
+        ( position.y - offset.y - glyph->bearing.y ) );
 
       auto p1 = vec2(
         ( p0.x + glyph->width ),
-        (int)( p0.y + glyph->height ) );
+        ( p0.y + glyph->height ) );
 
       auto color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 

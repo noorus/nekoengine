@@ -145,6 +145,8 @@ namespace neko {
       face->loadStyle( spec.rendering, spec.size, spec.thickness, g_prerenderGlyphs );
     }
 
+    task.font_->loaded_ = true;
+
     Locator::console().printf( srcLoader, "Loaded font %s (%s) with %i sizes", task.font_->name().c_str(),
       task.path_.c_str(), task.specs_.size() );
 
@@ -205,7 +207,7 @@ namespace neko {
     else
       NEKO_EXCEPT( "Unsupport image format in load texture task" );
 
-    return Pixmap( PixFmtColorRGBA8 );
+    return { PixFmtColorRGBA8 };
   }
 
   void ThreadedLoader::loadMaterial( LoadTask::TextureLoad& task )

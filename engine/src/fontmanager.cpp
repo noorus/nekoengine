@@ -121,7 +121,7 @@ namespace neko {
       auto font = createFont( name );
       auto filename = obj["file"].get<utf8String>();
       map_[font->name()] = font;
-      auto sizes = obj["preloadSizes"];
+      auto& sizes = obj["preloadSizes"];
       if ( !sizes.is_array() )
         NEKO_EXCEPT( "preloadSizes is not an array" );
       vector<FontLoadSpec> specs;
@@ -145,7 +145,7 @@ namespace neko {
 
   void FontManager::loadFile( const utf8String& filename )
   {
-    auto input = move( Locator::fileSystem().openFile( Dir_Data, filename )->readFullString() );
+    auto input = Locator::fileSystem().openFile( Dir_Data, filename )->readFullString();
     loadJSON( input );
   }
 

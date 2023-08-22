@@ -90,6 +90,11 @@ namespace neko {
       return NEKO_MATH_FUNC_ROUND( value );
     }
 
+    inline vec2 round( const vec2& v )
+    {
+      return { round( v.x ), round( v.y ) };
+    }
+
     //! \fn inline int iround( Real value )
     //! \brief Rounds to the nearest non-decimal value, returning an integer.
     //! \param value The value.
@@ -134,6 +139,11 @@ namespace neko {
       return NEKO_MATH_FUNC_FLOOR( value );
     }
 
+    inline vec2 floor( const vec2& v )
+    {
+      return { floor( v.x ), floor( v.y ) };
+    }
+
     //! \fn inline Real ceil( Real value )
     //! \brief Ceilings the given value.
     //! \param value The value.
@@ -141,6 +151,11 @@ namespace neko {
     inline Real ceil( Real value )
     {
       return NEKO_MATH_FUNC_CEIL( value );
+    }
+
+    inline vec2 ceil( const vec2& v )
+    {
+      return { ceil( v.x ), ceil( v.y ) };
     }
 
     //! \fn inline int iceil( Real value )
