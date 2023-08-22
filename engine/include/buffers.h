@@ -16,7 +16,6 @@ namespace neko {
 
   struct VertexTypeBase
   {
-
   };
 
   template <typename VertexType>
@@ -91,6 +90,53 @@ namespace neko {
     }
   };
 
+  class SpriteVertexbuffer {
+  protected:
+    using BufferType = MappedGLBuffer<Vertex3D>;
+    using IndicesType = MappedGLBuffer<gl::GLuint>;
+    unique_ptr<BufferType> buffer_;
+    unique_ptr<IndicesType> indices_;
+    AttribWriter attribs_;
+    GLuint vao_ = 0;
+  public:
+    SpriteVertexbuffer( size_t maxVertices, size_t maxIndices )
+    {
+      buffer_ = make_unique<BufferType>( maxVertices );
+      indices_ = make_unique<IndicesType>( maxIndices );
+      gl::glCreateVertexArrays( 1, &vao_ );
+      gl::glVertexArrayElementBuffer( vao_, indices_->id() );
+      attribs_.add( Attrib_Pos3D ); // vec3 position
+      attribs_.add( Attrib_Normal3D ); // vec3 normal
+      attribs_.add( Attrib_Texcoord2D ); // vec2 texcoord
+      attribs_.add( Attrib_Color4D ); // vec4 color
+      attribs_.add( Attrib_Tangent4D ); // vec4 tangent
+      attribs_.add( Attrib_Bitangent3D ); // vec3 bitangent
+      attribs_.write( vao_ );
+      gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs_.stride() );
+    }
+    inline BufferType& buffer() { return *buffer_; }
+    inline IndicesType& indices() { return *indices_; }
+    void draw( shaders::Shaders& shaders, const Material& mat, int frame, const mat4& model )
+    {
+      gl::glBindVertexArray( vao_ );
+      auto ppl = &shaders.usePipeline( "sprite" );
+      const auto hndl = mat.layers_[0].texture_->handle();
+      gl::glBindTextures( 0, 1, &hndl );
+      ppl->setUniform( "tex", 0 );
+      ppl->setUniform( "tex_layer", frame < mat.arrayDepth_ ? frame : mat.arrayDepth_ - 1 );
+      ppl->setUniform( "tex_dimensions", vec2( mat.width(), mat.height() ) );
+      ppl->setUniform( "model", model );
+      gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
+      gl::glBindVertexArray( 0 );
+    }
+    ~SpriteVertexbuffer()
+    {
+      gl::glDeleteVertexArrays( 1, &vao_ );
+      indices_.reset();
+      buffer_.reset();
+    }
+  };
+
   template <size_t Count>
   class PointRenderBuffer {
   protected:
@@ -110,7 +156,7 @@ namespace neko {
       attribs.write( vao_ );
       gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
     }
-    inline MappedGLBuffer<VertexPointParticle>& buffer() { return *buffer_.get(); }
+    inline MappedGLBuffer<VertexPointParticle>& buffer() { return *buffer_; }
     void draw( shaders::Pipeline& pipeline, GLsizei count, GLint base = 0, gl::GLenum mode = gl::GL_POINTS )
     {
       gl::glBindVertexArray( vao_ );
@@ -164,11 +210,6 @@ namespace neko {
       gl::glDeleteVertexArrays( 1, &vao_ );
       buffer_.reset();
     }
-  };
-
-  class New3DBuffer {
-  protected:
-  public:
   };
 
 #pragma pack( push, 1 )

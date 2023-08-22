@@ -62,6 +62,7 @@ namespace neko {
 
   class Sprite {
   public:
+    void markDead();
   };
 
   using SpritePtr = shared_ptr<Sprite>;

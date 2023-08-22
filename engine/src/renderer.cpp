@@ -414,6 +414,8 @@ namespace neko {
     fonts_->update();
     fonts_->prepareRender();
 
+    scene.sprites().update( *materials_ );
+
     // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point at which we try to create the VAO.
     // Thus uploading the VAOs should always come last.
     meshes_->uploadVBOs();
@@ -717,6 +719,7 @@ namespace neko {
 
     scene.texts().draw( *this );
     scene.primitives().draw( *shaders_, *builtin_.placeholderTexture_ );
+    scene.sprites().draw( *this, camera );
 
     if ( drawparams.drawopShouldDrawSky() && false )
     {
@@ -1008,20 +1011,6 @@ namespace neko {
       builtin_.screenQuad_->draw();
     }
 #endif
-
-    auto m = materials_->get( "mushroom_idle-down" );
-    if ( m && m->uploaded() )
-    {
-      setGLDrawState( false, false, true, false );
-      auto& pipeline = shaders_->usePipeline( "shroom" );
-      pipeline.setUniform( "tex", 0 );
-      auto lr = math::iround( (Real)time * 8.0f ) % 4;
-      pipeline.setUniform( "tex_layer", lr );
-      auto handle = m->textureHandle( 0 );
-      glBindTextures( 0, 1, &handle );
-      builtin_.screenFourthQuads_[3]->begin();
-      builtin_.screenFourthQuads_[3]->draw();
-    }
 
     fonts_->draw();
 

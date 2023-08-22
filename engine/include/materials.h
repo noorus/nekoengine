@@ -63,6 +63,9 @@ namespace neko {
           return false;
       return true;
     }
+    inline int width() const noexcept { return width_; }
+    inline int height() const noexcept { return height_; }
+    inline int depth() const noexcept { return arrayDepth_; }
     inline GLuint textureHandle( size_t index ) const
     {
       assert( index < layers_.size() && layers_[index].uploaded() );

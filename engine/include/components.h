@@ -30,6 +30,9 @@ namespace neko {
 
     bool orientationEditor( const char* label, quat& in_out );
 
+    extern int imguiInputText_Callback( ImGuiInputTextCallbackData* data );
+    extern bool imguiInputText( const char* label, utf8String* str, bool multiline, ImGuiInputTextCallback callback, void* user_data );
+
     template <typename T>
     inline bool dragVector( const char* label, const T& v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f,
       const char* format = "%.3f", ImGuiSliderFlags flags = 0 )
@@ -46,15 +49,19 @@ namespace neko {
     public:
       ComponentChildWrapper( const char* title, float height )
       {
-        ImGui::BeginChild( title, ImVec2( 0, height ), true, ImGuiWindowFlags_MenuBar );
+        ImGui::SeparatorText( title );
+        /* ImGui::BeginChild( title, ImVec2( 0, height ), true, ImGuiWindowFlags_MenuBar );
         if ( ImGui::BeginMenuBar() )
         {
           if ( ImGui::BeginMenu( title ) )
             ImGui::EndMenu();
           ImGui::EndMenuBar();
-        }
+        }*/
       }
-      ~ComponentChildWrapper() { ImGui::EndChild(); }
+      ~ComponentChildWrapper()
+      {
+        //ImGui::EndChild();
+      }
     };
 
   }
@@ -182,12 +189,6 @@ namespace neko {
       void imguiTextEditor( entity e );
     };
 
-    struct sprite
-    {
-      SpritePtr instance {};
-      bool dirty = false;
-    };
-
     struct camera
     {
       enum CameraProjection
@@ -261,6 +262,84 @@ namespace neko {
       void imguiPrimitiveEditor( entity e );
     };
 
+    enum PixelScale: int
+    {
+      PixelScale_1 = 0,
+      PixelScale_8,
+      PixelScale_10,
+      PixelScale_16,
+      PixelScale_20,
+      PixelScale_24,
+      PixelScale_30,
+      PixelScale_32,
+      PixelScale_40,
+      PixelScale_48,
+      PixelScale_50,
+      PixelScale_64,
+      MAX_PixelScale
+    };
+
+    constexpr Real c_pixelScaleValues[MAX_PixelScale] = {
+      ( 1.0f / 1.0f ),
+      ( 1.0f / 8.0f ),
+      ( 1.0f / 10.0f ),
+      ( 1.0f / 16.0f ),
+      ( 1.0f / 20.0f ),
+      ( 1.0f / 24.0f ),
+      ( 1.0f / 30.0f ),
+      ( 1.0f / 32.0f ),
+      ( 1.0f / 40.0f ),
+      ( 1.0f / 48.0f ),
+      ( 1.0f / 50.0f ),
+      ( 1.0f / 64.0f )
+    };
+
+    constexpr char* c_pixelScaleNames[MAX_PixelScale] = {
+      "1 = 1px",
+      "1 = 8px",
+      "1 = 10px",
+      "1 = 16px",
+      "1 = 20px",
+      "1 = 24px",
+      "1 = 30px",
+      "1 = 32px",
+      "1 = 40px",
+      "1 = 48px",
+      "1 = 50px",
+      "1 = 64px"
+    };
+
+    struct sprite
+    {
+      PixelScale pixelScaleBase = PixelScale_32;
+      Real size = 1.0f;
+      unique_ptr<SpriteVertexbuffer> mesh;
+      bool billboard = true;
+      int frame = 0;
+      MaterialPtr material;
+      vec2 dimensions { 0.0f, 0.0f };
+      utf8String matName;
+      TextInputUserData int_ud_;
+    };
+
+    struct dirty_sprite
+    {
+    };
+
+    class sprite_system {
+    protected:
+      manager* mgr_ = nullptr;
+      void addSprite( registry& r, entity e );
+      void updateSprite( registry& r, entity e );
+      void removeSprite( registry& r, entity e );
+    public:
+      sprite_system( manager* m );
+      void update( MaterialManager& mats );
+      void draw( Renderer& renderer, const Camera& cam );
+      ~sprite_system();
+      void imguiSpriteEditor( entity e );
+    };
+
     class manager {
     protected:
       registry registry_;
@@ -269,6 +348,7 @@ namespace neko {
       unique_ptr<camera_system> camsys_;
       unique_ptr<text_system> txtsys_;
       unique_ptr<primitive_system> primsys_;
+      unique_ptr<sprite_system> sprsys_;
       void imguiSceneGraphRecurse( entity e, entity& clicked );
       void imguiNodeSelectorRecurse( entity e, entity& selected );
       void imguiNodeEditor( entity e );
@@ -281,6 +361,7 @@ namespace neko {
       inline camera& cam( entity e ) { return registry_.get<camera>( e ); } //!< Get camera by entity
       inline text& tt( entity e ) { return registry_.get<text>( e ); } //!< Get text by entity
       inline primitive& pt( entity e ) { return registry_.get<primitive>( e ); }
+      inline sprite& s( entity e ) { return registry_.get<sprite>( e ); }
       inline bool validAndTransform( entity e )
       {
         if ( e == null || e == tombstone )
@@ -297,6 +378,7 @@ namespace neko {
       entity createCamera( string_view name );
       entity createText( string_view name );
       entity createPlane( string_view name );
+      entity createSprite( string_view name );
       inline entity& root() { return root_; }
       void update();
       void markDirty( entity e );
@@ -306,6 +388,7 @@ namespace neko {
       inline camera_system& cams() const { return *camsys_; }
       inline text_system& texts() const { return *txtsys_; }
       inline primitive_system& primitives() const { return *primsys_; }
+      inline sprite_system& sprites() const { return *sprsys_; }
     };
 
   }

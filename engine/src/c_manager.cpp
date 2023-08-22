@@ -13,6 +13,7 @@ namespace neko {
       camsys_ = make_unique<camera_system>( this, viewportResolution );
       txtsys_ = make_unique<text_system>( this );
       primsys_ = make_unique<primitive_system>( this );
+      sprsys_ = make_unique<sprite_system>( this );
 
       root_ = registry_.create();
       registry_.emplace<node>( root_, "root" );
@@ -20,6 +21,7 @@ namespace neko {
 
       auto txt = createText( "pooooop" );
       auto plane = createPlane( "lolplane" );
+      auto spr = createSprite( "lolsprite" );
     }
 
     entity manager::createNode( entity parent, string_view name )
@@ -93,6 +95,13 @@ namespace neko {
       p.values.plane.segments = { 10, 10 };
       p.values.plane.normal_sel = ig::PredefNormal_PlusY;
       p.values.plane.normal = ig::valueForNormalIndex( p.values.plane.normal_sel );
+      return e;
+    }
+
+    entity manager::createSprite( string_view name )
+    {
+      auto e = createRenderable( root_, name );
+      auto& s = registry_.emplace<sprite>( e );
       return e;
     }
 
@@ -212,6 +221,10 @@ namespace neko {
       if ( registry_.any_of<primitive>( e ) )
       {
         primsys_->imguiPrimitiveEditor( e );
+      }
+      if ( registry_.any_of<sprite>( e ) )
+      {
+        sprsys_->imguiSpriteEditor( e );
       }
     }
 

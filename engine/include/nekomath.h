@@ -61,6 +61,7 @@ namespace neko {
     using glm::toMat4;
     using glm::translate;
     using glm::scale;
+    using glm::transpose;
 
     using std::atan2;
 

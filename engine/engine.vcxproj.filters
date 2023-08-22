@@ -438,6 +438,9 @@
     <ClCompile Include="src\pixmap.cpp">
       <Filter>Source Files\gfx</Filter>
     </ClCompile>
+    <ClCompile Include="src\c_sprite_system.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">
@@ -973,6 +976,12 @@
     </None>
     <None Include="..\bin\data\spriteanimsets.json">
       <Filter>Data</Filter>
+    </None>
+    <None Include="..\bin\shaders\sprite.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\sprite.vert">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

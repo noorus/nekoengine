@@ -304,6 +304,7 @@
     <ClCompile Include="src\c_camera_system.cpp" />
     <ClCompile Include="src\c_manager.cpp" />
     <ClCompile Include="src\c_primitive_system.cpp" />
+    <ClCompile Include="src\c_sprite_system.cpp" />
     <ClCompile Include="src\c_text_system.cpp" />
     <ClCompile Include="src\director.cpp" />
     <ClCompile Include="src\dynamicmesh.cpp" />
@@ -559,6 +560,8 @@
     <None Include="..\bin\shaders\mat_unlitdefault.vert" />
     <None Include="..\bin\shaders\gui.frag" />
     <None Include="..\bin\shaders\gui.vert" />
+    <None Include="..\bin\shaders\sprite.frag" />
+    <None Include="..\bin\shaders\sprite.vert" />
     <None Include="..\bin\shaders\text.frag" />
     <None Include="..\bin\shaders\text_2d.vert" />
     <None Include="..\bin\shaders\text_3d.vert" />

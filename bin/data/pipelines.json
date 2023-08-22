@@ -53,9 +53,9 @@
     ]
   },
   {
-    "name": "shroom",
-    "vert": "shroom.vert",
-    "frag": "shroom.frag",
+    "name": "sprite",
+    "vert": "sprite.vert",
+    "frag": "sprite.frag",
     "uniforms": [
       "model",
       "tex",

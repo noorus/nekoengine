@@ -62,13 +62,12 @@ namespace neko {
         if ( pr.second->dirty() || !pr.second->material_ )
         {
           char tmp[64];
-          sprintf_s( tmp, 64, "font%I64i %.2f.png", id_, pr.second->size() );
+          sprintf_s( tmp, 64, "font/%I64i_%016I64x", id_, pr.first );
           pr.second->material_ = renderer->createTextureWithData( tmp,
             static_cast<int>( pr.second->atlas().dimensions().x ),
             static_cast<int>( pr.second->atlas().dimensions().y ), PixFmtColorR8, pr.second->atlas().data(),
             Texture::ClampBorder, Texture::Mipmapped );
           pr.second->markClean();
-          pr.second->material()->layer( 0 ).image().writePNG( tmp );
         }
       }
     }

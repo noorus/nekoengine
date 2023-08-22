@@ -49,6 +49,13 @@ namespace neko {
         return nullptr;
       return ( ( *it ).second.get() );
     }
+    inline ResourcePtr getPtr( const utf8String& name ) const
+    {
+      auto it = map_.find( name );
+      if ( it == map_.end() )
+        return {};
+      return ( ( *it ).second );
+    }
   };
 
 }
