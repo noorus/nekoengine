@@ -139,7 +139,7 @@
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <AdditionalOptions>/bigobj /utf-8 /Ob3</AdditionalOptions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>None</DebugInformationFormat>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <CallingConvention>Cdecl</CallingConvention>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
@@ -149,6 +149,7 @@
       <DiagnosticsFormat>Caret</DiagnosticsFormat>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -164,7 +165,7 @@
       </StackReserveSize>
       <StackCommitSize>
       </StackCommitSize>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>/ignore:4099 /time %(AdditionalOptions)</AdditionalOptions>
       <ShowProgress>NotSet</ShowProgress>

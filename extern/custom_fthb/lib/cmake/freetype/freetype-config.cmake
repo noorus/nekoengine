@@ -7,7 +7,7 @@ if(CMAKE_VERSION VERSION_LESS "2.8.3")
    message(FATAL_ERROR "CMake >= 2.8.3 required")
 endif()
 cmake_policy(PUSH)
-cmake_policy(VERSION 2.8.3...3.22)
+cmake_policy(VERSION 2.8.3...3.23)
 #----------------------------------------------------------------
 # Generated CMake target import file.
 #----------------------------------------------------------------
@@ -19,7 +19,7 @@ set(CMAKE_IMPORT_FILE_VERSION 1)
 set(_cmake_targets_defined "")
 set(_cmake_targets_not_defined "")
 set(_cmake_expected_targets "")
-foreach(_cmake_expected_target IN ITEMS freetype)
+foreach(_cmake_expected_target IN ITEMS freetype Freetype::Freetype)
   list(APPEND _cmake_expected_targets "${_cmake_expected_target}")
   if(TARGET "${_cmake_expected_target}")
     list(APPEND _cmake_targets_defined "${_cmake_expected_target}")
@@ -60,11 +60,18 @@ add_library(freetype STATIC IMPORTED)
 
 set_target_properties(freetype PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include/freetype2"
-  INTERFACE_LINK_LIBRARIES "C:\\Code\\SDK\\harfbuzz\\lib\\release\\harfbuzz.lib"
+  INTERFACE_LINK_LIBRARIES "D:/Code/build/harfbuzz/Release/harfbuzz.lib"
 )
 
-if(CMAKE_VERSION VERSION_LESS 2.8.12)
-  message(FATAL_ERROR "This file relies on consumers using CMake 2.8.12 or greater.")
+# Create imported target Freetype::Freetype
+add_library(Freetype::Freetype INTERFACE IMPORTED)
+
+set_target_properties(Freetype::Freetype PROPERTIES
+  INTERFACE_LINK_LIBRARIES "freetype"
+)
+
+if(CMAKE_VERSION VERSION_LESS 3.0.0)
+  message(FATAL_ERROR "This file relies on consumers using CMake 3.0.0 or greater.")
 endif()
 
 # Load information for each installed configuration.

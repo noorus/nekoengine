@@ -37,10 +37,10 @@ namespace neko {
     inline bool dragVector( const char* label, const T& v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f,
       const char* format = "%.3f", ImGuiSliderFlags flags = 0 )
     {
-      if constexpr ( std::is_same_v<T::value_type, float> )
+      if constexpr ( std::is_same_v<typename T::value_type, float> )
         return ImGui::DragScalarN( label, ImGuiDataType_Float, const_cast<void*>( reinterpret_cast<const void*>( &v[0] ) ),
           static_cast<int>( v.length() ), v_speed, &v_min, &v_max, format, flags );
-      if constexpr ( std::is_same_v<T::value_type, double> )
+      if constexpr ( std::is_same_v<typename T::value_type, double> )
         return ImGui::DragScalarN( label, ImGuiDataType_Double, const_cast<void*>( reinterpret_cast<const void*>( &v[0] ) ),
           static_cast<int>( v.length() ), v_speed, &v_min, &v_max, format, flags );
     }
@@ -279,7 +279,7 @@ namespace neko {
       MAX_PixelScale
     };
 
-    constexpr Real c_pixelScaleValues[MAX_PixelScale] = {
+    constexpr const Real c_pixelScaleValues[MAX_PixelScale] = {
       ( 1.0f / 1.0f ),
       ( 1.0f / 8.0f ),
       ( 1.0f / 10.0f ),
@@ -294,7 +294,7 @@ namespace neko {
       ( 1.0f / 64.0f )
     };
 
-    constexpr char* c_pixelScaleNames[MAX_PixelScale] = {
+    constexpr const char* c_pixelScaleNames[MAX_PixelScale] = {
       "1 = 1px",
       "1 = 8px",
       "1 = 10px",

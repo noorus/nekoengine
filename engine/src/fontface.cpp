@@ -16,13 +16,15 @@ namespace neko {
     if ( fterr || !face_ )
       NEKO_FREETYPE_EXCEPT( "FreeType font face load failed", fterr );
 
-    auto fmt = FT_Get_Font_Format( face_ );
+    // For some reason this export is perpetually broken in release build of FT
+    // auto fmt = FT_Get_Font_Format( face_ );
+
     utf8String name( font_->name() );
     if ( face_->family_name )
       name.append( " " + utf8String( face_->family_name ) );
     if ( face_->style_name )
       name.append( " " + utf8String( face_->style_name ) );
-    Locator::console().printf( LogSource::srcGfx, "Loaded %s font %s (face %i)", fmt, name.c_str(), faceIndex );
+    Locator::console().printf( LogSource::srcGfx, "Loaded font %s (face %i)", name.c_str(), faceIndex );
     
     forceUCS2Charmap();
 

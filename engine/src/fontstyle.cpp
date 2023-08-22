@@ -183,17 +183,17 @@ namespace neko {
   void FontStyle::postLoad()
   {
     auto metrics = face_->face_->size->metrics;
-    auto fmt = FT_Get_Font_Format( face_->face_ );
+    /* auto fmt = FT_Get_Font_Format( face_->face_ );
     if ( strcmp( fmt, "TrueType" ) == 0 )
     {
       ascender_ = static_cast<Real>( FT_MulFix( face_->face_->ascender, metrics.y_scale ) >> 6 );
       descender_ = static_cast<Real>( FT_MulFix( face_->face_->descender, metrics.y_scale ) >> 6 );
     }
     else
-    {
+    {*/
       ascender_ = static_cast<Real>( metrics.ascender >> 6 );
       descender_ = static_cast<Real>( metrics.descender >> 6 );
-    }
+    //}
   }
 
   const TextureAtlas& FontStyle::atlas() const

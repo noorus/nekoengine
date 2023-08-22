@@ -69,12 +69,12 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "Ankea Games"
-            VALUE "FileDescription", "NekoEngine (VN Branch)"
+            VALUE "FileDescription", "nekoengine"
             VALUE "FileVersion", "0.1.0.1"
             VALUE "InternalName", "engine.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2021"
+            VALUE "LegalCopyright", "Copyright (c) 2021-2023"
             VALUE "OriginalFilename", "engine.exe"
-            VALUE "ProductName", "NekoEngine (VN Branch)"
+            VALUE "ProductName", "nekoengine"
             VALUE "ProductVersion", "0.1.0.1"
         END
     END
@@ -93,6 +93,7 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_MAINICON            ICON                    "..\\embed\\panz_icon_v1.ico"
+
 IDI_CONSOLEICON         ICON                    "..\\embed\\console_icon_v1.ico"
 
 #endif    // Neutral (Default) resources

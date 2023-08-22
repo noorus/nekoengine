@@ -41,7 +41,7 @@ namespace neko {
     inline void update( const vector<nil::Button>& state )
     {
       size_t count = math::min( state.size(), c_buttonCount );
-      previousStates.swap( states_ );
+      previousStates_.swap( states_ );
       for ( auto i = 0; i < count; ++i )
         states_[i] = state[i].pushed;
     }

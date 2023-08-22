@@ -1,4 +1,4 @@
-prefix=C:/Code/SDK/freetype
+prefix=C:/Program Files (x86)/freetype
 exec_prefix=${prefix}
 libdir=${prefix}/lib
 includedir=${prefix}/include
@@ -6,7 +6,7 @@ includedir=${prefix}/include
 Name: FreeType 2
 URL: https://freetype.org
 Description: A free, high-quality, and portable font engine.
-Version: 24.3.18
+Version: 26.0.20
 Requires:  harfbuzz >= 2.0.0
 Requires.private: 
 Libs: -L${libdir} -lfreetype 
