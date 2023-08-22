@@ -225,7 +225,8 @@ namespace neko {
 
     scene_ = make_shared<SManager>( realResolution );
     auto cam = scene_->createCamera( "gamecam" );
-    scene_->tn( cam ).translate = { 5.0f, 3.0f, 0.0f };
+    scene_->tn( cam ).translate = { 0.0f, 0.0f, 10.0f };
+    scene_->tn( cam ).rotate = math::quaternionFrom( radians( 180 ), vec3( 0.0f, -1.0f, 0.0f ) );
     scene_->cams().setActive( cam );
 
     IMGUI_CHECKVERSION();
@@ -376,6 +377,12 @@ namespace neko {
   {
   }
 
+  constexpr RenderVisualizations c_emptyVisualizations = {
+    .bounds = false,
+    .frustums = false,
+    .nodes = false
+  };
+
   void Gfx::update( GameTime time, GameTime delta, Engine& engine )
   {
     if ( flags_.reloadShaders )
@@ -467,7 +474,7 @@ namespace neko {
     {
       auto camera = scene_->cams().getActive();
       if ( camera )
-        renderer_->drawGame( time, *scene_, *camera, &windowViewport_, gameViewport_ );
+        renderer_->drawGame( time, *scene_, *camera, &windowViewport_, gameViewport_, c_emptyVisualizations, false );
     }
 
     if ( show_demo_window )
@@ -478,24 +485,39 @@ namespace neko {
     ImGui::Text( "Editor" );
     ImGui::Separator();
     ImGui::ColorEdit3(
-      "Background", &editor_->clearColorRef().x, ImGuiColorEditFlags_Float | ImGuiColorEditFlags_DisplayHSV );
-    ImGui::ColorEdit4( "Grid Lines", &editor_->gridColorRef().x,
+      "background", &editor_->clearColorRef().x, ImGuiColorEditFlags_Float | ImGuiColorEditFlags_DisplayHSV );
+    ImGui::ColorEdit4( "gridlines", &editor_->gridColorRef().x,
       ImGuiColorEditFlags_Float | ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreviewHalf |
         ImGuiColorEditFlags_DisplayHSV );
+
+    ImGui::SeparatorText( "visualizers" );
+    ImGui::Checkbox( "show bounds", &editor_->visSettingsRef().bounds );
+    ImGui::Checkbox( "show frustums", &editor_->visSettingsRef().frustums );
+    ImGui::Checkbox( "show nodes", &editor_->visSettingsRef().nodes );
+    ImGui::Checkbox( "show in game vp", &editor_->visSettingsRef().gameViewport );
+    
     ImGui::Text( "Rendering" );
     ImGui::Separator();
     scene_->cams().imguiCameraSelector();
-    ImGui::DragFloat( "Gamma", &gamma, 0.0025f, 0.0f, 10.0f );
+    ImGui::DragFloat( "gamma", &gamma, 0.0025f, 0.0f, 10.0f );
     g_CVar_vid_gamma.set( gamma );
+    //ImGui::RadioButton()
     ImGui::End();
 
-    ImGui::Begin( "Scene Graph" );
-    scene_->imguiSceneGraph();
-    ImGui::End();
-
+    ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 6.0f, ImGui::GetStyle().WindowPadding.y ) );
     ImGui::Begin( "Nodes" );
+    auto fullw = ImGui::GetContentRegionAvail().x;
+    ImGui::BeginChild( "Scenegraph", ImVec2( math::max( fullw * 0.32f, 200.0f ), ImGui::GetContentRegionAvail().y ), false,
+      ImGuiWindowFlags_HorizontalScrollbar );
+    scene_->imguiSceneGraph();
+    ImGui::EndChild();
+    ImGui::SameLine();
+    ImGui::BeginChild( "Node Editor", ImVec2( ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y ), false,
+      ImGuiWindowFlags_HorizontalScrollbar );
     scene_->imguiSelectedNodes();
+    ImGui::EndChild();
     ImGui::End();
+    ImGui::PopStyleVar( 1 );
 
     auto gameMainTexture = renderer_->getMergedMainFramebuffer();
     if ( gameMainTexture && false )

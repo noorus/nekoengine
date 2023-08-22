@@ -198,7 +198,7 @@ namespace neko {
         MAX_CameraProjection
       } projection = CameraProjection::Perspective;
       Real perspective_fovy = 30.0f;
-      Real orthographic_radius = 10.0f;
+      Real orthographic_radius = 16.0f;
       enum CameraTracking
       {
         Free = 0,
@@ -208,7 +208,7 @@ namespace neko {
       Real free_dist = 100.0f;
       entity node_target = null;
       Real nearDist = 0.1f;
-      Real farDist = 10.0f;
+      Real farDist = 100.0f;
       Real exposure = 1.0f;
       int up_sel = ig::PredefNormal_PlusY;
       vec3 up = { 0.0f, 1.0f, 0.0f };

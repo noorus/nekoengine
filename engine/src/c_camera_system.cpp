@@ -74,7 +74,7 @@ namespace neko {
 
       auto prevSelected = selectedCamera_;
 
-      if ( ImGui::BeginCombo( "Camera", current ? current->name.data() : "none", cflags ) )
+      if ( ImGui::BeginCombo( "camera", current ? current->name.data() : "none", cflags ) )
       {
         bool selected = ( current ? true : false );
         if ( ImGui::Selectable( "none", &selected ) )

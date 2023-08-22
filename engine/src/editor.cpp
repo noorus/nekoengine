@@ -143,7 +143,7 @@ namespace neko {
 
     for ( int i = 0; i < 3; ++i )
     {
-      renderer->draw( time, scene, *viewports_[i]->camera(), *viewports_[i], renderer->builtins().screenFourthQuads_[i] );
+      renderer->draw( time, scene, *viewports_[i]->camera(), *viewports_[i], visSettings_, true, renderer->builtins().screenFourthQuads_[i] );
       auto& vp = viewports_[i];
       auto topleft = vp->posf();
       auto bottomright = topleft + vp->sizef();
@@ -168,7 +168,7 @@ namespace neko {
     if ( vp->camera() )
     {
       title = vp->debugString();
-      renderer->draw( time, scene, *vp->camera(), *vp, renderer->builtins().screenFourthQuads_[3] );
+      renderer->draw( time, scene, *vp->camera(), *vp, visSettings_, visSettings_.gameViewport, renderer->builtins().screenFourthQuads_[3] );
     }
     ImGui::GetBackgroundDrawList()->AddText( gameViewport.posf() + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ), title.c_str() );
 

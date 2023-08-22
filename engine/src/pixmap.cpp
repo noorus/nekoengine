@@ -208,7 +208,7 @@ namespace neko {
     {
       out.width_ = TinyTIFFReader_getWidth( tiff );
       out.height_ = TinyTIFFReader_getHeight( tiff );
-      auto bps = TinyTIFFReader_getBitsPerSample( tiff, 0 );
+      auto bps = static_cast<int>( TinyTIFFReader_getBitsPerSample( tiff, 0 ) );
       auto sf = TinyTIFFReader_getSampleFormat( tiff );
       auto spp = TinyTIFFReader_getSamplesPerPixel( tiff );
 
@@ -220,8 +220,8 @@ namespace neko {
         NEKO_EXCEPT( "Unsupported channel count in TIFF image" );
 
       vector<uint8_t> tiffSource;
-      tiffSource.resize( out.width_ * out.height_ * ( bps / 8 ) );
-      out.data_.resize( out.width_ * out.height_ * spp * sizeof( uint8_t ) );
+      tiffSource.resize( static_cast<size_t>( out.width_ ) * out.height_ * ( bps / 8 ) );
+      out.data_.resize( static_cast<size_t>( out.width_ ) * out.height_ * spp * sizeof( uint8_t ) );
       if ( bps == 16 && sf == TINYTIFF_SAMPLEFORMAT_UINT )
       {
         auto data = reinterpret_cast<uint8_t*>( out.data_.data() );
@@ -235,8 +235,8 @@ namespace neko {
           {
             for ( auto x = 0; x < out.width_; ++x )
             {
-              size_t p = ( y * out.width_ ) + x;
-              size_t d = ( ( ( y * out.width_ ) + x ) * spp ) + s;
+              auto p = ( y * out.width_ ) + x;
+              auto d = ( ( ( y * out.width_ ) + x ) * spp ) + s;
               // I'm practically entirely sure that this is wrong - whatever,
               // fix when we actually need one of these textures
               data[d] = math::iround( static_cast<Real>( source[p] ) / 256.0f );
@@ -257,8 +257,8 @@ namespace neko {
           {
             for ( auto x = 0; x < out.width_; ++x )
             {
-              size_t p = ( y * out.width_ ) + x;
-              size_t d = ( ( ( y * out.width_ ) + x ) * spp ) + s;
+              auto p = ( y * out.width_ ) + x;
+              auto d = ( ( ( y * out.width_ ) + x ) * spp ) + s;
               data[d] = static_cast<uint8_t>( source[p] );
             }
           }
@@ -359,7 +359,7 @@ namespace neko {
       {
         auto src = rhs.data().data() + ( ( ( ( src_y + i ) * rhs.width() ) + src_x ) * stride );
         auto dst = data_.data() + ( ( ( ( dst_y + i ) * width_ ) + dst_x ) * stride );
-        memcpy( dst, src, width * stride );
+        memcpy( dst, src, static_cast<size_t>( width ) * stride );
       }
     }
     else

@@ -586,39 +586,62 @@ namespace neko {
     return ( vp + ( ss * vs ) );
   }
 
-  static vector<c::CameraData*> g_cams;
-
-  void Renderer::drawSceneRecurse( SManager& scene, Camera& cam, const ViewportDrawParameters& drawparams, c::entity e )
+  inline void visualizeNode( SManager& scene, const ViewportDrawParameters& drawparams, c::entity e )
   {
     const auto& en = scene.nd( e );
+    const auto& et = scene.tn( e );
 
+    auto pt = toScreen( et.translate, et.model(), drawparams );
+    auto nx = drawparams.drawopViewportPosition();
+    auto mx = nx + drawparams.drawopViewportSize();
+    auto dl = ImGui::GetBackgroundDrawList();
+    dl->PushClipRect( nx, mx, false );
+    if ( pt.x >= nx.x && pt.y >= nx.y && pt.x < mx.x && pt.y < mx.y )
+    {
+      dl->AddRect( pt - 10.0f, pt + 10.0f, ImColor( 0.1f, 0.1f, 0.1f ), 0.0f, ImDrawFlags_None, 3.0f );
+      dl->AddRect( pt - 10.0f, pt + 10.0f, ImColor( 0.5f, 0.5f, 0.5f ), 0.0f, ImDrawFlags_None, 1.0f );
+      dl->AddText( pt + 1.0f, ImColor( 0.0f, 0.0f, 0.0f ), en.name.c_str() );
+      dl->AddText( pt, ImColor( 1.0f, 1.0f, 1.0f ), en.name.c_str() );
+    }
+    dl->PopClipRect();
+  }
+
+  void Renderer::drawSceneRecurse( SManager& scene, Camera& cam, const ViewportDrawParameters& drawparams,
+    const RenderVisualizations& vis, bool showVis, c::entity e )
+  {
     if ( scene.validAndTransform( e ) )
     {
-      const auto& et = scene.tn( e );
-      auto pt = toScreen( et.translate, et.model(), drawparams );
-      auto nx = drawparams.drawopViewportPosition();
-      auto mx = nx + drawparams.drawopViewportSize();
-      auto dl = ImGui::GetBackgroundDrawList();
-      dl->PushClipRect( nx, mx, false );
-      if ( pt.x >= nx.x && pt.y >= nx.y && pt.x < mx.x && pt.y < mx.y )
-      {
-        dl->AddRect( pt - 10.0f, pt + 10.0f, ImColor( 0.1f, 0.1f, 0.1f ), 0.0f, ImDrawFlags_None, 3.0f );
-        dl->AddRect( pt - 10.0f, pt + 10.0f, ImColor( 0.5f, 0.5f, 0.5f ), 0.0f, ImDrawFlags_None, 1.0f );
-        dl->AddText( pt + 1.0f, ImColor( 0.0f, 0.0f, 0.0f ), en.name.c_str() );
-        dl->AddText( pt, ImColor( 1.0f, 1.0f, 1.0f ), en.name.c_str() );
-      }
-      dl->PopClipRect();
+      if ( showVis && vis.nodes )
+        visualizeNode( scene, drawparams, e );
     }
 
-    auto sub = en.first;
+    auto sub = scene.nd( e ).first;
     while ( sub != c::null )
     {
-      drawSceneRecurse( scene, cam, drawparams, sub );
+      drawSceneRecurse( scene, cam, drawparams, vis, showVis, sub );
       sub = scene.nd( sub ).next;
     }
   }
 
-  void Renderer::sceneDraw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams )
+  inline void visualizeFrustum( const Camera& cam, shaders::Shaders& shdr )
+  {
+    LineRenderBuffer<24> vizbuf;
+    auto verts = vizbuf.buffer().lock();
+    const auto color = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+
+    for ( size_t i = 0; i < 24; ++i )
+      verts[i].color = color;
+
+    size_t i = 0;
+    cam.frustum().feedVertsTo( verts, i );
+
+    vizbuf.buffer().unlock();
+    auto ppl = &shdr.usePipeline( "dbg_line" );
+    vizbuf.draw( *ppl, cam.model(), 24, 0, gl::GL_LINES );
+  }
+
+  void Renderer::sceneDraw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams,
+    const RenderVisualizations& vis, bool showVis )
   {
     auto wire = ( drawparams.drawopShouldDrawWireframe() );
 
@@ -668,26 +691,15 @@ namespace neko {
       //  sceneDrawEnterNode( node, pipeline );
     }
 
-    drawSceneRecurse( scene, camera, drawparams, scene.root() );
+    drawSceneRecurse( scene, camera, drawparams, vis, showVis, scene.root() );
 
     for ( const auto& cm : scene.cams().cameras() )
     {
       if ( !cm.second.instance )
         continue;
 
-      LineRenderBuffer<24> boxviz_;
-      auto verts = boxviz_.buffer().lock();
-      const auto color = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
-
-      for ( size_t i = 0; i < 24; ++i )
-        verts[i].color = color;
-
-      size_t i = 0;
-      cm.second.instance->frustum().feedVertsTo( verts, i );
-
-      boxviz_.buffer().unlock();
-      auto ppl = &shaders_->usePipeline( "dbg_line" );
-      boxviz_.draw( *ppl, cm.second.instance->model(), 24, 0, gl::GL_LINES );
+      if ( vis.frustums && showVis )
+        visualizeFrustum( *cm.second.instance, *shaders_ );
     }
 
     glEnable( GL_LINE_SMOOTH );
@@ -783,8 +795,8 @@ namespace neko {
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
   }
 
-  void Renderer::drawGame(
-    GameTime time, SManager& scene, Camera& camera, const Viewport* viewport, const ViewportDrawParameters& params )
+  void Renderer::drawGame( GameTime time, SManager& scene, Camera& camera, const Viewport* viewport,
+    const ViewportDrawParameters& params, const RenderVisualizations& vis, bool showVis )
   {
     if ( !ctx_.ready() )
       return;
@@ -812,7 +824,7 @@ namespace neko {
       prepareSceneDraw( time, params );
       params.drawopPreSceneDraw( *shaders_ );
       prepareSceneDraw( time, camera, params );
-      sceneDraw( time, scene, camera, params ); 
+      sceneDraw( time, scene, camera, params, vis, showVis ); 
       prepareSceneDraw( time, params );
       params.drawopPostSceneDraw( *shaders_ );
       main->end();
@@ -870,8 +882,8 @@ namespace neko {
       viewport->end();
   }
 
-  void Renderer::draw(
-    GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad )
+  void Renderer::draw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams,
+    const RenderVisualizations& vis, bool showVis, StaticMeshPtr viewportQuad )
   {
     // check that the drawcontext is ready (fbo's available etc)
     if ( !ctx_.ready() )
@@ -909,7 +921,7 @@ namespace neko {
       prepareSceneDraw( time, camera, drawparams );
       drawparams.drawopPreSceneDraw( *shaders_ );
       prepareSceneDraw( time, camera, drawparams );
-      sceneDraw( time, scene, camera, drawparams );
+      sceneDraw( time, scene, camera, drawparams, vis, showVis );
       prepareSceneDraw( time, drawparams );
       drawparams.drawopPostSceneDraw( *shaders_ );
       if ( ctx_.fboMainMultisampled_ )

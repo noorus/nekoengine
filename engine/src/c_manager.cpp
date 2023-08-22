@@ -192,7 +192,7 @@ namespace neko {
       if ( e == null )
         return;
 
-      auto node = nd( e );
+      auto& node = nd( e );
       ImGui::Text( "ID: %i", static_cast<uint32_t>( e ) );
       ImGui::Text( "Name: %s", node.name.c_str() );
       ImGui::TextUnformatted( "Components" );
@@ -204,9 +204,25 @@ namespace neko {
         ig::ComponentChildWrapper wrap( "Transform", 120.0f + ww );
         ig::dragVector( "translate", t.translate, 0.1f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
         ig::dragVector( "scale", t.scale, 0.01f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
-        ImGui::gizmo3D( "rotation", t.rotate, ww );
-        //ImGui::SameLine();
-        //ImGui::Button( "+X" )
+        ImGui::gizmo3D( "rotation", t.rotate, std::min( ww, 180.0f ) );
+        ImGui::SameLine();
+        ImGui::BeginGroup();
+        if ( ImGui::Button( "+X" ) )
+          t.rotate = math::quaternionFrom( radians( 90 ), vec3( 0.0f, 1.0f, 0.0f ) );
+        ImGui::SameLine();
+        if ( ImGui::Button( "-X" ) )
+          t.rotate = math::quaternionFrom( radians( 90 ), vec3( 0.0f, -1.0f, 0.0f ) );
+        if ( ImGui::Button( "+Y" ) )
+          t.rotate = math::quaternionFrom( radians( 90 ), vec3( -1.0f, 0.0f, 0.0f ) );
+        ImGui::SameLine();
+        if ( ImGui::Button( "-Y" ) )
+          t.rotate = math::quaternionFrom( radians( 90 ), vec3( 1.0f, 0.0f, 0.0f ) );
+        if ( ImGui::Button( "+Z" ) )
+          t.rotate = math::quaternionFrom( radians( 0 ), vec3( 0.0f, 1.0f, 0.0f ) );
+        ImGui::SameLine();
+        if ( ImGui::Button( "-Z" ) )
+          t.rotate = math::quaternionFrom( radians( 180 ), vec3( 0.0f, -1.0f, 0.0f ) );
+        ImGui::EndGroup();
         // a bit wasteful but hardly an issue
         markDirty( e );
       }

@@ -30,6 +30,13 @@ namespace neko {
     virtual vec2 drawopViewportSize() const = 0;
   };
 
+  struct RenderVisualizations
+  {
+    bool bounds = true;
+    bool frustums = true;
+    bool nodes = true;
+  };
+
   class Editor;
   using EditorPtr = shared_ptr<Editor>;
 
@@ -140,6 +147,11 @@ namespace neko {
   };
 
   class Editor: public enable_shared_from_this<Editor> {
+  public:
+    struct Visualizations: public RenderVisualizations
+    {
+      bool gameViewport = false;
+    };
   protected:
     bool enabled_ = true;
     vec3 clearColor_ = vec3( 0.0f, 0.0f, 0.0f );
@@ -151,6 +163,7 @@ namespace neko {
     vec2 mousePos_ { 0.0f };
     ViewportDragOperation dragOp_;
     vec2 lastDragopPos_ { 0.0f, 0.0f };
+    Visualizations visSettings_;
   public:
     void initialize( RendererPtr renderer, const vec2& realResolution );
     void resize( const Viewport& windowViewport, GameViewport& gameViewport );
@@ -159,6 +172,7 @@ namespace neko {
     inline void enabled( bool enable ) { enabled_ = enable; }
     inline vec3& clearColorRef() { return clearColor_; }
     inline vec4& gridColorRef() { return gridColor_; }
+    inline Visualizations& visSettingsRef() { return visSettings_; }
     void shutdown();
     void updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene, const Viewport& window,
       GameViewport& gameViewport );

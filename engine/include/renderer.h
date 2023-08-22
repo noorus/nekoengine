@@ -131,11 +131,13 @@ namespace neko {
     void sceneDrawEnterNode( MeshNodePtr node, shaders::Pipeline& pipeline );
     void prepareSceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );
     void prepareSceneDraw( GameTime time, const ViewportDrawParameters& drawparams );
-    void sceneDraw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams );
+    void sceneDraw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams,
+      const RenderVisualizations& vis, bool showVis );
     void clearErrors();
     void setCameraUniforms( Camera& camera, uniforms::Camera& uniform );
     TexturePtr loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering );
-    void drawSceneRecurse( SManager& scene, Camera& cam, const ViewportDrawParameters& drawparams, c::entity e );
+    void drawSceneRecurse(
+      SManager& scene, Camera& cam, const ViewportDrawParameters& drawparams, const RenderVisualizations& vis, bool showVis, c::entity e );
   public:
     Renderer( ThreadedLoaderPtr loader, FontManagerPtr fonts, DirectorPtr director, ConsolePtr console );
     inline const StaticData& builtins() noexcept { return builtin_; }
@@ -162,10 +164,10 @@ namespace neko {
     void uploadModels();
     void jsRestart();
     inline shaders::Shaders& shaders() noexcept { return *( shaders_.get() ); }
-    void drawGame(
-      GameTime time, SManager& scene, Camera& camera, const Viewport* viewport, const ViewportDrawParameters& params );
-    void draw(
-      GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams, StaticMeshPtr viewportQuad );
+    void drawGame( GameTime time, SManager& scene, Camera& camera, const Viewport* viewport,
+      const ViewportDrawParameters& params, const RenderVisualizations& vis, bool showVis );
+    void draw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams,
+      const RenderVisualizations& vis, bool showVis, StaticMeshPtr viewportQuad );
     void reset( int width, int height );
     ~Renderer();
   };

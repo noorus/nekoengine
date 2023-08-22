@@ -22,7 +22,7 @@ namespace neko {
   {
     const auto& tfm = manager.tn( ent_ );
     position_ = tfm.translate;
-    direction_ = glm::rotate( tfm.rotate, vec3( 0.0f, 0.0f, -1.0f ) );
+    direction_ = glm::rotate( tfm.rotate, vec3( 0.0f, 0.0f, 1.0f ) );
 
     const auto& cam = manager.cam( ent_ );
     frustum_.near( cam.nearDist );
