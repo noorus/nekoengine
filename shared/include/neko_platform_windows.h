@@ -405,6 +405,14 @@ namespace neko {
       return true;
     }
 
+    inline HWND windowUnderCursor()
+    {
+      POINT tmp;
+      if ( !::GetCursorPos( &tmp ) )
+        return nullptr;
+      return ::WindowFromPoint( tmp );
+    }
+
     inline void setCursorPosition( vec2i position )
     {
       ::SetCursorPos( static_cast<int>( position.x ), static_cast<int>( position.y ) );

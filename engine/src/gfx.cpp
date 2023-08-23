@@ -360,7 +360,10 @@ namespace neko {
     gameViewport_.setCameraData( scene_->cams().getActiveData() );
 
     if ( editor_->enabled() )
-      editor_->updateRealtime( realTime, delta, input_, *scene_, windowViewport_, gameViewport_ );
+    {
+      bool ignoreInput = ( !window_->hasFocus() || platform::windowUnderCursor() != window_->getSystemHandle() );
+      editor_->updateRealtime( realTime, delta, input_, *scene_, windowViewport_, gameViewport_, ignoreInput );
+    }
   }
 
   void Gfx::clear( const vec4& color )

@@ -80,8 +80,8 @@ namespace neko {
     //gameViewport.camera()->setViewport( vec2( static_cast<Real>( halfsize.x ), static_cast<Real>( halfsize.y ) ) );
   }
 
-  void Editor::updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene,
-    const Viewport& window, GameViewport& gameViewport )
+  void Editor::updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene, const Viewport& window,
+    GameViewport& gameViewport, bool ignoreInput )
   {
     size_t PANBTN = 2;
     size_t GAMEVP = 3;
@@ -91,7 +91,7 @@ namespace neko {
     if ( dragOp_.ongoing() || !igIO.WantCaptureMouse )
     {
       auto vpidx = GAMEVP;
-      if ( !dragOp_.ongoing() )
+      if ( !dragOp_.ongoing() && !ignoreInput )
       {
         const auto halfsize = vec2i( window.sizef() * 0.5f );
         if ( input->mousePosition_.x < halfsize.x )
@@ -114,7 +114,7 @@ namespace neko {
         if ( input->mouseButtons().wasReleased( PANBTN ) )
           dragOp_.end();
       }
-      else if ( vpidx < 3 )
+      else if ( vpidx < 3 && !ignoreInput )
       {
         auto& vp = viewports_[vpidx];
         vp->camera()->applyInputZoom( static_cast<int>( input->movement().z ) );

@@ -102,6 +102,7 @@ namespace neko {
       return mouseButtons_.isPressed( index );
     }
     inline const ButtonTracker<5>& mouseButtons() const { return mouseButtons_; }
+    inline const POINT& mousePosition() const { return mousePosition_; }
     void resetMovement();
     void shutdown();
     void update();
