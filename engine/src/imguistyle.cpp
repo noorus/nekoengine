@@ -29,6 +29,7 @@ namespace neko {
     style.WindowTitleAlign = { 0.03f, 0.5f };
     style.WindowMenuButtonPosition = ImGuiDir_Right;
     style.ColorButtonPosition = ImGuiDir_Right;
+    style.SeparatorTextPadding = ImVec2( 16, 4 );
 
     auto colors = style.Colors;
     colors[ImGuiCol_Text] = ImVec4( 0.96f, 0.95f, 0.94f, 1.00f );

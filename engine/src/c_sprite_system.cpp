@@ -64,7 +64,7 @@ namespace neko {
             Locator::meshGenerator().makePlane(
               s.dimensions * c_pixelScaleValues[s.pixelScaleBase],
               { 1, 1 },
-              { 0.0f, 0.0f, -1.0f } );
+              { 0.0f, 0.0f, 1.0f } );
           if ( !s.mesh || s.mesh->buffer().size() != parts.first.size() ||
                 s.mesh->indices().size() != parts.second.size() )
             s.mesh = make_unique<SpriteVertexbuffer>( parts.first.size(), parts.second.size() );

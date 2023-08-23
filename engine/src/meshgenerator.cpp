@@ -72,8 +72,16 @@ namespace neko {
 
   }
 
+  // clang-format off
+
   void implAddPlane( vector<Vertex3D>& verts, vector<GLuint>& indices, vec2 dimensions, vec2u segments, vec3 normal, vec4 color, vec3 position = vec3( 0.0f ) )
   {
+    if ( segments.x < 1 || segments.y < 1 )
+      return;
+
+    dimensions = vec2( dimensions.y, dimensions.x );
+    segments = vec2u( segments.y, segments.x );
+
     const auto prevverts = verts.size();
     const auto previndices = indices.size();
     verts.resize( prevverts + ( ( segments.x + 1 ) * ( segments.y + 1 ) ) );
@@ -91,12 +99,12 @@ namespace neko {
     for ( unsigned int i = 0; i <= segments.x; ++i )
       for ( unsigned int j = 0; j <= segments.y; ++j )
       {
-        auto v = Vertex3D{
-          orig + (Real)i * delta1 + (Real)j * delta2,
-          normal,
-          vec2( (Real)i, (Real)j ), // vec2( i / (Real)segments.x, j / (Real)segments.y ),
-          color };
-        verts[prevverts + ( i * ( segments.y + 1 ) + j )] = move( v );
+        auto uv = vec2(
+          ( static_cast<Real>( segments.y ) - static_cast<Real>( j ) ) / static_cast<Real>( segments.y ),
+          ( static_cast<Real>( segments.x ) - static_cast<Real>( i ) ) / static_cast<Real>( segments.x )
+        );
+        auto v = Vertex3D { orig + (Real)i * delta1 + (Real)j * delta2, normal, uv, color };
+        verts[prevverts + ( ( i * ( segments.y + 1 ) ) + j )] = move( v );
       }
 
     bool reverse = ( glm::dot( glm::cross( delta1, delta2 ), normal ) > 0.0f );

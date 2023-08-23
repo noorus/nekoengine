@@ -251,7 +251,7 @@ namespace neko {
         for ( auto i : it->flipFramesX_ )
           cut.flipRectHorizontal( 0, i * h, w, h );
 
-        cut.flipVertical();
+        // cut.flipVertical();
         MaterialLayer layer( move( cut ) );
         it->material_->layers_.push_back( move( layer ) );
       }
@@ -262,7 +262,7 @@ namespace neko {
         for ( int i = 0; i < it->definition_->frameCount(); ++i )
         {
           cut.blitRectFrom( *sheet, 0, i * h, it->sheetPos_.x + ( i * w ), it->sheetPos_.y, w, h );
-          cut.flipRectVertical( 0, i * h, w, h );
+          // cut.flipRectVertical( 0, i * h, w, h );
           if ( utils::contains( it->flipFramesX_, i ) )
             cut.flipRectHorizontal( 0, i * h, w, h );
         }

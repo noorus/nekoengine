@@ -29,8 +29,9 @@ void main()
   vec3 Lo = texture( tex, tc ).rgb;
   float alpha = texture( tex, tc ).a;
 
-  vec3 ambient = processing.ambient.rgb * Lo;
-  vec3 diffuse = ambient + Lo;
+  //vec3 ambient = processing.ambient.rgb * Lo;
+  //vec3 diffuse = ambient + Lo;
+  vec3 diffuse = Lo;
 
   out_color = vs_out.color * vec4( diffuse, alpha );
 }

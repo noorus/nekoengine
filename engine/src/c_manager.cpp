@@ -5,6 +5,11 @@ namespace neko {
 
   namespace c {
 
+    // +Z, Y up
+    const auto c_defaultCameraOrientation = math::quaternionFrom( radians( 0 ), vec3( 0.0f, 1.0f, 0.0f ) );
+    // +Z, Y up
+    const auto c_defaultNodeOrientation = math::quaternionFrom( radians( 0 ), vec3( 0.0f, 1.0f, 0.0f ) );
+
     manager::manager( vec2 viewportResolution )
     {
       registry_.on_construct<transform>().connect<&registry::emplace_or_replace<dirty_transform>>();
@@ -55,7 +60,8 @@ namespace neko {
     entity manager::createRenderable( entity parent, string_view name )
     {
       auto e = createNode( root_, name );
-      registry_.emplace<transform>( e );
+      auto& sn = registry_.emplace<transform>( e );
+      sn.rotate = c_defaultNodeOrientation;
       registry_.emplace<renderable>( e );
       return e;
     }
@@ -68,7 +74,9 @@ namespace neko {
     entity manager::createCamera( string_view name )
     {
       auto e = createNode( root_, name );
-      registry_.emplace<transform>( e );
+      auto& tn = registry_.emplace<transform>( e );
+      auto id = quat::identity();
+      tn.rotate = c_defaultCameraOrientation;
       auto& c = registry_.emplace<camera>( e );
       c.up = ig::valueForNormalIndex( c.up_sel );
       return e;
@@ -93,7 +101,7 @@ namespace neko {
       p.type = primitive::PrimitiveType::Plane;
       p.values.plane.dimensions = { 10.0f, 10.0f };
       p.values.plane.segments = { 1, 1 };
-      p.values.plane.normal_sel = ig::PredefNormal_PlusY;
+      p.values.plane.normal_sel = ig::PredefNormal_PlusZ;
       p.values.plane.normal = ig::valueForNormalIndex( p.values.plane.normal_sel );
       return e;
     }
@@ -102,6 +110,7 @@ namespace neko {
     {
       auto e = createRenderable( root_, name );
       auto& s = registry_.emplace<sprite>( e );
+      s.matName = "mushroom_idle-left";
       return e;
     }
 
@@ -202,27 +211,29 @@ namespace neko {
         auto& t = tn( e );
         auto ww = ImGui::GetContentRegionAvail().x * 0.5f;
         ig::ComponentChildWrapper wrap( "Transform", 120.0f + ww );
+        ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 4, 4 ) );
         ig::dragVector( "translate", t.translate, 0.1f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
         ig::dragVector( "scale", t.scale, 0.01f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
-        ImGui::gizmo3D( "rotation", t.rotate, std::min( ww, 180.0f ) );
+        ImGui::gizmo3D( "rotation", t.rotate, std::min( ww, 150.0f ) );
         ImGui::SameLine();
         ImGui::BeginGroup();
-        if ( ImGui::Button( "+X" ) )
+        if ( ImGui::Button( "+X", ImVec2( 36, 0 ) ) )
           t.rotate = math::quaternionFrom( radians( 90 ), vec3( 0.0f, 1.0f, 0.0f ) );
         ImGui::SameLine();
-        if ( ImGui::Button( "-X" ) )
+        if ( ImGui::Button( "-X", ImVec2( 36, 0 ) ) )
           t.rotate = math::quaternionFrom( radians( 90 ), vec3( 0.0f, -1.0f, 0.0f ) );
-        if ( ImGui::Button( "+Y" ) )
+        if ( ImGui::Button( "+Y", ImVec2( 36, 0 ) ) )
           t.rotate = math::quaternionFrom( radians( 90 ), vec3( -1.0f, 0.0f, 0.0f ) );
         ImGui::SameLine();
-        if ( ImGui::Button( "-Y" ) )
+        if ( ImGui::Button( "-Y", ImVec2( 36, 0 ) ) )
           t.rotate = math::quaternionFrom( radians( 90 ), vec3( 1.0f, 0.0f, 0.0f ) );
-        if ( ImGui::Button( "+Z" ) )
+        if ( ImGui::Button( "+Z", ImVec2( 36, 0 ) ) )
           t.rotate = math::quaternionFrom( radians( 0 ), vec3( 0.0f, 1.0f, 0.0f ) );
         ImGui::SameLine();
-        if ( ImGui::Button( "-Z" ) )
+        if ( ImGui::Button( "-Z", ImVec2( 36, 0 ) ) )
           t.rotate = math::quaternionFrom( radians( 180 ), vec3( 0.0f, -1.0f, 0.0f ) );
         ImGui::EndGroup();
+        ImGui::PopStyleVar();
         // a bit wasteful but hardly an issue
         markDirty( e );
       }

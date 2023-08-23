@@ -126,7 +126,7 @@ namespace neko {
         {
           vec2 dimensions;
           glm::i32vec2 segments;
-          int normal_sel = ig::PredefNormal_PlusY;
+          int normal_sel = ig::PredefNormal_PlusZ;
           vec3 normal;
         } plane;
         struct Box

@@ -225,8 +225,7 @@ namespace neko {
 
     scene_ = make_shared<SManager>( realResolution );
     auto cam = scene_->createCamera( "gamecam" );
-    scene_->tn( cam ).translate = { 0.0f, 0.0f, 10.0f };
-    scene_->tn( cam ).rotate = math::quaternionFrom( radians( 180 ), vec3( 0.0f, -1.0f, 0.0f ) );
+    scene_->tn( cam ).translate = { 0.0f, 0.0f, 20.0f };
     scene_->cams().setActive( cam );
 
     IMGUI_CHECKVERSION();
