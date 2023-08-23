@@ -47,6 +47,9 @@ namespace neko {
 
       world_ = make_unique<MappedGLBuffer<neko::uniforms::World>>();
       processing_ = make_unique<MappedGLBuffer<neko::uniforms::Processing>>();
+
+      loadIncludeFile( R"(includes.json)" );
+      loadPipelineFile( R"(pipelines.json)" );
     }
 
     // Shader

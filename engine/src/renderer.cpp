@@ -255,8 +255,6 @@ namespace neko {
 
     shaders_ = make_shared<shaders::Shaders>( console_ );
     shaders_->initialize();
-    shaders_->loadIncludeFile( R"(includes.json)" );
-    shaders_->loadPipelineFile( R"(pipelines.json)" );
 
     materials_ = make_shared<MaterialManager>( this, loader_ );
     meshes_ = make_shared<MeshManager>( console_ );

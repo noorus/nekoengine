@@ -92,7 +92,7 @@ namespace neko {
       auto& p = registry_.emplace<primitive>( e );
       p.type = primitive::PrimitiveType::Plane;
       p.values.plane.dimensions = { 10.0f, 10.0f };
-      p.values.plane.segments = { 10, 10 };
+      p.values.plane.segments = { 1, 1 };
       p.values.plane.normal_sel = ig::PredefNormal_PlusY;
       p.values.plane.normal = ig::valueForNormalIndex( p.values.plane.normal_sel );
       return e;
@@ -283,9 +283,9 @@ namespace neko {
           t.derived_translate = t.translate;
         }
         auto tmp = mat4( numbers::one );
+        tmp = glm::translate( tmp, t.derived_translate );
         tmp = glm::scale( tmp, t.derived_scale );
         tmp *= glm::toMat4( t.derived_rotate );
-        tmp = glm::translate( tmp, t.derived_translate );
         t.cached_transform = tmp;
       } );
 
