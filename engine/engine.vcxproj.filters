@@ -931,12 +931,6 @@
     <None Include="..\bin\shaders\inc.math.glsl">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\shaders\mat_skybox.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\mat_skybox.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\bin\shaders\dbg_line.frag">
       <Filter>Shaders</Filter>
     </None>

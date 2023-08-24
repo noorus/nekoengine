@@ -46,8 +46,6 @@ namespace neko {
 
     void text_system::draw( Renderer& renderer )
     {
-      glDisable( GL_LINE_SMOOTH );
-      glDisable( GL_POLYGON_SMOOTH );
       for ( auto& [eid, data] : texts_ )
       {
         if ( !data.instance || data.instance->dead() )

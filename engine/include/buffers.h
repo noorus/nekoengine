@@ -74,10 +74,6 @@ namespace neko {
     void draw( shaders::Shaders& shaders, const Material& mat, const mat4& model )
     {
       gl::glBindVertexArray( vao_ );
-
-      gl::glEnable( gl::GL_CULL_FACE );
-      gl::glCullFace( gl::GL_BACK );
-      gl::glFrontFace( gl::GL_CCW );
       auto ppl = &shaders.usePipeline( "mat_unlit" );
       const auto hndl = mat.layers_[0].texture_->handle();
       gl::glBindTextures( 0, 1, &hndl );

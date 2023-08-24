@@ -529,7 +529,8 @@ namespace neko {
     glPolygonMode( GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL );
 
     glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_ONE );
+    //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     glDisable( GL_LINE_SMOOTH );
     glDisable( GL_POLYGON_SMOOTH );
@@ -556,6 +557,8 @@ namespace neko {
         pointLight.dummy = vec4( 0.0f );
       shaders_->world()->unlock();
     }
+
+    setGLDrawState( true, true, true, drawparams.drawopShouldDrawWireframe() );
   }
 
   void Renderer::prepareSceneDraw( GameTime time, const ViewportDrawParameters& drawparams )
@@ -571,6 +574,8 @@ namespace neko {
         pointLight.dummy = vec4( 0.0f );
       shaders_->world()->unlock();
     }
+
+    setGLDrawState( true, true, true, drawparams.drawopShouldDrawWireframe() );
   }
 
   inline vec2 toScreen( const vec3& pt, const mat4& model, const ViewportDrawParameters& dp )
@@ -722,29 +727,17 @@ namespace neko {
 
     glDisable( GL_LINE_SMOOTH );
 
+    // TODO at some point this primitive stuff has to be replaced with proper
+    // scene graph traversal, and sorting to solids first (with depth writes),
+    // transparents afterwards (without depth writes)
     setGLDrawState( true, true, false, wire );
-    particles_->draw( *shaders_, *materials_ );
-    origoTest_->draw( *shaders_, { 0.0f, 0.0f, 5.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } );
-
-    scene.texts().draw( *this );
     scene.primitives().draw( *shaders_, *builtin_.placeholderTexture_ );
+    setGLDrawState( true, false, false, wire );
+    particles_->draw( *shaders_, *materials_ );
     scene.sprites().draw( *this, camera );
+    scene.texts().draw( *this );
 
-    if ( drawparams.drawopShouldDrawSky() && false )
-    {
-      setGLDrawState( true, true, true, wire );
-      glDepthFunc( GL_LEQUAL );
-      auto& pipeline = shaders_->usePipeline( "mat_skybox" );
-      pipeline.setUniform( "tex", 0 );
-      auto mat = materials_->get( "demo_skybox" );
-      if ( mat && mat->uploaded() )
-      {
-        const GLuint hndl = mat->layers_[0].texture_->handle();
-        glBindTextures( 0, 1, &hndl );
-        builtin_.skybox_->drawOnce( pipeline, vec3( 0.0f ) );
-      }
-      glDepthFunc( GL_LESS );
-    }
+    origoTest_->draw( *shaders_, { 0.0f, 0.0f, 5.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } );
   }
 
   void Renderer::implClearAndPrepare( const vec3& color )
@@ -898,7 +891,7 @@ namespace neko {
 
     {
       auto processing = shaders_->processing()->lock().data();
-      processing->ambient = vec4( 0.04f, 0.04f, 0.04f, 1.0f );
+      processing->ambient = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
       processing->gamma = g_CVar_vid_gamma.as_f();
       processing->resolution = resolution_;
       shaders_->processing()->unlock();
@@ -943,17 +936,18 @@ namespace neko {
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
     // Early out - if dbg_showdepth is enabled, just show the main depth buffer
-    /* if ( !drawparams.isEditor && g_CVar_dbg_showdepth.as_b() )
+    if ( g_CVar_dbg_showdepth.as_b() && drawparams.drawopShouldDoBufferVisualizations() )
     {
-      setGLDrawState( false, false, true, false );
+      setGLDrawState( false, false, false, false );
       auto& pipeline = shaders_->usePipeline( "dbg_depthvis2d" );
       pipeline.setUniform( "tex", 0 );
-      GLuint handle = ctx_.fboMain_->depth()->handle();
+      GLuint handle =
+        ( ctx_.fboMainMultisampled_ ? ctx_.fboMainMultisampled_->depth()->handle() : ctx_.fboMain_->depth()->handle() );
       glBindTextures( 0, 1, &handle );
       viewportQuad->begin();
       viewportQuad->draw();
       return;
-    }*/
+    }
 
     if ( ctx_.fboMainMultisampled_ )
     {

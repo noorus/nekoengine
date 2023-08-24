@@ -34,11 +34,6 @@ namespace neko {
     _update();
   }
 
-  bool GameViewport::drawopShouldDrawSky() const
-  {
-    return true;
-  }
-
   bool GameViewport::drawopShouldDrawWireframe() const
   {
     return false;
@@ -84,6 +79,11 @@ namespace neko {
   const CameraPtr GameViewport::drawopGetCamera() const
   {
     return ( camdata_ && camdata_->instance ? camdata_->instance : CameraPtr() );
+  }
+
+  bool GameViewport::drawopShouldDoBufferVisualizations() const
+  {
+    return true;
   }
 
   vec3 GameViewport::ndcPointToWorld( vec2 ndc_viewcoord ) const

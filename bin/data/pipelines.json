@@ -83,15 +83,6 @@
     ]
   },
   {
-    "name": "mat_skybox",
-    "vert": "mat_skybox.vert",
-    "frag": "mat_skybox.frag",
-    "uniforms": [
-      "model",
-      "tex"
-    ]
-  },
-  {
     "name": "mat_screentone",
     "vert": "mat_screentone.vert",
     "frag": "mat_screentone.frag",

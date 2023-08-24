@@ -17,7 +17,6 @@ namespace neko {
 
   class ViewportDrawParameters {
   public:
-    virtual bool drawopShouldDrawSky() const = 0;
     virtual bool drawopShouldDrawWireframe() const = 0;
     virtual vec2 drawopFullResolution() const = 0;
     virtual vec3 drawopClearColor() const = 0;
@@ -28,6 +27,7 @@ namespace neko {
     virtual void drawopPostSceneDraw( shaders::Shaders& shaders ) const = 0;
     virtual vec2 drawopViewportPosition() const = 0;
     virtual vec2 drawopViewportSize() const = 0;
+    virtual bool drawopShouldDoBufferVisualizations() const = 0;
   };
 
   struct RenderVisualizations
@@ -75,7 +75,6 @@ namespace neko {
     EditorPtr editor_; 
   public:
     // ViewportDrawParameters interface implementation
-    bool drawopShouldDrawSky() const override;
     bool drawopShouldDrawWireframe() const override;
     vec2 drawopFullResolution() const override;
     vec3 drawopClearColor() const override;
@@ -86,6 +85,7 @@ namespace neko {
     vec2 drawopViewportPosition() const override;
     vec2 drawopViewportSize() const override;
     const CameraPtr drawopGetCamera() const override;
+    bool drawopShouldDoBufferVisualizations() const override;
     // Viewport interface implementation
     vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const override;
     vec3 ndcPointToWorld( vec3 ndc_viewcoord ) const override;
@@ -114,7 +114,6 @@ namespace neko {
     void resize( int width, int height, const Viewport& windowViewport );
   public:
     // ViewportDrawParameters interface implementation
-    bool drawopShouldDrawSky() const override;
     bool drawopShouldDrawWireframe() const override;
     vec2 drawopFullResolution() const override;
     vec3 drawopClearColor() const override;
@@ -125,6 +124,7 @@ namespace neko {
     vec2 drawopViewportPosition() const override;
     vec2 drawopViewportSize() const override;
     const CameraPtr drawopGetCamera() const override;
+    bool drawopShouldDoBufferVisualizations() const override;
     // Viewport interface implementation
     vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const override;
     vec3 ndcPointToWorld( vec3 ndc_viewcoord ) const override;

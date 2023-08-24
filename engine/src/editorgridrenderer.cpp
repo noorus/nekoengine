@@ -47,7 +47,7 @@ namespace neko {
     verts[5].color = vec4( 0.0f, 0.0f, 1.0f, 1.0f );
     verts[5].pos = origin + ( math::cross( right, up ) * length );
     viz_->buffer().unlock();
-    glLineWidth( 2.0f );
+    glLineWidth( 3.0f );
     glDisable( GL_DEPTH_TEST );
     glDepthMask( GL_FALSE );
     glDisable( GL_LINE_SMOOTH );

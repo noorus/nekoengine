@@ -12,12 +12,5 @@
     "layers": [
       "sakura.png"
     ]
-  },
-  {
-    "type": "unlit",
-    "name": "demo_skybox",
-    "layers": [
-      "pink_sunrise_4k.exr"
-    ]
   }
 ]

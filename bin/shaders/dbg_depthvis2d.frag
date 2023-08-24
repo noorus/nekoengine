@@ -20,5 +20,5 @@ float depthLinearize( float depth )
 void main()
 {
   float value = depthLinearize( texture( tex, vs_out.texcoord ).r );
-  out_color = vec4( vec3( value ), 1.0 );
+  out_color = vec4( mix( vec3( 1.0, 0.0, 0.0 ), vec3( 0.0 ), value ), 1.0 );
 }

@@ -87,11 +87,6 @@ namespace neko {
     Viewport::resize( width, height );
   }
 
-  bool EditorViewport::drawopShouldDrawSky() const
-  {
-    return false;
-  }
-
   bool EditorViewport::drawopShouldDrawWireframe() const
   {
     return false;
@@ -141,6 +136,11 @@ namespace neko {
   const CameraPtr EditorViewport::drawopGetCamera() const
   {
     return camera_;
+  }
+
+  bool EditorViewport::drawopShouldDoBufferVisualizations() const
+  {
+    return false;
   }
 
   vec3 EditorViewport::ndcPointToWorld( vec2 ndc_viewcoord ) const
