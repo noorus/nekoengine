@@ -54,45 +54,130 @@ namespace neko {
       inline bool linked() const { return linked_; }
       inline bool ready() const { return ( gl::glIsProgram( id_ ) && linked_ ); }
       GLuint getUBO( const char* name );
+      inline void setUniformInt( GLint index, int value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform1i( id_, index, value );
+      }
+      inline void setUniformUint( GLint index, unsigned int value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform1ui( id_, index, value );
+      }
+      inline void setUniformBool( GLint index, bool value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform1ui( id_, index, value );
+      }
+      inline void setUniformFloat( GLint index, float value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform1f( id_, index, value );
+      }
+      inline void setUniformDouble( GLint index, double value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform1d( id_, index, value );
+      }
+      inline void setUniformVec2f( GLint index, const vec2f& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform2fv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformVec3f( GLint index, const vec3f& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform3fv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformVec4f( GLint index, const vec4f& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform4fv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformVec2i( GLint index, const vec2i& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform2iv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformVec3i( GLint index, const vec3i& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform3iv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformVec4i( GLint index, const vec4i& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform4iv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformVec2u( GLint index, const vec2u& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform2uiv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformVec3u( GLint index, const vec3u& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform3uiv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformVec4u( GLint index, const vec4u& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform4uiv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformQuat( GLint index, const quat& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniform4fv( id_, index, 1, glm::value_ptr( value ) );
+      }
+      inline void setUniformMat3( GLint index, const mat3& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniformMatrix3fv( id_, index, 1, gl::GL_FALSE, glm::value_ptr( value ) );
+      }
+      inline void setUniformMat4( GLint index, const mat4& value )
+      {
+        if ( index >= 0 )
+          gl::glProgramUniformMatrix4fv( id_, index, 1, gl::GL_FALSE, glm::value_ptr( value ) );
+      }
       template <typename T>
       inline void setUniform( GLint index, T const& value )
       {
         if ( index == -1 )
           return;
         if constexpr ( std::is_same_v<T, GLint> )
-          gl::glProgramUniform1i( id_, index, value );
+          setUniformInt( index, value );
         else if constexpr ( std::is_same_v<T, GLuint> )
-          gl::glProgramUniform1ui( id_, index, value );
+          setUniformUint( index, value );
         else if constexpr ( std::is_same_v<T, bool> )
-          gl::glProgramUniform1ui( id_, index, value );
+          setUniformBool( index, value );
         else if constexpr ( std::is_same_v<T, GLfloat> )
-          gl::glProgramUniform1f( id_, index, value );
+          setUniformFloat( index, value );
         else if constexpr ( std::is_same_v<T, GLdouble> )
-          gl::glProgramUniform1d( id_, index, value );
+          setUniformDouble( index, value );
         else if constexpr ( std::is_same_v<T, vec2f> )
-          gl::glProgramUniform2fv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformVec2f( index, value );
         else if constexpr ( std::is_same_v<T, vec3f> )
-          gl::glProgramUniform3fv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformVec3f( index, value );
         else if constexpr ( std::is_same_v<T, vec4f> )
-          gl::glProgramUniform4fv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformVec4f( index, value );
         else if constexpr ( std::is_same_v<T, vec2i> )
-          gl::glProgramUniform2iv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformVec2i( index, value );
         else if constexpr ( std::is_same_v<T, vec3i> )
-          gl::glProgramUniform3iv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformVec3i( index, value );
         else if constexpr ( std::is_same_v<T, vec4i> )
-          gl::glProgramUniform4iv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformVec4i( index, value );
         else if constexpr ( std::is_same_v<T, vec2u> )
-          gl::glProgramUniform2uiv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformVec2u( index, value );
         else if constexpr ( std::is_same_v<T, vec3u> )
-          gl::glProgramUniform3uiv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformVec3u( index, value );
         else if constexpr ( std::is_same_v<T, vec4u> )
-          gl::glProgramUniform4uiv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformVec4u( index, value );
         else if constexpr ( std::is_same_v<T, quaternion> )
-          gl::glProgramUniform4fv( id_, index, 1, glm::value_ptr( value ) );
+          setUniformQuat( index, value );
         else if constexpr ( std::is_same_v<T, mat3> )
-          gl::glProgramUniformMatrix3fv( id_, index, 1, gl::GL_FALSE, glm::value_ptr( value ) );
+          setUniformMat3( index, value );
         else if constexpr ( std::is_same_v<T, mat4> )
-          gl::glProgramUniformMatrix4fv( id_, index, 1, gl::GL_FALSE, glm::value_ptr( value ) );
+          setUniformMat4( index, value );
         else
           NEKO_EXCEPT( "Unsupported uniform value type" );
       }
