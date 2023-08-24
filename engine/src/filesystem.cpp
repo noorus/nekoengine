@@ -2,6 +2,7 @@
 
 #include "neko_platform_windows.h"
 #include "neko_exception.h"
+#include "neko_filepath.h"
 #include "messaging.h"
 #include "locator.h"
 #include "console.h"

@@ -1,5 +1,6 @@
-#include "pch.h"
+ #include "pch.h"
 #include "neko_exception.h"
+#include "neko_platform.h"
 #ifdef NEKO_PLATFORM_WINDOWS
 # define NOMINMAX
 # define WIN32_LEAN_AND_MEAN
@@ -8,50 +9,72 @@
 
 namespace neko {
 
-  Exception::Exception( const string& description ): description_( description )
+  __forceinline utf8String stackTrace( const PCONTEXT ctx )
   {
+    auto thread = GetCurrentThread();
+    platform::SinkedStackWalker sw;
+    sw.ShowCallstack( thread, ctx );
+    return sw.output();
   }
 
-  Exception::Exception( const string& description, const string& source, Exception::Type type ) :
-    description_( description ), source_( source )
+  Exception::Exception()
   {
-#ifdef NEKO_PLATFORM_WINDOWS
-    if ( type == Exception::Type_WinAPI )
-    {
-      LPSTR message = nullptr;
-      auto code = GetLastError();
-      FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL, code, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),
-        (LPSTR)&message, 0, NULL );
-      description_.append( message );
-      LocalFree( message );
-    }
+#ifndef DEBUG
+    RtlCaptureContext( &context_ );
+    stack_ = stackTrace( &context_ );
 #endif
   }
 
-#ifndef NEKO_SIDELIBRARY_BUILD
+  Exception::Exception( const utf8String& description ): message_( description )
+  {
+#ifndef DEBUG
+    RtlCaptureContext( &context_ );
+    stack_ = stackTrace( &context_ );
+#endif
+  }
+
+  Exception::Exception( const utf8String& description, const utf8String& source ): message_( description ), source_( source )
+  {
+#ifndef DEBUG
+    RtlCaptureContext( &context_ );
+    stack_ = stackTrace( &context_ );
+#endif
+  }
+
+  Exception::Exception( const utf8String& description, const utf8String& source, DWORD code ):
+    message_( description ), source_( source ), code_( code )
+  {
+#ifndef DEBUG
+    RtlCaptureContext( &context_ );
+    stack_ = stackTrace( &context_ );
+#endif
+  }
+
   Exception::Exception( const string& description, gl::GLenum gle, const string& source ):
-    description_( description ), source_( source )
+    message_( description ), source_( source )
   {
 #ifndef RELEASE
-    description_.append( " (" + glbinding::aux::Meta::getString( gle ) + ")" );
+    message_.append( " (" + glbinding::aux::Meta::getString( gle ) + ")" );
 #else
-    description_.append( " (" + std::to_string( (unsigned int)gle ) + ")" );
+    message_.append( " (" + std::to_string( (unsigned int)gle ) + ")" );
 #endif
   }
-#endif
+
+  WinapiException WinapiException::createFromLastError( string_view func, string_view caller )
+  {
+    auto code = GetLastError();
+    string msg = platform::formatWinapiError( func, code );
+    return WinapiException( code, msg, caller );
+  }
 
   const string& Exception::getFullDescription() const
   {
     if ( fullDescription_.empty() )
     {
       stringstream stream;
-      stream << description_;
+      stream << message_;
       if ( !source_.empty() )
-        stream << "\r\nIn function " << source_;
+        stream << "\nIn function " << source_;
       fullDescription_ = stream.str();
     }
 

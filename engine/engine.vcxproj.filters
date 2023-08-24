@@ -148,6 +148,12 @@
     <Filter Include="Source Files\extern\imguizmo">
       <UniqueIdentifier>{53a6e734-9f63-4f3d-9153-4c1ae2e72789}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\extern\stackwalker">
+      <UniqueIdentifier>{65e78746-77bd-4411-9cd3-aa61ec09ac89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extern\stackwalker">
+      <UniqueIdentifier>{6a8686e1-b5ff-4a06-b8ef-bcf034a7ed74}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -440,6 +446,12 @@
     </ClCompile>
     <ClCompile Include="src\c_sprite_system.cpp">
       <Filter>Source Files\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\extern\stackwalker\StackWalker.cpp">
+      <Filter>Source Files\extern\stackwalker</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\src\platform_windows_errorhandling.cpp">
+      <Filter>Source Files\shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -838,6 +850,9 @@
     </ClInclude>
     <ClInclude Include="include\json.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\extern\stackwalker\StackWalker.h">
+      <Filter>Header Files\extern\stackwalker</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

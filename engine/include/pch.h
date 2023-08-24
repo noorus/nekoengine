@@ -78,6 +78,19 @@
 #include <chrono>
 #include <span>
 
+#include <fcntl.h>
+#include <io.h>
+#include <stdio.h>
+#include <strsafe.h>
+
+#pragma warning( push )
+#pragma warning( disable : 4005 )
+#include <ntstatus.h>
+#pragma warning( pop )
+
+// StackWalker
+#include <StackWalker.h>
+
 // OpenGL
 #include <glbinding/gl45core/gl.h>
 #include <glbinding/glbinding.h>

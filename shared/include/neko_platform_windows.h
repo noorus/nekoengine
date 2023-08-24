@@ -7,28 +7,28 @@
 #include <windows.h>
 #include <shlobj.h>
 
-#ifndef NEKO_SIDELIBRARY_BUILD
 // fucking ICU steals the priority of resolving resource.h directly
-# include "../../engine/resource.h"
-#endif
+#include "../../engine/resource.h"
 
 namespace neko {
 
   namespace platform {
 
-#ifndef NEKO_SIDELIBRARY_BUILD
+    extern utf8String g_moduleName;
 
     namespace api {
 
       using fnGetDpiForSystem = UINT( WINAPI* )( VOID );
       using fnSetThreadDpiAwarenessContext = DPI_AWARENESS_CONTEXT( WINAPI* )( DPI_AWARENESS_CONTEXT );
       using fnSetThreadDescription = HRESULT( WINAPI* )( HANDLE hThread, PCWSTR lpThreadDescription );
+      using fnGetThreadDescription = HRESULT( WINAPI* )( HANDLE hThread, PWSTR* ppszThreadDescription );
 
       struct WinapiCalls
       {
         fnGetDpiForSystem pfnGetDpiForSystem = nullptr;
         fnSetThreadDpiAwarenessContext pfnSetThreadDpiAwarenessContext = nullptr;
         fnSetThreadDescription pfnSetThreadDescription = nullptr;
+        fnGetThreadDescription pfnGetThreadDescription = nullptr;
       };
 
       extern WinapiCalls g_calls;
@@ -50,8 +50,6 @@ namespace neko {
     void performanceTeardownCurrentThread();
 
     extern HINSTANCE g_instance;
-
-#endif
 
 #pragma warning( push )
 #pragma warning( disable : 26110 )
@@ -431,9 +429,12 @@ namespace neko {
       FILETIME ft;
       GetSystemTimeAsFileTime( &ft );
 
-      LARGE_INTEGER li;
-      li.LowPart = ft.dwLowDateTime;
-      li.HighPart = ft.dwHighDateTime;
+      LARGE_INTEGER li {
+        .u {
+          .LowPart = ft.dwLowDateTime,
+          .HighPart = static_cast<LONG>( ft.dwHighDateTime )
+        }
+      };
 
       return ( li.QuadPart - c_unixTimeStart ) / c_ticksPerSecond;
     }
@@ -587,37 +588,159 @@ namespace neko {
       OutputDebugStringW( utf8ToWide( str ).c_str() );
     }
 
-    //! Assign a thread name that will be visible in debuggers.
-    inline void setDebuggerThreadName( HANDLE thread, const utf8String& threadName )
+    inline uint32_t getCurrentThreadID()
     {
-      // Prefer SetThreadDescription, but it is only available from Windows 10 version 1607 onwards.
-      /*if ( api::g_calls.pfnSetThreadDescription )
+      return ::GetCurrentThreadId();
+    }
+
+    inline HMODULE getCurrentDLLHandle()
+    {
+      HMODULE mod = nullptr;
+      GetModuleHandleExW( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<LPCWSTR>( &getCurrentDLLHandle ), &mod );
+      return mod;
+    }
+
+    inline void nativeWriteConsole( const char* str )
+    {
+      auto out = GetStdHandle( STD_OUTPUT_HANDLE );
+      if ( out && out != INVALID_HANDLE_VALUE )
       {
-        api::g_calls.pfnSetThreadDescription( thread, utf8ToWide( threadName ).c_str() );
-        return;
-      }*/
+        DWORD dummy;
+        ignore = WriteConsoleA( out, str, lstrlenA( str ), &dummy, nullptr );
+      }
+    }
+
+    inline span<uint8_t> readRCDataResource( HMODULE mod, LPCWSTR name )
+    {
+      auto resource = FindResourceW( mod, name, RT_RCDATA );
+      if ( !resource )
+        return {};
+
+      auto size = SizeofResource( mod, resource );
+      if ( !size )
+        return {};
+
+      auto data = LoadResource( mod, resource );
+      if ( !data )
+        return {};
+
+      auto buffer = static_cast<uint8_t*>( LockResource( data ) );
+      if ( !buffer )
+        return {};
+
+      return { buffer, size };
+    }
+
+    inline void setDebuggerThreadName_legacyImpl( HANDLE thread, const utf8String& threadName )
+    {
 #ifdef _DEBUG
-      // Otherwise, back to the ancient trickery.
       auto threadID = GetThreadId( thread );
-#pragma pack( push, 8 )
-      struct threadNamingStruct {
+# pragma pack( push, 8 )
+      struct threadNamingStruct
+      {
         DWORD type;
         LPCSTR name;
         DWORD threadID;
         DWORD flags;
       } nameSignalStruct = { 0 };
-#pragma pack( pop )
+# pragma pack( pop )
       nameSignalStruct.type = 0x1000;
       nameSignalStruct.name = threadName.c_str();
       nameSignalStruct.threadID = threadID;
       nameSignalStruct.flags = 0;
       __try
       {
-        RaiseException( 0x406D1388, 0,
-          sizeof( nameSignalStruct ) / sizeof( ULONG_PTR ),
-          (const ULONG_PTR*)&nameSignalStruct );
-      } __except ( EXCEPTION_EXECUTE_HANDLER ) {}
+        RaiseException( 0x406D1388, 0, sizeof( nameSignalStruct ) / sizeof( ULONG_PTR ),
+          reinterpret_cast<const ULONG_PTR*>( &nameSignalStruct ) );
+      }
+      __except ( EXCEPTION_EXECUTE_HANDLER )
+      {
+      }
 #endif
+    }
+
+    //! Assign a thread name that will be visible in debuggers.
+    inline void setDebuggerThreadName( HANDLE thread, const utf8String& threadName )
+    {
+      // Prefer SetThreadDescription, but it is only available from Windows 10 version 1607 onwards.
+      if ( api::g_calls.pfnSetThreadDescription )
+        api::g_calls.pfnSetThreadDescription( thread, utf8ToWide( threadName ).c_str() );
+      else
+        setDebuggerThreadName_legacyImpl( thread, threadName );
+    }
+
+    inline utf8String getThreadDescriptor( HANDLE thread )
+    {
+      auto id = GetThreadId( thread );
+      wchar_t* name = nullptr;
+      if ( api::g_calls.pfnGetThreadDescription )
+        ignore = api::g_calls.pfnGetThreadDescription( thread, &name );
+      static thread_local wchar_t buf[128];
+      if ( name )
+      {
+        StringCchPrintfW( buf, 128, L"0x%X (%s)", id, name );
+        LocalFree( name );
+      }
+      else
+        StringCchPrintfW( buf, 128, L"0x%X", id );
+      return wideToUtf8( buf );
+    }
+
+    // Error/exception handling utilities
+
+    inline utf8String formatWinapiError( string_view func, DWORD code )
+    {
+      LPSTR message = nullptr;
+      FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL,
+        code, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), reinterpret_cast<LPSTR>( &message ), 0, NULL );
+      auto len = lstrlenA( message ) + func.size() + 64;
+      auto fmtbuf = reinterpret_cast<char*>( LocalAlloc( LMEM_ZEROINIT, len ) );
+      if ( !fmtbuf )
+        return {};
+      StringCchPrintfA( fmtbuf, len, "%s failed with 0x%8.8X: %s", func.data(), code, message );
+      LocalFree( message );
+      auto ret = utf8String( fmtbuf );
+      LocalFree( fmtbuf );
+      return ret;
+    }
+
+    extern utf8String windowsExceptionMessage( HANDLE thrd, EXCEPTION_POINTERS* ptrs );
+    extern utf8String windowsExceptionMessage( HANDLE thrd, const Exception& e );
+    extern utf8String windowsExceptionMessage( HANDLE thrd, const std::exception& e );
+
+    class SinkedStackWalker: public StackWalker {
+    private:
+      utf8String sink_;
+    protected:
+      void OnOutput( LPCSTR txt ) override;
+      void OnSymInit( LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName ) override;
+      void OnDbgHelpErr( LPCSTR szFuncName, DWORD gle, DWORD64 addr ) override;
+      void OnLoadModule( LPCSTR img, LPCSTR mod, DWORD64 baseAddr, DWORD size, DWORD result, LPCSTR symType, LPCSTR pdbName,
+        ULONGLONG fileVersion ) override;
+      void OnCallstackEntry( CallstackEntryType eType, CallstackEntry& entry ) override;
+    public:
+      inline const utf8String& output() const { return sink_; }
+    };
+
+    inline void showFormattedError( const char* str, string_view title )
+    {
+      MessageBoxA( 0, str, title.data(), MB_ICONERROR | MB_OK );
+    }
+
+    inline void showFormattedError( const utf8String& str, string_view title )
+    {
+      showFormattedError( str.c_str(), title );
+    }
+
+    inline void showFormattedError( string_view str, string_view title )
+    {
+      showFormattedError( str.data(), title );
+    }
+
+    inline void showFormattedError( const stringstream& stream, string_view title )
+    {
+      showFormattedError( stream.str().c_str(), title );
     }
 
   }

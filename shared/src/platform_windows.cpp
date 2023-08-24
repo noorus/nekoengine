@@ -46,6 +46,8 @@ namespace neko {
         if ( kernel )
         {
           g_calls.pfnSetThreadDpiAwarenessContext = (fnSetThreadDpiAwarenessContext)GetProcAddress( kernel, "SetThreadDescription" );
+          g_calls.pfnSetThreadDescription = (fnSetThreadDescription)GetProcAddress( kernel, "SetThreadDescription" );
+          g_calls.pfnGetThreadDescription = (fnGetThreadDescription)GetProcAddress( kernel, "GetThreadDescription" );
         }
       }
 
@@ -118,7 +120,7 @@ namespace neko {
       // default flags might already be set for the process.
       UINT wantedModes = SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX;
       auto originalModes = SetErrorMode( wantedModes );
-      SetErrorMode( originalModes | wantedModes );
+      ignore = SetErrorMode( originalModes | wantedModes );
     }
 
     void commonThreadSetup( LPCWSTR avProfile, AVRT_PRIORITY avPriority, int threadPriority, bool boostableOnWake )

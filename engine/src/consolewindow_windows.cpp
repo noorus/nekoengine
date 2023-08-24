@@ -128,8 +128,7 @@ namespace neko {
     const COLORREF c_consoleForeground = RGB( 10, 13, 20 );
 
     const string c_consoleFont = "Lucida Console";
-    const long c_consoleFontSize =
-      160; // in TWIPs. if you can figure out what the fuck that means in human terms, congratulations.
+    const long c_consoleFontSize = 160;
 
     const string c_consoleClassname = "nekoConsole"; // does not matter
 

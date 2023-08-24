@@ -95,7 +95,7 @@ namespace neko {
 
   void MaterialManager::loadFile( const utf8String& filename )
   {
-    auto& input = Locator::fileSystem().openFile( Dir_Data, filename )->readFullString();
+    auto input = Locator::fileSystem().openFile( Dir_Data, filename )->readFullString();
     loadJSON( input );
   }
 
