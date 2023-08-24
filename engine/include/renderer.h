@@ -42,6 +42,9 @@ namespace neko {
     int64_t uniformBufferAlignment = 0; //!< Minimum alignment for uniform buffer sizes and offsets
     float maxAnisotropy = 0.0f; //!< Maximum anisotropy level, usually 16.0
     int64_t maxArrayTextureLayers = 0; //!< Maximum array texture layers
+    vector<int64_t> maxComputeWorkgroupCount;
+    vector<int64_t> maxComputeWorkgroupSize;
+    int64_t maxComputeWorkgroupInvocations = 0;
   };
 
   class MeshNode;

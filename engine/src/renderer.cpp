@@ -119,6 +119,21 @@ namespace neko {
       target = (int64_t)data;
       return true;
     };
+    auto glvGetIntArray = [glbAuxStr]( GLenum e, vector<int64_t>& target, bool doNotThrow = false ) -> bool
+    {
+      for ( GLuint i = 0; i < target.size(); ++i )
+      {
+        glGetInteger64i_v( e, i, &target[i] );
+        auto error = glGetError();
+        if ( error != GL_NO_ERROR )
+        {
+          if ( !doNotThrow )
+            NEKO_OPENGL_EXCEPT( "glGetInteger64i_v failed for " + glbAuxStr( e ), error );
+          return false;
+        }
+      }
+      return true;
+    };
     auto glvGetFloat = [glbAuxStr]( GLenum e, float& target, bool doNotThrow = false ) -> bool
     {
       GLfloat data = 0.0f;
@@ -215,6 +230,12 @@ namespace neko {
 
     // Array textures
     glvGetI64( GL_MAX_ARRAY_TEXTURE_LAYERS, info.maxArrayTextureLayers );
+
+    info.maxComputeWorkgroupCount.resize( 3, 0 );
+    glvGetIntArray( GL_MAX_COMPUTE_WORK_GROUP_COUNT, info.maxComputeWorkgroupCount );
+    info.maxComputeWorkgroupSize.resize( 3, 0 );
+    glvGetIntArray( GL_MAX_COMPUTE_WORK_GROUP_SIZE, info.maxComputeWorkgroupSize );
+    glvGetI64( GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, info.maxComputeWorkgroupInvocations );
   }
 
   void Renderer::clearErrors()
@@ -246,6 +267,10 @@ namespace neko {
       info_.textureBufferAlignment, info_.uniformBufferAlignment );
     console_->printf( srcGfx, "Maximums are %i/texture %i/renderbuffer %ix%i/framebuffer %i/2dlayers",
       info_.maxTextureSize, info_.maxRenderbufferSize, info_.maxFramebufferWidth, info_.maxFramebufferHeight, info_.maxArrayTextureLayers );
+    console_->printf( srcGfx, "Maximum compute workgroup count [%i,%i,%i] size [%i,%i,%i] invocations %i",
+      info_.maxComputeWorkgroupCount[0], info_.maxComputeWorkgroupCount[1], info_.maxComputeWorkgroupCount[2],
+      info_.maxComputeWorkgroupSize[0], info_.maxComputeWorkgroupSize[1], info_.maxComputeWorkgroupSize[2],
+      info_.maxComputeWorkgroupInvocations );
     console_->printf( srcGfx, "Maximum anisotropy is %.1f", info_.maxAnisotropy );
   }
 
