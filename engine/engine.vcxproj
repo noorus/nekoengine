@@ -364,6 +364,7 @@
     <ClInclude Include="..\shared\include\neko_compilerdef.h" />
     <ClInclude Include="..\shared\include\neko_config.h" />
     <ClInclude Include="..\shared\include\neko_exception.h" />
+    <ClInclude Include="..\shared\include\neko_filepath.h" />
     <ClInclude Include="..\shared\include\neko_platform.h" />
     <ClInclude Include="..\shared\include\neko_platform_windows.h" />
     <ClInclude Include="..\shared\include\neko_pooledtypes.h" />

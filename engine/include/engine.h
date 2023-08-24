@@ -1,5 +1,6 @@
 #pragma once
 #include "neko_types.h"
+#include "neko_filepath.h"
 #include "forwards.h"
 #include "subsystem.h"
 #include "console.h"

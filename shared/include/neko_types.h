@@ -363,9 +363,4 @@ namespace neko {
     uint16_t second;  //!< Second
   };
 
-  struct Environment
-  {
-    wstring documentsPath_;
-  };
-
 }

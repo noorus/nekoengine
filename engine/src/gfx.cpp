@@ -257,10 +257,8 @@ namespace neko {
 
     renderer_->initialize( gameViewport_.size().x, gameViewport_.size().y );
 
-    auto documentsPath = platform::wideToUtf8( engine.env().documentsPath_ );
-
     #ifndef NEKO_NO_GUI
-    gui_->initialize( this, documentsPath, *window_ );
+    gui_->initialize( this, engine.env().documentsPath_.utf8(), *window_ );
     gui_->setInstallationInfo( engine.installationInfo() );
     #endif
 

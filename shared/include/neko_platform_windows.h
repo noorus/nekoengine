@@ -553,14 +553,9 @@ namespace neko {
     inline wstring getCurrentDirectory()
     {
       wchar_t currentDirectory[MAX_PATH];
-#ifndef NEKO_SIDELIBRARY_BUILD
       if ( !GetCurrentDirectoryW( MAX_PATH, currentDirectory ) )
         NEKO_EXCEPT( "Current directory fetch failed" );
-#else
-      if ( !GetCurrentDirectoryW( MAX_PATH, currentDirectory ) )
-        return L"";
-#endif
-      return currentDirectory;
+      return wstring( currentDirectory ) + L"\\";
     }
 
     //! Get current date and time.

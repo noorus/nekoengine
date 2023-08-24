@@ -2,6 +2,7 @@
 
 #include "neko_types.h"
 #include "neko_exception.h"
+#include "neko_platform.h"
 
 namespace neko {
 

@@ -289,7 +289,7 @@ namespace neko {
     swprintf_s( filename, 64, L"%04d%02d%02d_%S-%02d%02d%02d.log", now.year, now.month, now.day, info.logName.c_str(),
       now.hour, now.minute, now.second );
 
-    fileOut_ = make_unique<TextFileWriter>( env.documentsPath_ + filename );
+    fileOut_ = make_unique<TextFileWriter>( filepath::normalizeFrom( filename, env.documentsPath_ ).wide() );
 
     writeStartBanner( info );
   }

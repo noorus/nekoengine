@@ -854,6 +854,9 @@
     <ClInclude Include="..\extern\stackwalker\StackWalker.h">
       <Filter>Header Files\extern\stackwalker</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\include\neko_filepath.h">
+      <Filter>Header Files\shared</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="engine.manifest" />

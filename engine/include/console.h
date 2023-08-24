@@ -3,9 +3,15 @@
 #include "neko_platform.h"
 #include "utilities.h"
 #include "consolelistener.h"
+#include "neko_filepath.h"
 #include "forwards.h"
 
 namespace neko {
+
+  struct Environment
+  {
+    filepath documentsPath_;
+  };
 
   //! \def NEKO_DECLARE_CONCMD(name,desc,cb)
   //! Declares a console command with a callback.

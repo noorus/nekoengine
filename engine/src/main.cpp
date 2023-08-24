@@ -88,8 +88,27 @@ inline int runMain( const std::vector<std::wstring>& arguments )
   bool failure = false;
 
   Environment env;
-  env.documentsPath_ = move( platform::getGameDocumentsPath() );
-  platform::ensureDirectory( env.documentsPath_ );
+  bool useLocalDir = false;
+
+  {
+    size_t i = 0;
+    while ( i < arguments.size() )
+    {
+      if ( arguments[i] == L"-localdir" )
+      {
+        useLocalDir = true;
+      }
+      i++;
+    }
+  }
+
+  if ( !useLocalDir )
+  {
+    env.documentsPath_ = move( platform::getGameDocumentsPath() );
+    platform::ensureDirectory( env.documentsPath_.directory().wide() );
+  }
+  else
+    env.documentsPath_ = platform::getCurrentDirectory();
 
   platform::initialize();
   platform::prepareProcess();
@@ -128,36 +147,43 @@ inline int runMain( const std::vector<std::wstring>& arguments )
 
   platform::performanceInitializeGameThread();
 
-  console->printf( srcEngine, R"(Documents directory is %s)", platform::wideToUtf8( env.documentsPath_ ).c_str() );
+  {
+    size_t i = 0;
+    while ( i < arguments.size() )
+    {
+      if ( !arguments[i].empty() && arguments[i].c_str()[0] == L'+' )
+      {
+        i++;
+        if ( i < arguments.size() )
+        {
+          auto varname = platform::wideToUtf8( arguments[i - 1].substr( 1 ) );
+          auto var = console->getVariable( varname );
+          if ( !var )
+            console->printf(
+              srcEngine, R"(Command line "%S": Variable %s not found)", arguments[i - 1].c_str(), varname.c_str() );
+          else
+            var->set( platform::wideToUtf8( arguments[i] ) );
+        }
+      }
+      else if ( arguments[i] == L"-exec" )
+      {
+        i++;
+        if ( i < arguments.size() )
+          console->executeFile( platform::wideToUtf8( arguments[i] ) );
+      }
+      else if ( arguments[i] == L"-localdir" )
+      {
+        // Handled earlier
+      }
+      else
+        console->printf( srcEngine, R"(Unknown command line "%S")", arguments[i].c_str() );
+      i++;
+    }
+  }
+
+  console->printf( srcEngine, R"(Documents directory is %s)", env.documentsPath_.utf8().c_str() );
 
   EnginePtr engine = make_shared<Engine>( console, env );
-
-  size_t i = 0;
-  while ( i < arguments.size() )
-  {
-    if ( !arguments[i].empty() && arguments[i].c_str()[0] == L'+' )
-    {
-      i++;
-      if ( i < arguments.size() )
-      {
-        auto varname = platform::wideToUtf8( arguments[i - 1].substr( 1 ) );
-        auto var = console->getVariable( varname );
-        if ( !var )
-          console->printf( srcEngine, R"(Command line "%S": Variable %s not found)", arguments[i - 1].c_str(), varname.c_str() );
-        else
-          var->set( platform::wideToUtf8( arguments[i] ) );
-      }
-    }
-    else if ( arguments[i] == L"-exec" )
-    {
-      i++;
-      if ( i < arguments.size() )
-        console->executeFile( platform::wideToUtf8( arguments[i] ) );
-    }
-    else
-      console->printf( srcEngine, R"(Unknown command line "%S")", arguments[i].c_str() );
-    i++;
-  }
 
 #ifndef _DEBUG
   try
