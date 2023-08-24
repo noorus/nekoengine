@@ -91,7 +91,7 @@ namespace neko {
   TextPtr FontManager::createText( FontStylePtr style )
   {
     auto nid = textIndex_++;
-    Text::Features feats { .ligatures = true, .kerning = true };
+    Text::Features feats { .ligatures = false, .kerning = false };
     auto text = make_shared<Text>( ptr(), nid, style, feats );
     texts_[nid] = text;
     return move( text );

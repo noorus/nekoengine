@@ -52,9 +52,22 @@ namespace neko {
       {
         if ( !data.instance || data.instance->dead() )
           continue;
-        const auto& tfm = mgr_->tn( eid );
-        const auto& t = mgr_->tt( eid );
-        auto model = tfm.model() * glm::scale( vec3( t.size / data.instance->style()->size() ) );
+        const auto& tf = mgr_->tn( eid );
+        const auto& tn = mgr_->tt( eid );
+
+        auto scalemat =
+          glm::scale( vec3( c_pixelScaleValues[tn.pixelScaleBase] * ( tn.size / data.instance->style()->size() ) ) );
+        auto offset = tn.offset;
+        if ( tn.alignHorizontal == 1 )
+          offset.x -= ( data.instance->dimensions().x * 0.5f );
+        else if ( tn.alignHorizontal == 2 )
+          offset.x -= ( data.instance->dimensions().x );
+        if ( tn.alignVertical == 1 )
+          offset.y += ( data.instance->dimensions().y * 0.5f );
+        else if ( tn.alignVertical == 2 )
+          offset.y += ( data.instance->dimensions().y );
+        auto transmat = glm::translate( scalemat, vec3( offset, 0.0f ) );
+        auto model = ( tf.model() * transmat );
         data.instance->draw( renderer, model );
       }
     }
@@ -121,12 +134,18 @@ namespace neko {
     {
       ig::ComponentChildWrapper wrap( "Text", 200.0f );
 
-      auto& c = mgr_->reg().get<text>( e );
+      auto& tn = mgr_->reg().get<text>( e );
 
       bool changed = false;
-      changed |= ig::imguiInputText( "fontname", &c.fontName, false, nullptr, &c.int_ud_ );
-      changed |= ImGui::SliderFloat( "size", &c.size, 0.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp );
-      changed |= ig::imguiInputText( "content", &c.content, true, nullptr, &c.int_ud_ );
+      changed |= ig::imguiPixelScaleSelector( tn.pixelScaleBase );
+      changed |= ig::dragVector( "offset", tn.offset, 0.1f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
+      ImGui::SliderInt(
+        "horz align", &tn.alignHorizontal, 0, 2, "%d", ImGuiSliderFlags_NoInput | ImGuiSliderFlags_AlwaysClamp );
+      ImGui::SliderInt(
+        "vert align", &tn.alignVertical, 0, 2, "%d", ImGuiSliderFlags_NoInput | ImGuiSliderFlags_AlwaysClamp );
+      changed |= ig::imguiInputText( "fontname", &tn.fontName, false, nullptr, &tn.int_ud_ );
+      changed |= ImGui::SliderFloat( "size", &tn.size, 0.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp );
+      changed |= ig::imguiInputText( "content", &tn.content, true, nullptr, &tn.int_ud_ );
 
       if ( changed )
         mgr_->reg().emplace_or_replace<dirty_text>( e );

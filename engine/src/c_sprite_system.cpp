@@ -108,10 +108,7 @@ namespace neko {
       bool changed = false;
 
       auto matchanged = ig::imguiInputText( "material", &s.matName, false, nullptr, &s.int_ud_ );
-      auto scaleName =
-        ( s.pixelScaleBase >= 0 && s.pixelScaleBase < MAX_PixelScale ? c_pixelScaleNames[s.pixelScaleBase] : "Unknown" );
-      changed |= ImGui::SliderInt(
-        "pixel scale", reinterpret_cast<int*>( &s.pixelScaleBase ), PixelScale_1, MAX_PixelScale - 1, scaleName, ImGuiSliderFlags_NoInput );
+      changed |= ig::imguiPixelScaleSelector( s.pixelScaleBase );
       changed |= ImGui::SliderInt( "frame", &s.frame, 0, 32 );
       ImGui::Checkbox( "billboard", &s.billboard );
       if ( matchanged )

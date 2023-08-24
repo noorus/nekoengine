@@ -66,15 +66,18 @@ namespace neko {
 
     hbbuf_->setFrom( style_->hbfnt_, features_, text_ );
 
-    vec3 position( 0.0f );
-
     const auto ascender = style_->ascender();
     const auto descender = style_->descender();
-
-    position.y += ascender + descender;
+    const auto lineheight = ( ascender - descender );
 
     vertices_.clear();
     indices_.clear();
+
+    vec2 minpos { std::numeric_limits<Real>::max(), std::numeric_limits<Real>::max() };
+    meshDimensions_ = { 0.0f, 0.0f };
+
+    // TODO figure out the actual properties to use for offsetting, not this * 1.6f hardcoded nonsense
+    vec3 position( 0.0f, lineheight * 1.6f, 0.0f );
 
     for ( unsigned int i = 0; i < hbbuf_->count(); ++i )
     {
@@ -86,7 +89,7 @@ namespace neko {
       if ( chartype == U_CONTROL_CHAR && glyphindex == 0 )
       {
         position.x = 0.0f;
-        position.y += ( ascender - descender );
+        position.y += lineheight;
         continue;
       }
 
@@ -94,6 +97,7 @@ namespace neko {
       auto offset = vec2( gpos.x_offset, gpos.y_offset ) / c_fmagic;
       auto advance = ( vec2( gpos.x_advance, gpos.y_advance ) / c_fmagic );
 
+      // bearing = bitmap_left/bitmap_top
       auto p0 = vec2(
         ( position.x + offset.x + glyph->bearing.x ),
         ( position.y - offset.y - glyph->bearing.y ) );
@@ -104,17 +108,24 @@ namespace neko {
 
       auto color = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 
+      minpos.x = math::min( p0.x, minpos.x );
+      minpos.y = math::min( p0.y, minpos.y );
+      meshDimensions_.x = math::max( p1.x, meshDimensions_.x );
+      meshDimensions_.y = math::max( p1.y, meshDimensions_.y );
+
       auto index = static_cast<VertexIndex>( vertices_.size() );
-      vertices_.emplace_back( vec3( p0.x, p0.y, position.z ), vec2( glyph->coords[0].x, glyph->coords[0].y ), color );
-      vertices_.emplace_back( vec3( p0.x, p1.y, position.z ), vec2( glyph->coords[0].x, glyph->coords[1].y ), color );
-      vertices_.emplace_back( vec3( p1.x, p1.y, position.z ), vec2( glyph->coords[1].x, glyph->coords[1].y ), color );
-      vertices_.emplace_back( vec3( p1.x, p0.y, position.z ), vec2( glyph->coords[1].x, glyph->coords[0].y ), color );
+      vertices_.emplace_back( vec3( p0.x, lineheight - p0.y, position.z ), vec2( glyph->coords[0].x, glyph->coords[0].y ), color );
+      vertices_.emplace_back( vec3( p0.x, lineheight - p1.y, position.z ), vec2( glyph->coords[0].x, glyph->coords[1].y ), color );
+      vertices_.emplace_back( vec3( p1.x, lineheight - p1.y, position.z ), vec2( glyph->coords[1].x, glyph->coords[1].y ), color );
+      vertices_.emplace_back( vec3( p1.x, lineheight - p0.y, position.z ), vec2( glyph->coords[1].x, glyph->coords[0].y ), color );
 
       Indices idcs = { index + 0, index + 1, index + 2, index + 0, index + 2, index + 3 };
       indices_.insert( indices_.end(), idcs.begin(), idcs.end() );
 
       position += vec3( advance, 0.0f );
     }
+
+    meshDimensions_ -= minpos;
 
     dirty_ = false;
   }
@@ -133,7 +144,7 @@ namespace neko {
         static_cast<gl::GLuint>( indices_.size() ) );
       const auto& verts = mesh_->buffer().lock();
       const auto& indcs = mesh_->indices().lock();
-      memcpy( verts.data(), vertices_.data(), vertices_.size() * sizeof( Vertex ) );
+      memcpy( verts.data(), vertices_.data(), vertices_.size() * sizeof( VertexText ) );
       memcpy( indcs.data(), indices_.data(), indices_.size() * sizeof( GLuint ) );
       mesh_->buffer().unlock();
       mesh_->indices().unlock();

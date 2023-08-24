@@ -322,8 +322,9 @@ namespace neko {
     unicodeString text_;
     IDType id_;
     TextMeshPtr mesh_;
-    Vertices vertices_;
+    vector<VertexText> vertices_;
     Indices indices_;
+    vec2 meshDimensions_ = { 0.0f, 0.0f };
     bool dead_ = false;
   public:
     Text() = delete;
@@ -342,6 +343,7 @@ namespace neko {
     void draw( Renderer& renderer, const mat4& modelMatrix );
     inline void markDead() { dead_ = true; }
     inline const bool dead() const noexcept { return dead_; }
+    inline const vec2& dimensions() const noexcept { return meshDimensions_; }
   };
 
   class FontManager: public LoadedResourceManagerBase<Font>, public ShareableBase<FontManager> {

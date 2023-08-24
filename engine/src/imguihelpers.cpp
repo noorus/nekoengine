@@ -93,4 +93,11 @@ namespace neko::ig {
         ImVec2( -FLT_MIN, ImGui::GetTextLineHeight() * 4 ), flags, imguiInputText_Callback, &ud );
   }
 
+  bool imguiPixelScaleSelector( PixelScale& scale )
+  {
+    auto scaleName = ( scale >= 0 && scale < MAX_PixelScale ? c_pixelScaleNames[scale] : "Unknown" );
+    return ImGui::SliderInt( "pixel scale", reinterpret_cast<int*>( &scale ), PixelScale_1,
+      MAX_PixelScale - 1, scaleName, ImGuiSliderFlags_NoInput );
+  }
+
 }

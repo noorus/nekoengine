@@ -3,6 +3,7 @@
 #include "neko_types.h"
 #include "buffers.h"
 #include "spriteanim.h"
+#include "font.h"
 #include "imgui.h"
 
 #undef near
@@ -11,6 +12,55 @@
 namespace neko {
 
   class BasicGameCamera;
+
+  // clang-format off
+  
+  enum PixelScale: int
+  {
+    PixelScale_1 = 0,
+    PixelScale_8,
+    PixelScale_10,
+    PixelScale_16,
+    PixelScale_20,
+    PixelScale_24,
+    PixelScale_30,
+    PixelScale_32,
+    PixelScale_40,
+    PixelScale_48,
+    PixelScale_50,
+    PixelScale_64,
+    MAX_PixelScale
+  };
+
+  constexpr const Real c_pixelScaleValues[MAX_PixelScale] = {
+    ( 1.0f / 1.0f ),
+    ( 1.0f / 8.0f ),
+    ( 1.0f / 10.0f ),
+    ( 1.0f / 16.0f ),
+    ( 1.0f / 20.0f ),
+    ( 1.0f / 24.0f ),
+    ( 1.0f / 30.0f ),
+    ( 1.0f / 32.0f ),
+    ( 1.0f / 40.0f ),
+    ( 1.0f / 48.0f ),
+    ( 1.0f / 50.0f ),
+    ( 1.0f / 64.0f )
+  };
+
+  constexpr const char* c_pixelScaleNames[MAX_PixelScale] = {
+    "1 = 1px",
+    "1 = 8px",
+    "1 = 10px",
+    "1 = 16px",
+    "1 = 20px",
+    "1 = 24px",
+    "1 = 30px",
+    "1 = 32px",
+    "1 = 40px",
+    "1 = 48px",
+    "1 = 50px",
+    "1 = 64px"
+  };
 
   namespace ig {
 
@@ -32,6 +82,7 @@ namespace neko {
 
     extern int imguiInputText_Callback( ImGuiInputTextCallbackData* data );
     extern bool imguiInputText( const char* label, utf8String* str, bool multiline, ImGuiInputTextCallback callback, void* user_data );
+    extern bool imguiPixelScaleSelector( PixelScale& scale );
 
     template <typename T>
     inline bool dragVector( const char* label, const T& v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f,
@@ -150,45 +201,6 @@ namespace neko {
       void* chaincb_ud = nullptr;
     };
 
-    struct dirty_text
-    {
-    };
-
-    struct text
-    {
-      utf8String content;
-      utf8String fontName;
-      Real size = 10.0f;
-      TextInputUserData int_ud_;
-    };
-
-    struct TextData
-    {
-      entity ent = null;
-      TextPtr instance {};
-      bool dirty = false;
-      TextData(): ent( null ), dirty( false ) {}
-      TextData( entity e ): ent( e ) {}
-    };
-
-    using TextDataMap = map<entity, TextData>;
-
-    class text_system {
-    protected:
-      manager* mgr_ = nullptr;
-      TextDataMap texts_;
-      void addText( registry& r, entity e );
-      void updateText( registry& r, entity e );
-      void removeText( registry& r, entity e );
-    public:
-      text_system( manager* m );
-      void update( FontManager& fntmgr );
-      void draw( Renderer& renderer );
-      ~text_system();
-      inline const TextDataMap& texts() const { return texts_; }
-      void imguiTextEditor( entity e );
-    };
-
     struct camera
     {
       enum CameraProjection
@@ -262,52 +274,52 @@ namespace neko {
       void imguiPrimitiveEditor( entity e );
     };
 
-    enum PixelScale: int
+    // text
+
+    struct dirty_text
     {
-      PixelScale_1 = 0,
-      PixelScale_8,
-      PixelScale_10,
-      PixelScale_16,
-      PixelScale_20,
-      PixelScale_24,
-      PixelScale_30,
-      PixelScale_32,
-      PixelScale_40,
-      PixelScale_48,
-      PixelScale_50,
-      PixelScale_64,
-      MAX_PixelScale
     };
 
-    constexpr const Real c_pixelScaleValues[MAX_PixelScale] = {
-      ( 1.0f / 1.0f ),
-      ( 1.0f / 8.0f ),
-      ( 1.0f / 10.0f ),
-      ( 1.0f / 16.0f ),
-      ( 1.0f / 20.0f ),
-      ( 1.0f / 24.0f ),
-      ( 1.0f / 30.0f ),
-      ( 1.0f / 32.0f ),
-      ( 1.0f / 40.0f ),
-      ( 1.0f / 48.0f ),
-      ( 1.0f / 50.0f ),
-      ( 1.0f / 64.0f )
+    struct text
+    {
+      PixelScale pixelScaleBase = PixelScale_32;
+      utf8String content;
+      utf8String fontName;
+      Real size = 10.0f;
+      vec2 offset = { 0.0f, 0.0f };
+      int alignHorizontal = 0;
+      int alignVertical = 0;
+      TextInputUserData int_ud_;
     };
 
-    constexpr const char* c_pixelScaleNames[MAX_PixelScale] = {
-      "1 = 1px",
-      "1 = 8px",
-      "1 = 10px",
-      "1 = 16px",
-      "1 = 20px",
-      "1 = 24px",
-      "1 = 30px",
-      "1 = 32px",
-      "1 = 40px",
-      "1 = 48px",
-      "1 = 50px",
-      "1 = 64px"
+    struct TextData
+    {
+      entity ent = null;
+      TextPtr instance {};
+      bool dirty = false;
+      TextData(): ent( null ), dirty( false ) {}
+      TextData( entity e ): ent( e ) {}
     };
+
+    using TextDataMap = map<entity, TextData>;
+
+    class text_system {
+    protected:
+      manager* mgr_ = nullptr;
+      TextDataMap texts_;
+      void addText( registry& r, entity e );
+      void updateText( registry& r, entity e );
+      void removeText( registry& r, entity e );
+    public:
+      text_system( manager* m );
+      void update( FontManager& fntmgr );
+      void draw( Renderer& renderer );
+      ~text_system();
+      inline const TextDataMap& texts() const { return texts_; }
+      void imguiTextEditor( entity e );
+    };
+
+    // sprites
 
     struct sprite
     {

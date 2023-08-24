@@ -216,24 +216,14 @@ namespace neko {
     }
   };
 
-#pragma pack( push, 1 )
-  struct Vertex
-  {
-    vec3 position;
-    vec2 texcoord;
-    vec4 color;
-    Vertex( vec3 pos, vec2 tc, vec4 clr ): position( pos ), texcoord( tc ), color( clr ) {}
-  };
-#pragma pack( pop )
-
   using VertexIndex = unsigned int;
 
-  using Vertices = vector<Vertex>;
+  //using Vertices = vector<Vertex>;
   using Indices = vector<VertexIndex>;
 
   class TextRenderBuffer {
   protected:
-    using BufferType = MappedGLBuffer<Vertex>;
+    using BufferType = MappedGLBuffer<VertexText>;
     using IndicesType = MappedGLBuffer<gl::GLuint>;
     unique_ptr<BufferType> buffer_;
     unique_ptr<IndicesType> indices_;
@@ -257,7 +247,7 @@ namespace neko {
     void draw( shaders::Shaders& shaders, const mat4& model, gl::GLuint texture )
     {
       gl::glBindVertexArray( vao_ );
-      auto& pipeline = shaders.usePipeline( "text2d" );
+      auto& pipeline = shaders.usePipeline( "text3d" );
       pipeline.setUniform( "model", model );
       pipeline.setUniform( "tex", 0 );
       gl::glBindTextureUnit( 0, texture );
