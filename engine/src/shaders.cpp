@@ -296,6 +296,7 @@ namespace neko {
         utf8String vp_filename = obj.contains( "vert" ) ? obj["vert"].get<utf8String>() : "";
         utf8String gp_filename = obj.contains( "geom" ) ? obj["geom"].get<utf8String>() : "";
         utf8String fp_filename = obj.contains( "frag" ) ? obj["frag"].get<utf8String>() : "";
+        utf8String cp_filename = obj.contains( "comp" ) ? obj["comp"].get<utf8String>() : "";
 
         vector<utf8String> uniforms;
         if ( obj.contains( "uniforms" ) )
@@ -307,8 +308,8 @@ namespace neko {
             uniforms.push_back( u.get<utf8String>() );
         }
 
-        ShaderPtr vs, gs, fs;
-        ProgramPtr vp, gp, fp;
+        ShaderPtr vs, gs, fs, cs;
+        ProgramPtr vp, gp, fp, cp;
 
         if ( !vp_filename.empty() )
           buildSeparableProgram( name, vp_filename, Type::Shader_Vertex, vs, vp, uniforms );
@@ -316,6 +317,8 @@ namespace neko {
           buildSeparableProgram( name, gp_filename, Type::Shader_Geometry, gs, gp, uniforms );
         if ( !fp_filename.empty() )
           buildSeparableProgram( name, fp_filename, Type::Shader_Fragment, fs, fp, uniforms );
+        if ( !cp_filename.empty() )
+          buildSeparableProgram( name, cp_filename, Type::Shader_Compute, cs, cp, uniforms );
 
         auto pipeline = make_unique<Pipeline>( name );
         if ( vp )
@@ -324,6 +327,8 @@ namespace neko {
           glUseProgramStages( pipeline->id(), c_shaderTypes[gs->type()].maskBit, gp->id() );
         if ( fp )
           glUseProgramStages( pipeline->id(), c_shaderTypes[fs->type()].maskBit, fp->id() );
+        if ( cp )
+          glUseProgramStages( pipeline->id(), c_shaderTypes[cs->type()].maskBit, cp->id() );
 
         if ( vp )
           pipeline->stages_[Type::Shader_Vertex] = vp;
@@ -331,6 +336,8 @@ namespace neko {
           pipeline->stages_[Type::Shader_Geometry] = gp;
         if ( fp )
           pipeline->stages_[Type::Shader_Fragment] = fp;
+        if ( cp )
+          pipeline->stages_[Type::Shader_Compute] = cp;
 
         if ( vs )
           shaders_.push_back( move( vs ) );
@@ -338,12 +345,18 @@ namespace neko {
           shaders_.push_back( move( gs ) );
         if ( fs )
           shaders_.push_back( move( fs ) );
+        if ( cs )
+          shaders_.push_back( move( cs ) );
+
         if ( vp )
           programs_.push_back( move( vp ) );
         if ( gp )
           programs_.push_back( move( gp ) );
         if ( fp )
           programs_.push_back( move( fp ) );
+        if ( cp )
+          programs_.push_back( move( cp ) );
+
         pipelines_[name] = move( pipeline );
       }
       else
