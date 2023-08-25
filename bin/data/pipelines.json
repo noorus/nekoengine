@@ -139,5 +139,12 @@
     "uniforms": [
       "model"
     ]
+  },
+  {
+    "name": "tool_2dpaint",
+    "comp": "tool_2dpaint.comp",
+    "uniforms": [
+      "mouse"
+    ]
   }
 ]

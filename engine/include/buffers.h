@@ -82,6 +82,17 @@ namespace neko {
       gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
       gl::glBindVertexArray( 0 );
     }
+    void draw( shaders::Shaders& shaders, GLuint texture, const mat4& model )
+    {
+      gl::glBindVertexArray( vao_ );
+      auto ppl = &shaders.usePipeline( "mat_unlit" );
+      const auto hndl = texture;
+      gl::glBindTextures( 0, 1, &hndl );
+      ppl->setUniform( "tex", 0 );
+      ppl->setUniform( "model", model );
+      gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
+      gl::glBindVertexArray( 0 );
+    }
     ~BasicIndexedVertexbuffer()
     {
       gl::glDeleteVertexArrays( 1, &vao_ );

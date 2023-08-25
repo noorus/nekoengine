@@ -158,42 +158,6 @@ namespace neko {
     {
     };
 
-    struct dirty_primitive
-    {
-    };
-
-    struct primitive
-    {
-      enum class PrimitiveType
-      {
-        Plane = 0,
-        Box,
-        Sphere
-      } type;
-      unique_ptr<BasicIndexedVertexbuffer> mesh;
-      union Values
-      {
-        struct Plane
-        {
-          vec2 dimensions;
-          glm::i32vec2 segments;
-          int normal_sel = ig::PredefNormal_PlusZ;
-          vec3 normal;
-        } plane;
-        struct Box
-        {
-          vec3 dimensions;
-          vec2u segments;
-          bool inverted;
-        } box;
-        struct Sphere
-        {
-          Real diameter;
-          vec2u segments;
-        } sphere;
-      } values;
-    };
-
     struct TextInputUserData
     {
       utf8String* str = nullptr;
@@ -258,6 +222,44 @@ namespace neko {
       void setResolution( vec2 res );
       void imguiCameraSelector();
       void imguiCameraEditor( entity e );
+    };
+
+    // primitives
+
+    struct primitive
+    {
+      enum class PrimitiveType
+      {
+        Plane = 0,
+        Box,
+        Sphere
+      } type;
+      unique_ptr<BasicIndexedVertexbuffer> mesh;
+      union Values
+      {
+        struct Plane
+        {
+          vec2 dimensions;
+          glm::i32vec2 segments;
+          int normal_sel = ig::PredefNormal_PlusZ;
+          vec3 normal;
+        } plane;
+        struct Box
+        {
+          vec3 dimensions;
+          vec2u segments;
+          bool inverted;
+        } box;
+        struct Sphere
+        {
+          Real diameter;
+          vec2u segments;
+        } sphere;
+      } values;
+    };
+
+    struct dirty_primitive
+    {
     };
 
     class primitive_system {
@@ -352,6 +354,46 @@ namespace neko {
       void imguiSpriteEditor( entity e );
     };
 
+    // paintables
+
+    struct paintable
+    {
+      PixelScale pixelScaleBase = PixelScale_32;
+      unique_ptr<BasicIndexedVertexbuffer> mesh;
+      PaintableTexturePtr texture;
+      vec2i dimensions { 0, 0 };
+      int normal_sel = ig::PredefNormal_PlusZ;
+      vec3 normal { 0.0f, 0.0f, 1.0f };
+      vec2i lastPaintPos = { 0, 0 };
+      int paintBrushSize = 32;
+      float paintBrushSoftness = 0.2f;
+      float paintBrushOpacity = 0.4f;
+      void applyPaint( Renderer& renderer, const vec2& pos );
+      void mouseClickTest( manager* m, entity e, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button );
+    };
+
+    struct dirty_paintable
+    {
+    };
+
+    class paintables_system {
+    protected:
+      manager* mgr_ = nullptr;
+      void addSurface( registry& r, entity e );
+      void updateSurface( registry& r, entity e );
+      void removeSurface( registry& r, entity e );
+    public:
+      paintables_system( manager* m );
+      void update( Renderer& renderer );
+      void draw( Renderer& renderer, const Camera& cam );
+      ~paintables_system();
+      void imguiPaintableSurfaceEditor( entity e );
+    };
+
+    struct hittestable
+    {
+    };
+
     class manager {
     protected:
       registry registry_;
@@ -361,6 +403,7 @@ namespace neko {
       unique_ptr<text_system> txtsys_;
       unique_ptr<primitive_system> primsys_;
       unique_ptr<sprite_system> sprsys_;
+      unique_ptr<paintables_system> ptbsys_;
       void imguiSceneGraphRecurse( entity e, entity& clicked );
       void imguiNodeSelectorRecurse( entity e, entity& selected );
       void imguiNodeEditor( entity e );
@@ -374,6 +417,7 @@ namespace neko {
       inline text& tt( entity e ) { return registry_.get<text>( e ); } //!< Get text by entity
       inline primitive& pt( entity e ) { return registry_.get<primitive>( e ); }
       inline sprite& s( entity e ) { return registry_.get<sprite>( e ); }
+      inline paintable& paintable2d( entity e ) { return registry_.get<paintable>( e ); }
       inline bool validAndTransform( entity e )
       {
         if ( e == null || e == tombstone )
@@ -384,6 +428,7 @@ namespace neko {
       {
         return imguiSelectedNodes_.contains( e );
       }
+      void executeMouseClick( Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button );
       entity createNode( entity parent, string_view name );
       entity createRenderable( entity parent, string_view name );
       entity createNode( string_view name );
@@ -391,6 +436,7 @@ namespace neko {
       entity createText( string_view name );
       entity createPlane( string_view name );
       entity createSprite( string_view name );
+      entity createPaintable( string_view name );
       inline entity& root() { return root_; }
       void update();
       void markDirty( entity e );
@@ -401,6 +447,7 @@ namespace neko {
       inline text_system& texts() const { return *txtsys_; }
       inline primitive_system& primitives() const { return *primsys_; }
       inline sprite_system& sprites() const { return *sprsys_; }
+      inline paintables_system& paintables() const { return *ptbsys_; }
     };
 
   }

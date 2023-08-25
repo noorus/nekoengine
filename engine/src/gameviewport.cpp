@@ -86,6 +86,11 @@ namespace neko {
     return true;
   }
 
+  const Viewport& GameViewport::drawopGetViewport() const
+  {
+    return *this;
+  }
+
   vec3 GameViewport::ndcPointToWorld( vec2 ndc_viewcoord ) const
   {
     return ndcPointToWorld( vec3( ndc_viewcoord, -1.0f ) );
@@ -96,12 +101,31 @@ namespace neko {
     if ( !camdata_ || !camdata_->instance )
       return {};
     auto in = vec4( ndc_viewcoord, 1.0f );
-    auto m = glm::inverse( camdata_->instance->frustum().projection() * camdata_->instance->view() );
+    auto m = math::inverse( camdata_->instance->frustum().projection() * camdata_->instance->view() );
     auto out = m * in;
     assert( out.w != 0.0f );
     out.w = 1.0f / out.w;
-    return -vec3( out.z * out.w, out.y * out.w, out.x * out.w );
-    //return { out.x * out.w, out.y * out.w, out.z * out.w };
+    return { out.x * out.w, out.y * out.w, out.z * out.w };
+  }
+
+  bool GameViewport::ndcRay( vec2 ndc_viewcoord, Ray& ray ) const
+  {
+    if ( !camdata_ || !camdata_->instance )
+      return false;
+
+    auto m = math::inverse( camdata_->instance->frustum().projection() * camdata_->instance->view() );
+
+    auto near = m * vec4( ndc_viewcoord, 0.0f, 1.0f );
+    auto far = m * vec4( ndc_viewcoord, 1.0f, 1.0f );
+    if ( near.w == 0.0f || far.w == 0.0f )
+      return false;
+
+    near.w = 1.0f / near.w;
+    far.w = 1.0f / far.w;
+
+    ray.origin = { near.x * near.w, near.y * near.w, near.z * near.w };
+    ray.direction = math::normalize( vec3( far.x * far.w, far.y * far.w, far.z * far.w ) - ray.origin );
+    return true;
   }
 
 }

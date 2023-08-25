@@ -28,6 +28,8 @@ namespace neko {
     inline int height() const noexcept { return height_; }
     inline int depth() const noexcept { return depth_; }
     inline PixelFormat format() const noexcept { return format_; }
+    // GLGraphicsFormat glformat() const noexcept { return glFormat_; }
+    GLGraphicsFormat internalFormat() const noexcept { return internalFormat_; }
     //! Get the native handle for usage. Do not store it elsewhere so as to not violate RAII.
     inline GLuint handle() const noexcept { return handle_; }
   };

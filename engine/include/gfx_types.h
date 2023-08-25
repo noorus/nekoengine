@@ -104,6 +104,17 @@ namespace neko {
     PixFmtColorR16f
   };
 
+  struct PixelFormatValues
+  {
+    int components;
+    int bytes;
+    GLGraphicsFormat glformat;
+    GLGraphicsFormat internalformat;
+    GLGraphicsFormat gltype;
+  };
+
+  extern const map<PixelFormat, PixelFormatValues> c_pixelFormatData;
+
   class Pixmap : public nocopy {
   private:
     int width_ = 0;
@@ -130,6 +141,8 @@ namespace neko {
     inline int height() const noexcept { return height_; }
     inline PixelFormat format() const noexcept { return format_; }
     inline const vector<uint8_t>& data() const noexcept { return data_; }
+    inline vector<uint8_t>& writableData() noexcept { return data_; }
+    void convert( PixelFormat newfmt );
     void writePNG( const utf8String& filename ) const;
     void reset();
     void flipVertical();

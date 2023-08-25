@@ -249,6 +249,12 @@ namespace neko {
 
   using json = nlohmann::json;
 
+  struct Ray
+  {
+    vec3 origin { 0.0f };
+    vec3 direction { 0.0f };
+  };
+
   class nocopy {
   private:
     nocopy( const nocopy& ) = delete;

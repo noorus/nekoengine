@@ -8,8 +8,8 @@
 #include "camera.h"
 #include "gui.h"
 #include "viewport.h"
-#include "specialrenderers.h"
 #include "components.h"
+#include "specialrenderers.h"
 
 namespace neko {
 
@@ -28,6 +28,7 @@ namespace neko {
     virtual vec2 drawopViewportPosition() const = 0;
     virtual vec2 drawopViewportSize() const = 0;
     virtual bool drawopShouldDoBufferVisualizations() const = 0;
+    virtual const Viewport& drawopGetViewport() const = 0;
   };
 
   struct RenderVisualizations
@@ -86,9 +87,11 @@ namespace neko {
     vec2 drawopViewportSize() const override;
     const CameraPtr drawopGetCamera() const override;
     bool drawopShouldDoBufferVisualizations() const override;
+    const Viewport& drawopGetViewport() const override;
     // Viewport interface implementation
     vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const override;
     vec3 ndcPointToWorld( vec3 ndc_viewcoord ) const override;
+    bool ndcRay( vec2 ndc_viewcoord, Ray& ray ) const override;
   public:
     EditorViewport( EditorPtr editor, vec2 resolution, const EditorViewportDefinition& def );
     ~EditorViewport();
@@ -125,9 +128,11 @@ namespace neko {
     vec2 drawopViewportSize() const override;
     const CameraPtr drawopGetCamera() const override;
     bool drawopShouldDoBufferVisualizations() const override;
+    const Viewport& drawopGetViewport() const override;
     // Viewport interface implementation
     vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const override;
     vec3 ndcPointToWorld( vec3 ndc_viewcoord ) const override;
+    bool ndcRay( vec2 ndc_viewcoord, Ray& ray ) const override;
   };
 
   class CursorLock {
@@ -174,7 +179,8 @@ namespace neko {
     inline vec4& gridColorRef() { return gridColor_; }
     inline Visualizations& visSettingsRef() { return visSettings_; }
     void shutdown();
-    void updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene, const Viewport& window,
+    void updateRealtime( Renderer& renderer, GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene,
+      const Viewport& window,
       GameViewport& gameViewport, bool ignoreInput );
     bool draw( RendererPtr renderer, SManager& scene, GameTime time, const Viewport& window, GameViewport& gameViewport );
   };

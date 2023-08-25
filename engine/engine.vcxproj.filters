@@ -453,6 +453,12 @@
     <ClCompile Include="..\shared\src\platform_windows_errorhandling.cpp">
       <Filter>Source Files\shared</Filter>
     </ClCompile>
+    <ClCompile Include="src\paintabletexture.cpp">
+      <Filter>Source Files\gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\c_paintables_system.cpp">
+      <Filter>Source Files\components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">
@@ -990,6 +996,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\shaders\sprite.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\tool_2dpaint.comp">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

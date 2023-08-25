@@ -119,16 +119,16 @@ namespace neko {
       target = (int64_t)data;
       return true;
     };
-    auto glvGetIntArray = [glbAuxStr]( GLenum e, vector<int64_t>& target, bool doNotThrow = false ) -> bool
+    auto glvGetIntArray = [glbAuxStr]( GLenum e, int* target, GLuint count, bool doNotThrow = false ) -> bool
     {
-      for ( GLuint i = 0; i < target.size(); ++i )
+      for ( GLuint i = 0; i < count; ++i )
       {
-        glGetInteger64i_v( e, i, &target[i] );
+        glGetIntegeri_v( e, i, &target[i] );
         auto error = glGetError();
         if ( error != GL_NO_ERROR )
         {
           if ( !doNotThrow )
-            NEKO_OPENGL_EXCEPT( "glGetInteger64i_v failed for " + glbAuxStr( e ), error );
+            NEKO_OPENGL_EXCEPT( "glGetIntegeri_v failed for " + glbAuxStr( e ), error );
           return false;
         }
       }
@@ -231,10 +231,10 @@ namespace neko {
     // Array textures
     glvGetI64( GL_MAX_ARRAY_TEXTURE_LAYERS, info.maxArrayTextureLayers );
 
-    info.maxComputeWorkgroupCount.resize( 3, 0 );
-    glvGetIntArray( GL_MAX_COMPUTE_WORK_GROUP_COUNT, info.maxComputeWorkgroupCount );
-    info.maxComputeWorkgroupSize.resize( 3, 0 );
-    glvGetIntArray( GL_MAX_COMPUTE_WORK_GROUP_SIZE, info.maxComputeWorkgroupSize );
+    glvGetIntArray( GL_MAX_COMPUTE_WORK_GROUP_COUNT, &info.maxComputeWorkgroupCounts.x,
+      static_cast<GLuint>( info.maxComputeWorkgroupCounts.length() ) );
+    glvGetIntArray( GL_MAX_COMPUTE_WORK_GROUP_SIZE, &info.maxComputeWorkgroupSizes.x,
+      static_cast<GLuint>( info.maxComputeWorkgroupSizes.length() ) );
     glvGetI64( GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, info.maxComputeWorkgroupInvocations );
   }
 
@@ -265,11 +265,11 @@ namespace neko {
 
     console_->printf( srcGfx, "Buffer alignments are %i/texture %i/uniform",
       info_.textureBufferAlignment, info_.uniformBufferAlignment );
-    console_->printf( srcGfx, "Maximums are %i/texture %i/renderbuffer %ix%i/framebuffer %i/2dlayers",
+    console_->printf( srcGfx, "Maximum sizes are %i/texture %i/renderbuffer %ix%i/framebuffer %i/2dlayers",
       info_.maxTextureSize, info_.maxRenderbufferSize, info_.maxFramebufferWidth, info_.maxFramebufferHeight, info_.maxArrayTextureLayers );
     console_->printf( srcGfx, "Maximum compute workgroup count [%i,%i,%i] size [%i,%i,%i] invocations %i",
-      info_.maxComputeWorkgroupCount[0], info_.maxComputeWorkgroupCount[1], info_.maxComputeWorkgroupCount[2],
-      info_.maxComputeWorkgroupSize[0], info_.maxComputeWorkgroupSize[1], info_.maxComputeWorkgroupSize[2],
+      info_.maxComputeWorkgroupCounts.x, info_.maxComputeWorkgroupCounts.y, info_.maxComputeWorkgroupCounts.z,
+      info_.maxComputeWorkgroupSizes.x, info_.maxComputeWorkgroupSizes.y, info_.maxComputeWorkgroupSizes.z,
       info_.maxComputeWorkgroupInvocations );
     console_->printf( srcGfx, "Maximum anisotropy is %.1f", info_.maxAnisotropy );
   }
@@ -290,7 +290,7 @@ namespace neko {
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
 
-    builtin_.placeholderTexture_ = createTextureWithData( "int_placeholder", 2, 2, PixFmtColorRGBA8,
+    builtin_.placeholderTexture_ = createMaterialWithData( "int_placeholder", 2, 2, PixFmtColorRGBA8,
       (const void*)BuiltinData::placeholderImage2x2.data() );
 
     builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
@@ -437,6 +437,7 @@ namespace neko {
     fonts_->prepareRender();
 
     scene.sprites().update( *materials_ );
+    scene.paintables().update( *this );
 
     // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point at which we try to create the VAO.
     // Thus uploading the VAOs should always come last.
@@ -462,13 +463,19 @@ namespace neko {
 #endif
   }
 
-  MaterialPtr Renderer::createTextureWithData( const utf8String& name, int width, int height, PixelFormat format,
+  TexturePtr Renderer::createTexture( int width, int height, PixelFormat format, const void* data,
+    const Texture::Wrapping wrapping, const Texture::Filtering filtering, int multisamples )
+  {
+    return make_shared<Texture>( this, width, height, format, data, wrapping, filtering, multisamples );
+  }
+
+  MaterialPtr Renderer::createMaterialWithData( const utf8String& name, int width, int height, PixelFormat format,
   const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
     return materials_->createTextureWithData( name, width, height, format, data, wrapping, filtering );
   }
 
-  MaterialPtr Renderer::createTextureWithData( const utf8String& name, int width, int height, int depth,
+  MaterialPtr Renderer::createMaterialWithData( const utf8String& name, int width, int height, int depth,
     PixelFormat format, const void* data, const Texture::Wrapping wrapping, const Texture::Filtering filtering )
   {
     return materials_->createTextureWithData( name, width, height, depth, format, data, wrapping, filtering );
@@ -759,6 +766,7 @@ namespace neko {
     scene.primitives().draw( *shaders_, *builtin_.placeholderTexture_ );
     setGLDrawState( true, false, false, wire );
     particles_->draw( *shaders_, *materials_ );
+    scene.paintables().draw( *this, camera );
     scene.sprites().draw( *this, camera );
     scene.texts().draw( *this );
 
@@ -804,6 +812,11 @@ namespace neko {
   {
     for ( GLuint i = 0; i < textures.size(); ++i )
       glBindTextureUnit( i, textures[i] );
+  }
+
+  void Renderer::bindImageTexture( GLuint unit, TexturePtr texture, int level, GLenum access )
+  {
+    glBindImageTexture( unit, texture->handle(), level, GL_FALSE, 0, access, texture->internalFormat() );
   }
 
   void Renderer::resetFbo()
@@ -997,11 +1010,52 @@ namespace neko {
     glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 
     // Draw the merged buffer in full quad
+    if ( true )
     {
       setGLDrawState( false, false, false, false );
       auto& pipeline = shaders_->usePipeline( "passthrough2d" );
       pipeline.setUniform( "tex", 0 );
       const GLuint hndl = ctx_.mergedMain_->texture( 0 )->handle();
+      glBindTextures( 0, 1, &hndl );
+      viewportQuad->begin();
+      viewportQuad->draw();
+    }
+    // Draw the merged buffer in full quad
+
+    if ( true )
+    {
+      /* setGLDrawState( false, false, false, false );
+      auto& pipeline = shaders_->usePipeline( "passthrough2d" );
+      pipeline.setUniform( "tex", 0 );
+      const GLuint hndl = ctx_.mergedMain_->texture( 0 )->handle();
+      glBindTextures( 0, 1, &hndl );
+      builtin_.screenQuad_->begin();
+      builtin_.screenQuad_->draw();*/
+    }
+    else
+    {
+      if ( !drawtx_ )
+        drawtx_ = make_shared<PaintableTexture>( *this, 1000, 1000, PixFmtColorRGBA32f );
+      auto& pp = shaders_->usePipeline( "tool_2dpaint" );
+      pp.setUniform( "mouse", vec2( 0.5f, 0.5f ) );
+      bindImageTexture( 0, drawtx_->texture() );
+      bindTexture( 0, drawtx_->texture() );
+      glDispatchCompute( drawtx_->width() / 10, drawtx_->height() / 10, 1 );
+      glMemoryBarrier( gl::MemoryBarrierMask::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
+
+      static bool imgout = false;
+      if ( !imgout )
+      {
+        imgout = true;
+        auto px = drawtx_->read( *this );
+        px->convert( PixFmtColorRGBA8 );
+        px->writePNG( "kekw.png" );
+      }
+
+      setGLDrawState( false, false, false, false );
+      auto& pipeline = shaders_->usePipeline( "passthrough2d" );
+      pipeline.setUniform( "tex", 0 );
+      const GLuint hndl = drawtx_->handle();
       glBindTextures( 0, 1, &hndl );
       viewportQuad->begin();
       viewportQuad->draw();

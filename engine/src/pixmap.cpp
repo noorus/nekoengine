@@ -282,6 +282,49 @@ namespace neko {
     data_.clear();
   }
 
+  void Pixmap::convert( PixelFormat newfmt )
+  {
+    if ( newfmt == format_ )
+      return;
+
+    if ( !g_fmtInfo.contains( newfmt ) )
+      NEKO_EXCEPT( "Unsupported pixel format passed to Pixmap::convert" );
+
+    if ( data_.empty() )
+    {
+      format_ = newfmt;
+      return;
+    }
+
+    vector<uint8_t> rbd;
+    const auto pixelCount = ( width_ * height_ );
+    const auto components = g_fmtInfo.at( newfmt ).first;
+    const auto bytespercomponent = g_fmtInfo.at( newfmt ).second;
+    const auto stride = ( components * bytespercomponent );
+    rbd.resize( static_cast<size_t>( pixelCount ) * stride );
+
+    if ( newfmt == PixFmtColorRGBA8 && format_ == PixFmtColorRGBA32f )
+    {
+      auto srcdata = reinterpret_cast<float*>( data_.data() );
+      auto dstdata = reinterpret_cast<uint8_t*>( rbd.data() );
+      for ( auto i = 0; i < ( pixelCount * components ); ++i )
+        dstdata[i] = static_cast<uint8_t>( srcdata[i] * 255.0f );
+    }
+    else if ( newfmt == PixFmtColorRGBA32f && format_ == PixFmtColorRGBA8 )
+    {
+      constexpr auto scaler = ( 1.0f / 255.0f );
+      auto srcdata = reinterpret_cast<uint8_t*>( data_.data() );
+      auto dstdata = reinterpret_cast<float*>( rbd.data() );
+      for ( auto i = 0; i < ( pixelCount * components ); ++i )
+        dstdata[i] = static_cast<float>( srcdata[i] ) * scaler;
+    }
+    else
+      NEKO_EXCEPT( "Unsupported pixel format passed to Pixmap::convert" );
+
+    format_ = newfmt;
+    data_.swap( rbd );
+  }
+
   void Pixmap::writePNG( const utf8String& filename ) const
   {
     platform::FileWriter writer( filename );
@@ -292,6 +335,8 @@ namespace neko {
       lodepng::encode( buffer, data_.data(), width_, height_, LCT_RGB, 8 );
     else if ( format_ == PixFmtColorR8 )
       lodepng::encode( buffer, data_.data(), width_, height_, LCT_GREY, 8 );
+    else
+      return;
     writer.writeBlob( buffer.data(), static_cast<uint32_t>( buffer.size() ) );
   }
 

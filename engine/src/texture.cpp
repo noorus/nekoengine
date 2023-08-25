@@ -147,6 +147,29 @@ namespace neko {
     glDeleteTextures( 1, &handle );
   }
 
+  PixmapPtr Texture::readBack()
+  {
+    int level = 0;
+    const auto& fmt = c_pixelFormatData.at( format_ );
+    auto pmp = make_shared<Pixmap>( width_, height_, format_, nullptr );
+    glGetTextureImage( handle_, level, fmt.glformat, fmt.gltype,
+      static_cast<GLsizei>( pmp->data().size() ),
+      pmp->writableData().data() );
+    return pmp;
+  }
+
+  void Texture::writeData( const void* data )
+  {
+    assert( data );
+    glTextureSubImage2D( handle_, 0, 0, 0, width_, height_, glFormat_, internalType_, data );
+  }
+
+  void Texture::writeRect( const vec2i& offset, int width, int height, const void* data )
+  {
+    assert( data );
+    glTextureSubImage2D( handle_, 0, offset.x, offset.y, width, height, glFormat_, internalType_, data );
+  }
+
   Texture::~Texture()
   {
     if ( handle_ )

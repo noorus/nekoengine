@@ -219,6 +219,12 @@ namespace neko {
         assert( stages_[stage] );
         return stages_[stage]->id();
       }
+      inline ProgramPtr getProgram( Type stage )
+      {
+        if ( !stages_.contains( stage ) )
+          return {};
+        return stages_[stage];
+      }
       inline bool ready() { return ( gl::glIsProgramPipeline( id_ ) && !stages_.empty() ); }
       template <typename T>
       inline Pipeline& setUniform( const char* name, T const& value )

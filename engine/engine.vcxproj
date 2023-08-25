@@ -150,6 +150,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -221,6 +222,7 @@
     <ClCompile Include="src\consolewindow_windows.cpp" />
     <ClCompile Include="src\c_camera_system.cpp" />
     <ClCompile Include="src\c_manager.cpp" />
+    <ClCompile Include="src\c_paintables_system.cpp" />
     <ClCompile Include="src\c_primitive_system.cpp" />
     <ClCompile Include="src\c_sprite_system.cpp" />
     <ClCompile Include="src\c_text_system.cpp" />
@@ -240,6 +242,7 @@
     <ClCompile Include="src\imguistyle.cpp" />
     <ClCompile Include="src\js_text.cpp" />
     <ClCompile Include="src\ortbicamera.cpp" />
+    <ClCompile Include="src\paintabletexture.cpp" />
     <ClCompile Include="src\particlemanager.cpp" />
     <ClCompile Include="src\pixmap.cpp" />
     <ClCompile Include="src\spriteanim.cpp" />
@@ -481,6 +484,7 @@
     <None Include="..\bin\shaders\text.frag" />
     <None Include="..\bin\shaders\text_2d.vert" />
     <None Include="..\bin\shaders\text_3d.vert" />
+    <None Include="..\bin\shaders\tool_2dpaint.comp" />
     <None Include="..\extern\steamworks\sdk\public\steam\steam_api.json" />
     <None Include="cpp.hint" />
   </ItemGroup>

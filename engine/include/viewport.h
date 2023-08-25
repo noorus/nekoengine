@@ -34,10 +34,13 @@ namespace neko {
     virtual vec2 mapPointByWindow( vec2 point ) const; //!< Map a point from window-relative pixel coordinates to NDC view space
     virtual vec3 ndcPointToWorld( vec2 ndc_viewcoord ) const; //!< Cast a point on the 2D viewport in -1...1 view coordinates to world (near plane depth)
     virtual vec3 ndcPointToWorld( vec3 ndc_viewcoord ) const; //!< Cast a point on the 2D viewport in -1...1 view coordinates to world, Z maps to clip planes
+    virtual bool ndcRay( vec2 ndc_viewcoord, Ray& ray ) const;
     virtual vec3 viewportPointToWorld( vec2 px_viewcoord ) const; //!< Cast a point from viewport-relative pixel coordinates to world (near plane depth)
     virtual vec3 viewportPointToWorld( vec3 px_viewcoord ) const; //!< Cast a point from viewport-relative pixel coordinates to world, Z maps to clip planes
+    virtual bool viewportRay( vec2 px_viewcoord, Ray& ray ) const;
     virtual vec3 windowPointToWorld( vec2 px_windowcoord ) const; //!< Cast a point from window-relative pixel coordinates to world (near plane depth)
     virtual vec3 windowPointToWorld( vec3 px_windowcoord ) const; //!< Cast a point from window-relative pixel coordinates to world, Z maps to clip planes
+    virtual bool windowRay( vec2 px_viewcoord, Ray& ray ) const;
   };
 
 }

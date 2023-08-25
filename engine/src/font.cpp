@@ -63,7 +63,7 @@ namespace neko {
         {
           char tmp[64];
           sprintf_s( tmp, 64, "font/%I64i_%016I64x", id_, pr.first );
-          pr.second->material_ = renderer->createTextureWithData( tmp,
+          pr.second->material_ = renderer->createMaterialWithData( tmp,
             static_cast<int>( pr.second->atlas().dimensions().x ),
             static_cast<int>( pr.second->atlas().dimensions().y ), PixFmtColorR8, pr.second->atlas().data(),
             Texture::ClampBorder, Texture::Mipmapped );

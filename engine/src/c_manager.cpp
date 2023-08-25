@@ -19,14 +19,17 @@ namespace neko {
       txtsys_ = make_unique<text_system>( this );
       primsys_ = make_unique<primitive_system>( this );
       sprsys_ = make_unique<sprite_system>( this );
+      ptbsys_ = make_unique<paintables_system>( this );
 
       root_ = registry_.create();
       registry_.emplace<node>( root_, "root" );
       registry_.emplace<transform>( root_ );
 
-      auto txt = createText( "pooooop" );
-      auto plane = createPlane( "lolplane" );
-      auto spr = createSprite( "lolsprite" );
+      //auto txt = createText( "pooooop" );
+      //auto plane = createPlane( "lolplane" );
+      //auto spr = createSprite( "lolsprite" );
+      auto e = createPaintable( "lolpaint" );
+      registry_.emplace<hittestable>( e );
     }
 
     entity manager::createNode( entity parent, string_view name )
@@ -111,6 +114,14 @@ namespace neko {
       auto e = createRenderable( root_, name );
       auto& s = registry_.emplace<sprite>( e );
       s.matName = "mushroom_idle-left";
+      return e;
+    }
+
+    entity manager::createPaintable( string_view name )
+    {
+      auto e = createRenderable( root_, name );
+      auto& p = registry_.emplace<paintable>( e );
+      p.dimensions = vec2i( 256, 256 );
       return e;
     }
 
@@ -253,6 +264,10 @@ namespace neko {
       {
         sprsys_->imguiSpriteEditor( e );
       }
+      if ( registry_.any_of<paintable>( e ) )
+      {
+        ptbsys_->imguiPaintableSurfaceEditor( e );
+      }
     }
 
     void manager::imguiSelectedNodes()
@@ -261,6 +276,19 @@ namespace neko {
       {
         imguiNodeEditor( e );
         ImGui::Separator();
+      }
+    }
+
+    void manager::executeMouseClick( Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button )
+    {
+      auto view = registry_.view<hittestable>();
+      for ( auto e : view )
+      {
+        if ( registry_.any_of<paintable>( e ) )
+        {
+          auto& pt = paintable2d( e );
+          pt.mouseClickTest( this, e, renderer, ray, mousepos, button );
+        }
       }
     }
 

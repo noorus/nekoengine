@@ -61,6 +61,12 @@ namespace neko {
     return { 0.0f, 0.0f, 0.0f };
   }
 
+  bool Viewport::ndcRay( vec2 px_viewcoord, Ray& ray ) const
+  {
+    NEKO_EXCEPT( "ndcRay called on bare Viewport" );
+    return false;
+  }
+
   vec3 Viewport::viewportPointToWorld( vec2 px_viewcoord ) const
   {
     return ndcPointToWorld( mapPointByViewport( px_viewcoord ) );
@@ -71,6 +77,11 @@ namespace neko {
     return ndcPointToWorld( vec3( mapPointByViewport( { px_viewcoord.x, px_viewcoord.y } ), px_viewcoord.z ) );
   }
 
+  bool Viewport::viewportRay( vec2 px_viewcoord, Ray& ray ) const
+  {
+    return ndcRay( mapPointByViewport( px_viewcoord ), ray );
+  }
+
   vec3 Viewport::windowPointToWorld( vec2 px_windowcoord ) const
   {
     return ndcPointToWorld( mapPointByWindow( px_windowcoord ) );
@@ -79,6 +90,11 @@ namespace neko {
   vec3 Viewport::windowPointToWorld( vec3 px_windowcoord ) const
   {
     return ndcPointToWorld( vec3( mapPointByWindow( { px_windowcoord.x, px_windowcoord.y } ), px_windowcoord.z ) );
+  }
+
+  bool Viewport::windowRay( vec2 px_viewcoord, Ray& ray ) const
+  {
+    return ndcRay( mapPointByWindow( px_viewcoord ), ray );
   }
 
   void Viewport::begin() const

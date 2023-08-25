@@ -362,6 +362,71 @@ namespace neko {
       return math::acos( math::clamp( f, -( glm::one<Real>() ), glm::one<Real>() ) );
     }
 
+    // Möller-Trumbore intersection
+    inline bool rayTriangleIntersection( const Ray& ray, const vec3& v0, const vec3& v1, const vec3& v2, vec3& out_intersection )
+    {
+      constexpr auto c_epsilon = std::numeric_limits<Real>::epsilon();
+      auto edge1 = ( v1 - v0 );
+      auto edge2 = ( v2 - v0 );
+      auto h = cross( ray.direction, edge2 );
+      auto a = dot( edge1, h );
+      if ( a > -c_epsilon && a < c_epsilon )
+        return false;
+      auto f = ( 1.0f / a );
+      auto s = ( ray.origin - v0 );
+      auto u = ( f * dot( s, h ) );
+      if ( u < 0.0f || u > 1.0f )
+        return false;
+      auto q = cross( s, edge1 );
+      auto v = ( f * dot( ray.direction, q ) );
+      if ( v < 0.0f || u + v > 1.0f )
+        return false;
+      auto t = ( f * dot( edge2, q ) );
+      if ( t > c_epsilon )
+      {
+        out_intersection = ( ray.origin + ( ray.direction * t ) );
+        return true;
+      }
+      return false;
+    }
+
+    // Möller-Trumbore intersection
+    inline bool rayTriangleIntersection(
+      const Ray& ray, const vec3& v0, const vec3& v1, const vec3& v2, float& out_u, float& out_v )
+    {
+      constexpr auto c_epsilon = std::numeric_limits<Real>::epsilon();
+      auto v0v1 = ( v1 - v0 );
+      auto v0v2 = ( v2 - v0 );
+      auto N = cross( v0v1, v0v2 );
+      auto area2 = length( N );
+      auto ndotdir = dot( N, ray.direction );
+      if ( abs( ndotdir ) < c_epsilon )
+        return false;
+      auto d = -dot( N, v0 );
+      auto t = -( dot( N, ray.origin ) + d ) / ndotdir;
+      if ( t < 0.0f )
+        return false;
+      auto P = ( ray.origin + t * ray.direction );
+      auto edge = ( v1 - v0 );
+      auto vp = ( P - v0 );
+      auto C = cross( edge, vp );
+      if ( dot( N, C ) < 0.0f )
+        return false;
+      edge = ( v2 - v1 );
+      vp = ( P - v1 );
+      C = cross( edge, vp );
+      out_u = ( length( C ) / area2 );
+      if ( dot( N, C ) < 0.0f )
+        return false;
+      edge = ( v0 - v2 );
+      vp = ( P - v2 );
+      C = cross( edge, vp );
+      out_v = ( length( C ) / area2 );
+      if ( dot( N, C ) < 0.0f )
+        return false;
+      return true;
+    }
+
     //! \fn inline quaternion quaternionFrom( Real pitch, Real yaw, Real roll )
     //! \brief Build a quaternion from pitch/yaw/roll rotation values.
     //! \param [in] pitch Rotation along X axis.

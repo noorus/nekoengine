@@ -80,24 +80,29 @@ namespace neko {
     //gameViewport.camera()->setViewport( vec2( static_cast<Real>( halfsize.x ), static_cast<Real>( halfsize.y ) ) );
   }
 
-  void Editor::updateRealtime( GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene, const Viewport& window,
+  void Editor::updateRealtime( Renderer& renderer, GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene,
+    const Viewport& window,
     GameViewport& gameViewport, bool ignoreInput )
   {
     size_t PANBTN = 2;
     size_t GAMEVP = 3;
     mousePos_ = vec2( static_cast<Real>( input->mousePosition_.x ), static_cast<Real>( input->mousePosition_.y ) );
+    auto mousePosPx = vec2i( input->mousePosition_.x, input->mousePosition_.y );
 
     auto& igIO = ImGui::GetIO();
     if ( dragOp_.ongoing() || !igIO.WantCaptureMouse )
     {
       auto vpidx = GAMEVP;
+      const auto halfsize = vec2i( window.sizef() * 0.5f );
+      if ( input->mousePosition_.x < halfsize.x )
+        vpidx = ( input->mousePosition_.y < halfsize.y ? 0 : 2 );
+      else
+        vpidx = ( input->mousePosition_.y < halfsize.y ? 1 : 3 );
+      auto vp = ( vpidx < 3 ? reinterpret_cast<Viewport*>( viewports_[vpidx].get() )
+                            : reinterpret_cast<Viewport*>( &gameViewport ) );
+      auto mousepoint = vp->mapPointByWindow( mousePos_ );
       if ( !dragOp_.ongoing() && !ignoreInput )
       {
-        const auto halfsize = vec2i( window.sizef() * 0.5f );
-        if ( input->mousePosition_.x < halfsize.x )
-          vpidx = ( input->mousePosition_.y < halfsize.y ? 0 : 2 );
-        else
-          vpidx = ( input->mousePosition_.y < halfsize.y ? 1 : 3 );
         if ( input->mouseButtons().wasPressed( PANBTN ) && vpidx != GAMEVP )
         {
           dragOp_.begin( viewports_[vpidx], mousePos_ );
@@ -114,10 +119,16 @@ namespace neko {
         if ( input->mouseButtons().wasReleased( PANBTN ) )
           dragOp_.end();
       }
-      else if ( vpidx < 3 && !ignoreInput )
+      else if ( !ignoreInput )
       {
-        auto& vp = viewports_[vpidx];
-        vp->camera()->applyInputZoom( static_cast<int>( input->movement().z ) );
+        if ( vpidx < 3 )
+          reinterpret_cast<EditorViewport*>( vp )->camera()->applyInputZoom( static_cast<int>( input->movement().z ) );
+        if ( input->mousebtn( 0 ) && mousepoint.x >= -1.0f && mousepoint.y >= -1.0f && mousepoint.x <= 1.0f && mousepoint.y <= 1.0f )
+        {
+          Ray ray;
+          if ( vp->ndcRay( mousepoint, ray ) )
+            scene.executeMouseClick( renderer, ray, mousePosPx, 0 );
+        }
       }
     }
 

@@ -90,7 +90,7 @@ namespace neko {
     auto offset = static_cast<GLuint>( prevverts );
 
     auto vx = math::perpendicular( normal );
-    auto vy = glm::cross( normal, vx );
+    auto vy = math::cross( normal, vx );
 
     auto delta1 = vec3( dimensions.x / (Real)segments.x * vx );
     auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
@@ -104,10 +104,10 @@ namespace neko {
           ( static_cast<Real>( segments.x ) - static_cast<Real>( i ) ) / static_cast<Real>( segments.x )
         );
         auto v = Vertex3D { orig + (Real)i * delta1 + (Real)j * delta2, normal, uv, color };
-        verts[prevverts + ( ( i * ( segments.y + 1 ) ) + j )] = move( v );
+        verts[prevverts + ( ( i * ( segments.y + 1 ) ) + j )] = v;
       }
 
-    bool reverse = ( glm::dot( glm::cross( delta1, delta2 ), normal ) > 0.0f );
+    bool reverse = ( math::dot( math::cross( delta1, delta2 ), normal ) > 0.0f );
 
     for ( unsigned int i = 0; i < segments.x; ++i )
     {

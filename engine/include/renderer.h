@@ -12,7 +12,6 @@
 #include "shaders.h"
 #include "viewport.h"
 #include "gfx.h"
-#include "specialrenderers.h"
 #include "console.h"
 
 namespace MyGUI {
@@ -42,8 +41,8 @@ namespace neko {
     int64_t uniformBufferAlignment = 0; //!< Minimum alignment for uniform buffer sizes and offsets
     float maxAnisotropy = 0.0f; //!< Maximum anisotropy level, usually 16.0
     int64_t maxArrayTextureLayers = 0; //!< Maximum array texture layers
-    vector<int64_t> maxComputeWorkgroupCount;
-    vector<int64_t> maxComputeWorkgroupSize;
+    vec3i maxComputeWorkgroupCounts;
+    vec3i maxComputeWorkgroupSizes;
     int64_t maxComputeWorkgroupInvocations = 0;
   };
 
@@ -93,11 +92,6 @@ namespace neko {
     void implDeleteRenderbuffer( GLuint handle );
     GLuint implCreateFramebuffer( int width, int height );
     void implDeleteFramebuffer( GLuint handle );
-    void bindVao( GLuint id );
-    void bindTexture( GLuint unit, TexturePtr texture );
-    void bindTextures( const vector<TexturePtr>& textures, GLuint firstUnit = 0 );
-    void bindTextures( const vector<GLuint>& textures, GLuint firstUnit = 0 );
-    void bindTextureUnits( const vector<GLuint>& textures );
     void resetFbo();
   protected:
     GLInformation info_;
@@ -105,6 +99,7 @@ namespace neko {
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
     shaders::ShadersPtr shaders_;
+    PaintableTexturePtr drawtx_;
     MeshManagerPtr meshes_;
 #ifndef NEKO_NO_SCRIPTING
     ModelManagerPtr models_;
@@ -147,15 +142,23 @@ namespace neko {
     void preInitialize();
     void initialize( int width, int height );
     void shutdown();
-    MaterialPtr createTextureWithData( const utf8String& name, int width, int height, PixelFormat format,
+    TexturePtr createTexture( int width, int height, PixelFormat format, const void* data,
+      const Texture::Wrapping wrapping, const Texture::Filtering filtering, int multisamples = 1 );
+    MaterialPtr createMaterialWithData( const utf8String& name, int width, int height, PixelFormat format,
       const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
-    MaterialPtr createTextureWithData( const utf8String& name, int width, int height, int depth,
+    MaterialPtr createMaterialWithData( const utf8String& name, int width, int height, int depth,
       PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge,
       const Texture::Filtering filtering = Texture::Linear );
     inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
     inline MaterialManager& materials() noexcept { return *( materials_.get() ); }
     inline ThreadedLoaderPtr loader() noexcept { return loader_; }
     shaders::Pipeline& useMaterial( const utf8String& name );
+    void bindVao( GLuint id );
+    void bindTexture( GLuint unit, TexturePtr texture );
+    void bindTextures( const vector<TexturePtr>& textures, GLuint firstUnit = 0 );
+    void bindTextures( const vector<GLuint>& textures, GLuint firstUnit = 0 );
+    void bindTextureUnits( const vector<GLuint>& textures );
+    void bindImageTexture( GLuint unit, TexturePtr texture, int level = 0, GLenum access = gl::GL_READ_WRITE );
     inline TexturePtr getMergedMainFramebuffer()
     {
       if ( ctx_.ready() && ctx_.mergedMain_->available() )

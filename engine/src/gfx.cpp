@@ -359,7 +359,7 @@ namespace neko {
     if ( editor_->enabled() )
     {
       bool ignoreInput = ( !window_->hasFocus() || platform::windowUnderCursor() != window_->getSystemHandle() );
-      editor_->updateRealtime( realTime, delta, input_, *scene_, windowViewport_, gameViewport_, ignoreInput );
+      editor_->updateRealtime( *renderer_, realTime, delta, input_, *scene_, windowViewport_, gameViewport_, ignoreInput );
     }
   }
 

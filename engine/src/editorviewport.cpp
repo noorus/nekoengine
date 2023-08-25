@@ -138,6 +138,11 @@ namespace neko {
     return camera_;
   }
 
+  const Viewport& EditorViewport::drawopGetViewport() const
+  {
+    return *this;
+  }
+
   bool EditorViewport::drawopShouldDoBufferVisualizations() const
   {
     return false;
@@ -156,6 +161,16 @@ namespace neko {
     assert( out.w != 0.0f );
     out.w = 1.0f / out.w;
     return ( c_flipMat * ( out * out.w * axisMask_ ) );
+  }
+
+  bool EditorViewport::ndcRay( vec2 ndc_viewcoord, Ray& ray ) const
+  {
+    auto near = vec4( ndc_viewcoord, 0.0f, 1.0f );
+    auto far = vec4( ndc_viewcoord, 1.0f, 1.0f );
+    auto m = glm::inverse( camera_->frustum().projection() * camera_->view() );
+    ray.origin = vec3( m * near );
+    ray.direction = math::normalize( vec3( m * far ) - ray.origin );
+    return true;
   }
 
 }
