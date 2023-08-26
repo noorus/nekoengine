@@ -78,5 +78,5 @@ class DemoScene extends Scene
   }
 }
 
-let demoscene = new DemoScene( "demo" );
+const demoscene = new DemoScene( "demo" );
 Game.registerScene( demoscene );
