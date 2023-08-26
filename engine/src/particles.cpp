@@ -56,13 +56,13 @@ namespace neko {
     Base::update( delta, time );
   }
 
-  void SakuraSystem::draw( shaders::Shaders& shaders, const Material& mat )
+  void SakuraSystem::draw( Shaders& shaders, const Material& mat )
   {
     Base::draw( shaders, mat );
     auto verts = boxviz_->buffer().lock();
     const auto color = vec4( 0.0f, 1.0f, 0.0f, 1.0f );
-    const auto mi = box_.min();
-    const auto ma = box_.max();
+    const auto& mi = box_.min();
+    const auto& ma = box_.max();
 
     for ( size_t i = 0; i < 24; ++i )
       verts[i].color = color;

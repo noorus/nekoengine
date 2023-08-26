@@ -60,7 +60,7 @@ namespace neko {
 
   void SpriteManager::loadAnimdefFile( const utf8String& filename )
   {
-    auto input = move( Locator::fileSystem().openFile( Dir_Data, filename )->readFullString() );
+    auto input = Locator::fileSystem().openFile( Dir_Data, filename )->readFullString();
     loadAnimdefJSON( input );
   }
 
@@ -120,7 +120,7 @@ namespace neko {
 
   void SpriteManager::loadAnimsetFile( const utf8String& filename )
   {
-    auto input = move( Locator::fileSystem().openFile( Dir_Data, filename )->readFullString() );
+    auto input = Locator::fileSystem().openFile( Dir_Data, filename )->readFullString();
     loadAnimsetJSON( input );
   }
 

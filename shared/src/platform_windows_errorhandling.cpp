@@ -168,16 +168,16 @@ namespace neko {
       if ( ( eType != lastEntry ) && ( entry.offset != 0 ) )
       {
         if ( entry.name[0] == 0 )
-          StringCchCopyNA( entry.name, STACKWALK_MAX_NAMELEN, "(unknown function)", STACKWALK_MAX_NAMELEN - 1 );
+          StringCchCopyNA( entry.name, STACKWALK_MAX_NAMELEN, "(unknown function)", static_cast<size_t>( STACKWALK_MAX_NAMELEN ) - 1 );
         if ( entry.undName[0] != 0 )
-          StringCchCopyNA( entry.name, STACKWALK_MAX_NAMELEN, entry.undName, STACKWALK_MAX_NAMELEN - 1 );
+          StringCchCopyNA( entry.name, STACKWALK_MAX_NAMELEN, entry.undName, static_cast<size_t>( STACKWALK_MAX_NAMELEN ) - 1 );
         if ( entry.undFullName[0] != 0 )
-          StringCchCopyNA( entry.name, STACKWALK_MAX_NAMELEN, entry.undFullName, STACKWALK_MAX_NAMELEN - 1 );
+          StringCchCopyNA( entry.name, STACKWALK_MAX_NAMELEN, entry.undFullName, static_cast<size_t>( STACKWALK_MAX_NAMELEN ) - 1 );
         if ( entry.lineFileName[0] == 0 )
         {
-          StringCchCopyNA( entry.lineFileName, STACKWALK_MAX_NAMELEN, "(unknown file)", STACKWALK_MAX_NAMELEN - 1 );
+          StringCchCopyNA( entry.lineFileName, STACKWALK_MAX_NAMELEN, "(unknown file)", static_cast<size_t>( STACKWALK_MAX_NAMELEN ) - 1 );
           if ( entry.moduleName[0] == 0 )
-            StringCchCopyNA( entry.moduleName, STACKWALK_MAX_NAMELEN, "(unknown module)", STACKWALK_MAX_NAMELEN - 1 );
+            StringCchCopyNA( entry.moduleName, STACKWALK_MAX_NAMELEN, "(unknown module)", static_cast<size_t>( STACKWALK_MAX_NAMELEN ) - 1 );
           StringCchPrintfA(
             buf, STACKWALK_MAX_NAMELEN, "%p (%s): %s\n", (LPVOID)entry.offset, entry.moduleName, entry.name );
         }

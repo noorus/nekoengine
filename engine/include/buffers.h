@@ -71,7 +71,7 @@ namespace neko {
     }
     inline BufferType& buffer() { return *buffer_; }
     inline IndicesType& indices() { return *indices_; }
-    void draw( shaders::Shaders& shaders, const Material& mat, const mat4& model )
+    void draw( Shaders& shaders, const Material& mat, const mat4& model )
     {
       gl::glBindVertexArray( vao_ );
       auto ppl = &shaders.usePipeline( "mat_unlit" );
@@ -82,7 +82,7 @@ namespace neko {
       gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
       gl::glBindVertexArray( 0 );
     }
-    void draw( shaders::Shaders& shaders, GLuint texture, const mat4& model )
+    void draw( Shaders& shaders, GLuint texture, const mat4& model )
     {
       gl::glBindVertexArray( vao_ );
       auto ppl = &shaders.usePipeline( "mat_unlit" );
@@ -127,7 +127,7 @@ namespace neko {
     }
     inline BufferType& buffer() { return *buffer_; }
     inline IndicesType& indices() { return *indices_; }
-    void draw( shaders::Shaders& shaders, const Material& mat, int frame, const mat4& model )
+    void draw( Shaders& shaders, const Material& mat, int frame, const mat4& model )
     {
       gl::glBindVertexArray( vao_ );
       auto ppl = &shaders.usePipeline( "sprite" );
@@ -168,7 +168,7 @@ namespace neko {
       gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
     }
     inline MappedGLBuffer<VertexPointParticle>& buffer() { return *buffer_; }
-    void draw( shaders::Pipeline& pipeline, GLsizei count, GLint base = 0, gl::GLenum mode = gl::GL_POINTS )
+    void draw( Pipeline& pipeline, GLsizei count, GLint base = 0, gl::GLenum mode = gl::GL_POINTS )
     {
       gl::glBindVertexArray( vao_ );
       mat4 mdl( 1.0f );
@@ -201,7 +201,7 @@ namespace neko {
       gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs.stride() );
     }
     inline MappedGLBuffer<VertexLine>& buffer() { return *buffer_; }
-    void draw( shaders::Pipeline& pipeline, GLsizei count, GLint base = 0, gl::GLenum mode = gl::GL_POINTS )
+    void draw( Pipeline& pipeline, GLsizei count, GLint base = 0, gl::GLenum mode = gl::GL_POINTS )
     {
       gl::glBindVertexArray( vao_ );
       mat4 mdl( 1.0f );
@@ -209,7 +209,7 @@ namespace neko {
       gl::glDrawArrays( mode, base, count );
       gl::glBindVertexArray( 0 );
     }
-    void draw( shaders::Pipeline& pipeline, const mat4& mdl, GLsizei count, GLint base, gl::GLenum mode )
+    void draw( Pipeline& pipeline, const mat4& mdl, GLsizei count, GLint base, gl::GLenum mode )
     {
       gl::glBindVertexArray( vao_ );
       pipeline.setUniform( "model", mdl );
@@ -251,7 +251,7 @@ namespace neko {
     }
     inline BufferType& buffer() { return *buffer_; }
     inline IndicesType& indices() { return *indices_; }
-    void draw( shaders::Shaders& shaders, const mat4& model, gl::GLuint texture )
+    void draw( Shaders& shaders, const mat4& model, gl::GLuint texture )
     {
       gl::glBindVertexArray( vao_ );
       auto& pipeline = shaders.usePipeline( "text3d" );

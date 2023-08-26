@@ -225,13 +225,6 @@ namespace neko {
     return move( ptr );
   }
 
-  DynamicMeshPtr MeshManager::createDynamic( GLenum drawMode, VBOType vertexType, bool useIndices, bool mappable )
-  {
-    auto mesh = make_shared<DynamicMesh>( shared_from_this(), vertexType, drawMode, useIndices, mappable );
-    dynamics_.push_back( mesh );
-    return move( mesh );
-  }
-
   StaticMeshPtr MeshManager::createStatic( GLenum drawMode, vector<Vertex2D> verts )
   {
     auto mesh = make_shared<StaticMesh>( shared_from_this(), drawMode, move( verts ) );
@@ -394,7 +387,6 @@ namespace neko {
 #ifndef NEKO_NO_SCRIPTING
     jsReset();
 #endif
-    dynamics_.clear();
     statics_.clear();
   }
 

@@ -29,7 +29,7 @@ namespace neko {
     viz_.reset();
   }
 
-  void AxesPointerRenderer::draw( shaders::Shaders& shaders, vec3 origin, vec3 up, vec3 right )
+  void AxesPointerRenderer::draw( Shaders& shaders, vec3 origin, vec3 up, vec3 right )
   {
     origin = vec3( -origin.z, -origin.y, -origin.x );
     auto verts = viz_->buffer().lock();
@@ -124,7 +124,7 @@ namespace neko {
     viz_->buffer().unlock();
   }
 
-  void EditorGridRenderer::draw( shaders::Shaders& shaders )
+  void EditorGridRenderer::draw( Shaders& shaders )
   {
     if ( !drawCount_ )
       return;

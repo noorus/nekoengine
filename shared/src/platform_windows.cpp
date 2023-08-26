@@ -132,7 +132,7 @@ namespace neko {
       memset( tlsSpace, 0, sizeof( TLSThreadData ) );
       if ( g_CVar_sys_priorityadjust.as_b() )
       {
-        tlsSpace->avrtHandle = move( AvSetMmThreadCharacteristicsW( avProfile, &tlsSpace->avrtTaskIndex ) );
+        tlsSpace->avrtHandle = AvSetMmThreadCharacteristicsW( avProfile, &tlsSpace->avrtTaskIndex );
         if ( tlsSpace->avrtHandle )
           AvSetMmThreadPriority( tlsSpace->avrtHandle, avPriority );
         auto thread = GetCurrentThread();

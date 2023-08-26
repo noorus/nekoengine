@@ -98,8 +98,7 @@ namespace neko {
     ConsolePtr console_;
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
-    shaders::ShadersPtr shaders_;
-    PaintableTexturePtr drawtx_;
+    ShadersPtr shaders_;
     MeshManagerPtr meshes_;
 #ifndef NEKO_NO_SCRIPTING
     ModelManagerPtr models_;
@@ -109,7 +108,6 @@ namespace neko {
     MaterialManagerPtr materials_;
     ParticleSystemManagerPtr particles_;
     SpriteManagerPtr sprites_;
-    shared_ptr<AxesPointerRenderer> origoTest_;
     DirectorPtr director_;
     vec2 resolution_;
     struct DrawCtx
@@ -126,7 +124,7 @@ namespace neko {
     } userData_;
     void implClearAndPrepare( const vec3& color );
     void uploadModelsEnterNode( MeshNodePtr node );
-    void sceneDrawEnterNode( MeshNodePtr node, shaders::Pipeline& pipeline );
+    void sceneDrawEnterNode( MeshNodePtr node, Pipeline& pipeline );
     void prepareSceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );
     void prepareSceneDraw( GameTime time, const ViewportDrawParameters& drawparams );
     void sceneDraw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams,
@@ -152,7 +150,7 @@ namespace neko {
     inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
     inline MaterialManager& materials() noexcept { return *( materials_.get() ); }
     inline ThreadedLoaderPtr loader() noexcept { return loader_; }
-    shaders::Pipeline& useMaterial( const utf8String& name );
+    Pipeline& useMaterial( const utf8String& name );
     void bindVao( GLuint id );
     void bindTexture( GLuint unit, TexturePtr texture );
     void bindTextures( const vector<TexturePtr>& textures, GLuint firstUnit = 0 );
@@ -169,7 +167,7 @@ namespace neko {
     void uploadTextures();
     void uploadModels();
     void jsRestart();
-    inline shaders::Shaders& shaders() noexcept { return *( shaders_.get() ); }
+    inline Shaders& shaders() noexcept { return *( shaders_.get() ); }
     void drawGame( GameTime time, SManager& scene, Camera& camera, const Viewport* viewport,
       const ViewportDrawParameters& params, const RenderVisualizations& vis, bool showVis );
     void draw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams,

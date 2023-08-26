@@ -31,7 +31,7 @@ namespace neko {
       vert.bitangent = vec3( 0.0f );
     }
 
-    int i = 0;
+    size_t i = 0;
     while ( i < indices.size() )
     {
       auto& v0 = verts[indices[i]];
@@ -45,7 +45,7 @@ namespace neko {
       vec3 t = ( e1 * y2 - e2 * y1 ) * r;
       vec3 b = ( e2 * x1 - e1 * x2 ) * r;
 
-      for ( int j = 0; j < 3; j++ )
+      for ( size_t j = 0; j < 3; j++ )
       {
         if ( i + j >= verts.size() )
           break;
@@ -84,8 +84,8 @@ namespace neko {
 
     const auto prevverts = verts.size();
     const auto previndices = indices.size();
-    verts.resize( prevverts + ( ( segments.x + 1 ) * ( segments.y + 1 ) ) );
-    indices.resize( previndices + ( segments.x * segments.y * 6 ) );
+    verts.resize( prevverts + ( static_cast<size_t>( segments.x + 1 ) * static_cast<size_t>( segments.y + 1 ) ) );
+    indices.resize( previndices + ( static_cast<size_t>( segments.x ) * segments.y * 6 ) );
 
     auto offset = static_cast<GLuint>( prevverts );
 
@@ -96,22 +96,22 @@ namespace neko {
     auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
 
     auto orig = position + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
-    for ( unsigned int i = 0; i <= segments.x; ++i )
-      for ( unsigned int j = 0; j <= segments.y; ++j )
+    for ( size_t i = 0; i <= static_cast<size_t>( segments.x ); ++i )
+      for ( size_t j = 0; j <= static_cast<size_t>( segments.y ); ++j )
       {
         auto uv = vec2(
           ( static_cast<Real>( segments.y ) - static_cast<Real>( j ) ) / static_cast<Real>( segments.y ),
           ( static_cast<Real>( segments.x ) - static_cast<Real>( i ) ) / static_cast<Real>( segments.x )
         );
         auto v = Vertex3D { orig + (Real)i * delta1 + (Real)j * delta2, normal, uv, color };
-        verts[prevverts + ( ( i * ( segments.y + 1 ) ) + j )] = v;
+        verts[prevverts + ( ( i * ( static_cast<size_t>( segments.y ) + 1 ) ) + j )] = v;
       }
 
     bool reverse = ( math::dot( math::cross( delta1, delta2 ), normal ) > 0.0f );
 
-    for ( unsigned int i = 0; i < segments.x; ++i )
+    for ( size_t i = 0; i < static_cast<size_t>( segments.x ); ++i )
     {
-      for ( unsigned int j = 0; j < segments.y; ++j )
+      for ( size_t j = 0; j < static_cast<size_t>( segments.y ); ++j )
       {
         auto base = previndices + ( ( i * segments.y + j ) * 6 );
         indices[base + 0] = offset;
@@ -160,10 +160,10 @@ namespace neko {
     const auto width = size.x;
     const auto height = size.y;
 
-    verts.resize( width * height );
+    verts.resize( static_cast<size_t>( width ) * height );
 
     // two triangles per step
-    indices.resize( ( width - 1 ) * ( height - 1 ) * 2 * 3 );
+    indices.resize( ( static_cast<size_t>( width ) - 1 ) * ( static_cast<size_t>( height ) - 1 ) * 2 * 3 );
 
     auto scale = vec3( dimensions.x / static_cast<Real>( size.x ), dimensions.y / static_cast<Real>( size.y ), dimensions.z );
     const auto twidth = static_cast<Real>( width - 1 ) * scale.x;

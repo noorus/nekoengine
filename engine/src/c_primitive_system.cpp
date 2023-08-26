@@ -70,7 +70,7 @@ namespace neko {
       mgr_->reg().clear<dirty_primitive>();
     }
 
-    void primitive_system::draw( shaders::Shaders& shaders, const Material& mat )
+    void primitive_system::draw( Shaders& shaders, const Material& mat )
     {
       auto view = mgr_->reg().view<primitive>();
       for ( auto entity : view )

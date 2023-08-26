@@ -46,7 +46,7 @@ namespace neko {
       manager* m, entity e, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button )
     {
       bool hit = false;
-      vec2 hitpos;
+      vec2 hitpos { 0.0f };
       if ( mesh && mesh->indices().size() == 6 )
       {
         auto& t = m->tn( e );
@@ -57,7 +57,7 @@ namespace neko {
         {
           // this will definitely not work for any other purpose
           auto triangle = ( i * 3 );
-          vec3 v[3];
+          vec3 v[3] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
           if ( reverse )
           {
             v[0] = vec3( t.model() * vec4( verts.data()[indices.data()[triangle + 0]].position, 1.0f ) );

@@ -234,9 +234,6 @@
     <ClCompile Include="src\staticmesh.cpp">
       <Filter>Source Files\gfx\meshes</Filter>
     </ClCompile>
-    <ClCompile Include="src\dynamicmesh.cpp">
-      <Filter>Source Files\gfx\meshes</Filter>
-    </ClCompile>
     <ClCompile Include="src\meshmanager.cpp">
       <Filter>Source Files\gfx\meshes</Filter>
     </ClCompile>

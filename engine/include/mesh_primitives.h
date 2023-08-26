@@ -23,11 +23,7 @@ namespace neko {
 
   }
 
-  namespace shaders {
-
-    struct Pipeline;
-
-  }
+  struct Pipeline;
 
   template <typename T>
   class MappedGLBuffer {
@@ -420,51 +416,6 @@ namespace neko {
 
   using VAOPtr = shared_ptr<VAO>;
 
-  class DynamicMesh: public nocopy {
-  public:
-    MeshManagerPtr manager_;
-    VBOPtr vbo_;
-    EBOPtr ebo_;
-    VAOPtr vao_;
-    GLenum drawMode_;
-    struct Flags {
-      bool indices : 1;
-      bool mappable_ : 1;
-    } flags_;
-  public:
-    DynamicMesh( MeshManagerPtr manager, VBOType vertexType, GLenum drawMode, bool useIndices, bool mappable );
-    ~DynamicMesh();
-    void pushVertices( const vector<Vertex2D>& vertices );
-    void pushVertices( const vector<Vertex3D>& vertices );
-    void pushVertices( const vector<MyGUI::Vertex>& vertices );
-    void pushIndices( const vector<GLuint>& indices );
-    inline const size_t vertsCount() const
-    {
-      assert( vbo_ );
-      return vbo_->vertexCount();
-    }
-    inline const size_t indicesCount() const
-    {
-      assert( ebo_ );
-      return ebo_->storage_.size();
-    }
-    void begin();
-    void draw( int count = 0 );
-    template <typename T>
-    inline void append( const vector<T>& vertices, vector<GLuint> indices )
-    {
-      assert( vbo_ && ebo_ );
-      auto base = (GLuint)vertsCount();
-      pushVertices( vertices );
-      std::for_each( indices.begin(), indices.end(), [base]( GLuint& n ) { n += base; } );
-      pushIndices( indices );
-    }
-    void resize( size_t newSize );
-  };
-
-  using DynamicMeshPtr = shared_ptr<DynamicMesh>;
-  using DynamicMeshVector = vector<DynamicMeshPtr>;
-
   // Lightweight, purposefully copyable
   class JSMesh {
   public:
@@ -496,7 +447,7 @@ namespace neko {
     ~StaticMesh();
     void begin();
     void draw();
-    void drawOnce( shaders::Pipeline& pipeline, vec3 position, vec3 scale = vec3( 1.0f ), quaternion rotation = glm::quat_identity<Real, glm::defaultp>() );
+    void drawOnce( Pipeline& pipeline, vec3 position, vec3 scale = vec3( 1.0f ), quaternion rotation = glm::quat_identity<Real, glm::defaultp>() );
   };
 
   using StaticMeshPtr = shared_ptr<StaticMesh>;

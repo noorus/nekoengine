@@ -23,7 +23,7 @@ namespace neko {
     EditorGridRenderer();
     ~EditorGridRenderer();
     void update( const EditorViewport& viewport, EditorOrthoCamera& camera );
-    void draw( shaders::Shaders& shaders );
+    void draw( Shaders& shaders );
   };
 
   class AxesPointerRenderer {
@@ -32,7 +32,7 @@ namespace neko {
   public:
     AxesPointerRenderer();
     ~AxesPointerRenderer();
-    void draw( shaders::Shaders& shaders, vec3 origin, vec3 up, vec3 right );
+    void draw( Shaders& shaders, vec3 origin, vec3 up, vec3 right );
   };
 
 }

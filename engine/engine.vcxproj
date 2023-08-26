@@ -227,7 +227,6 @@
     <ClCompile Include="src\c_sprite_system.cpp" />
     <ClCompile Include="src\c_text_system.cpp" />
     <ClCompile Include="src\director.cpp" />
-    <ClCompile Include="src\dynamicmesh.cpp" />
     <ClCompile Include="src\editor.cpp" />
     <ClCompile Include="src\editorgridrenderer.cpp" />
     <ClCompile Include="src\editororthocamera.cpp" />

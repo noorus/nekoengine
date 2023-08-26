@@ -14,7 +14,7 @@
 namespace neko {
 
   const char* c_fileLogFormat = "[%0#*.2f][%s] %s\r\n";
-  const int c_consolePrintfBufferSize = 16384;
+  const size_t c_consolePrintfBufferSize = 16384;
 
   CVarList Console::precreated_;
 
@@ -477,7 +477,7 @@ namespace neko {
 
     ScopedRWLock lock( &lock_ );
 
-    auto command = arguments[0];
+    const auto& command = arguments[0];
     for ( auto base : cvars_ )
     {
       if ( !base->isRegistered() )

@@ -271,7 +271,7 @@ namespace neko {
     public:
       primitive_system( manager* m );
       void update();
-      void draw( shaders::Shaders& shaders, const Material& mat );
+      void draw( Shaders& shaders, const Material& mat );
       ~primitive_system();
       void imguiPrimitiveEditor( entity e );
     };

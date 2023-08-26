@@ -361,12 +361,12 @@ namespace neko {
   };
 
   struct DateTime {
-    uint16_t year;    //!< Year
-    uint16_t month;   //!< Month
-    uint16_t day;     //!< Day
-    uint16_t hour;    //!< Hour
-    uint16_t minute;  //!< Minute
-    uint16_t second;  //!< Second
+    uint16_t year = 0;    //!< Year
+    uint16_t month = 0;   //!< Month
+    uint16_t day = 0;     //!< Day
+    uint16_t hour = 0;    //!< Hour
+    uint16_t minute = 0;  //!< Minute
+    uint16_t second = 0;  //!< Second
   };
 
 }

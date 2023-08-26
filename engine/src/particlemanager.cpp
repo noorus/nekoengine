@@ -28,7 +28,7 @@ namespace neko {
     sakura_->update( delta, time );
   }
 
-  void ParticleSystemManager::draw( shaders::Shaders& shaders, MaterialManager& materials )
+  void ParticleSystemManager::draw( Shaders& shaders, MaterialManager& materials )
   {
     const auto partmat = materials.get( "demo_sakura" );
     sakura_->draw( shaders, *partmat );

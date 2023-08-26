@@ -64,7 +64,7 @@ namespace neko {
   {
     auto code = GetLastError();
     string msg = platform::formatWinapiError( func, code );
-    return WinapiException( code, msg, caller );
+    return { code, msg, caller };
   }
 
   const string& Exception::getFullDescription() const

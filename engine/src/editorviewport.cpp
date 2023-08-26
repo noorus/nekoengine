@@ -112,13 +112,13 @@ namespace neko {
     return 1.0f;
   }
 
-  void EditorViewport::drawopPreSceneDraw( shaders::Shaders& shaders ) const
+  void EditorViewport::drawopPreSceneDraw( Shaders& shaders ) const
   {
     grid_->update( *this, *camera_ );
     grid_->draw( shaders );
   }
 
-  void EditorViewport::drawopPostSceneDraw( shaders::Shaders& shaders ) const
+  void EditorViewport::drawopPostSceneDraw( Shaders& shaders ) const
   {
     axesGizmo_->draw( shaders, viewportPointToWorld( { 40.0f, 70.0f, 0.0f } ), vec3( 0.0f, 1.0f, 0.0f ), vec3( 1.0f, 0.0f, 0.0f ) );
   }

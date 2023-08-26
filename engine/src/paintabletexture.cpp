@@ -37,7 +37,7 @@ namespace neko {
     if ( format == PixFmtColorRGBA32f )
     {
       auto protoValue = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
-      data.resize( width * height * 4 * sizeof( float ) );
+      data.resize( static_cast<size_t>( width ) * height * 4 * sizeof( float ) );
       auto ptr = reinterpret_cast<vec4*>( data.data() );
       for ( auto i = 0; i < ( width * height ); ++i )
         ptr[i] = protoValue;

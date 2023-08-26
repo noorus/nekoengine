@@ -52,14 +52,14 @@ namespace neko {
       NEKO_EXCEPT( "Crop constructor's parameters would overshoot source dimensions" );
 
     auto stride = g_fmtInfo.at( format_ ).first * g_fmtInfo.at( format_ ).second;
-    data_.resize( width_ * height_ * stride );
+    data_.resize( static_cast<size_t>( width_ ) * height_ * stride );
 
     int dstrow = 0;
     for ( int srcrow = y; srcrow < ( y + height_ ); ++srcrow )
     {
       auto srcoffset = ( ( srcrow * from.width() * stride ) + ( x * stride ) );
       auto dstoffset = ( ( dstrow * width_ * stride ) );
-      memcpy( data_.data() + dstoffset, from.data().data() + srcoffset, width_ * stride );
+      memcpy( data_.data() + dstoffset, from.data().data() + srcoffset, static_cast<size_t>( width_ ) * stride );
       dstrow++;
     }
   }

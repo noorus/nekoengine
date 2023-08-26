@@ -23,7 +23,6 @@ namespace neko {
     vector<VAOPtr> vaos_;
     vector<GLuint> freeVaos_;
     vector<GLuint> freeBuffers_;
-    DynamicMeshVector dynamics_;
     StaticMeshVector statics_;
 #ifndef NEKO_NO_SCRIPTING
     MeshMap meshes_;
@@ -52,7 +51,6 @@ namespace neko {
     VAOPtr createVAO();
     void freeVAO( VAOPtr vao );
     void destroyFreed();
-    DynamicMeshPtr createDynamic( GLenum drawMode, VBOType vertexType, bool useIndices, bool mappable );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices );
     StaticMeshPtr createStatic( GLenum drawMode, vector<Vertex3D> verts );

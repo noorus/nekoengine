@@ -62,9 +62,9 @@ namespace neko {
     return 1.0f;
   }
 
-  void GameViewport::drawopPreSceneDraw( shaders::Shaders& shaders ) const {}
+  void GameViewport::drawopPreSceneDraw( Shaders& shaders ) const {}
 
-  void GameViewport::drawopPostSceneDraw( shaders::Shaders& shaders ) const {}
+  void GameViewport::drawopPostSceneDraw( Shaders& shaders ) const {}
 
   vec2 GameViewport::drawopViewportPosition() const
   {

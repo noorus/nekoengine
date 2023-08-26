@@ -23,8 +23,8 @@ namespace neko {
     virtual vec4 drawopGridColor() const = 0;
     virtual Real drawopExposure() const = 0;
     virtual const CameraPtr drawopGetCamera() const = 0;
-    virtual void drawopPreSceneDraw( shaders::Shaders& shaders ) const = 0;
-    virtual void drawopPostSceneDraw( shaders::Shaders& shaders ) const = 0;
+    virtual void drawopPreSceneDraw( Shaders& shaders ) const = 0;
+    virtual void drawopPostSceneDraw( Shaders& shaders ) const = 0;
     virtual vec2 drawopViewportPosition() const = 0;
     virtual vec2 drawopViewportSize() const = 0;
     virtual bool drawopShouldDoBufferVisualizations() const = 0;
@@ -81,8 +81,8 @@ namespace neko {
     vec3 drawopClearColor() const override;
     vec4 drawopGridColor() const override;
     Real drawopExposure() const override;
-    void drawopPreSceneDraw( shaders::Shaders& shaders ) const override;
-    void drawopPostSceneDraw( shaders::Shaders& shaders ) const override;
+    void drawopPreSceneDraw( Shaders& shaders ) const override;
+    void drawopPostSceneDraw( Shaders& shaders ) const override;
     vec2 drawopViewportPosition() const override;
     vec2 drawopViewportSize() const override;
     const CameraPtr drawopGetCamera() const override;
@@ -122,8 +122,8 @@ namespace neko {
     vec3 drawopClearColor() const override;
     vec4 drawopGridColor() const override;
     Real drawopExposure() const override;
-    void drawopPreSceneDraw( shaders::Shaders& shaders ) const override;
-    void drawopPostSceneDraw( shaders::Shaders& shaders ) const override;
+    void drawopPreSceneDraw( Shaders& shaders ) const override;
+    void drawopPostSceneDraw( Shaders& shaders ) const override;
     vec2 drawopViewportPosition() const override;
     vec2 drawopViewportSize() const override;
     const CameraPtr drawopGetCamera() const override;

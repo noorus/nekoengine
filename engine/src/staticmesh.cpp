@@ -9,30 +9,30 @@ namespace neko {
   StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts ):
   manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)verts.size() )
   {
-    vbo_ = move( manager_->pushVBO( move( verts ) ) );
+    vbo_ = move( manager_->pushVBO( verts ) );
     vao_ = manager_->pushVAO( vbo_ );
   }
 
   StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex2D> verts, vector<GLuint> indices ):
   manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)indices.size() )
   {
-    vbo_ = move( manager_->pushVBO( move( verts ) ) );
-    ebo_ = move( manager_->pushEBO( move( indices ) ) );
+    vbo_ = move( manager_->pushVBO( verts ) );
+    ebo_ = move( manager_->pushEBO( indices ) );
     vao_ = manager_->pushVAO( vbo_, ebo_ );
   }
 
   StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex3D> verts ):
   manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)verts.size() )
   {
-    vbo_ = move( manager_->pushVBO( move( verts ) ) );
+    vbo_ = move( manager_->pushVBO( verts ) );
     vao_ = manager_->pushVAO( vbo_ );
   }
 
   StaticMesh::StaticMesh( MeshManagerPtr manager, GLenum drawMode, vector<Vertex3D> verts, vector<GLuint> indices ):
   manager_( move( manager ) ), drawMode_( drawMode ), size_( (GLsizei)indices.size() )
   {
-    vbo_ = move( manager_->pushVBO( move( verts ) ) );
-    ebo_ = move( manager_->pushEBO( move( indices ) ) );
+    vbo_ = move( manager_->pushVBO( verts ) );
+    ebo_ = move( manager_->pushEBO( indices ) );
     vao_ = manager_->pushVAO( vbo_, ebo_ );
   }
 
@@ -50,7 +50,7 @@ namespace neko {
     vao_->draw( drawMode_ );
   }
 
-  void StaticMesh::drawOnce( shaders::Pipeline& pipeline, vec3 position, vec3 scale, quaternion rotation )
+  void StaticMesh::drawOnce( Pipeline& pipeline, vec3 position, vec3 scale, quaternion rotation )
   {
     if ( !vao_->uploaded_ )
       return;

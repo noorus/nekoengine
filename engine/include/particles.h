@@ -86,7 +86,7 @@ namespace neko {
         }
       }
     }
-    virtual void draw( shaders::Shaders& shaders, const Material& mat )
+    virtual void draw( Shaders& shaders, const Material& mat )
     {
       if ( !mat.uploaded() || mat.layers_.empty() || !mat.layers_[0].texture_ )
         return;
@@ -128,7 +128,7 @@ namespace neko {
     SakuraSystem( const aabb& box );
     virtual void resetParticle( size_t index );
     virtual void update( GameTime delta, GameTime time );
-    virtual void draw( shaders::Shaders& shaders, const Material& mat );
+    virtual void draw( Shaders& shaders, const Material& mat );
   };
 
   class ParticleSystemManager {
@@ -137,7 +137,7 @@ namespace neko {
   public:
     ParticleSystemManager();
     void update( GameTime delta, GameTime time );
-    void draw( shaders::Shaders& shaders, MaterialManager& materials );
+    void draw( Shaders& shaders, MaterialManager& materials );
     ~ParticleSystemManager();
   };
 

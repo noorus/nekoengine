@@ -278,7 +278,7 @@ namespace neko {
   {
     clearErrors();
 
-    shaders_ = make_shared<shaders::Shaders>( console_ );
+    shaders_ = make_shared<Shaders>( console_ );
     shaders_->initialize();
 
     materials_ = make_shared<MaterialManager>( this, loader_ );
@@ -306,7 +306,6 @@ namespace neko {
 
     particles_ = make_shared<ParticleSystemManager>();
     sprites_ = make_shared<SpriteManager>( this );
-    origoTest_ = make_shared<AxesPointerRenderer>();
   }
 
   TexturePtr Renderer::loadPNGTexture( const utf8String& filepath, Texture::Wrapping wrapping, Texture::Filtering filtering )
@@ -481,7 +480,7 @@ namespace neko {
     return materials_->createTextureWithData( name, width, height, depth, format, data, wrapping, filtering );
   }
 
-  shaders::Pipeline& Renderer::useMaterial( const utf8String& name )
+  Pipeline& Renderer::useMaterial( const utf8String& name )
   {
     GLuint empties[4] = { 0, 0, 0, 0 };
     static bool inited = false;
@@ -532,7 +531,7 @@ namespace neko {
     userData_.image_ = createTextureWithData( "rainet_avatar_" + id, image.width_, image.height_, PixFmtColorRGBA8, image.buffer_.data() );
   }*/
 
-  void Renderer::sceneDrawEnterNode( MeshNodePtr node, shaders::Pipeline& pipeline )
+  void Renderer::sceneDrawEnterNode( MeshNodePtr node, Pipeline& pipeline )
   {
     /* if ( node->mesh_ && node->mesh_->mesh_ )
     {
@@ -658,7 +657,7 @@ namespace neko {
     }
   }
 
-  inline void visualizeFrustum( const Camera& cam, shaders::Shaders& shdr )
+  inline void visualizeFrustum( const Camera& cam, Shaders& shdr )
   {
     LineRenderBuffer<24> vizbuf;
     auto verts = vizbuf.buffer().lock();
@@ -682,7 +681,7 @@ namespace neko {
 
     setGLDrawState( true, true, true, wire );
 
-    auto fn_drawModels = [&]( shaders::Pipeline& pipeline ) -> void
+    auto fn_drawModels = [&]( Pipeline& pipeline ) -> void
     {
 #ifndef NEKO_NO_SCRIPTING
       if ( models_ )
@@ -769,8 +768,6 @@ namespace neko {
     scene.paintables().draw( *this, camera );
     scene.sprites().draw( *this, camera );
     scene.texts().draw( *this );
-
-    origoTest_->draw( *shaders_, { 0.0f, 0.0f, 5.0f }, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } );
   }
 
   void Renderer::implClearAndPrepare( const vec3& color )
@@ -1046,7 +1043,6 @@ namespace neko {
     glBindTextureUnit( 0, 0 );
     glBindVertexArray( builtin_.emptyVAO_ );
 
-    origoTest_.reset();
     particles_.reset();
 
     sprites_.reset();
