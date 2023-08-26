@@ -215,10 +215,11 @@ namespace neko {
     for ( const auto& target : task.paths_ )
     {
       MaterialLayer layer( loadTexture( target ) );
+      layer.image_.flipVertical();
       task.material_->wantWrapping_ = Texture::Repeat;
-      task.material_->layers_.push_back( move( layer ) );
       task.material_->width_ = layer.width();
       task.material_->height_ = layer.height();
+      task.material_->layers_.push_back( move( layer ) );
     }
 
     task.material_->loaded_ = true;

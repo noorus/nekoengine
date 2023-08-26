@@ -230,9 +230,109 @@ namespace neko {
       inline Pipeline& setUniform( const char* name, T const& value )
       {
         for ( auto& stage : stages_ )
-        {
           stage.second->setUniform( name, value );
-        }
+        return ( *this );
+      }
+      inline Pipeline& setUniformInt( GLint index, int value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformInt( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformUint( GLint index, unsigned int value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformUint( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformBool( GLint index, bool value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformBool( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformFloat( GLint index, float value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformFloat( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformDouble( GLint index, double value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformDouble( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformVec2f( GLint index, const vec2f& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformVec2f( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformVec3f( GLint index, const vec3f& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformVec3f( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformVec4f( GLint index, const vec4f& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformVec4f( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformVec2i( GLint index, const vec2i& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformVec2i( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformVec3i( GLint index, const vec3i& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformVec3i( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformVec4i( GLint index, const vec4i& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformVec4i( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformVec2u( GLint index, const vec2u& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformVec2u( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformVec3u( GLint index, const vec3u& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformVec3u( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformVec4u( GLint index, const vec4u& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformVec4u( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformQuat( GLint index, const quat& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformQuat( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformMat3( GLint index, const mat3& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformMat3( index, value );
+        return ( *this );
+      }
+      inline Pipeline& setUniformMat4( GLint index, const mat4& value )
+      {
+        for ( auto& stage : stages_ )
+          stage.second->setUniformMat4( index, value );
         return ( *this );
       }
       ~Pipeline();

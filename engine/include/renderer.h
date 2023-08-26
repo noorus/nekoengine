@@ -78,13 +78,13 @@ namespace neko {
     GLuint implCreateTexture2D( int width, int height,
       GLGraphicsFormat format, GLGraphicsFormat internalFormat,
       GLGraphicsFormat internalType, const void* data,
-      GLWrapMode wrap = GLenum::GL_CLAMP_TO_EDGE,
+      GLWrapMode wrap = GLenum::GL_REPEAT,
       Texture::Filtering filtering = Texture::Linear,
       int samples = 1 );
     GLuint implCreateTexture2DArray( int width, int height, int depth,
       GLGraphicsFormat format, GLGraphicsFormat internalFormat,
       GLGraphicsFormat internalType, const void* data,
-      GLWrapMode wrap = GLenum::GL_CLAMP_TO_EDGE,
+      GLWrapMode wrap = GLenum::GL_REPEAT,
       Texture::Filtering filtering = Texture::Linear,
       int samples = 1 );
     void implDeleteTexture( GLuint handle );
@@ -145,9 +145,9 @@ namespace neko {
     TexturePtr createTexture( int width, int height, PixelFormat format, const void* data,
       const Texture::Wrapping wrapping, const Texture::Filtering filtering, int multisamples = 1 );
     MaterialPtr createMaterialWithData( const utf8String& name, int width, int height, PixelFormat format,
-      const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge, const Texture::Filtering filtering = Texture::Linear );
+      const void* data, const Texture::Wrapping wrapping = Texture::Repeat, const Texture::Filtering filtering = Texture::Linear );
     MaterialPtr createMaterialWithData( const utf8String& name, int width, int height, int depth,
-      PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::ClampEdge,
+      PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::Repeat,
       const Texture::Filtering filtering = Texture::Linear );
     inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
     inline MaterialManager& materials() noexcept { return *( materials_.get() ); }

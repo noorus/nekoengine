@@ -141,10 +141,29 @@
     ]
   },
   {
-    "name": "tool_2dpaint",
-    "comp": "tool_2dpaint.comp",
+    "name": "paint2d_tool",
+    "comp": "paint2d_tool.comp",
     "uniforms": [
-      "mouse"
+      "paint_mousepos",
+      "paint_brushtype",
+      "paint_brushsize",
+      "paint_brushsoften",
+      "paint_brushopacity",
+      "paint_brushcolor",
+      "paint_noiseseed",
+      "paint_noisedetail",
+      "paint_noiseoffset",
+      "paint_noiseedgesonly",
+      "paint_noisemultiplier"
+    ]
+  },
+  {
+    "name": "paint2d_default",
+    "vert": "paint2d_default.vert",
+    "frag": "paint2d_default.frag",
+    "uniforms": [
+      "model",
+      "tex"
     ]
   }
 ]

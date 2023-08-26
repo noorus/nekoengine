@@ -1,0 +1,176 @@
+#version 450 core
+
+#include "inc.buffers.glsl"
+#include "inc.math.glsl"
+
+layout ( local_size_x = 8, local_size_y = 8, local_size_z = 1 ) in;
+
+layout ( rgba32f, binding = 0 ) uniform image2D out_image;
+
+uniform ivec2 paint_mousepos;
+uniform int paint_brushsize;
+uniform float paint_brushsoften;
+uniform float paint_brushopacity;
+uniform vec4 paint_brushcolor;
+
+uniform int paint_brushtype;
+uniform float paint_noiseseed;
+uniform int paint_noisedetail;
+uniform float paint_noiseoffset;
+uniform bool paint_noiseedgesonly;
+uniform float paint_noisemultiplier;
+
+const int p[] = int[]( 151, 160, 137,  91,  90,  15, 131,  13, 201,  95,  96,  53, 194, 233,   7,
+   225, 140,  36, 103,  30,  69, 142,   8,  99,  37, 240,  21,  10,  23, 190,   6, 148, 247, 120,
+   234,  75,   0,  26, 197,  62,  94, 252, 219, 203, 117,  35,  11,  32,  57, 177,  33,  88, 237,
+   149,  56,  87, 174,  20, 125, 136, 171, 168,  68, 175,  74, 165,  71, 134, 139,  48,  27, 166,
+    77, 146, 158, 231,  83, 111, 229, 122,  60, 211, 133, 230, 220, 105,  92,  41,  55,  46, 245,
+    40, 244, 102, 143,  54,  65,  25,  63, 161,   1, 216,  80,  73, 209,  76, 132, 187, 208,  89,
+    18, 169, 200, 196, 135, 130, 116, 188, 159,  86, 164, 100, 109, 198, 173, 186,   3,  64,  52,
+   217, 226, 250, 124, 123,   5, 202,  38, 147, 118, 126, 255,  82,  85, 212, 207, 206,  59, 227,
+    47,  16,  58,  17, 182, 189,  28,  42, 223, 183, 170, 213, 119, 248, 152,   2,  44, 154, 163,
+    70, 221, 153, 101, 155, 167,  43, 172,   9, 129,  22,  39, 253,  19,  98, 108, 110,  79, 113,
+   224, 232, 178, 185, 112, 104, 218, 246,  97, 228, 251,  34, 242, 193, 238, 210, 144,  12, 191,
+   179, 162, 241,  81,  51, 145, 235, 249,  14, 239, 107,  49, 192, 214,  31, 181, 199, 106, 157,
+   184,  84, 204, 176, 115, 121,  50,  45, 127,   4, 150, 254, 138, 236, 205,  93, 222, 114,  67,
+    29,  24,  72, 243, 141, 128, 195,  78,  66, 215,  61, 156, 180 );
+
+float tpn_gradient( int hash, vec3 unit )
+{
+	int h = hash & 15;
+  float u = ( h < 8 ? unit.x : unit.y ),
+    v = ( h < 4 ? unit.y : ( h == 12 || h == 14 ? unit.x : unit.z ) );
+  return ( ( h & 1 ) == 0 ? u : -u ) + ( ( h & 2 ) == 0 ? v : -v );
+}
+
+vec3 tpn_fade( vec3 t )
+{
+  return t * t * t * ( t * ( 6.0 * t - 15.0 ) + 10.0 );
+}
+
+float tpn_ffade( float t )
+{
+  return t * t * t * ( t * ( 6.0 * t - 15.0 ) + 10.0 );
+}
+
+// tiled Perlin noise
+float tpn( vec3 coord, int N )
+{
+  coord *= float( N );
+  
+  ivec3 c = ivec3( coord );
+  vec3 unit = fract( coord );
+   
+  vec3 unit_000 = unit;
+  vec3 unit_100 = unit - vec3( 1.0, 0.0, 0.0 );
+  vec3 unit_001 = unit - vec3( 0.0, 0.0, 1.0 );
+  vec3 unit_101 = unit - vec3( 1.0, 0.0, 1.0 );
+  vec3 unit_010 = unit - vec3( 0.0, 1.0, 0.0 );
+  vec3 unit_110 = unit - vec3( 1.0, 1.0, 0.0 );
+  vec3 unit_011 = unit - vec3( 0.0, 1.0, 1.0 );
+  vec3 unit_111 = unit - 1.0;
+
+  int A = p[( c.x ) % N] + c.y,
+     AA = p[A % N] + c.z,
+     AB = p[( A + 1 ) % N] + c.z,
+      B = p[( c.x + 1 ) % N] + c.y,
+     BA = p[B % N] + c.z,
+     BB = p[( B + 1) % N] + c.z;
+
+  float x000 = tpn_gradient( p[(AA    ) % N], unit_000 );
+	float x100 = tpn_gradient( p[(BA    ) % N], unit_100 );
+	float x010 = tpn_gradient( p[(AB    ) % N], unit_010 );
+	float x110 = tpn_gradient( p[(BB    ) % N], unit_110 );
+  float x001 = tpn_gradient( p[(AA + 1) % N], unit_001 );
+	float x101 = tpn_gradient( p[(BA + 1) % N], unit_101 );
+	float x011 = tpn_gradient( p[(AB + 1) % N], unit_011 );
+	float x111 = tpn_gradient( p[(BB + 1) % N], unit_111 );
+
+  vec3 w = tpn_fade( unit );
+
+  return mix(
+    mix( mix( x000, x100, w.x ), mix( x010, x110, w.x ), w.y ),
+    mix( mix( x001, x101, w.x ), mix( x011, x111, w.x ), w.y ),
+    w.z );
+}
+
+float brush_noise( vec2 coord, float tile, float offset, int N )
+{
+  return clamp( tpn_ffade( clamp( tpn( vec3( coord, tile ), N ), 0.0, 1.0 ) + offset ), 0.0, 1.0 );
+}
+
+float cubicPulse( float c, float w, float x )
+{
+  x = abs( x - c );
+  if ( x > w )
+    return 0.0;
+  x /= w;
+  return 1.0 - x * x * ( 3.0 - 2.0 * x );
+}
+
+float map( float value, float low1, float high1, float low2, float high2 )
+{
+  return low2 + ( value - low1 ) * ( high2 - low2 ) / ( high1 - low1 );
+}
+
+float linearstep( float a, float b, float v )
+{
+  return clamp( map( v, a, b, 0.0, 1.0 ), 0.0, 1.0 );
+}
+
+void main()
+{
+  ivec2 tc = ivec2( gl_GlobalInvocationID.xy );
+  vec4 previous_value = imageLoad( out_image, tc );
+  float brushsize = float( paint_brushsize );
+
+  vec2 tcf = vec2( tc ) / ( vec2( gl_NumWorkGroups.xy ) * vec2( gl_WorkGroupSize.xy ) );
+
+  float s = 0.0;
+  int N = paint_noisedetail;
+  float noise = brush_noise( tcf, paint_noiseseed, paint_noiseoffset, N );
+
+  bool rhomb = true;
+  
+  float sftmod = ( paint_brushsoften * ( brushsize * 0.5 ) );
+
+  if ( paint_brushtype == 0 )
+  {
+    float dist_px = sdf_circle( vec2( tc - paint_mousepos ), 0.0 );
+    float sftmod = max( brushsize * paint_brushsoften, 0.0001 );
+    float min_px = ( brushsize - sftmod );
+    float max_px = ( brushsize + sftmod );
+    float noise_mult = paint_noisemultiplier;
+    if ( paint_noiseedgesonly )
+    {
+      float d = abs( dist_px - min_px ) * 1.5;
+      noise_mult = paint_noisemultiplier * cubicPulse( ( float( min_px ) * 0.8 ) + d, ( float( max_px ) * 0.8 ) - d, dist_px );
+    }
+    float v = smoothstep( max_px, min_px, dist_px );
+    s = mix( v, noise * v, noise_mult );
+  }
+  else if ( paint_brushtype == 1 )
+  {
+    float dist_px = sdf_circle( vec2( tc - paint_mousepos ), brushsize );
+    float edgemod = 1.0 - linearstep( 0, sftmod, abs( dist_px ) - sftmod );
+    float v = 1.0 - linearstep( -sftmod, sftmod, dist_px );
+    if ( paint_noiseedgesonly )
+      s = ( v + ( paint_noisemultiplier * edgemod * noise ) );
+    else
+      s = mix( v, noise * v, paint_noisemultiplier );
+  }
+  else if ( paint_brushtype == 2 )
+  {
+    float dist_px = sdf_rhombus( vec2( tc - paint_mousepos ), vec2( brushsize, brushsize ) );
+    float edgemod = 1.0 - linearstep( 0, sftmod, abs( dist_px ) - sftmod );
+    float v = 1.0 - linearstep( -sftmod, sftmod, dist_px );
+    if ( paint_noiseedgesonly )
+      s = ( v + ( paint_noisemultiplier * edgemod * noise ) );
+    else
+      s = mix( v, noise * v, paint_noisemultiplier );
+  }
+
+  float value = clamp( paint_brushopacity * s, 0.0, 1.0 );
+
+  imageStore( out_image, tc, mix( previous_value, paint_brushcolor, value ) );
+}

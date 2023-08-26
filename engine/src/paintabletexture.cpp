@@ -45,8 +45,8 @@ namespace neko {
     texture_ = renderer.createTexture(
       width, height, format,
       data.empty() ? nullptr : data.data(),
-      Texture::Wrapping::ClampEdge,
-      Texture::Filtering::Linear,
+      Texture::Wrapping::Repeat,
+      Texture::Filtering::Nearest,
       1 );
   }
 

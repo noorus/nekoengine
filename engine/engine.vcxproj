@@ -468,6 +468,8 @@
     <None Include="..\bin\shaders\mainframebuf2d.frag" />
     <None Include="..\bin\shaders\mat_screentone.frag" />
     <None Include="..\bin\shaders\mat_screentone.vert" />
+    <None Include="..\bin\shaders\paint2d_default.frag" />
+    <None Include="..\bin\shaders\paint2d_default.vert" />
     <None Include="..\bin\shaders\particle.frag" />
     <None Include="..\bin\shaders\particle_billboard.geom" />
     <None Include="..\bin\shaders\particle_billboard.vert" />
@@ -484,7 +486,7 @@
     <None Include="..\bin\shaders\text.frag" />
     <None Include="..\bin\shaders\text_2d.vert" />
     <None Include="..\bin\shaders\text_3d.vert" />
-    <None Include="..\bin\shaders\tool_2dpaint.comp" />
+    <None Include="..\bin\shaders\paint2d_tool.comp" />
     <None Include="..\extern\steamworks\sdk\public\steam\steam_api.json" />
     <None Include="cpp.hint" />
   </ItemGroup>

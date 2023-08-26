@@ -74,11 +74,13 @@ namespace neko {
 
     for ( int i = 0; i < colorbufcount_; i++ )
     {
-      colorBuffers_.push_back( make_shared<Texture>( renderer_, width_, height_, format_, nullptr, Texture::ClampEdge, Texture::Nearest, multisamples_ ) );
+      colorBuffers_.push_back( make_shared<Texture>(
+        renderer_, width_, height_, format_, nullptr, Texture::Repeat, Texture::Nearest, multisamples_ ) );
     }
 
     if ( depth_ )
-      depthBuffer_ = make_shared<Texture>( renderer_, width_, height_, c_depthFormat, nullptr, Texture::ClampEdge, Texture::Nearest, multisamples_ );
+      depthBuffer_ = make_shared<Texture>(
+        renderer_, width_, height_, c_depthFormat, nullptr, Texture::Repeat, Texture::Nearest, multisamples_ );
 
     assert( colorBuffers_.size() < 32 );
     array<GLenum, 32> drawBuffers {};

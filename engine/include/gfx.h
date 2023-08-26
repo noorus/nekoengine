@@ -34,7 +34,7 @@ namespace neko {
   struct RenderVisualizations
   {
     bool bounds = true;
-    bool frustums = true;
+    bool frustums = false;
     bool nodes = true;
   };
 
@@ -160,7 +160,7 @@ namespace neko {
   protected:
     bool enabled_ = true;
     vec3 clearColor_ = vec3( 0.0f, 0.0f, 0.0f );
-    vec4 gridColor_ = vec4( 0.06f, 0.055f, 0.062f, 0.38f );
+    vec4 gridColor_ = vec4( 0.28f, 0.3f, 0.44f, 0.28f );
     vector<EditorViewportPtr> viewports_;
     int panningViewport_ = -1;
     unique_ptr<CursorLock> cursorLock_;

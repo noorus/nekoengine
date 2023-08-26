@@ -12,5 +12,41 @@
     "layers": [
       "sakura.png"
     ]
+  },
+  {
+    "type": "unlit",
+    "name": "ground_grasslands1",
+    "wrapping": "repeat",
+    "filtering": "nearest",
+    "layers": [
+      "noiracide_autumnhills_texture14.png"
+    ]
+  },
+  {
+    "type": "unlit",
+    "name": "ground_grasslands2",
+    "wrapping": "repeat",
+    "filtering": "nearest",
+    "layers": [
+      "noiracide_grasslands_texture2.png"
+    ]
+  },
+  {
+    "type": "unlit",
+    "name": "ground_grasslands3",
+    "wrapping": "repeat",
+    "filtering": "nearest",
+    "layers": [
+      "noiracide_grasslands_texture3.png"
+    ]
+  },
+  {
+    "type": "unlit",
+    "name": "ground_grasslands5",
+    "wrapping": "repeat",
+    "filtering": "nearest",
+    "layers": [
+      "noiracide_grasslands_texture5.png"
+    ]
   }
 ]

@@ -10,6 +10,20 @@
 
 namespace neko {
 
+  static const map<utf8String, Texture::Wrapping> c_wrappingMap = {
+    { "clamp_edge", Texture::Wrapping::ClampEdge },
+    { "clamp_border", Texture::Wrapping::ClampBorder },
+    { "mirrored_repeat", Texture::Wrapping::MirroredRepeat },
+    { "repeat", Texture::Wrapping::Repeat },
+    { "mirrored_clamp_edge", Texture::Wrapping::MirroredClampEdge }
+  };
+
+  static const map<utf8String, Texture::Filtering> c_filteringMap = {
+    { "nearest", Texture::Filtering::Nearest },
+    { "linear", Texture::Filtering::Linear },
+    { "mipmapped", Texture::Filtering::Mipmapped }
+  };
+
   MaterialManager::MaterialManager( Renderer* renderer, ThreadedLoaderPtr loader ):
   LoadedResourceManagerBase<Material>( loader ), renderer_( renderer )
   {
@@ -70,10 +84,30 @@ namespace neko {
     {
       auto name = obj["name"].get<utf8String>();
       auto material = make_shared<Material>( name );
+      material->wantFiltering_ = Texture::Filtering::Mipmapped;
+      material->wantWrapping_ = Texture::Wrapping::Repeat;
       const auto& type = obj["type"].get<utf8String>();
       if ( c_materialTypes.find( type ) == c_materialTypes.end() )
         NEKO_EXCEPT( "Unknown material type " + type );
       material->type_ = c_materialTypes.at( type );
+      if ( obj.contains( "wrapping" ) )
+      {
+        const auto& wrap = obj["wrapping"].get<utf8String>();
+        if ( c_wrappingMap.contains( wrap ) )
+          material->wantWrapping_ = c_wrappingMap.at( wrap );
+        else
+          Locator::console().printf(
+            srcGfx, R"(Warning: Unknown material wrapping "%s" for material "%s")", wrap.c_str(), name.c_str() );
+      }
+      if ( obj.contains( "filtering" ) )
+      {
+        const auto& flt = obj["filtering"].get<utf8String>();
+        if ( c_filteringMap.contains( flt ) )
+          material->wantFiltering_ = c_filteringMap.at( flt );
+        else
+          Locator::console().printf(
+            srcGfx, R"(Warning: Unknown material filtering "%s" for material "%s")", flt.c_str(), name.c_str() );
+      }
       const auto& layers = obj["layers"];
       if ( !layers.is_array() )
         NEKO_EXCEPT( "Material layers is not an array" );

@@ -355,19 +355,71 @@ namespace neko {
     };
 
     // paintables
+    
+    class PaintableVerterbuffer {
+    protected:
+      using BufferType = MappedGLBuffer<Vertex3D>;
+      using IndicesType = MappedGLBuffer<gl::GLuint>;
+      unique_ptr<BufferType> buffer_;
+      unique_ptr<IndicesType> indices_;
+      AttribWriter attribs_;
+      GLuint vao_ = 0;
+    public:
+      PaintableVerterbuffer( size_t maxVertices, size_t maxIndices )
+      {
+        buffer_ = make_unique<BufferType>( maxVertices );
+        indices_ = make_unique<IndicesType>( maxIndices );
+        gl::glCreateVertexArrays( 1, &vao_ );
+        gl::glVertexArrayElementBuffer( vao_, indices_->id() );
+        attribs_.add( Attrib_Pos3D ); // vec3 position
+        attribs_.add( Attrib_Normal3D ); // vec3 normal
+        attribs_.add( Attrib_Texcoord2D ); // vec2 texcoord
+        attribs_.add( Attrib_Color4D ); // vec4 color
+        attribs_.add( Attrib_Tangent4D ); // vec4 tangent
+        attribs_.add( Attrib_Bitangent3D ); // vec3 bitangent
+        attribs_.write( vao_ );
+        gl::glVertexArrayVertexBuffer( vao_, 0, buffer_->id(), 0, attribs_.stride() );
+      }
+      inline BufferType& buffer() { return *buffer_; }
+      inline IndicesType& indices() { return *indices_; }
+      void draw( Renderer& renderer, const span<GLuint> textures, const mat4& model, const vec2& pxdimensions, float pxscale );
+      ~PaintableVerterbuffer()
+      {
+        gl::glDeleteVertexArrays( 1, &vao_ );
+        indices_.reset();
+        buffer_.reset();
+      }
+    };
+
+    enum PaintBrushType: int
+    {
+      Brush_Classic = 0,
+      Brush_Circle,
+      Brush_Rhombus,
+      MAX_Brush
+    };
 
     struct paintable
     {
       PixelScale pixelScaleBase = PixelScale_32;
-      unique_ptr<BasicIndexedVertexbuffer> mesh;
-      PaintableTexturePtr texture;
+      unique_ptr<PaintableVerterbuffer> mesh;
+      PaintableTexturePtr blendMap;
       vec2i dimensions { 0, 0 };
       int normal_sel = ig::PredefNormal_PlusZ;
       vec3 normal { 0.0f, 0.0f, 1.0f };
       vec2i lastPaintPos = { 0, 0 };
-      int paintBrushSize = 32;
+      int paintSelectedLayerIndex = 0;
+      int paintBrushSize = 8;
       float paintBrushSoftness = 0.2f;
-      float paintBrushOpacity = 0.4f;
+      float paintBrushOpacity = 0.3f;
+      bool paintBrushNoiseLockSeed = true;
+      float paintBrushNoiseSeed = 125.0f;
+      float paintBrushNoiseOffset = 0.05f;
+      float paintBrushNoiseAmount = 0.8f;
+      int paintBrushNoiseDetail = 115;
+      bool paintBrushNoiseEdgesOnly = true;
+      PaintBrushType paintBrushType = Brush_Classic;
+      vector<GLuint> textures;
       void applyPaint( Renderer& renderer, const vec2& pos );
       void mouseClickTest( manager* m, entity e, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button );
     };
@@ -390,9 +442,13 @@ namespace neko {
       void imguiPaintableSurfaceEditor( entity e );
     };
 
+    // hittestable
+
     struct hittestable
     {
     };
+
+    // overall manager
 
     class manager {
     protected:

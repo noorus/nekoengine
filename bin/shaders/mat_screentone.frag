@@ -29,7 +29,7 @@ float circletest( vec2 pos, float scale, vec2 tc )
 {
   pos = fract( pos * scale );
   pos = vec2( 0.5 ) - pos;
-  float circle = sdf_circle( pos );
+  float circle = 0.0; // sdf_circle( pos );
   float square = sdf_square( pos );
   float heart = sdf_heart( pos, 1.0 );
   //return mix( circle, square, tc.x );

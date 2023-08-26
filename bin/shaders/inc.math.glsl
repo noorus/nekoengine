@@ -27,9 +27,9 @@ vec2 util_posToSphericalUV( vec3 worldpos )
   return uv;
 }
 
-float sdf_circle( vec2 pos )
+float sdf_circle( vec2 pos, float r )
 {
-  return length( pos );
+  return length( pos ) - r;
 }
 
 float sdf_square( vec2 pos )
@@ -44,6 +44,21 @@ float sdf_heart( vec2 pos, float scale )
   float xterm = pow( pos.x, 2.0 );
   float yterm = pow( ( pos.y * 1.0 ) - sqrt( abs( pos.x * 0.6 ) ), 2.2 );
   return ( xterm + yterm ) * scale;
+}
+
+float ndot(vec2 a, vec2 b )
+{
+  return a.x * b.x - a.y * b.y;
+}
+
+float sdf_rhombus( in vec2 p, in vec2 b ) 
+{
+  p = abs(p);
+
+  float h = clamp( ndot(b-2.0*p,b)/dot(b,b), -1.0, 1.0 );
+  float d = length( p-0.5*b*vec2(1.0-h,1.0+h) );
+
+  return d * sign( p.x*b.y + p.y*b.x - b.x*b.y );
 }
 
 #endif

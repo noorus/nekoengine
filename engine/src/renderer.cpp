@@ -26,7 +26,7 @@ namespace neko {
   NEKO_DECLARE_CONVAR( dbg_wireframe, "Whether to render in wireframe mode.", false );
   NEKO_DECLARE_CONVAR( dbg_showdepth, "Whether to visualize the depth buffer.", false );
   NEKO_DECLARE_CONVAR( vid_hdr, "Toggle HDR processing.", true );
-  NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 2.2f );
+  NEKO_DECLARE_CONVAR( vid_gamma, "Screen gamma target.", 1.1f );
   NEKO_DECLARE_CONVAR( vid_exposure, "Testing.", 1.0f );
   NEKO_DECLARE_CONVAR( gl_dump, "Dump OpenGL extensions on startup.", false );
 
@@ -561,8 +561,8 @@ namespace neko {
     glPolygonMode( GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL );
 
     glEnable( GL_BLEND );
-    glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_ONE );
-    //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    // glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_ONE );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     glDisable( GL_LINE_SMOOTH );
     glDisable( GL_POLYGON_SMOOTH );
@@ -1016,46 +1016,6 @@ namespace neko {
       auto& pipeline = shaders_->usePipeline( "passthrough2d" );
       pipeline.setUniform( "tex", 0 );
       const GLuint hndl = ctx_.mergedMain_->texture( 0 )->handle();
-      glBindTextures( 0, 1, &hndl );
-      viewportQuad->begin();
-      viewportQuad->draw();
-    }
-    // Draw the merged buffer in full quad
-
-    if ( true )
-    {
-      /* setGLDrawState( false, false, false, false );
-      auto& pipeline = shaders_->usePipeline( "passthrough2d" );
-      pipeline.setUniform( "tex", 0 );
-      const GLuint hndl = ctx_.mergedMain_->texture( 0 )->handle();
-      glBindTextures( 0, 1, &hndl );
-      builtin_.screenQuad_->begin();
-      builtin_.screenQuad_->draw();*/
-    }
-    else
-    {
-      if ( !drawtx_ )
-        drawtx_ = make_shared<PaintableTexture>( *this, 1000, 1000, PixFmtColorRGBA32f );
-      auto& pp = shaders_->usePipeline( "tool_2dpaint" );
-      pp.setUniform( "mouse", vec2( 0.5f, 0.5f ) );
-      bindImageTexture( 0, drawtx_->texture() );
-      bindTexture( 0, drawtx_->texture() );
-      glDispatchCompute( drawtx_->width() / 10, drawtx_->height() / 10, 1 );
-      glMemoryBarrier( gl::MemoryBarrierMask::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
-
-      static bool imgout = false;
-      if ( !imgout )
-      {
-        imgout = true;
-        auto px = drawtx_->read( *this );
-        px->convert( PixFmtColorRGBA8 );
-        px->writePNG( "kekw.png" );
-      }
-
-      setGLDrawState( false, false, false, false );
-      auto& pipeline = shaders_->usePipeline( "passthrough2d" );
-      pipeline.setUniform( "tex", 0 );
-      const GLuint hndl = drawtx_->handle();
       glBindTextures( 0, 1, &hndl );
       viewportQuad->begin();
       viewportQuad->draw();

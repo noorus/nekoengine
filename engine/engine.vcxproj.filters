@@ -998,7 +998,13 @@
     <None Include="..\bin\shaders\sprite.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\shaders\tool_2dpaint.comp">
+    <None Include="..\bin\shaders\paint2d_tool.comp">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\paint2d_default.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\paint2d_default.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
