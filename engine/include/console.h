@@ -140,6 +140,7 @@ namespace neko {
     static void callbackExec( Console* console, ConCmd* command, StringVector& arguments );
   public:
     Console();
+    ~Console();
     inline EnginePtr engine() { return engine_; }
     void setEngine( EnginePtr engine );
     void resetEngine();

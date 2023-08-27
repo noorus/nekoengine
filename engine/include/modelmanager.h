@@ -13,6 +13,7 @@
 namespace neko {
 
   using ModelMap = map<size_t, js::Model*>;
+  struct RenderSyncContext;
 
   class ModelManager: public enable_shared_from_this<ModelManager>, public nocopy {
   private:

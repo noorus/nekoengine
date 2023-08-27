@@ -55,18 +55,22 @@ namespace neko {
   {
     utf8String name_;
     map<utf8String, SpriteAnimationSetDefinitionEntryPtr> entries_;
+    inline const utf8String& name() const noexcept { return name_; }
   };
 
   using SpriteAnimationSetDefinitionPtr = shared_ptr<SpriteAnimationSetDefinition>;
   using SpriteAnimationSetDefinitionVector = vector<SpriteAnimationSetDefinitionPtr>;
+  using SpriteAnimationSetDefinitionMap = map<utf8String, SpriteAnimationSetDefinitionPtr>;
 
   class SpriteManager {
   private:
     Renderer* renderer_ = nullptr;
     SpriteAnimationDefinitionMap animdefs_;
+    SpriteAnimationSetDefinitionMap sets_;
   public:
     SpriteManager( Renderer* renderer );
     void initialize();
+    void prepareRender( ThreadedLoader& loader );
     void shutdown();
     void loadAnimdefJSONRaw( const nlohmann::json& arr );
     void loadAnimdefJSON( const utf8String& input );

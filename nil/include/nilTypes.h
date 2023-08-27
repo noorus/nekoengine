@@ -14,6 +14,7 @@
 #include <set>
 #include <algorithm>
 #include <numeric>
+#include <chrono>
 
 namespace nil {
 
@@ -28,6 +29,8 @@ namespace nil {
   using VirtualKeyCode = unsigned int; //!< A virtual key code type.
 
   using Real = float; //!< Real number type.
+
+  using TimePoint = std::chrono::steady_clock::time_point;
 
 # define NIL_REAL_ZERO 0.0f //!< Real number zero constant.
 # define NIL_REAL_ONE 1.0f //!< Real number one constant.
@@ -56,6 +59,10 @@ namespace nil {
   using std::make_unique;
   using std::set;
 
+  namespace chrono {
+    using namespace std::chrono;
+  }
+
   class System;
 
   using SystemPtr = shared_ptr<System>;
@@ -69,6 +76,9 @@ namespace nil {
     Real b; //!< Blue color component in {0..1}
   };
 
+# if defined( NIL_CUSTOM_VEC2I_TYPE )
+  using Vector2i = NIL_CUSTOM_VEC2I_TYPE;
+# else
   //! \struct Vector2i
   //! Two-dimensional integer vector.
   struct Vector2i
@@ -78,7 +88,7 @@ namespace nil {
 
     inline Vector2i(): x( 0 ), y( 0 ) {}
 
-    inline explicit Vector2i( int32_t x_, int32_t y_ ): x( x_ ), y( y_ ) {}
+    inline Vector2i( int32_t x_, int32_t y_ ): x( x_ ), y( y_ ) {}
 
     inline bool operator == ( const Vector2i& other ) const
     {
@@ -97,7 +107,11 @@ namespace nil {
 
     const static Vector2i ZERO; //!< Static default zero vector
   };
+# endif
 
+# if defined( NIL_CUSTOM_VEC3I_TYPE )
+  using Vector3i = NIL_CUSTOM_VEC3I_TYPE;
+# else
   //! \struct Vector3i
   //! Three-dimensional integer vector.
   struct Vector3i
@@ -108,7 +122,7 @@ namespace nil {
 
     inline Vector3i(): x( 0 ), y( 0 ), z( 0 ) {}
 
-    inline explicit Vector3i( int32_t x_, int32_t y_, int32_t z_ ):
+    inline Vector3i( int32_t x_, int32_t y_, int32_t z_ ):
     x( x_ ), y( y_ ), z( z_ ) {}
 
     inline bool operator == ( const Vector3i& other ) const
@@ -123,7 +137,11 @@ namespace nil {
 
     const static Vector3i ZERO; //!< Static default zero vector
   };
+# endif
 
+# if defined( NIL_CUSTOM_VEC2_TYPE )
+  using Vector2f = NIL_CUSTOM_VEC2_TYPE;
+# else
   //! \struct Vector2f
   //! Two-dimensional floating point vector.
   struct Vector2f
@@ -133,7 +151,7 @@ namespace nil {
 
     inline Vector2f(): x( NIL_REAL_ZERO ), y( NIL_REAL_ZERO ) {}
 
-    inline explicit Vector2f( Real x_, Real y_ ): x( x_ ), y( y_ ) {}
+    inline Vector2f( Real x_, Real y_ ): x( x_ ), y( y_ ) {}
 
     inline bool operator == ( const Vector2f& other ) const
     {
@@ -147,7 +165,11 @@ namespace nil {
 
     const static Vector2f ZERO; //!< Static default zero vector
   };
+# endif
 
+# if defined( NIL_CUSTOM_VEC3_TYPE )
+  using Vector3f = NIL_CUSTOM_VEC3_TYPE;
+# else
   //! \struct Vector3f
   //! Three-dimensional floating point vector.
   struct Vector3f
@@ -158,7 +180,7 @@ namespace nil {
 
     inline Vector3f(): x( NIL_REAL_ZERO ), y( NIL_REAL_ZERO ), z( NIL_REAL_ZERO ) {}
 
-    inline explicit Vector3f( Real x_, Real y_, Real z_ ):
+    inline Vector3f( Real x_, Real y_, Real z_ ):
     x( x_ ), y( y_ ), z( z_ ) {}
 
     inline bool operator == ( const Vector3f& other ) const
@@ -173,6 +195,7 @@ namespace nil {
 
     const static Vector3f ZERO; //!< Static default zero vector
   };
+# endif
 
   //! @}
 

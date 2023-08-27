@@ -1,4 +1,4 @@
-#include "pch.h"
+include "pch.h"
 #include "locator.h"
 #include "font.h"
 #include "neko_exception.h"
@@ -9,6 +9,10 @@
 
 namespace neko {
 
+  static int gcalccrea = 0;
+  static int gcalcunlo = 0;
+  static int gcalcfree = 0;
+
   Font::Font( FontManagerPtr manager, IDType i, const utf8String& name ):
     LoadedResourceBase<Font>( name ), manager_( manager ), id_( i )
   {
@@ -16,6 +20,9 @@ namespace neko {
 
   FontFacePtr Font::loadFace( span<uint8_t> source, FaceID faceIndex )
   {
+    if ( !manager_ )
+      NEKO_EXCEPT( "Font::loadFace called after manager has been reset" );
+
     // Make a safety copy in our own memory
     // Loading new styles on the fly later could still access this memory
     // and we won't rely on the host keeping that available and alive
@@ -39,9 +46,12 @@ namespace neko {
 
   void Font::unload()
   {
+    for ( auto& [key, face] : faces_ )
+      face->unload();
     faces_.clear();
     data_.reset();
     loaded_ = false;
+    manager_.reset();
   }
 
   Font::~Font()

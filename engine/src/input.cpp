@@ -176,6 +176,7 @@ namespace neko {
 
   void GfxInput::shutdown()
   {
+    system_->shutdown();
     system_.reset();
   }
 

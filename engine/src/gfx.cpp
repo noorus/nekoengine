@@ -566,11 +566,11 @@ namespace neko {
 
   void Gfx::shutdown()
   {
+    input_->shutdown();
+ 
     messaging_->remove( this );
 
     scene_.reset();
-
-    input_->shutdown();
 
     gui_->shutdown();
 

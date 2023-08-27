@@ -20,9 +20,25 @@ namespace neko {
 
   }
 
+  void SpriteManager::prepareRender( ThreadedLoader& loader )
+  {
+    assert( renderer_ );
+
+    SpriteAnimationSetDefinitionVector sheets;
+    loader.getFinishedSpritesheets( sheets );
+    if ( !sheets.empty() )
+      Locator::console().printf( srcGfx, "SpriteManager::prepareRender got %d new spritesheets", sheets.size() );
+
+    for ( auto& newSheet : sheets )
+      if ( sets_.find( newSheet->name() ) == sets_.end() )
+        sets_[newSheet->name()] = newSheet;
+      else if ( sets_[newSheet->name()] != newSheet )
+        NEKO_EXCEPT( "Loader-returned spritesheet already exists" );
+  }
+
   void SpriteManager::shutdown()
   {
-
+    sets_.clear();
   }
 
   void SpriteManager::loadAnimdefJSONRaw( const json& obj )

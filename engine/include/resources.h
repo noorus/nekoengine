@@ -22,6 +22,11 @@ namespace neko {
     name_( name )
     {
       assert( !name_.empty() );
+      // OutputDebugStringA( utils::ilprinf( "Resource created: %s\r\n", name_.c_str() ).c_str() );
+    }
+    ~LoadedResourceBase()
+    {
+      // OutputDebugStringA( utils::ilprinf( "Resource freed: %s\r\n", name_.c_str() ).c_str() );
     }
     inline const utf8String& name() const { return name_; }
     inline bool loaded() const { return loaded_; }

@@ -215,6 +215,7 @@ namespace neko {
     inline bool dirty() const { return dirty_; }
     inline void markClean() { dirty_ = false; }
     inline const MaterialPtr material() const { return material_; }
+    void unload();
     const TextureAtlas& atlas() const;
     virtual ~FontStyle();
   };
@@ -238,6 +239,7 @@ namespace neko {
     StyleID loadStyle( FontRendering rendering, Real size, Real thickness, const unicodeString& prerenderGlyphs );
     inline FontPtr font() { return font_; }
     inline const FontStyleMap& styles() const noexcept { return styles_; }
+    void unload();
     virtual ~FontFace();
   };
 
@@ -256,13 +258,13 @@ namespace neko {
     unique_ptr<Buffer> data_;
     IDType id_;
     FontFacePtr loadFace( span<uint8_t> source, FaceID faceIndex );
-    void unload();
   public:
     Font( FontManagerPtr manager, IDType i, const utf8String& name );
     inline FontManagerPtr manager() { return manager_; }
     inline IDType id() const noexcept { return id_; }
     inline const FontFaceMap& faces() const noexcept { return faces_; }
     void update( Renderer* renderer );
+    void unload();
     virtual ~Font();
   };
 
@@ -374,7 +376,6 @@ namespace neko {
       unsigned int minor;
       unsigned int patch;
     } hbVersion_ = { 0 };
-    FontMap fonts_;
     IDType fontIndex_ = 0;
     IDType textIndex_ = 0;
   protected:
@@ -403,9 +404,9 @@ namespace neko {
     // Other overrides
     inline FontPtr font( const utf8String& name )
     {
-      return ( fonts_.find( name ) == fonts_.end() ) ? FontPtr() : fonts_.at( name );
+      return ( map_.find( name ) == map_.end() ) ? FontPtr() : map_.at( name );
     }
-    inline FontMap& fonts() { return fonts_; }
+    inline FontMap& fonts() { return map_; }
     void update();
     void draw();
   };

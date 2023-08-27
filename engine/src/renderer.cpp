@@ -434,6 +434,7 @@ namespace neko {
     scene.texts().update( *fonts_ );
     fonts_->update();
     fonts_->prepareRender();
+    sprites_->prepareRender( *loader_ );
 
     scene.sprites().update( *materials_ );
     scene.paintables().update( *this );
@@ -1032,8 +1033,18 @@ namespace neko {
 
   void Renderer::shutdown()
   {
+    loader_->clear();
+    loader_.reset();
     sprites_->shutdown();
     fonts_->shutdownRender();
+
+    builtin_.placeholderTexture_.reset();
+    for ( int i = 0; i < 4; ++i )
+      builtin_.screenFourthQuads_[i].reset();
+    builtin_.screenQuad_.reset();
+    builtin_.skybox_.reset();
+    builtin_.unitQuad_.reset();
+    builtin_.unitSphere_.reset();
   }
 
   Renderer::~Renderer()

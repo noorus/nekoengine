@@ -171,6 +171,10 @@ namespace neko {
       []( ConBase* a, ConBase* b ) -> bool { return ( _stricmp( a->name().c_str(), b->name().c_str() ) <= 0 ); } );
   }
 
+  Console::~Console()
+  {
+  }
+
   LogSource Console::registerSource( const string& name, vec3 color )
   {
     ScopedRWLock lock( &lock_ );

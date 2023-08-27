@@ -163,6 +163,7 @@ namespace neko {
     ConsoleWindow::~ConsoleWindow()
     {
       console_->removeListener( this );
+      console_.reset();
     }
 
     void ConsoleWindow::onConsolePrint( Console* console, vec3 color, const string& str )

@@ -335,6 +335,20 @@ namespace neko {
       finishedSpritesheetsEvent_.set();
   }
 
+  void ThreadedLoader::clear()
+  {
+    addTaskLock_.lock();
+    finishedTasksLock_.lock();
+    newTasks_.clear();
+    finishedMaterials_.clear();
+    finishedModels_.clear();
+    finishedFonts_.clear();
+    finishedAnimations_.clear();
+    finishedSpritesheets_.clear();
+    finishedTasksLock_.unlock();
+    addTaskLock_.unlock();
+  }
+
   ThreadedLoader::~ThreadedLoader()
   {
   }

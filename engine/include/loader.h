@@ -123,6 +123,7 @@ namespace neko {
     void getFinishedAnimations( AnimationVector& animations );
     void getFinishedSpritesheets( SpriteAnimationSetDefinitionVector& sheets );
     void addLoadTask( const LoadTaskVector& resources );
+    void clear();
     ~ThreadedLoader();
   };
 

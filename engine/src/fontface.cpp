@@ -9,6 +9,9 @@
 
 namespace neko {
 
+  static int gcalccrea = 0;
+  static int gcalcfree = 0;
+
   FontFace::FontFace( FontPtr font, FT_Library ft, FT_Open_Args* args, FaceID faceIndex ):
     ft_( ft ), font_( font )
   {
@@ -72,9 +75,17 @@ namespace neko {
     return it->second;
   }
 
+  void FontFace::unload()
+  {
+    for ( auto& [key, style] : styles_ )
+      style->unload();
+    font_.reset();
+    styles_.clear();
+  }
+
   FontFace::~FontFace()
   {
-    styles_.clear();
+    unload();
   }
 
 }

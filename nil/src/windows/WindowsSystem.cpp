@@ -471,15 +471,28 @@ namespace nil {
     return xinput_.get();
   }
 
-  System::~System()
+  void System::shutdown()
   {
+    mouseMap_.clear();
+    keyboardMap_.clear();
+    controllerMap_.clear();
+
     for ( auto& device : devices_ )
       device->disable();
+    devices_.clear();
+
+    hidManager_.reset();
+    eventMonitor_.reset();
 
     SAFE_RELEASE( dinput_ );
 
     // Restore accessiblity features
     internals_.restore();
+  }
+
+  System::~System()
+  {
+    shutdown();
   }
 
 }

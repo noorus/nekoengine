@@ -164,6 +164,10 @@ namespace nil {
 
     inline SystemPtr ptr() { return shared_from_this(); }
 
+    //! Shuts down the system.
+    //! Attempts to free all resources, do not access after shutting down.
+    void shutdown();
+
     //! Destructor.
     ~System();
   };

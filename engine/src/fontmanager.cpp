@@ -62,7 +62,7 @@ namespace neko {
   FontPtr FontManager::createFont( const utf8String& name )
   {
     auto font = make_shared<Font>( ptr(), fontIndex_++, name );
-    fonts_[name] = font;
+    map_[name] = font;
 
     return move( font );
   }
@@ -81,9 +81,9 @@ namespace neko {
   void FontManager::unloadFont( FontPtr font )
   {
     font->unload();
-    for ( auto it = fonts_.begin(); it != fonts_.end(); )
+    for ( auto it = map_.begin(); it != map_.end(); )
       if ( ( *it ).second->id() == font->id() )
-        it = fonts_.erase( it );
+        it = map_.erase( it );
       else
         ++it;
   }
@@ -160,13 +160,13 @@ namespace neko {
 
     for ( auto& newFont : fonts )
     {
-      if ( fonts_.find( newFont->name() ) == fonts_.end() )
-        fonts_[newFont->name()] = newFont;
-      else if ( fonts_[newFont->name()] != newFont )
+      if ( map_.find( newFont->name() ) == map_.end() )
+        map_[newFont->name()] = newFont;
+      else if ( map_[newFont->name()] != newFont )
         NEKO_EXCEPT( "Loader-returned font already exists" );
     }
 
-    for ( const auto& [key, font] : fonts_ )
+    for ( const auto& [key, font] : map_ )
     {
       font->update( renderer_ );
     }
@@ -201,14 +201,14 @@ namespace neko {
   void FontManager::shutdownRender()
   {
     texts_.clear();
+    for ( auto& [key, font] : map_ )
+      font->unload();
     map_.clear();
-    fonts_.clear();
     renderer_ = nullptr;
   }
 
   void FontManager::shutdownLogic()
   {
-    fonts_.clear();
     if ( freeType_ )
     {
       FT_Done_Library( freeType_ );
@@ -218,6 +218,7 @@ namespace neko {
 
   FontManager::~FontManager()
   {
+    shutdownLogic();
   }
 
 }
