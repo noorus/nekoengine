@@ -73,8 +73,10 @@ namespace neko {
 
   void Scripting::tick( GameTime tick, GameTime time )
   {
-    global_->tick( tick, time );
+    auto scene = global_->renderSync().lockSceneWrite();
+    global_->tick( tick, time, *scene );
     global_->process();
+    global_->renderSync().unlockSceneWrite();
   }
 
   void Scripting::postUpdate( GameTime delta, GameTime tick )

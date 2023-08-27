@@ -11,6 +11,7 @@
 #include "memory.h"
 #include "js_math.h"
 #include "director.h"
+#include "components.h"
 
 namespace neko {
 
@@ -42,6 +43,43 @@ namespace neko {
   void RenderSyncContext::destructed( js::Text* text )
   {
     frameDeletedTexts.push_back( text );
+  }
+
+  void RenderSyncContext::createScene( const vec2& resolution )
+  {
+    sceneLock_.lock();
+    assert( !scene_ );
+    scene_ = make_shared<SManager>( resolution );
+    sceneLock_.unlock();
+  }
+
+  void RenderSyncContext::destroyScene()
+  {
+    sceneLock_.lock();
+    scene_.reset();
+    sceneLock_.unlock();
+  }
+
+  SManagerPtr RenderSyncContext::lockSceneWrite()
+  {
+    sceneLock_.lock();
+    return scene_;
+  }
+
+  void RenderSyncContext::unlockSceneWrite()
+  {
+    sceneLock_.unlock();
+  }
+
+  SManagerPtr RenderSyncContext::lockSceneShared()
+  {
+    sceneLock_.lockShared();
+    return scene_;
+  }
+
+  void RenderSyncContext::unlockSceneShared()
+  {
+    sceneLock_.unlockShared();
   }
 
   void RenderSyncContext::syncFromScripting()

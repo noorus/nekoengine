@@ -21,7 +21,7 @@
 // convenient to drop some dependencies when developing stuff on the road.
 
 // Define to disable scripting & drop the V8 libraries requirement.
-#define NEKO_NO_SCRIPTING
+#undef NEKO_NO_SCRIPTING
 
 // Define to disable audio & drop FMOD SDK requirement.
 #define NEKO_NO_AUDIO

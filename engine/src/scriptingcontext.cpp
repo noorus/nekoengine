@@ -87,6 +87,7 @@ namespace neko {
     meshRegistry_.initialize( isolate_, global );
     modelRegistry_.initialize( isolate_, global );
     textRegistry_.initialize( isolate_, global );
+    entRegistry_.initialize( isolate_, global );
 
     JS_SET_GLOBAL_FUNCTION( include );
     JS_SET_GLOBAL_FUNCTION( require );
@@ -182,7 +183,7 @@ namespace neko {
     return script->execute( ctx_ );
   }
 
-  void ScriptingContext::tick( GameTime tick, GameTime time )
+  void ScriptingContext::tick( GameTime tick, GameTime time, SManager& scene )
   {
     isolate_->Enter();
     HandleScope handleScope( isolate_ );
@@ -204,6 +205,7 @@ namespace neko {
 
   ScriptingContext::~ScriptingContext()
   {
+    entRegistry_.clear();
     textRegistry_.clear();
     modelRegistry_.clear();
     meshRegistry_.clear();

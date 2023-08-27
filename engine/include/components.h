@@ -508,8 +508,4 @@ namespace neko {
 
   }
 
-  using SManager = c::manager;
-
-  using SManagerPtr = shared_ptr<SManager>;
-
 }

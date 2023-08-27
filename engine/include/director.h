@@ -14,8 +14,11 @@ namespace neko {
 
 #ifndef NEKO_NO_SCRIPTING
 
-  struct RenderSyncContext
-  {
+  struct RenderSyncContext {
+  private:
+    SManagerPtr scene_;
+    platform::RWLock sceneLock_;
+  public:
     platform::RWLock lock_;
     // per frame containers
     js::MeshVector frameNewMeshes;
@@ -42,6 +45,12 @@ namespace neko {
     void syncModelsFromRenderer( js::ModelVector& outCreated, js::ModelVector& outDeleted );
     void syncTextsFromRenderer( js::TextVector& outCreated, js::TextVector& outDeleted );
     void resetFromRenderer();
+    void createScene( const vec2& resolution );
+    void destroyScene();
+    SManagerPtr lockSceneWrite();
+    void unlockSceneWrite();
+    SManagerPtr lockSceneShared();
+    void unlockSceneShared();
   };
 
 #else

@@ -221,10 +221,9 @@ namespace neko {
     EditorPtr editor_;
     std::queue<uint64_t> updateAccounts_;
     platform::RWLock logicLock_;
-    SManagerPtr scene_;
     void preInitialize();
     void printInfo();
-    void resize( size_t width, size_t height );
+    void resize( Engine& engine, size_t width, size_t height );
     struct Flags {
       bool editorResized = false;
       bool mainbufResized = false;
@@ -240,14 +239,14 @@ namespace neko {
     void postInitialize( Engine& engine );
     Gfx( ThreadedLoaderPtr loader, FontManagerPtr fonts, MessagingPtr messaging, DirectorPtr director, ConsolePtr console );
     const Image& renderWindowReadPixels() override;
-    void processEvents( bool discardMouse, bool discardKeyboard ); //!< Process vital window events and such.
+    void processEvents( Engine& engine, bool discardMouse, bool discardKeyboard ); //!< Process vital window events and such.
     void updateRealTime( GameTime realTime, GameTime delta, Engine& engine );
     void preUpdate();
     void update( GameTime gameTime, GameTime delta, Engine& engine );
     inline Renderer& renderer() noexcept { return *( renderer_.get() ); }
-    void shutdown();
+    void shutdown( Engine& engine );
     void restart( Engine& engine );
-    void jsRestart();
+    void jsRestart( Engine& engine );
     virtual ~Gfx();
   };
 

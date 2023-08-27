@@ -51,7 +51,7 @@ namespace neko {
         restartEvent_.reset();
         console_->printf( srcGfx, "Restarting renderer" );
         gfx_->logicLock_.lock();
-        gfx_->jsRestart();
+        gfx_->jsRestart( *engine_ );
         gfx_->logicLock_.unlock();
         console_->printf( srcGfx, "Restart done" );
         restartedEvent_.set();
@@ -65,24 +65,26 @@ namespace neko {
       auto discardMouse = ImGui::GetIO().WantCaptureMouse;
       auto discardKeyboard = ImGui::GetIO().WantCaptureKeyboard;
 
-      gfx_->processEvents( discardMouse, discardKeyboard );
+      gfx_->processEvents( *engine_, discardMouse, discardKeyboard );
 
       auto time = engine_->sync().gameTime.load();
       auto delta = ( time - lastTime_ );
       lastTime_ = time;
 
-      gfx_->update( time, delta, *engine_.get() );
+      gfx_->update( time, delta, *engine_ );
 
       auto rt = engine_->sync().realTime.load();
       delta = ( rt - lastRealTime_ );
       lastRealTime_ = rt;
 
-      gfx_->updateRealTime( rt, delta, *engine_.get() );
+      gfx_->updateRealTime( rt, delta, *engine_ );
 
       gfx_->logicLock_.unlock();
 
       platform::sleep( 1 );
     }
+
+    gfx_->shutdown( *engine_ );
   }
 
   bool ThreadedRenderer::threadProc( platform::Event& running, platform::Event& wantStop, void* argument )

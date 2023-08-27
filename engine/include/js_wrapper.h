@@ -20,6 +20,7 @@ namespace neko {
       Wrapped_Mesh, //!< Dynamic: DynamicMesh
       Wrapped_Model, //!< Dynamic: Model
       Wrapped_Text, //!< Dynamic: Text
+      Wrapped_Entity,
       Max_WrappedType
     };
 

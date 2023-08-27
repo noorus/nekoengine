@@ -10,6 +10,8 @@
 #include "js_model.h"
 #include "js_game.h"
 #include "js_text.h"
+#include "js_entity.h"
+#include "components.h"
 #include "director.h"
 
 namespace neko {
@@ -88,11 +90,12 @@ namespace neko {
     js::DynamicObjectsRegistry<js::Mesh, JSMesh> meshRegistry_;
     js::DynamicObjectsRegistry<js::Model, js::JSModel> modelRegistry_;
     js::DynamicObjectsRegistry<js::Text, JSText> textRegistry_;
+    js::DynamicObjectsRegistry<js::Entity, js::JSEntity> entRegistry_;
   public:
     EnginePtr engine_;
     ConsolePtr console_;
     ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
-    void tick( GameTime tick, GameTime time );
+    void tick( GameTime tick, GameTime time, SManager& scene );
     void process();
     ~ScriptingContext();
     inline v8::Isolate* isolate() const noexcept { return isolate_; }
@@ -103,6 +106,7 @@ namespace neko {
     inline js::DynamicObjectsRegistry<js::Mesh, JSMesh>& meshreg() { return meshRegistry_; }
     inline js::DynamicObjectsRegistry<js::Model, js::JSModel>& modelreg() { return modelRegistry_; }
     inline js::DynamicObjectsRegistry<js::Text, JSText>& textreg() { return textRegistry_; }
+    inline js::DynamicObjectsRegistry<js::Entity, js::JSEntity>& entreg() { return entRegistry_; }
     inline RenderSyncContext& renderSync() { return director_->renderSync(); }
     js::V8Value addAndRunScript( const utf8String& filename );
     js::V8Value requireScript( const utf8String& filename );
@@ -117,17 +121,17 @@ namespace neko {
     wstring dataDirectory_;
   private:
     //! v8::ArrayBuffer::Allocator implementation
-    virtual void* Allocate( size_t length ) override;
-    virtual void* AllocateUninitialized( size_t length ) override;
-    virtual void Free( void* data, size_t length ) override;
+    void* Allocate( size_t length ) override;
+    void* AllocateUninitialized( size_t length ) override;
+    void Free( void* data, size_t length ) override;
   public:
     Scripting( EnginePtr engine );
     void initialize();
     void postInitialize();
     void shutdown();
-    virtual void preUpdate( GameTime time ) override;
-    virtual void tick( GameTime tick, GameTime time ) override;
-    virtual void postUpdate( GameTime delta, GameTime tick ) override;
+    void preUpdate( GameTime time ) override;
+    void tick( GameTime tick, GameTime time ) override;
+    void postUpdate( GameTime delta, GameTime tick ) override;
     virtual ~Scripting();
     inline ScriptingContextPtr getContext() noexcept { return global_; }
   };

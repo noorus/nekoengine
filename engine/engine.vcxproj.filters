@@ -456,6 +456,9 @@
     <ClCompile Include="src\c_paintables_system.cpp">
       <Filter>Source Files\components</Filter>
     </ClCompile>
+    <ClCompile Include="src\js_entity.cpp">
+      <Filter>Source Files\scripting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">
@@ -859,6 +862,9 @@
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_filepath.h">
       <Filter>Header Files\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_entity.h">
+      <Filter>Header Files\scripting</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

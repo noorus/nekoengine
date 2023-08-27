@@ -54,6 +54,8 @@ class DemoScene extends Scene
     ]
     this._text = new text({ translate: vec3( 200, 200, 0), str: "beep beep boop boop" } );
     Console.print( this._text );
+    const poop = new entity();
+    Console.print( poop );
   }
   enter()
   {

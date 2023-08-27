@@ -9,9 +9,6 @@
 
 namespace neko {
 
-  static int gcalccrea = 0;
-  static int gcalcfree = 0;
-
   FontStyle::FontStyle( FontFacePtr face, FT_Library ft, FT_Face ftface, Real size, vec2i atlasSize,
   FontRendering rendering, Real thickness, const unicodeString& prerenderGlyphs ): size_( size ),
   face_( face ), storedFaceIndex_( ftface->face_index ),

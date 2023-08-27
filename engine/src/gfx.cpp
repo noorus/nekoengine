@@ -223,10 +223,12 @@ namespace neko {
 
     auto realResolution = vec2( (Real)window_->getSize().x, (Real)window_->getSize().y );
 
-    scene_ = make_shared<SManager>( realResolution );
-    auto cam = scene_->createCamera( "gamecam" );
-    scene_->tn( cam ).translate = { 0.0f, 0.0f, 20.0f };
-    scene_->cams().setActive( cam );
+    engine.director()->renderSync().createScene( realResolution );
+    auto scene = engine.director()->renderSync().lockSceneWrite();
+
+    auto cam = scene->createCamera( "gamecam" );
+    scene->tn( cam ).translate = { 0.0f, 0.0f, 20.0f };
+    scene->cams().setActive( cam );
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -248,12 +250,13 @@ namespace neko {
     ImGui_ImplWin32_InitForOpenGL( window_->getSystemHandle() );
     ImGui_ImplOpenGL3_Init( c_imguiGlslVersion );
 
-    gameViewport_.setCameraData( scene_->cams().getActiveData() );
+    gameViewport_.setCameraData( scene->cams().getActiveData() );
+    engine.director()->renderSync().unlockSceneWrite();
 
     editor_ = make_shared<Editor>();
     editor_->initialize( renderer_, realResolution );
 
-    resize( window_->getSize().x, window_->getSize().y );
+    resize( engine, window_->getSize().x, window_->getSize().y );
 
     renderer_->initialize( gameViewport_.size().x, gameViewport_.size().y );
 
@@ -267,7 +270,7 @@ namespace neko {
     messaging_->listen( this );
   }
 
-  void Gfx::resize( size_t width, size_t height )
+  void Gfx::resize( Engine& engine, size_t width, size_t height )
   {
     auto newwindowsize = vec2i( width, height );
     if ( newwindowsize != windowViewport_.size() )
@@ -290,7 +293,9 @@ namespace neko {
     editor_->resize( windowViewport_, gameViewport_ );
 
     auto realResolution = vec2( (Real)width, (Real)height );
-    scene_->cams().setResolution( realResolution );
+    auto scene = engine.director()->renderSync().lockSceneWrite();
+    scene->cams().setResolution( realResolution );
+    engine.director()->renderSync().unlockSceneWrite();
 
     //glViewport( 0, 0, static_cast<GLsizei>( width ), static_cast<GLsizei>( height ) );
 
@@ -301,7 +306,7 @@ namespace neko {
 
   NEKO_EXTERN_CONVAR( vid_gamma );
 
-  void Gfx::processEvents( bool discardMouse, bool discardKeyboard )
+  void Gfx::processEvents( Engine& engine, bool discardMouse, bool discardKeyboard )
   {
     input_->update();
 
@@ -314,7 +319,7 @@ namespace neko {
       }
       else if ( evt.type == sf::Event::Resized )
       {
-        resize( evt.size.width, evt.size.height );
+        resize( engine, evt.size.width, evt.size.height );
       }
       else if ( evt.type == sf::Event::LostFocus )
       {
@@ -353,14 +358,18 @@ namespace neko {
 
   void Gfx::updateRealTime( GameTime realTime, GameTime delta, Engine& engine )
   {
-    scene_->cams().update();
-    gameViewport_.setCameraData( scene_->cams().getActiveData() );
+    auto scene = engine.director()->renderSync().lockSceneWrite();
+
+    scene->cams().update();
+    gameViewport_.setCameraData( scene->cams().getActiveData() );
 
     if ( editor_->enabled() )
     {
       bool ignoreInput = ( !window_->hasFocus() || platform::windowUnderCursor() != window_->getSystemHandle() );
-      editor_->updateRealtime( *renderer_, realTime, delta, input_, *scene_, windowViewport_, gameViewport_, ignoreInput );
+      editor_->updateRealtime( *renderer_, realTime, delta, input_, *scene, windowViewport_, gameViewport_, ignoreInput );
     }
+
+    engine.director()->renderSync().unlockSceneWrite();
   }
 
   void Gfx::clear( const vec4& color )
@@ -392,9 +401,11 @@ namespace neko {
       flags_.reloadShaders = false;
     }
 
-    scene_->update();
+    auto scene = engine.director()->renderSync().lockSceneWrite();
 
-    renderer_->update( *scene_, delta, time );
+    scene->update();
+
+    renderer_->update( *scene, delta, time );
     
     {
       char stats[256];
@@ -470,11 +481,11 @@ namespace neko {
       ImGui::EndMainMenuBar();
     }
 
-    if ( !editor_->draw( renderer_, *scene_, time, windowViewport_, gameViewport_ ) )
+    if ( !editor_->draw( renderer_, *scene, time, windowViewport_, gameViewport_ ) )
     {
-      auto camera = scene_->cams().getActive();
+      auto camera = scene->cams().getActive();
       if ( camera )
-        renderer_->drawGame( time, *scene_, *camera, &windowViewport_, gameViewport_, c_emptyVisualizations, false );
+        renderer_->drawGame( time, *scene, *camera, &windowViewport_, gameViewport_, c_emptyVisualizations, false );
     }
 
     if ( show_demo_window )
@@ -498,7 +509,7 @@ namespace neko {
     
     ImGui::Text( "Rendering" );
     ImGui::Separator();
-    scene_->cams().imguiCameraSelector();
+    scene->cams().imguiCameraSelector();
     ImGui::DragFloat( "gamma", &gamma, 0.0025f, 0.0f, 10.0f );
     g_CVar_vid_gamma.set( gamma );
     //ImGui::RadioButton()
@@ -509,12 +520,12 @@ namespace neko {
     auto fullw = ImGui::GetContentRegionAvail().x;
     ImGui::BeginChild( "Scenegraph", ImVec2( math::max( fullw * 0.32f, 200.0f ), ImGui::GetContentRegionAvail().y ), false,
       ImGuiWindowFlags_HorizontalScrollbar );
-    scene_->imguiSceneGraph();
+    scene->imguiSceneGraph();
     ImGui::EndChild();
     ImGui::SameLine();
     ImGui::BeginChild( "Node Editor", ImVec2( ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y ), false,
       ImGuiWindowFlags_HorizontalScrollbar );
-    scene_->imguiSelectedNodes();
+    scene->imguiSelectedNodes();
     ImGui::EndChild();
     ImGui::End();
     ImGui::PopStyleVar( 1 );
@@ -540,6 +551,8 @@ namespace neko {
 
 #endif
 
+    engine.director()->renderSync().unlockSceneWrite();
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
 
@@ -564,13 +577,13 @@ namespace neko {
     return lastCapture_;
   }
 
-  void Gfx::shutdown()
+  void Gfx::shutdown( Engine& engine )
   {
     input_->shutdown();
  
     messaging_->remove( this );
 
-    scene_.reset();
+    engine.director()->renderSync().destroyScene();
 
     gui_->shutdown();
 
@@ -589,22 +602,23 @@ namespace neko {
     platform::RenderWindowHandler::free();
   }
 
-  void Gfx::jsRestart()
+  void Gfx::jsRestart( Engine& engine )
   {
     renderer_->jsRestart();
-    renderer_->update( *scene_, 0.0, 0.0 );
+    auto scene = engine.director()->renderSync().lockSceneWrite();
+    renderer_->update( *scene, 0.0, 0.0 );
+    engine.director()->renderSync().unlockSceneWrite();
   }
 
   void Gfx::restart( Engine& engine )
   {
-    shutdown();
+    shutdown( engine );
     preInitialize();
     postInitialize( engine );
   }
 
   Gfx::~Gfx()
   {
-    shutdown();
     input_.reset();
   }
 

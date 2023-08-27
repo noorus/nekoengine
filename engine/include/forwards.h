@@ -20,6 +20,13 @@ namespace neko {
     //
   };
 
+  namespace c {
+    class manager;
+  }
+
+  using SManager = c::manager;
+  using SManagerPtr = shared_ptr<SManager>;
+
   template <class T, LogSource VLogSource>
   class Subsystem: public SystemBase<T> {
   private:
