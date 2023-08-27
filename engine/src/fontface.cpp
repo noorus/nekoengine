@@ -9,9 +9,6 @@
 
 namespace neko {
 
-  static int gcalccrea = 0;
-  static int gcalcfree = 0;
-
   FontFace::FontFace( FontPtr font, FT_Library ft, FT_Open_Args* args, FaceID faceIndex ):
     ft_( ft ), font_( font )
   {

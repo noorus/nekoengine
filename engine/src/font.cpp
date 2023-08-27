@@ -1,4 +1,4 @@
-include "pch.h"
+#include "pch.h"
 #include "locator.h"
 #include "font.h"
 #include "neko_exception.h"
@@ -8,10 +8,6 @@ include "pch.h"
 #include "engine.h"
 
 namespace neko {
-
-  static int gcalccrea = 0;
-  static int gcalcunlo = 0;
-  static int gcalcfree = 0;
 
   Font::Font( FontManagerPtr manager, IDType i, const utf8String& name ):
     LoadedResourceBase<Font>( name ), manager_( manager ), id_( i )
