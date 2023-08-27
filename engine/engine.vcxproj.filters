@@ -536,9 +536,6 @@
     <ClInclude Include="include\subsystem.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="include\js_wrapper.h">
-      <Filter>Header Files\scripting</Filter>
-    </ClInclude>
     <ClInclude Include="include\js_console.h">
       <Filter>Header Files\scripting</Filter>
     </ClInclude>
@@ -864,6 +861,18 @@
       <Filter>Header Files\shared</Filter>
     </ClInclude>
     <ClInclude Include="include\js_entity.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_dynamicobject.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_dynamicregistry.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_staticobject.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_types.h">
       <Filter>Header Files\scripting</Filter>
     </ClInclude>
   </ItemGroup>

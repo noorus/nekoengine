@@ -12,18 +12,15 @@ namespace neko {
 
   namespace js {
 
-    static const char* c_className = "vec2";
+    JS_DYNAMICOBJECT_DECLARE_STATICS_NAMED( Vector2, neko::vec2, vec2 )
 
-    static const mathShared::Messages c_equalsMessages( c_className + utf8String( ".equals" ), false );
-    static const mathShared::Messages c_greaterMessages( c_className + utf8String( ".greaterThan" ), false );
-    static const mathShared::Messages c_greaterOrEqualMessages( c_className + utf8String( ".greaterThanOrEqual" ), false );
-    static const mathShared::Messages c_lesserMessages( c_className + utf8String( ".lessThan" ), false );
-    static const mathShared::Messages c_lesserOrEqualMessages( c_className + utf8String( ".lessThanOrEqual" ), false );
-    static const mathShared::Messages c_addMessages( c_className + utf8String( ".add" ), false );
-    static const mathShared::Messages c_subMessages( c_className + utf8String( ".sub" ), false );
-
-    string DynamicObjectWrapper<Vector2, neko::vec2>::className( c_className );
-    WrappedType DynamicObjectWrapper<Vector2, neko::vec2>::internalType = Wrapped_Vector2;
+    static const mathShared::Messages c_equalsMessages( Vector2::className + utf8String( ".equals" ), false );
+    static const mathShared::Messages c_greaterMessages( Vector2::className + utf8String( ".greaterThan" ), false );
+    static const mathShared::Messages c_greaterOrEqualMessages( Vector2::className + utf8String( ".greaterThanOrEqual" ), false );
+    static const mathShared::Messages c_lesserMessages( Vector2::className + utf8String( ".lessThan" ), false );
+    static const mathShared::Messages c_lesserOrEqualMessages( Vector2::className + utf8String( ".lessThanOrEqual" ), false );
+    static const mathShared::Messages c_addMessages( Vector2::className + utf8String( ".add" ), false );
+    static const mathShared::Messages c_subMessages( Vector2::className + utf8String( ".sub" ), false );
 
     void Vector2::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
@@ -141,12 +138,12 @@ namespace neko {
       if ( args.IsConstructCall() )
       {
         auto thisObj = args.This();
-        auto ptr = ctx->vec2reg().createFromJS( thisObj, vec );
+        auto ptr = ctx->vec2reg()->createFromJS( thisObj, vec );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
       else
       {
-        auto ptr = ctx->vec2reg().createFrom( vec );
+        auto ptr = ctx->vec2reg()->createFrom( vec );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
     }
@@ -404,7 +401,7 @@ namespace neko {
     {
       auto normalized = glm::normalize( v_ );
       auto ctx = getScriptContext( args.GetIsolate() );
-      auto ptr = ctx->vec2reg().createFrom( normalized );
+      auto ptr = ctx->vec2reg()->createFrom( normalized );
       args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
     }
 
@@ -420,7 +417,7 @@ namespace neko {
           ( v_.x + other->v_.x ) * 0.5f,
           ( v_.y + other->v_.y ) * 0.5f );
         auto ctx = getScriptContext( args.GetIsolate() );
-        auto ptr = ctx->vec2reg().createFrom( mid );
+        auto ptr = ctx->vec2reg()->createFrom( mid );
         args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
       }
     }
@@ -459,7 +456,7 @@ namespace neko {
     void Vector2::js_perpendicular( const V8CallbackArgs& args )
     {
       auto ctx = getScriptContext( args.GetIsolate() );
-      auto ptr = ctx->vec2reg().createFrom( vec2( -v_.y, v_.x ) );
+      auto ptr = ctx->vec2reg()->createFrom( vec2( -v_.y, v_.x ) );
       args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
     }
 
@@ -473,7 +470,7 @@ namespace neko {
       {
         auto ret = vec2( v_ - ( 2 * glm::dot( v_, normal->v() ) * normal->v() ) );
         auto ctx = getScriptContext( args.GetIsolate() );
-        auto ptr = ctx->vec2reg().createFrom( ret );
+        auto ptr = ctx->vec2reg()->createFrom( ret );
         args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
       }
     }
@@ -514,7 +511,7 @@ namespace neko {
     void Vector2::js_inverse( const V8CallbackArgs& args )
     {
       auto ctx = getScriptContext( args.GetIsolate() );
-      auto ptr = ctx->vec2reg().createFrom( vec2( -v_.x, -v_.y ) );
+      auto ptr = ctx->vec2reg()->createFrom( vec2( -v_.x, -v_.y ) );
       args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
     }
 

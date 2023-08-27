@@ -9,8 +9,8 @@ namespace neko {
 
   namespace js {
 
-    string StaticObjectWrapper<Console>::className( "Console" );
-    WrappedType StaticObjectWrapper<Console>::internalType = Wrapped_Console;
+    string StaticObject<Console>::className( "Console" );
+    WrappedType StaticObject<Console>::internalType = Wrapped_Console;
 
     Console::Console( ConsolePtr console ): console_( move( console ) ) {}
 

@@ -69,66 +69,62 @@ namespace neko {
     }
   }
 
-# define JS_SET_GLOBAL_FUNCTION( x )                                                        \
-  global->Set( js::util::allocStringConserve( #x, isolate_ ),                               \
-    v8::FunctionTemplate::New(                                                              \
-      isolate_,                                                                             \
-      []( const v8::FunctionCallbackInfo<v8::Value>& args ) {                               \
-     auto self = static_cast<ScriptingContext*>( args.Data().As<v8::External>()->Value() ); \
-     self->js_##x( args );                                                                  \
-      },                                                                                    \
-      v8::External::New( isolate_, static_cast<void*>( this ) ) ) )
+  void ScriptContextBaseRegistries::initializeRegistries( Isolate* isolate, Local<ObjectTemplate>& global )
+  {
+    if ( !vec2Registry_ )
+      vec2Registry_ = make_shared<js::Vector2::RegistryType>();
+    vec2Registry_->initialize( isolate, global );
+
+    if ( !vec3Registry_ )
+      vec3Registry_ = make_shared<js::Vector3::RegistryType>();
+    vec3Registry_->initialize( isolate, global );
+
+    if ( !quaternionRegistry_ )
+      quaternionRegistry_ = make_shared<js::Quaternion::RegistryType>();
+    quaternionRegistry_->initialize( isolate, global );
+
+    if ( !meshRegistry_ )
+      meshRegistry_ = make_shared<js::Mesh::RegistryType>();
+    meshRegistry_->initialize( isolate, global );
+
+    if ( !modelRegistry_ )
+      modelRegistry_ = make_shared<js::Model::RegistryType>();
+    modelRegistry_->initialize( isolate, global );
+
+    if ( !textRegistry_ )
+      textRegistry_ = make_shared<js::Text::RegistryType>();
+    textRegistry_->initialize( isolate, global );
+
+    if ( !entityRegistry_ )
+      entityRegistry_ = make_shared<js::Entity::RegistryType>();
+    entityRegistry_->initialize( isolate, global );
+  }
+
+  void ScriptContextBaseRegistries::clearRegistries()
+  {
+    vec2Registry_->clear();
+    vec3Registry_->clear();
+    quaternionRegistry_->clear();
+    meshRegistry_->clear();
+    modelRegistry_->clear();
+    textRegistry_->clear();
+    entityRegistry_->clear();
+  }
+
+  void ScriptContextBaseRegistries::destroyRegistries()
+  {
+    vec2Registry_.reset();
+    vec3Registry_.reset();
+    quaternionRegistry_.reset();
+    meshRegistry_.reset();
+    modelRegistry_.reset();
+    textRegistry_.reset();
+    entityRegistry_.reset();
+  }
 
   void ScriptingContext::registerTemplateGlobals( Local<ObjectTemplate>& global )
   {
-    vec2Registry_.initialize( isolate_, global );
-    vec3Registry_.initialize( isolate_, global );
-    quatRegistry_.initialize( isolate_, global );
-    meshRegistry_.initialize( isolate_, global );
-    modelRegistry_.initialize( isolate_, global );
-    textRegistry_.initialize( isolate_, global );
-    entRegistry_.initialize( isolate_, global );
-
-    JS_SET_GLOBAL_FUNCTION( include );
-    JS_SET_GLOBAL_FUNCTION( require );
-  }
-
-  void ScriptingContext::js_include( const v8::FunctionCallbackInfo<v8::Value>& args )
-  {
-    // FIXME: This actually crashes and burns due to some sort of (handle?) heap fuckup
-
-    HandleScope handleScope( isolate_ );
-
-    if ( args.Length() != 1 || !args[0]->IsString() )
-    {
-      js::util::throwException( isolate_, "Expected file name as argument" );
-      args.GetReturnValue().Set( false );
-      return;
-    }
-
-    v8::String::Utf8Value filename( isolate_, args[0] );
-    auto retval = addAndRunScript( *filename );
-
-    args.GetReturnValue().Set( retval );
-  }
-
-  void ScriptingContext::js_require( const v8::FunctionCallbackInfo<v8::Value>& args )
-  {
-    // FIXME: This actually crashes and burns due to some sort of (handle?) heap fuckup
-
-    HandleScope handleScope( isolate_ );
-
-    if ( args.Length() != 1 || !args[0]->IsString() )
-    {
-      js::util::throwException( isolate_, "Expected file name as argument" );
-      args.GetReturnValue().Set( false );
-      return;
-    }
-
-    v8::String::Utf8Value filename( isolate_, args[0] );
-    auto retval = requireScript( *filename );
-
-    args.GetReturnValue().Set( retval );
+    initializeRegistries( isolate_, global );
   }
 
   void ScriptingContext::registerContextGlobals( Global<Context>& globalContext )
@@ -142,7 +138,7 @@ namespace neko {
     jsGame_ = js::Game::create( isolate_, context->Global() );
   }
 
-  js::V8Value ScriptingContext::addAndRunScript( const utf8String& filename )
+  js::V8Value ScriptingContext::addAndRunScript( SManager& scene, const utf8String& filename )
   {
     HandleScope handleScope( isolate_ );
 
@@ -185,6 +181,8 @@ namespace neko {
 
   void ScriptingContext::tick( GameTime tick, GameTime time, SManager& scene )
   {
+    sceneRuntimeDontTouch_ = &scene;
+
     isolate_->Enter();
     HandleScope handleScope( isolate_ );
     auto context = Local<Context>::New( isolate_, ctx_ );
@@ -194,24 +192,24 @@ namespace neko {
     renderSync().syncFromScripting();
 
     isolate_->Exit();
+
+    sceneRuntimeDontTouch_ = nullptr;
   }
 
-  void ScriptingContext::process()
+  void ScriptingContext::process( SManager& scene )
   {
-    isolate_->PerformMicrotaskCheckpoint();
+    sceneRuntimeDontTouch_ = &scene;
 
+    isolate_->PerformMicrotaskCheckpoint();
     v8::platform::PumpMessageLoop( owner_->platform_.get(), isolate_, v8::platform::MessageLoopBehavior::kDoNotWait );
+
+    sceneRuntimeDontTouch_ = nullptr;
   }
 
   ScriptingContext::~ScriptingContext()
   {
-    entRegistry_.clear();
-    textRegistry_.clear();
-    modelRegistry_.clear();
-    meshRegistry_.clear();
-    quatRegistry_.clear();
-    vec3Registry_.clear();
-    vec2Registry_.clear();
+    clearRegistries();
+    destroyRegistries();
 
     if ( isolate_ )
     {

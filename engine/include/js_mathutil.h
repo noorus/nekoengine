@@ -4,7 +4,6 @@
 #include "neko_types.h"
 #include "neko_exception.h"
 #include "console.h"
-#include "js_wrapper.h"
 #include "js_math.h"
 #include "scripting.h"
 
@@ -125,22 +124,23 @@ namespace neko {
         return retval;
       }
 
-      template <typename T, typename Y>
-      inline shared_ptr<T> inl_addition( V8Context& context, const v8::ReturnValue<v8::Value>& ret, Y& registry, const V8Value& lhs, const V8Value& rhs )
+      template <typename T>
+      inline shared_ptr<T> inl_addition( V8Context& context, const v8::ReturnValue<v8::Value>& ret, typename T::RegistryPtrType& registry, const V8Value& lhs, const V8Value& rhs )
       {
         auto lobj = extractWrappedDynamic<T>( context, lhs );
         auto robj = extractWrappedDynamic<T>( context, rhs );
         auto sum = ( lobj->v() + robj->v() );
-        return registry.createFrom( sum );
+        return registry->createFrom( sum );
       }
 
-      template <typename T, typename Y>
-      inline shared_ptr<T> inl_subtraction( V8Context& context, const v8::ReturnValue<v8::Value>& ret, Y& registry, const V8Value& lhs, const V8Value& rhs )
+      template <typename T>
+      inline shared_ptr<T> inl_subtraction( V8Context& context, const v8::ReturnValue<v8::Value>& ret,
+        typename T::RegistryPtrType& registry, const V8Value& lhs, const V8Value& rhs )
       {
         auto lobj = extractWrappedDynamic<T>( context, lhs );
         auto robj = extractWrappedDynamic<T>( context, rhs );
         auto sum = ( lobj->v() - robj->v() );
-        return registry.createFrom( sum );
+        return registry->createFrom( sum );
       }
 
       inline bool jsmath_add( const V8CallbackArgs& args, ScriptingContext* ctx, const Messages& msgs, const V8Value& lhs, const V8Value& rhs )
@@ -156,13 +156,13 @@ namespace neko {
 
         if ( lhsType == Wrapped_Vector2 && rhsType == Wrapped_Vector2 )
         {
-          auto ptr = inl_addition<Vector2, DynamicObjectsRegistry<Vector2, vec2>>( context, args.GetReturnValue(), ctx->vec2reg(), lhs, rhs );
+          auto ptr = inl_addition<Vector2>( context, args.GetReturnValue(), ctx->vec2reg(), lhs, rhs );
           args.GetReturnValue().Set( ptr->handle( context->GetIsolate() ) );
           return true;
         }
         else if ( lhsType == Wrapped_Vector3 && rhsType == Wrapped_Vector3 )
         {
-          auto ptr = inl_addition<Vector3, DynamicObjectsRegistry<Vector3, vec3>>( context, args.GetReturnValue(), ctx->vec3reg(), lhs, rhs );
+          auto ptr = inl_addition<Vector3>( context, args.GetReturnValue(), ctx->vec3reg(), lhs, rhs );
           args.GetReturnValue().Set( ptr->handle( context->GetIsolate() ) );
           return true;
         }
@@ -183,13 +183,13 @@ namespace neko {
 
         if ( lhsType == Wrapped_Vector2 && rhsType == Wrapped_Vector2 )
         {
-          auto ptr = inl_subtraction<Vector2, DynamicObjectsRegistry<Vector2, vec2>>( context, args.GetReturnValue(), ctx->vec2reg(), lhs, rhs );
+          auto ptr = inl_subtraction<Vector2>( context, args.GetReturnValue(), ctx->vec2reg(), lhs, rhs );
           args.GetReturnValue().Set( ptr->handle( context->GetIsolate() ) );
           return true;
         }
         else if ( lhsType == Wrapped_Vector3 && rhsType == Wrapped_Vector3 )
         {
-          auto ptr = inl_subtraction<Vector3, DynamicObjectsRegistry<Vector3, vec3>>( context, args.GetReturnValue(), ctx->vec3reg(), lhs, rhs );
+          auto ptr = inl_subtraction<Vector3>( context, args.GetReturnValue(), ctx->vec3reg(), lhs, rhs );
           args.GetReturnValue().Set( ptr->handle( context->GetIsolate() ) );
           return true;
         }

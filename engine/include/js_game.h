@@ -4,7 +4,7 @@
 #include "neko_types.h"
 #include "neko_exception.h"
 #include "console.h"
-#include "js_wrapper.h"
+#include "js_staticobject.h"
 
 namespace neko {
 
@@ -33,7 +33,7 @@ namespace neko {
 
     using SceneMap = map<string, Scene>;
 
-    class Game: public StaticObjectWrapper<Game> {
+    class Game: public StaticObject<Game> {
     private:
       void registerGlobals( Isolate* isolate, V8FunctionTemplate& tpl ) final;
     protected:

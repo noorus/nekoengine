@@ -4,7 +4,7 @@
 #include "neko_types.h"
 #include "neko_exception.h"
 #include "console.h"
-#include "js_wrapper.h"
+#include "js_staticobject.h"
 
 namespace neko {
 
@@ -13,7 +13,7 @@ namespace neko {
     class Console;
     using JSConsolePtr = unique_ptr<Console>;
 
-    class Console: public StaticObjectWrapper<Console> {
+    class Console: public StaticObject<Console> {
     private:
       ConsolePtr console_;
       void registerGlobals( Isolate* isolate, V8FunctionTemplate& tpl ) final;

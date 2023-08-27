@@ -42,19 +42,19 @@ class DemoScene extends Scene
     this._mesh = new mesh(verts, indices);*/
     //this._mesh = new mesh("ground", vec3(16, 16, 0.2), vec2(32));
     //this._mesh = new mesh("plane", vec2(16, 16), vec2(32), vec3(0, 1, 0));
-    this._mesh = new mesh("box", vec3(3, 3, 3), vec2(1));
+    this._mesh = new Mesh("box", vec3(3, 3, 3), vec2(1));
     this._ctr = 0;
     Console.print(this._mesh);
     this._models = [
-      new model({
+      new Model({
         mesh: this._mesh,
         scale: vec3(1, 1, 1),
         translate: vec3(0, 1, 0)
       })
     ]
-    this._text = new text({ translate: vec3( 200, 200, 0), str: "beep beep boop boop" } );
+    this._text = new Text({ translate: vec3( 200, 200, 0), str: "beep beep boop boop" } );
     Console.print( this._text );
-    const poop = new entity();
+    const poop = new Entity( { name:"omg script entity"});
     Console.print( poop );
   }
   enter()

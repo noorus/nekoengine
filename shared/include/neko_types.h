@@ -254,6 +254,12 @@ namespace neko {
     vec3 origin { 0.0f };
     vec3 direction { 0.0f };
   };
+    
+  // This is a nasty little utility class to help with type deduction in
+  // template specialization and other situations.
+  // Its only job is to signal a type to the compiler without generating a footprint.
+  template <typename T>
+  struct type {};
 
   class nocopy {
   private:

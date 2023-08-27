@@ -20,10 +20,7 @@ namespace neko {
 
   namespace js {
 
-    static const char* c_className = "mesh";
-
-    string DynamicObjectWrapper<Mesh, JSMesh>::className( c_className );
-    WrappedType DynamicObjectWrapper<Mesh, JSMesh>::internalType = Wrapped_Mesh;
+    JS_DYNAMICOBJECT_DECLARE_STATICS( Mesh, neko::JSMesh )
 
     void Mesh::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
@@ -196,13 +193,13 @@ namespace neko {
       if ( args.IsConstructCall() )
       {
         auto thisObj = args.This();
-        auto ptr = ctx->meshreg().createFromJS( thisObj, mesh );
+        auto ptr = ctx->meshreg()->createFromJS( thisObj, mesh );
         ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
       else
       {
-        auto ptr = ctx->meshreg().createFrom( mesh );
+        auto ptr = ctx->meshreg()->createFrom( mesh );
         ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }

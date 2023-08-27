@@ -9,16 +9,12 @@
 # include "js_mathutil.h"
 # include "js_mesh.h"
 # include "js_model.h"
-# include "js_wrapper.h"
 
 namespace neko {
 
   namespace js {
 
-    static const char* c_className = "model";
-
-    string DynamicObjectWrapper<Model, JSModel>::className( c_className );
-    WrappedType DynamicObjectWrapper<Model, JSModel>::internalType = Wrapped_Model;
+    JS_DYNAMICOBJECT_DECLARE_STATICS( Model, neko::js::JSModel )
 
     JSModel::JSModel()
     {
@@ -75,30 +71,30 @@ namespace neko {
       auto ctx = getScriptContext( isolate );
 
       if ( !model.scale_ )
-        model.scale_ = ctx->vec3reg().createFrom( defaultScale );
+        model.scale_ = ctx->vec3reg()->createFrom( defaultScale );
       if ( !model.translate_ )
-        model.translate_ = ctx->vec3reg().createFrom( defaultTranslate );
+        model.translate_ = ctx->vec3reg()->createFrom( defaultTranslate );
       if ( !model.rotate_ )
-        model.rotate_ = ctx->quatreg().createFrom( defaultRotate );
+        model.rotate_ = ctx->quatreg()->createFrom( defaultRotate );
 
       if ( args.IsConstructCall() )
       {
         auto thisObj = args.This();
-        auto ptr = ctx->modelreg().createFromJS( thisObj, model );
+        auto ptr = ctx->modelreg()->createFromJS( thisObj, model );
         ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
       else
       {
-        auto ptr = ctx->modelreg().createFrom( model );
+        auto ptr = ctx->modelreg()->createFrom( model );
         ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
     }
 
-    JS_WRAPPER_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Model, Scale, local_.scale_ )
-    JS_WRAPPER_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Model, Translate, local_.translate_ )
-    JS_WRAPPER_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS( Model, Rotate, local_.rotate_ )
+    JS_DYNAMICOBJECT_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Model, Scale, local_.scale_ )
+    JS_DYNAMICOBJECT_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Model, Translate, local_.translate_ )
+    JS_DYNAMICOBJECT_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS( Model, Rotate, local_.rotate_ )
 
     void Model::js_toString( const V8CallbackArgs& args )
     {

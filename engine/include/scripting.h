@@ -13,6 +13,10 @@
 #include "js_entity.h"
 #include "components.h"
 #include "director.h"
+#include "js_types.h"
+#include "js_dynamicobject.h"
+#include "js_dynamicregistry.h"
+#include "js_util.h"
 
 namespace neko {
 
@@ -66,7 +70,32 @@ namespace neko {
 
   using V8FunctionCallback = void(*)( const v8::FunctionCallbackInfo<v8::Value>& args );
 
-  class ScriptingContext: public nocopy {
+# define SCRIPTCONTEXTBASE_DECLARE_REGISTRY( Type, Lowercase ) \
+protected:                                                     \
+  Type::RegistryPtrType Lowercase##Registry_;                  \
+public:                                                        \
+  template <typename T>                                        \
+  T::RegistryPtrType registry( type<Type> )                    \
+  {                                                            \
+   return Lowercase##Registry_;                                \
+  }
+
+  class ScriptContextBaseRegistries {
+  private: // Declare registries here using the macro above
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Vector2, vec2 )
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Vector3, vec3 )
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Quaternion, quaternion )
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Mesh, mesh )
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Model, model )
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Text, text )
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Entity, entity )
+  protected:
+    void initializeRegistries( js::Isolate* isolate, js::Local<js::ObjectTemplate>& global );
+    void clearRegistries();
+    void destroyRegistries();
+  };
+
+  class ScriptingContext: public nocopy, public ScriptContextBaseRegistries {
   private:
     const bool externalIsolate_;
     v8::Isolate* isolate_;
@@ -74,41 +103,51 @@ namespace neko {
     Scripting* owner_;
     DirectorPtr director_;
     ScriptMap scripts_;
+    SManager* sceneRuntimeDontTouch_ = nullptr;
     void initialize();
   private:
     void registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global );
     void registerContextGlobals( v8::Global<v8::Context>& globalContext );
-    void js_include( const v8::FunctionCallbackInfo<v8::Value>& args );
-    void js_require( const v8::FunctionCallbackInfo<v8::Value>& args );
   protected:
     js::JSConsolePtr jsConsole_;
     js::JSMathPtr jsMath_;
     js::JSGamePtr jsGame_;
-    js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
+    /* js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
     js::DynamicObjectsRegistry<js::Vector3, vec3> vec3Registry_;
     js::DynamicObjectsRegistry<js::Quaternion, quaternion> quatRegistry_;
     js::DynamicObjectsRegistry<js::Mesh, JSMesh> meshRegistry_;
     js::DynamicObjectsRegistry<js::Model, js::JSModel> modelRegistry_;
     js::DynamicObjectsRegistry<js::Text, JSText> textRegistry_;
-    js::DynamicObjectsRegistry<js::Entity, js::JSEntity> entRegistry_;
+    js::DynamicObjectsRegistry<js::Entity, js::JSEntity> entRegistry_;*/
   public:
     EnginePtr engine_;
     ConsolePtr console_;
     ScriptingContext( Scripting* owner, v8::ArrayBuffer::Allocator* allocator, v8::Isolate* isolate = nullptr );
     void tick( GameTime tick, GameTime time, SManager& scene );
-    void process();
+    void process( SManager& scene );
     ~ScriptingContext();
     inline v8::Isolate* isolate() const noexcept { return isolate_; }
     inline v8::Global<v8::Context>& ctx() noexcept { return ctx_; }
-    inline js::DynamicObjectsRegistry<js::Vector2, vec2>& vec2reg() { return vec2Registry_; }
-    inline js::DynamicObjectsRegistry<js::Vector3, vec3>& vec3reg() { return vec3Registry_; }
-    inline js::DynamicObjectsRegistry<js::Quaternion, quaternion>& quatreg() { return quatRegistry_; }
-    inline js::DynamicObjectsRegistry<js::Mesh, JSMesh>& meshreg() { return meshRegistry_; }
-    inline js::DynamicObjectsRegistry<js::Model, js::JSModel>& modelreg() { return modelRegistry_; }
-    inline js::DynamicObjectsRegistry<js::Text, JSText>& textreg() { return textRegistry_; }
-    inline js::DynamicObjectsRegistry<js::Entity, js::JSEntity>& entreg() { return entRegistry_; }
+    inline js::Vector2::RegistryPtrType vec2reg() { return registry<js::Vector2>( type<js::Vector2>() ); }
+    inline js::Vector3::RegistryPtrType vec3reg() { return registry<js::Vector3>( type<js::Vector3>() ); }
+    inline js::Quaternion::RegistryPtrType quatreg() { return registry<js::Quaternion>( type<js::Quaternion>() ); }
+    inline js::Entity::RegistryPtrType entreg() { return registry<js::Entity>( type<js::Entity>() ); }
+    inline js::Mesh::RegistryPtrType meshreg() { return registry<js::Mesh>( type<js::Mesh>() ); }
+    inline js::Model::RegistryPtrType modelreg() { return registry<js::Model>( type<js::Model>() ); }
+    inline js::Text::RegistryPtrType textreg() { return registry<js::Text>( type<js::Text>() ); }
+    //inline js::DynamicObjectsRegistry<js::Vector3, vec3>& vec3reg() { return vec3Registry_; }
+    //inline js::DynamicObjectsRegistry<js::Quaternion, quaternion>& quatreg() { return quatRegistry_; }
+    //inline js::DynamicObjectsRegistry<js::Mesh, JSMesh>& meshreg() { return meshRegistry_; }
+    //inline js::DynamicObjectsRegistry<js::Model, js::JSModel>& modelreg() { return modelRegistry_; }
+    //inline js::DynamicObjectsRegistry<js::Text, JSText>& textreg() { return textRegistry_; }
+    //inline js::DynamicObjectsRegistry<js::Entity, js::JSEntity>& entreg() { return entRegistry_; }
     inline RenderSyncContext& renderSync() { return director_->renderSync(); }
-    js::V8Value addAndRunScript( const utf8String& filename );
+    inline SManager& scene()
+    {
+      assert( sceneRuntimeDontTouch_ );
+      return *sceneRuntimeDontTouch_;
+    }
+    js::V8Value addAndRunScript( SManager& scene, const utf8String& filename );
     js::V8Value requireScript( const utf8String& filename );
   };
 

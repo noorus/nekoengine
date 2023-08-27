@@ -488,6 +488,7 @@ namespace neko {
       entity createNode( entity parent, string_view name );
       entity createRenderable( entity parent, string_view name );
       entity createNode( string_view name );
+      void destroyNode( entity e );
       entity createCamera( string_view name );
       entity createText( string_view name );
       entity createPlane( string_view name );

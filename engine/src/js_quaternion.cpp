@@ -12,10 +12,7 @@ namespace neko {
 
   namespace js {
 
-    static const char* c_className = "quaternion";
-
-    string DynamicObjectWrapper<Quaternion, neko::quaternion>::className( c_className );
-    WrappedType DynamicObjectWrapper<Quaternion, neko::quaternion>::internalType = Wrapped_Quaternion;
+    JS_DYNAMICOBJECT_DECLARE_STATICS_NAMED( Quaternion, neko::quaternion, quat )
 
     void Quaternion::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
@@ -101,12 +98,13 @@ namespace neko {
       if ( args.IsConstructCall() )
       {
         auto thisObj = args.This();
-        auto ptr = ctx->quatreg().createFromJS( thisObj, quat );
+       // ctx->registry<q
+        auto ptr = ctx->quatreg()->createFromJS( thisObj, quat );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
       else
       {
-        auto ptr = ctx->quatreg().createFrom( quat );
+        auto ptr = ctx->quatreg()->createFrom( quat );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
     }
@@ -230,7 +228,7 @@ namespace neko {
     {
       auto normalized = glm::normalize( q_ );
       auto ctx = getScriptContext( args.GetIsolate() );
-      auto ptr = ctx->quatreg().createFrom( normalized );
+      auto ptr = ctx->quatreg()->createFrom( normalized );
       args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
     }
 
@@ -255,7 +253,7 @@ namespace neko {
       }
       auto resQ = glm::lerp( q_, other->q_, interp );
       auto ctx = getScriptContext( args.GetIsolate() );
-      auto ptr = ctx->quatreg().createFrom( resQ );
+      auto ptr = ctx->quatreg()->createFrom( resQ );
       args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
     }
 
@@ -280,7 +278,7 @@ namespace neko {
       }
       auto resQ = glm::slerp( q_, other->q_, interp );
       auto ctx = getScriptContext( args.GetIsolate() );
-      auto ptr = ctx->quatreg().createFrom( resQ );
+      auto ptr = ctx->quatreg()->createFrom( resQ );
       args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
     }
 

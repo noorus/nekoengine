@@ -13,8 +13,8 @@ namespace neko {
 
     static const char* c_className = "Game";
 
-    string StaticObjectWrapper<Game>::className( c_className );
-    WrappedType StaticObjectWrapper<Game>::internalType = Wrapped_Game;
+    string StaticObject<Game>::className( c_className );
+    WrappedType StaticObject<Game>::internalType = Wrapped_Game;
 
     Game::Game() {}
 

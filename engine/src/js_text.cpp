@@ -21,10 +21,7 @@ namespace neko {
 
   namespace js {
 
-    static const char* c_className = "text";
-
-    string DynamicObjectWrapper<Text, JSText>::className( c_className );
-    WrappedType DynamicObjectWrapper<Text, JSText>::internalType = Wrapped_Text;
+    JS_DYNAMICOBJECT_DECLARE_STATICS( Text, neko::JSText )
 
     void Text::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
@@ -75,30 +72,30 @@ namespace neko {
       auto ctx = getScriptContext( isolate );
 
       if ( !text.scale_ )
-        text.scale_ = ctx->vec3reg().createFrom( defaultScale );
+        text.scale_ = ctx->vec3reg()->createFrom( defaultScale );
       if ( !text.translate_ )
-        text.translate_ = ctx->vec3reg().createFrom( defaultTranslate );
+        text.translate_ = ctx->vec3reg()->createFrom( defaultTranslate );
       if ( !text.rotate_ )
-        text.rotate_ = ctx->quatreg().createFrom( defaultRotate );
+        text.rotate_ = ctx->quatreg()->createFrom( defaultRotate );
 
       if ( args.IsConstructCall() )
       {
         auto thisObj = args.This();
-        auto ptr = ctx->textreg().createFromJS( thisObj, text );
+        auto ptr = ctx->textreg()->createFromJS( thisObj, text );
         ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
       else
       {
-        auto ptr = ctx->textreg().createFrom( text );
+        auto ptr = ctx->textreg()->createFrom( text );
         ctx->renderSync().constructed( ptr.get() );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
     }
 
-    JS_WRAPPER_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Text, Scale, local_.scale_ )
-    JS_WRAPPER_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Text, Translate, local_.translate_ )
-    JS_WRAPPER_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS( Text, Rotate, local_.rotate_ )
+    JS_DYNAMICOBJECT_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Text, Scale, local_.scale_ )
+    JS_DYNAMICOBJECT_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Text, Translate, local_.translate_ )
+    JS_DYNAMICOBJECT_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS( Text, Rotate, local_.rotate_ )
 
     void Text::js_toString( const V8CallbackArgs& args )
     {

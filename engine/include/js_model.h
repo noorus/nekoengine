@@ -5,7 +5,7 @@
 #include "neko_exception.h"
 #include "console.h"
 #include "mesh_primitives.h"
-#include "js_wrapper.h"
+#include "js_dynamicobject.h"
 #include "js_math.h"
 #include "js_mesh.h"
 #include "locator.h"
@@ -24,7 +24,7 @@ namespace neko {
       JSModel();
     };
 
-    class Model: public DynamicObjectWrapper<Model, JSModel> {
+    class Model: public DynamicObject<Model, JSModel> {
     private:
       JSModel local_; //!< Internal model.
     protected:

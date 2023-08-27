@@ -3,3 +3,45 @@
 // For more information see https://go.microsoft.com/fwlink/?linkid=865984
 #define neko_avx_align __declspec( align( 32 ) )
 #define neko_avx_inline
+#define JS_DYNAMICOBJECT_DECLARE_STATICS( T, Base ) \
+  utf8String DynamicObject<T, Base>::className( #T ); \
+  WrappedType DynamicObject<T, Base>::internalType = Wrapped_ ## T ## ;
+#define JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( T, Method ) \
+  void T##::js_##Method( const V8CallbackArgs& args ) { \
+    const utf8String funcName( #T "::" #Method ); \
+    auto isolate = args.GetIsolate(); \
+    HandleScope handleScope( isolate ); \
+    auto context = args.GetIsolate()->GetCurrentContext(); \
+    auto scriptCtx = scriptContext( isolate ); \
+    v8::Local<v8::Value> ret;
+#define JS_DYNAMICOBJECT_MEMBERFUNCTION_END() \
+    args.GetReturnValue().Set( ret ); \
+  }
+#define JS_DYNAMICOBJECT_CONSTRUCTBODY_BEGIN( T )       \
+const utf8String funcName( #T "::Constructor" );       \
+auto isolate = args.GetIsolate();                      \
+HandleScope handleScope( isolate );                    \
+auto context = args.GetIsolate()->GetCurrentContext(); \
+auto scriptCtx = scriptContext( isolate );
+
+#define JS_DYNAMICOBJECT_CONSTRUCTBODY_DO( T, Source )                          \
+if ( args.IsConstructCall() )                                                 \
+{                                                                             \
+  auto thisObj = args.This();                                                 \
+  auto ptr = scriptCtx->registry<T>( type<T> {} )->createFromJS( thisObj, Source ); \
+  args.GetReturnValue().Set( ptr->handle( isolate ) );                        \
+}                                                                             \
+else                                                                          \
+{                                                                             \
+  auto ptr = scriptCtx->registry<T>( type<T> {} )->createFrom( Source );            \
+  args.GetReturnValue().Set( ptr->handle( isolate ) );                        \
+}
+    
+#define JS_DYNAMICOBJECT_DESTRUCTBODY_DO( T, LocalPtr ) \
+if ( isolate && !deleted_ ) \
+{ \
+  auto ctx = scriptContext( isolate ); \
+  if ( ctx ) \
+    ctx->registry<T>( type<T>{} )->destroy( LocalPtr ); \
+} \
+DynamicObject<T, BaseType>::jsOnDestruct( isolate );

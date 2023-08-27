@@ -19,6 +19,8 @@
 
 namespace neko {
 
+  using v8::V8;
+
 # ifdef _DEBUG
 #  define NEKO_CONFIG_SUBDIRNAME "debug"
 # else
@@ -30,24 +32,24 @@ namespace neko {
 
   Scripting::Scripting( EnginePtr engine ): Subsystem( move( engine ) ), v8::ArrayBuffer::Allocator()
   {
-    engine_->console()->printf( srcScripting, "Initializing V8 v%s", v8::V8::GetVersion() );
+    engine_->console()->printf( srcScripting, "Initializing V8 v%s", V8::GetVersion() );
 
     rootDirectory_ = platform::getCurrentDirectory();
     dataDirectory_ = rootDirectory_ + c_v8BaseDirectory;
     dataDirectory_.append( L"" NEKO_CONFIG_SUBDIRNAME "\\" );
 
-    if ( !v8::V8::InitializeICU() )
+    if ( !V8::InitializeICU() )
       NEKO_EXCEPT( "V8 ICU initialization failed" );
 
-    v8::V8::InitializeExternalStartupDataFromFile( platform::wideToUtf8( dataDirectory_ + c_snapshotData ).c_str() );
+    V8::InitializeExternalStartupDataFromFile( platform::wideToUtf8( dataDirectory_ + c_snapshotData ).c_str() );
 
     platform_ = move( v8::platform::NewDefaultPlatform( 0, // threadpoolsize
       v8::platform::IdleTaskSupport::kDisabled // idle task support
       ) );
 
-    v8::V8::InitializePlatform( platform_.get() );
+    V8::InitializePlatform( platform_.get() );
 
-    v8::V8::Initialize();
+    V8::Initialize();
   }
 
   void Scripting::initialize()
@@ -57,8 +59,10 @@ namespace neko {
 
   void Scripting::postInitialize()
   {
+    auto scene = global_->renderSync().lockSceneWrite();
     v8::HandleScope handleScope( global_->isolate() );
-    global_->addAndRunScript( "initialization.js" );
+    global_->addAndRunScript( *scene, "initialization.js" );
+    global_->renderSync().unlockSceneWrite();
   }
 
   void Scripting::shutdown()
@@ -75,7 +79,7 @@ namespace neko {
   {
     auto scene = global_->renderSync().lockSceneWrite();
     global_->tick( tick, time, *scene );
-    global_->process();
+    global_->process( *scene );
     global_->renderSync().unlockSceneWrite();
   }
 

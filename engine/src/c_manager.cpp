@@ -74,6 +74,11 @@ namespace neko {
       return createNode( root_, name );
     }
 
+    void manager::destroyNode( entity e )
+    {
+      registry_.destroy( e );
+    }
+
     entity manager::createCamera( string_view name )
     {
       auto e = createNode( root_, name );

@@ -1,6 +1,6 @@
 ﻿{
   "env": {
-    "es2022":  true
+    "es2022": true
   },
   "extends": [
     "eslint:recommended"
@@ -16,14 +16,15 @@
   },
   "globals": {
     "Console": "writable",
-    "Math": "writable",
+    "NekoMath": "writable",
     "Game": "writable",
     "mesh": "writable",
     "model": "writable",
     "text": "writable",
     "vec2": "writable",
-    "vec3": "readonly",
-    "quat": "readonly"
+    "vec3": "writable",
+    "quat": "writable",
+    "entity": "writable"
   },
   "plugins": [],
   "root": true,
@@ -76,8 +77,10 @@
     "new-cap": [
       "error",
       {
+        "newIsCap": true,
+        "capIsNew": true,
         "properties": false,
-        "newIsCapExceptions": [ "ctor", "module" ]
+        "newIsCapExceptions": [ "ctor", "module", "vec2", "vec3", "quat", "mesh", "model", "text", "entity" ]
       }
     ],
     "new-parens": "error",
@@ -140,6 +143,7 @@
     "no-unreachable-loop": "error",
     "no-unsafe-optional-chaining": "error",
     "no-unused-expressions": "off",
+    "no-unused-vars": "off",
     "no-use-before-define": "off",
     "no-useless-backreference": "error",
     "no-useless-call": "error",

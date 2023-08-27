@@ -4,7 +4,9 @@
 #include "neko_types.h"
 #include "neko_exception.h"
 #include "console.h"
-#include "js_wrapper.h"
+#include "js_staticobject.h"
+#include "js_dynamicobject.h"
+#include "js_dynamicregistry.h"
 
 namespace neko {
 
@@ -13,7 +15,7 @@ namespace neko {
     class Math;
     using JSMathPtr = unique_ptr<Math>;
 
-    class Math: public StaticObjectWrapper<Math> {
+    class Math: public StaticObject<Math> {
     private:
       void registerGlobals( Isolate* isolate, V8FunctionTemplate& tpl ) final;
     public:
@@ -39,7 +41,7 @@ namespace neko {
 
     //! \class Vector2
     //! \brief Implementation of JavaScript vec2().
-    class Vector2: public DynamicObjectWrapper<Vector2, neko::vec2> {
+    class Vector2: public DynamicObject<Vector2, neko::vec2> {
     private:
       vec2 v_; //!< Internal vec2.
     protected:
@@ -93,7 +95,7 @@ namespace neko {
 
     //! \class Vector3
     //! \brief Implementation of JavaScript vec3().
-    class Vector3: public DynamicObjectWrapper<Vector3, neko::vec3> {
+    class Vector3: public DynamicObject<Vector3, neko::vec3> {
     private:
       vec3 v_; //!< Internal vec3.
     protected:
@@ -143,7 +145,7 @@ namespace neko {
 
     using Vector3Ptr = shared_ptr<Vector3>;
 
-    class Quaternion: public DynamicObjectWrapper<Quaternion, neko::quaternion> {
+    class Quaternion: public DynamicObject<Quaternion, neko::quaternion> {
     private:
       quaternion q_; //!< Internal quaternion.
     protected:

@@ -5,7 +5,8 @@
 # include "neko_exception.h"
 # include "console.h"
 # include "mesh_primitives.h"
-# include "js_wrapper.h"
+# include "js_dynamicobject.h"
+# include "js_dynamicregistry.h"
 # include "js_math.h"
 # include "js_mesh.h"
 # include "components.h"
@@ -23,7 +24,7 @@ namespace neko {
       js::QuaternionPtr rotate;
     };
 
-    class Entity: public DynamicObjectWrapper<Entity, JSEntity> {
+    class Entity: public DynamicObject<Entity, JSEntity> {
     private:
       JSEntity local_;
     protected:
@@ -36,6 +37,7 @@ namespace neko {
       void js_setRotate( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
       //! Functions
       void js_toString( const V8CallbackArgs& args );
+      void js_has( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
       virtual int32_t jsEstimateSize() const;

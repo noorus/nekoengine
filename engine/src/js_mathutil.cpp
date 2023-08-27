@@ -64,6 +64,8 @@ namespace neko {
       return move( Vector3::unwrap( local )->shared_from_this() );
     }
 
+    //  v8::String::Utf8Value name( isolate, args[0] );
+
     QuaternionPtr extractQuaternion( int arg, const V8CallbackArgs& args )
     {
       if ( args.Length() >= ( arg + 1 ) && args[arg]->IsObject() )

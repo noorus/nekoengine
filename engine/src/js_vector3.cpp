@@ -12,18 +12,15 @@ namespace neko {
 
   namespace js {
 
-    static const char* c_className = "vec3";
+    JS_DYNAMICOBJECT_DECLARE_STATICS_NAMED( Vector3, neko::vec3, vec3 )
 
-    static const mathShared::Messages c_equalsMessages( c_className + utf8String( ".equals" ), false );
-    static const mathShared::Messages c_greaterMessages( c_className + utf8String( ".greaterThan" ), false );
-    static const mathShared::Messages c_greaterOrEqualMessages( c_className + utf8String( ".greaterThanOrEqual" ), false );
-    static const mathShared::Messages c_lesserMessages( c_className + utf8String( ".lessThan" ), false );
-    static const mathShared::Messages c_lesserOrEqualMessages( c_className + utf8String( ".lessThanOrEqual" ), false );
-    static const mathShared::Messages c_addMessages( c_className + utf8String( ".add" ), false );
-    static const mathShared::Messages c_subMessages( c_className + utf8String( ".sub" ), false );
-
-    string DynamicObjectWrapper<Vector3, neko::vec3>::className( c_className );
-    WrappedType DynamicObjectWrapper<Vector3, neko::vec3>::internalType = Wrapped_Vector3;
+    static const mathShared::Messages c_equalsMessages( Vector3::className + utf8String( ".equals" ), false );
+    static const mathShared::Messages c_greaterMessages( Vector3::className + utf8String( ".greaterThan" ), false );
+    static const mathShared::Messages c_greaterOrEqualMessages( Vector3::className + utf8String( ".greaterThanOrEqual" ), false );
+    static const mathShared::Messages c_lesserMessages( Vector3::className + utf8String( ".lessThan" ), false );
+    static const mathShared::Messages c_lesserOrEqualMessages( Vector3::className + utf8String( ".lessThanOrEqual" ), false );
+    static const mathShared::Messages c_addMessages( Vector3::className + utf8String( ".add" ), false );
+    static const mathShared::Messages c_subMessages( Vector3::className + utf8String( ".sub" ), false );
 
     void Vector3::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
@@ -139,12 +136,12 @@ namespace neko {
       if ( args.IsConstructCall() )
       {
         auto thisObj = args.This();
-        auto ptr = ctx->vec3reg().createFromJS( thisObj, vec );
+        auto ptr = ctx->vec3reg()->createFromJS( thisObj, vec );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
       else
       {
-        auto ptr = ctx->vec3reg().createFrom( vec );
+        auto ptr = ctx->vec3reg()->createFrom( vec );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
     }
@@ -394,7 +391,7 @@ namespace neko {
     {
       auto normalized = glm::normalize( v_ );
       auto ctx = getScriptContext( args.GetIsolate() );
-      auto ptr = ctx->vec3reg().createFrom( normalized );
+      auto ptr = ctx->vec3reg()->createFrom( normalized );
       args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
     }
 
@@ -411,7 +408,7 @@ namespace neko {
           ( v_.y + other->v_.y ) * 0.5f,
           ( v_.z + other->v_.z ) * 0.5f );
         auto ctx = getScriptContext( args.GetIsolate() );
-        auto ptr = ctx->vec3reg().createFrom( mid );
+        auto ptr = ctx->vec3reg()->createFrom( mid );
         args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
       }
     }
@@ -456,7 +453,7 @@ namespace neko {
     void Vector3::js_inverse( const V8CallbackArgs& args )
     {
       auto ctx = getScriptContext( args.GetIsolate() );
-      auto ptr = ctx->vec3reg().createFrom( vec3( -v_.x, -v_.y, -v_.z ) );
+      auto ptr = ctx->vec3reg()->createFrom( vec3( -v_.x, -v_.y, -v_.z ) );
       args.GetReturnValue().Set( ptr->handle( args.GetIsolate() ) );
     }
 

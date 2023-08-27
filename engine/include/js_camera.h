@@ -1,5 +1,5 @@
 #pragma once
-#ifndef NEKO_NO_SCRIPTING
+#ifdef NEKO_NO_SCRIPTING
 
 #include "neko_types.h"
 #include "neko_exception.h"
