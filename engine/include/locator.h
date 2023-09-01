@@ -20,6 +20,7 @@ namespace neko {
     static void provideMemory( MemoryPtr memory ) { memoryService_ = move( memory ); }
     static const bool hasConsole() noexcept { return ( consoleService_ ? true : false ); }
     static Console& console() { return *consoleService_; }
+    static ConsolePtr consolePtr() { return consoleService_; }
     static void provideConsole( ConsolePtr console ) { consoleService_ = move( console ); }
     static const bool hasMessaging() noexcept { return ( messagingService_ ? true : false ); }
     static Messaging& messaging() { return *messagingService_; }

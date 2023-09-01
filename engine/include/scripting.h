@@ -11,6 +11,7 @@
 #include "js_game.h"
 #include "js_text.h"
 #include "js_entity.h"
+#include "js_component.h"
 #include "components.h"
 #include "director.h"
 #include "js_types.h"
@@ -30,6 +31,11 @@ namespace neko {
     };
 
     inline ScriptingContext* getScriptContext( Isolate* isolate )
+    {
+      return static_cast<ScriptingContext*>( isolate->GetData( IsolateData_ScriptingContext ) );
+    }
+
+    inline ScriptingContext* scriptContext( Isolate* isolate )
     {
       return static_cast<ScriptingContext*>( isolate->GetData( IsolateData_ScriptingContext ) );
     }
@@ -89,6 +95,7 @@ public:                                                        \
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Model, model )
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Text, text )
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Entity, entity )
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::TransformComponent, component )
   protected:
     void initializeRegistries( js::Isolate* isolate, js::Local<js::ObjectTemplate>& global );
     void clearRegistries();
@@ -112,13 +119,6 @@ public:                                                        \
     js::JSConsolePtr jsConsole_;
     js::JSMathPtr jsMath_;
     js::JSGamePtr jsGame_;
-    /* js::DynamicObjectsRegistry<js::Vector2, vec2> vec2Registry_;
-    js::DynamicObjectsRegistry<js::Vector3, vec3> vec3Registry_;
-    js::DynamicObjectsRegistry<js::Quaternion, quaternion> quatRegistry_;
-    js::DynamicObjectsRegistry<js::Mesh, JSMesh> meshRegistry_;
-    js::DynamicObjectsRegistry<js::Model, js::JSModel> modelRegistry_;
-    js::DynamicObjectsRegistry<js::Text, JSText> textRegistry_;
-    js::DynamicObjectsRegistry<js::Entity, js::JSEntity> entRegistry_;*/
   public:
     EnginePtr engine_;
     ConsolePtr console_;
@@ -135,12 +135,7 @@ public:                                                        \
     inline js::Mesh::RegistryPtrType meshreg() { return registry<js::Mesh>( type<js::Mesh>() ); }
     inline js::Model::RegistryPtrType modelreg() { return registry<js::Model>( type<js::Model>() ); }
     inline js::Text::RegistryPtrType textreg() { return registry<js::Text>( type<js::Text>() ); }
-    //inline js::DynamicObjectsRegistry<js::Vector3, vec3>& vec3reg() { return vec3Registry_; }
-    //inline js::DynamicObjectsRegistry<js::Quaternion, quaternion>& quatreg() { return quatRegistry_; }
-    //inline js::DynamicObjectsRegistry<js::Mesh, JSMesh>& meshreg() { return meshRegistry_; }
-    //inline js::DynamicObjectsRegistry<js::Model, js::JSModel>& modelreg() { return modelRegistry_; }
-    //inline js::DynamicObjectsRegistry<js::Text, JSText>& textreg() { return textRegistry_; }
-    //inline js::DynamicObjectsRegistry<js::Entity, js::JSEntity>& entreg() { return entRegistry_; }
+    inline js::TransformComponent::RegistryPtrType compreg() { return registry<js::TransformComponent>( type<js::TransformComponent>() ); }
     inline RenderSyncContext& renderSync() { return director_->renderSync(); }
     inline SManager& scene()
     {

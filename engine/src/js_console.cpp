@@ -39,6 +39,11 @@ namespace neko {
       {
         if ( i > 0 )
           msg.append( " " );
+        if ( args[i].IsEmpty() )
+        {
+          msg.append( "[empty]" );
+          continue;
+        }
         v8::String::Utf8Value str( isolate, args[i] );
         if ( *str )
           msg.append( *str );

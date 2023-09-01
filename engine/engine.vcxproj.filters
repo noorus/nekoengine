@@ -459,6 +459,12 @@
     <ClCompile Include="src\js_entity.cpp">
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
+    <ClCompile Include="src\js_utils.cpp">
+      <Filter>Source Files\scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\js_component.cpp">
+      <Filter>Source Files\scripting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\pch.h">
@@ -873,6 +879,9 @@
       <Filter>Header Files\scripting</Filter>
     </ClInclude>
     <ClInclude Include="include\js_types.h">
+      <Filter>Header Files\scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="include\js_component.h">
       <Filter>Header Files\scripting</Filter>
     </ClInclude>
   </ItemGroup>

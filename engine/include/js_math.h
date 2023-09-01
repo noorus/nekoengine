@@ -12,6 +12,8 @@ namespace neko {
 
   namespace js {
 
+    using fnOnModifiedCallback = void( * )( uintptr_t arg1, uintptr_t arg2 );
+
     class Math;
     using JSMathPtr = unique_ptr<Math>;
 

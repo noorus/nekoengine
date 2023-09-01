@@ -11,6 +11,15 @@ namespace neko {
 
   namespace js {
 
+    class DirtyableObject {
+    protected:
+      bool dirty_ = true;
+    public:
+      inline bool dirty() const noexcept { return dirty_; }
+      inline void markDirty() { dirty_ = true; }
+      inline void markClean() { dirty_ = false; }
+    };
+
     // clang-format off
 
     #define JS_DYNAMICOBJECT_DECLARE_STATICS( T, Base ) \
@@ -21,6 +30,14 @@ namespace neko {
       utf8String DynamicObject<T, Base>::className( #CName ); \
       WrappedType DynamicObject<T, Base>::internalType = Wrapped_ ## T ## ;
 
+    #define JS_MAPPEDDYNAMICOBJECT_DECLARE_STATICS( T, Base ) \
+      utf8String DynamicObject<T, Base, MappedDynamicObjectRegistry<T, Base>>::className( #T ); \
+      WrappedType DynamicObject<T, Base, MappedDynamicObjectRegistry<T, Base>>::internalType = Wrapped_ ## T ## ;
+
+    #define JS_MAPPEDDYNAMICOBJECT_DECLARE_STATICS_NAMED( T, Base, CName ) \
+      utf8String DynamicObject<T, Base, MappedDynamicObjectRegistry<T, Base>>::className( #CName ); \
+      WrappedType DynamicObject<T, Base, MappedDynamicObjectRegistry<T, Base>>::internalType = Wrapped_ ## T ## ;
+
     #define JS_DYNAMICOBJECT_DECLARE_PROPERTY( Name ) \
       void js_get ## Name ## ( V8String prop, const PropertyCallbackInfo<v8::Value>& info ); \
       void js_set ## Name ## ( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info )
@@ -30,6 +47,8 @@ namespace neko {
 
     #define JS_DYNAMICOBJECT_PROPERTYGETTER_BEGIN( T, Property ) \
       void T##::js_get ## Property ## ( V8String prop, const PropertyCallbackInfo<v8::Value>& info ) { \
+        if ( prop->IsSymbol() ) \
+          return; \
         const utf8String funcName( #T "::js_get" #Property ); \
         auto isolate = info.GetIsolate(); \
         HandleScope handleScope( isolate ); \
@@ -43,6 +62,8 @@ namespace neko {
     
     #define JS_DYNAMICOBJECT_PROPERTYSETTER_BEGIN( T, Property ) \
       void T##::js_set ## Property ## ( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info ) { \
+        if ( prop->IsSymbol() ) \
+          return; \
         const utf8String funcName( #T "::js_set" #Property ); \
         auto isolate = info.GetIsolate(); \
         HandleScope handleScope( isolate ); \
@@ -113,6 +134,27 @@ namespace neko {
        varname = Vector3::unwrap( object )->shared_from_this();                                              \
       }
 
+    #define JS_DYNAMICOBJECT_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS_WITH_CALLBACKS( cls, propname, varname )   \
+      void cls::js_get##propname( V8String prop, const PropertyCallbackInfo<v8::Value>& info )               \
+      {                                                                                                      \
+       info.GetReturnValue().Set( varname->handle( info.GetIsolate() ) );                                    \
+       js_afterGet##propname( info );                                                                        \
+      }                                                                                                      \
+      void cls::js_set##propname( V8String prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info ) \
+      {                                                                                                      \
+       auto isolate = info.GetIsolate();                                                                     \
+       auto context = isolate->GetCurrentContext();                                                          \
+       WrappedType argWrapType = Max_WrappedType;                                                            \
+       if ( !util::getWrappedType( context, value, argWrapType ) || argWrapType != Wrapped_Vector3 )         \
+       {                                                                                                     \
+        isolate->ThrowException( util::staticStr( isolate, "Passed argument is not a vec3" ) );              \
+        return;                                                                                              \
+       }                                                                                                     \
+       auto object = value->ToObject( context ).ToLocalChecked();                                            \
+       varname = Vector3::unwrap( object )->shared_from_this();                                              \
+       js_afterSet##propname( info );                                                                        \
+      }
+
     #define JS_DYNAMICOBJECT_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS( cls, propname, varname )              \
       void cls::js_get##propname( V8String prop, const PropertyCallbackInfo<v8::Value>& info )                  \
       {                                                                                                         \
@@ -132,16 +174,36 @@ namespace neko {
        varname = Quaternion::unwrap( object )->shared_from_this();                                       \
       }
 
-    template <class T, class Y>
-    class DynamicObject: public ShareableBase<T> {
+    template <typename T>
+    T::PtrType unwrapDynamic( V8Context& context, V8Value value, bool shouldThrow = true )
+    {
+      if ( value.IsEmpty() )
+      {
+        if ( shouldThrow )
+          util::utf8Literal( args.GetIsolate(), "Argument is empty" );
+        return {};
+      }
+      auto object = value->ToObject( context ).ToLocalChecked();
+      if ( !util::isWrappedType( context, object, T::internalType ) )
+      {
+        if ( shouldThrow )
+          util::utf8Literal( args.GetIsolate(), "Wrong internal type" );
+        return {};
+      }
+      return T::unwrap( object )->ptr();
+    }
+
+    template <class T, class Y, class R = DynamicObjectRegistry<T, Y>>
+    class DynamicObject: public ShareableBase<T>, public DirtyableObject {
       friend class neko::Scripting;
       template <class T>
       friend class DynamicObjectConstructor;
     public:
       using BaseType = Y;
-      using RegistryType = DynamicObjectRegistry<T, BaseType>;
+      using PtrType = shared_ptr<T>;
+      using RegistryType = R;
       using RegistryPtrType = shared_ptr<RegistryType>;
-      friend class RegistryType;
+      friend RegistryType;
     public:
       static utf8String className;
       static WrappedType internalType;

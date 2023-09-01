@@ -9,19 +9,80 @@ namespace neko {
 
   namespace utils {
 
-    template <typename Container, typename Fn>
-    Container map( const Container& in, Fn func )
+    template <typename InContainer, typename OutContainer, typename Fn>
+    OutContainer map( const InContainer& in, Fn func )
     {
-      Container out {};
+      OutContainer out {};
       out.reserve( in.size() );
       std::transform( in.begin(), in.end(), std::back_inserter( out ), func );
       return out;
     }
 
     template <typename T>
+    constexpr bool contains( const T& vec, typename T::key_type value )
+    {
+      return ( std::find( vec.begin(), vec.end(), value ) != vec.end() );
+    }
+
+    template <typename T>
     constexpr bool contains( const vector<T>& vec, T value )
     {
       return ( std::find( vec.begin(), vec.end(), value ) != vec.end() );
+    }
+
+    template <typename T>
+    constexpr bool set_contains( const set<T>& vec, T value )
+    {
+      return ( std::find( vec.begin(), vec.end(), value ) != vec.end() );
+    }
+
+    template <typename T>
+    inline set<T> set_union( const set<T>& a, const set<T>& b )
+    {
+      set<T> out;
+      std::set_union( a.begin(), a.end(), b.begin(), b.end(), std::inserter( out, out.begin() ) );
+      return out;
+    }
+
+    template <typename T>
+    inline set<T> set_intersection( const set<T>& a, const set<T>& b )
+    {
+      set<T> out;
+      std::set_intersection( a.begin(), a.end(), b.begin(), b.end(), std::inserter( out, out.begin() ) );
+      return out;
+    }
+
+    template <typename T>
+    inline set<T> set_difference( const set<T>& a, const set<T>& b )
+    {
+      set<T> out;
+      std::set_difference( a.begin(), a.end(), b.begin(), b.end(), std::inserter( out, out.begin() ) );
+      return out;
+    }
+
+    // FIXME Replace with something more robust later
+    inline bool streq( const utf8String& a, const utf8String& b )
+    {
+      return ( strcmp( a.c_str(), b.c_str() ) == 0 );
+    }
+
+    inline utf8String& ltrim( utf8String& str )
+    {
+      str.erase(
+        str.begin(), std::find_if( str.begin(), str.end(), []( unsigned char ch ) { return !std::isblank( ch ); } ) );
+      return str;
+    }
+
+    inline utf8String& rtrim( utf8String& str )
+    {
+      str.erase(
+        std::find_if( str.rbegin(), str.rend(), []( unsigned char ch ) { return !std::isblank( ch ); } ).base(), str.end() );
+      return str;
+    }
+
+    inline utf8String& trim( utf8String& s )
+    {
+      return rtrim( ltrim( s ) );
     }
 
     constexpr size_t alignToNextMultiple( size_t offset, size_t alignment )
@@ -31,7 +92,19 @@ namespace neko {
 
     inline unicodeString uniFrom( const utf8String& u8str )
     {
-      return unicodeString::fromUTF8( icu::StringPiece( u8str.c_str(), static_cast<int32_t>( u8str.length() ) ) );
+      auto unistr = unicodeString::fromUTF8( icu::StringPiece( u8str.c_str(), static_cast<int32_t>( u8str.length() ) ) );
+      icu::StringCharacterIterator it( unistr );
+      while ( it.hasNext() )
+      {
+        auto c = it.next32PostInc();
+        if ( c == 0xFFFD )
+          return {};
+        auto cat = static_cast<UCharCategory>( u_charType( c ) );
+        if ( utils::set_contains(
+               { U_UNASSIGNED, U_GENERAL_OTHER_TYPES, U_CONTROL_CHAR, U_FORMAT_CHAR, U_PRIVATE_USE_CHAR }, cat ) )
+          return {};
+      }
+      return unistr;
     }
 
     inline utf8String uniToUtf8( const unicodeString& ustr ) noexcept
@@ -39,6 +112,46 @@ namespace neko {
       utf8String out;
       ustr.toUTF8String( out );
       return out;
+    }
+
+    template <typename T>
+    inline void searchAndReplace( T& str, const T& search, const T& replace )
+    {
+      auto pos = str.find( search );
+      while ( pos != T::npos )
+      {
+        str.replace( pos, search.size(), replace );
+        pos = str.find( search, pos + replace.size() );
+      }
+    }
+
+    template <typename T>
+    inline vector<T> stringSplit( const T& str, const T& delimiter )
+    {
+      size_t last = 0, next = 0;
+      vector<T> parts;
+      while ( ( next = str.find( delimiter, last ) ) != T::npos )
+      {
+        parts.push_back( str.substr( last, next - last ) );
+        last = next + delimiter.length();
+      }
+      if ( last < str.length() - 1 )
+        parts.push_back( str.substr( last ) );
+      return parts;
+    }
+
+    template <typename T>
+    inline T arrayJoin( const vector<T>& vec, typename T::value_type delimiter )
+    {
+      using VT = T::value_type;
+      std::basic_ostringstream<VT, std::char_traits<VT>, std::allocator<VT>> stream;
+      for ( auto i = 0; i < vec.size(); ++i )
+      {
+        if ( i )
+          stream << delimiter;
+        stream << vec[i];
+      }
+      return stream.str();
     }
 
     //! Inline printf - buffer max is 16384 characters total

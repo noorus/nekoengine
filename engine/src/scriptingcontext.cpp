@@ -98,6 +98,10 @@ namespace neko {
     if ( !entityRegistry_ )
       entityRegistry_ = make_shared<js::Entity::RegistryType>();
     entityRegistry_->initialize( isolate, global );
+
+    if ( !componentRegistry_ )
+      componentRegistry_ = make_shared<js::TransformComponent::RegistryType>();
+    componentRegistry_->initialize( isolate, global );
   }
 
   void ScriptContextBaseRegistries::clearRegistries()
@@ -109,6 +113,7 @@ namespace neko {
     modelRegistry_->clear();
     textRegistry_->clear();
     entityRegistry_->clear();
+    componentRegistry_->clear();
   }
 
   void ScriptContextBaseRegistries::destroyRegistries()
@@ -120,6 +125,7 @@ namespace neko {
     modelRegistry_.reset();
     textRegistry_.reset();
     entityRegistry_.reset();
+    componentRegistry_.reset();
   }
 
   void ScriptingContext::registerTemplateGlobals( Local<ObjectTemplate>& global )
@@ -192,6 +198,19 @@ namespace neko {
     renderSync().syncFromScripting();
 
     isolate_->Exit();
+
+    for ( auto& [key, value] : compreg()->items() )
+    {
+      if ( !value || !value->dirty() )
+        continue;
+      if ( !value->dirty() && !value->ent().scale->dirty() && !value->ent().rotate->dirty() && !value->ent().translate->dirty() )
+        continue;
+      auto& tn = scene.tn( value->ent().eid );
+      tn.scale = value->ent().scale->v();
+      tn.rotate = value->ent().rotate->q();
+      tn.translate = value->ent().translate->v();
+      scene.reg().emplace_or_replace<c::dirty_transform>( value->ent().eid );
+    }
 
     sceneRuntimeDontTouch_ = nullptr;
   }

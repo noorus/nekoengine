@@ -15,14 +15,12 @@ namespace neko {
 
   namespace js {
 
-    JS_DYNAMICOBJECT_DECLARE_STATICS( Entity, JSEntity )
+    JS_MAPPEDDYNAMICOBJECT_DECLARE_STATICS( Entity, JSEntity )
 
     void Entity::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
       // Properties
-      JS_WRAPPER_SETACCESSOR( tpl, Entity, scale, Scale );
-      JS_WRAPPER_SETACCESSOR( tpl, Entity, translate, Translate );
-      JS_WRAPPER_SETACCESSOR( tpl, Entity, rotate, Rotate );
+      JS_WRAPPER_SETACCESSOR( tpl, Entity, id, ID );
 
       // Methods
       JS_WRAPPER_SETMEMBER( tpl, Entity, toString );
@@ -30,83 +28,69 @@ namespace neko {
       JS_WRAPPER_SETMEMBERNAMED( tpl, Entity, has, contains );
     }
 
-    void Entity::jsConstructor( const v8::FunctionCallbackInfo<v8::Value>& args )
+    void Entity::jsConstructor( const V8CallbackArgs& args )
     {
-      auto isolate = args.GetIsolate();
-      HandleScope handleScope( isolate );
+      JS_DYNAMICOBJECT_CONSTRUCTBODY_BEGIN( Entity )
 
-      auto context = args.GetIsolate()->GetCurrentContext();
-
-      const utf8String funcName( "entity::Constructor" );
-
-      vec3 defaultScale( 1.0f, 1.0f, 1.0f );
-      vec3 defaultTranslate( 0.0f, 0.0f, 0.0f );
-      quaternion defaultRotate( glm::quat_identity<Real, glm::defaultp>() );
-
-      JSEntity loc;
-      utf8String name;
-
-      WrappedType wrappedType = Max_WrappedType;
-      if ( args.Length() == 1 )
+      if ( args.Length() != 1 || !args[0]->IsUint32() )
       {
-        util::getWrappedType( context, args[0], wrappedType );
-        if ( args[0]->IsObject() && wrappedType == Max_WrappedType )
-        {
-          auto maybeObj = args[0]->ToObject( context );
-          name = util::extractStringMember( isolate, funcName, maybeObj, "name", true );
-          loc.scale = extractVector3Member( isolate, funcName, maybeObj, "scale", false );
-          loc.translate = extractVector3Member( isolate, funcName, maybeObj, "translate", false );
-          loc.rotate = extractQuaternionMember( isolate, funcName, maybeObj, "rotate", false );
-        }
+        util::throwException( isolate, "Syntax error: Entity::constructor expected entity ID as argument 0" );
+        return;
       }
 
-      auto ctx = getScriptContext( isolate );
-      loc.id = ctx->scene().createNode( name );
+      auto eid = util::uint32FromValue( context, args[0], 0, true );
 
-      if ( !loc.scale )
-        loc.scale = ctx->vec3reg()->createFrom( defaultScale );
-      if ( !loc.translate )
-        loc.translate = ctx->vec3reg()->createFrom( defaultTranslate );
-      if ( !loc.rotate )
-        loc.rotate = ctx->quatreg()->createFrom( defaultRotate );
-
+      JSEntity loc( eid );
       if ( args.IsConstructCall() )
       {
         auto thisObj = args.This();
-        auto ptr = ctx->entreg()->createFromJS( thisObj, loc );
-        //ctx->renderSync().constructed( ptr.get() );
+        auto ptr = scriptCtx->registry<Entity>( type<Entity> {} )->createFromJS( thisObj, static_cast<uint64_t>( eid ), loc );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
       else
       {
-        auto ptr = ctx->entreg()->createFrom( loc );
-        //ctx->renderSync().constructed( ptr.get() );
+        auto ptr = scriptCtx->registry<Entity>( type<Entity> {} )->createFrom( static_cast<uint64_t>( eid ), loc );
         args.GetReturnValue().Set( ptr->handle( isolate ) );
       }
     }
 
-    JS_DYNAMICOBJECT_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Entity, Scale, local_.scale )
-    JS_DYNAMICOBJECT_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS( Entity, Translate, local_.translate )
-    JS_DYNAMICOBJECT_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS( Entity, Rotate, local_.rotate )
-
     void Entity::js_toString( const V8CallbackArgs& args )
     {
-      args.GetReturnValue().Set( util::allocString( utils::ilprinf( "entity[%i]", local_.id ), args.GetIsolate() ) );
+      args.GetReturnValue().Set( util::allocString( utils::ilprinf( "entity[%i]", local_.eid ), args.GetIsolate() ) );
     }
 
-    void Entity::js_has( const V8CallbackArgs& args )
+    void Entity::js_getID( V8String prop, const PropertyCallbackInfo<v8::Value>& info )
     {
-      auto isolate = args.GetIsolate();
-      HandleScope handleScope( isolate );
+      info.GetReturnValue().Set( static_cast<uint32_t>( local_.eid ) );
+    }
 
-      auto context = args.GetIsolate()->GetCurrentContext();
+    void Entity::js_setID( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info )
+    {
+      auto context = info.GetIsolate()->GetCurrentContext();
+      auto eid = static_cast<c::entity>( util::uint32FromValue( context, value, 0, true ) );
+      if ( eid != local_.eid )
+        util::throwException( info.GetIsolate(), "Cannot assign to entity.id" );
+    }
+
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Entity, has )
+    {
       const auto& cname = util::extractStringArg( context, args, 0, "" );
 
-      bool ret = false;
-      auto ctx = getScriptContext( args.GetIsolate() );
-      if ( cname == "transform" )
-        ret = ctx->scene().reg().any_of<c::transform>( local_.id );
+      ret = v8::False( isolate );
+      if ( cname == "transform" && scriptCtx->scene().reg().any_of<c::transform>( local_.eid ) )
+        ret = v8::True( isolate );
+      else if ( cname == "renderable" && scriptCtx->scene().reg().any_of<c::renderable>( local_.eid ) )
+        ret = v8::True( isolate );
+      else if ( cname == "camera" && scriptCtx->scene().reg().any_of<c::camera>( local_.eid ) )
+        ret = v8::True( isolate );
+      else if ( cname == "primitive" && scriptCtx->scene().reg().any_of<c::primitive>( local_.eid ) )
+        ret = v8::True( isolate );
+      else if ( cname == "text" && scriptCtx->scene().reg().any_of<c::text>( local_.eid ) )
+        ret = v8::True( isolate );
+      else if ( cname == "sprite" && scriptCtx->scene().reg().any_of<c::sprite>( local_.eid ) )
+        ret = v8::True( isolate );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
     int32_t Entity::jsEstimateSize() const
     {

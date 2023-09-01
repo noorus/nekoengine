@@ -122,7 +122,9 @@
 
 // ICU
 #ifndef NEKO_NO_ICU
+# include <unicode/uconfig.h>
 # include <unicode/utypes.h>
+# include <unicode/uclean.h>
 # include <unicode/uchar.h>
 # include <unicode/locid.h>
 # include <unicode/ustring.h>
@@ -130,6 +132,8 @@
 # include <unicode/unistr.h>
 # include <unicode/utf8.h>
 # include <unicode/utf16.h>
+# include <unicode/uchriter.h>
+# include <unicode/schriter.h>
 #endif // !NEKO_NO_ICU
 
 #pragma warning( pop )

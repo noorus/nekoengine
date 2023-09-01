@@ -19,6 +19,7 @@ namespace neko {
       Wrapped_Model, //!< Dynamic: Model
       Wrapped_Text, //!< Dynamic: Text
       Wrapped_Entity,
+      Wrapped_TransformComponent,
       Max_WrappedType
     };
 

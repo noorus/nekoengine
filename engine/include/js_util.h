@@ -225,6 +225,17 @@ namespace neko {
         return static_cast<int64_t>( value->NumberValue( context ).FromMaybe( 0 ) );
       }
 
+      inline uint32_t uint32FromValue( V8Context& context, V8Value value, uint32_t defaultValue = 0, bool shouldThrow = true )
+      {
+        if ( !value->IsUint32() )
+        {
+          if ( shouldThrow )
+            util::throwException( context->GetIsolate(), "Expected an uint32" );
+          return defaultValue;
+        }
+        return static_cast<uint32_t>( value->Uint32Value( context ).FromMaybe( defaultValue ) );
+      }
+
       inline int64_t int64FromArray( V8Context& context, v8::Local<v8::Array> arrayValue, uint32_t index )
       {
         return static_cast<int64_t>(
@@ -339,6 +350,25 @@ namespace neko {
           return {};
         }
         return static_cast<int>( object.ToLocalChecked()->Int32Value( isolate->GetCurrentContext() ).FromJust() );
+      }
+
+      inline optional<uint32_t> extractUInt32Member( Isolate* isolate, const utf8String& func,
+        v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow = true )
+      {
+        if ( maybeObject.IsEmpty() )
+        {
+          util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
+          return {};
+        }
+        auto object =
+          maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
+        if ( object.IsEmpty() || !object.ToLocalChecked()->IsNumber() )
+        {
+          if ( shouldThrow)
+            util::throwException( isolate, ( func + ": passed object has no numeric member \"" + name + "\"" ).c_str() );
+          return {};
+        }
+        return static_cast<uint32_t>( object.ToLocalChecked()->Uint32Value( isolate->GetCurrentContext() ).FromJust() );
       }
 
       inline optional<int64_t> extractInt64Member(

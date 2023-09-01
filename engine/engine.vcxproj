@@ -239,8 +239,10 @@
     <ClCompile Include="src\gameviewport.cpp" />
     <ClCompile Include="src\imguihelpers.cpp" />
     <ClCompile Include="src\imguistyle.cpp" />
+    <ClCompile Include="src\js_component.cpp" />
     <ClCompile Include="src\js_entity.cpp" />
     <ClCompile Include="src\js_text.cpp" />
+    <ClCompile Include="src\js_utils.cpp" />
     <ClCompile Include="src\ortbicamera.cpp" />
     <ClCompile Include="src\paintabletexture.cpp" />
     <ClCompile Include="src\particlemanager.cpp" />
@@ -395,6 +397,7 @@
     <ClInclude Include="include\input.h" />
     <ClInclude Include="include\json.h" />
     <ClInclude Include="include\js_camera.h" />
+    <ClInclude Include="include\js_component.h" />
     <ClInclude Include="include\js_console.h" />
     <ClInclude Include="include\js_dynamicobject.h" />
     <ClInclude Include="include\js_dynamicregistry.h" />

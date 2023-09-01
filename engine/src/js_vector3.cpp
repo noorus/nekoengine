@@ -161,7 +161,10 @@ namespace neko {
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )
+      {
         v_.x = static_cast<Real>( value->NumberValue( context ).ToChecked() );
+        markDirty();
+      }
     }
 
     //! \verbatim
@@ -179,7 +182,10 @@ namespace neko {
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )
+      {
         v_.y = static_cast<Real>( value->NumberValue( context ).ToChecked() );
+        markDirty();
+      }
     }
 
     //! \verbatim
@@ -197,7 +203,10 @@ namespace neko {
     {
       auto context = info.GetIsolate()->GetCurrentContext();
       if ( value->IsNumber() && !value->NumberValue( context ).IsNothing() )
+      {
         v_.z = static_cast<Real>( value->NumberValue( context ).ToChecked() );
+        markDirty();
+      }
     }
 
     //! \verbatim

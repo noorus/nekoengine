@@ -26,6 +26,7 @@ class DemoScene extends Scene
     this._mesh = null;
     this._model = null;
     this._text = null;
+    this._enttest = null;
   }
   initialize( time )
   {
@@ -54,8 +55,8 @@ class DemoScene extends Scene
     ]
     this._text = new Text({ translate: vec3( 200, 200, 0), str: "beep beep boop boop" } );
     Console.print( this._text );
-    const poop = new Entity( { name:"omg script entity"});
-    Console.print( poop );
+    this._enttest = new TransformComponent( 1 );
+    Console.print( this._enttest );
   }
   enter()
   {
@@ -67,6 +68,9 @@ class DemoScene extends Scene
   }
   update( time, delta )
   {
+    this._enttest.translate.x = Math.sin( time * 2 ) * 2;
+    this._enttest.translate.y = Math.cos( time * 2 ) * 2;
+    // Console.print( this._enttest.translate );
     //this._models[1].rotate.fromAngleAxis(toRadians(time * 50), vec3(0, 0, 1));
     //this._models[2].translate.z = Math.sin(time * 2) * 2;
     /*if (this._ctr < 12) {

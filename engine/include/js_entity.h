@@ -11,6 +11,7 @@
 # include "js_mesh.h"
 # include "components.h"
 # include "locator.h"
+# include "js_component.h"
 
 namespace neko {
 
@@ -18,23 +19,17 @@ namespace neko {
 
     struct JSEntity {
     public:
-      neko::c::entity id;
-      js::Vector3Ptr scale;
-      js::Vector3Ptr translate;
-      js::QuaternionPtr rotate;
+      neko::c::entity eid;
+      JSEntity( uint32_t id ): eid( static_cast<neko::c::entity>( id ) ) {}
     };
 
-    class Entity: public DynamicObject<Entity, JSEntity> {
+    class Entity: public DynamicObject<Entity, JSEntity, MappedDynamicObjectRegistry<Entity, JSEntity>> {
     private:
       JSEntity local_;
     protected:
       //! Properties
-      void js_getScale( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
-      void js_setScale( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
-      void js_getTranslate( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
-      void js_setTranslate( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
-      void js_getRotate( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
-      void js_setRotate( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      void js_getID( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
+      void js_setID( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
       //! Functions
       void js_toString( const V8CallbackArgs& args );
       void js_has( const V8CallbackArgs& args );
