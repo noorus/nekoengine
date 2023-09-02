@@ -24,19 +24,19 @@ namespace neko {
       explicit Math();
     public:
       //! JavaScript Math.equals
-      void js_equals( Isolate* isolate, const V8CallbackArgs& args );
+      void js_equals( const V8CallbackArgs& args );
       //! JavaScript Math.greater
-      void js_greater( Isolate* isolate, const V8CallbackArgs& args );
+      void js_greater( const V8CallbackArgs& args );
       //! JavaScript Math.greaterOrEqual
-      void js_greaterOrEqual( Isolate* isolate, const V8CallbackArgs& args );
+      void js_greaterOrEqual( const V8CallbackArgs& args );
       //! JavaScript Math.lesser
-      void js_lesser( Isolate* isolate, const V8CallbackArgs& args );
+      void js_lesser( const V8CallbackArgs& args );
       //! JavaScript Math.lesserOrEqual
-      void js_lesserOrEqual( Isolate* isolate, const V8CallbackArgs& args );
+      void js_lesserOrEqual( const V8CallbackArgs& args );
       //! JavaScript Math.add
-      void js_add( Isolate* isolate, const V8CallbackArgs& args );
+      void js_add( const V8CallbackArgs& args );
       //! JavaScript Math.sub
-      void js_sub( Isolate* isolate, const V8CallbackArgs& args );
+      void js_sub( const V8CallbackArgs& args );
     public:
       static JSMathPtr create( Isolate* isolate, V8Object global );
     };

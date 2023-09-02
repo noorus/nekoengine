@@ -10,6 +10,10 @@ namespace neko {
 
   namespace js {
 
+    #define JS_STATICOBJECT_DECLARE_STATICS( T )  \
+     utf8String StaticObject<T>::className( #T ); \
+     WrappedType StaticObject<T>::internalType = Wrapped_##T##;
+
     template <class T>
     class StaticObject {
       friend class neko::Scripting;

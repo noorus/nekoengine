@@ -4,13 +4,14 @@
 # include "js_console.h"
 # include "js_util.h"
 # include "console.h"
+# include "js_dynamicobject.h"
+# include "scripting.h"
 
 namespace neko {
 
   namespace js {
 
-    string StaticObject<Console>::className( "Console" );
-    WrappedType StaticObject<Console>::internalType = Wrapped_Console;
+    JS_STATICOBJECT_DECLARE_STATICS( Console )
 
     Console::Console( ConsolePtr console ): console_( move( console ) ) {}
 
@@ -30,7 +31,7 @@ namespace neko {
       JS_WRAPPER_SETOBJMEMBER( tpl, Console, execute );
     }
 
-    void Console::js_print( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Console, print )
     {
       HandleScope handleScope( isolate );
 
@@ -51,11 +52,10 @@ namespace neko {
 
       console_->print( neko::srcScripting, msg );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
-    void Console::js_getVariable( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Console, getVariable )
     {
-      HandleScope handleScope( isolate );
-
       if ( args.Length() != 1 || !args[0]->IsString() )
       {
         util::throwException( isolate, "Syntax error: String Console.getVariable( String variable )" );
@@ -72,13 +72,12 @@ namespace neko {
         return;
       }
 
-      args.GetReturnValue().Set( util::allocString( variable->as_s(), isolate ) );
+      ret = util::allocString( variable->as_s(), isolate );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
-    void Console::js_setVariable( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Console, setVariable )
     {
-      HandleScope handleScope( isolate );
-
       if ( args.Length() != 2 || !args[0]->IsString() )
       {
         util::throwException( isolate, "Syntax error: Console.setVariable( String variable, String value )" );
@@ -98,11 +97,10 @@ namespace neko {
 
       variable->set( (const char*)*variableValue );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
-    void Console::js_execute( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Console, execute )
     {
-      HandleScope handleScope( isolate );
-
       if ( args.Length() != 1 || !args[0]->IsString() )
       {
         util::throwException( isolate, "Syntax error: Console.execute( String commandLine )" );
@@ -113,6 +111,7 @@ namespace neko {
 
       console_->execute( (const char*)*commandLine );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
   }
 

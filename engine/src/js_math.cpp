@@ -80,26 +80,23 @@ namespace neko {
     //! \verbatim
     //! bool Math.equals( lhs, rhs )
     //! \endverbatim
-    void Math::js_equals( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Math, equals )
     {
-      HandleScope handleScope( isolate );
-
       WrappedType lhsType, rhsType;
       if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_equalsMessages, args, lhsType, rhsType ) )
         return;
 
-      bool retval = mathShared::jsmath_equals( isolate, args[0], args[1], lhsType );
+     bool retval = mathShared::jsmath_equals( isolate, args[0], args[1], lhsType );
 
       args.GetReturnValue().Set( retval );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
     //! \verbatim
     //! bool Math.greater( lhs, rhs )
     //! \endverbatim
-    void Math::js_greater( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Math, greater )
     {
-      HandleScope handleScope( isolate );
-
       WrappedType lhsType, rhsType;
       if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_greaterMessages, args, lhsType, rhsType ) )
         return;
@@ -108,14 +105,13 @@ namespace neko {
 
       args.GetReturnValue().Set( retval );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
     //! \verbatim
     //! bool Math.greaterOrEqual( lhs, rhs )
     //! \endverbatim
-    void Math::js_greaterOrEqual( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Math, greaterOrEqual )
     {
-      HandleScope handleScope( isolate );
-
       WrappedType lhsType, rhsType;
       if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_greaterOrEqualMessages, args, lhsType, rhsType ) )
         return;
@@ -124,14 +120,13 @@ namespace neko {
 
       args.GetReturnValue().Set( retval );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
     //! \verbatim
     //! bool Math.lesser( lhs, rhs )
     //! \endverbatim
-    void Math::js_lesser( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Math, lesser )
     {
-      HandleScope handleScope( isolate );
-
       WrappedType lhsType, rhsType;
       if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_lesserMessages, args, lhsType, rhsType ) )
         return;
@@ -140,14 +135,13 @@ namespace neko {
 
       args.GetReturnValue().Set( retval );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END_NO_RETSET()
 
     //! \verbatim
     //! bool Math.lesserOrEqual( lhs, rhs )
     //! \endverbatim
-    void Math::js_lesserOrEqual( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Math, lesserOrEqual )
     {
-      HandleScope handleScope( isolate );
-
       WrappedType lhsType, rhsType;
       if ( !mathShared::extractLhsRhsArgsTypes( isolate, c_lesserOrEqualMessages, args, lhsType, rhsType ) )
         return;
@@ -156,28 +150,25 @@ namespace neko {
 
       args.GetReturnValue().Set( retval );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END_NO_RETSET()
 
     //! \verbatim
     //! bool Math.add( lhs, rhs )
     //! \endverbatim
-    void Math::js_add( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Math, add )
     {
-      HandleScope handleScope( isolate );
-
-      auto context = getScriptContext( isolate );
-      mathShared::jsmath_add( args, context, c_addMessages, args[0], args[1] );
+      mathShared::jsmath_add( args, scriptCtx, c_addMessages, args[0], args[1] );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END_NO_RETSET()
 
     //! \verbatim
     //! bool Math.sub( lhs, rhs )
     //! \endverbatim
-    void Math::js_sub( Isolate* isolate, const V8CallbackArgs& args )
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Math, sub )
     {
-      HandleScope handleScope( isolate );
-
-      auto context = getScriptContext( isolate );
-      mathShared::jsmath_subtract( args, context, c_addMessages, args[0], args[1] );
+      mathShared::jsmath_subtract( args, scriptCtx, c_addMessages, args[0], args[1] );
     }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END_NO_RETSET()
 
   }
 

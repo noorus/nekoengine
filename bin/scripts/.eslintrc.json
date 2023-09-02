@@ -24,7 +24,8 @@
     "vec2": "writable",
     "vec3": "writable",
     "quat": "writable",
-    "entity": "writable"
+    "entity": "writable",
+    "TransformComponent": "writable"
   },
   "plugins": [],
   "root": true,

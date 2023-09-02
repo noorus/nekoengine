@@ -42,7 +42,9 @@ namespace neko {
       explicit Game();
     public:
       //! JavaScript Game.registerScene
-      void js_registerScene( Isolate* isolate, const V8CallbackArgs& args );
+      void js_registerScene( const V8CallbackArgs& args );
+      void js_getEntity( const V8CallbackArgs& args );
+      void js_createEntity( const V8CallbackArgs& args );
     public:
       static JSGamePtr create( Isolate* isolate, V8Object global );
       void update( V8Context& context, GameTime tick, GameTime time );

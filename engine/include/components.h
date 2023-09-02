@@ -484,6 +484,23 @@ namespace neko {
       {
         return imguiSelectedNodes_.contains( e );
       }
+      inline optional<entity> find( string_view name ) const
+      {
+        for ( const auto& e : registry_.view<node>() )
+        {
+          if ( e == null || e == tombstone )
+            continue;
+          if ( registry_.get<node>( e ).name == name )
+            return e;
+        }
+        return {};
+      }
+      inline bool valid( entity e )
+      {
+        if ( e == null || e == tombstone )
+          return false;
+        return registry_.any_of<node>( e );
+      }
       void executeMouseClick( Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button );
       entity createNode( entity parent, string_view name );
       entity createRenderable( entity parent, string_view name );

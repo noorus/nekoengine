@@ -485,7 +485,7 @@ namespace neko {
     util::utf8Literal( isolate, #x ), \
     FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
       auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
-      self->js_##x( args.GetIsolate(), args ); \
+      self->js_##x( args ); \
     }, v8::External::New( isolate, (void*)this ) ) )
 
   //! Use this to create member functions for static-wrapped objects (instances) with another name.
@@ -493,7 +493,7 @@ namespace neko {
     util::utf8Literal( isolate, #y ), \
     FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
       auto self = static_cast<cls*>( args.Data().As<v8::External>()->Value() ); \
-      self->js_##x( args.GetIsolate(), args ); \
+      self->js_##x( args ); \
     }, v8::External::New( isolate, (void*)this ) ) )
 
   //! Use this to create accessors for variables in dynamic-wrapped objects' templates.

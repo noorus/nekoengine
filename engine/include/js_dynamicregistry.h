@@ -127,7 +127,9 @@ namespace neko {
         auto context = isolate->GetCurrentContext();
         auto constFunc = constructor.Get( isolate )->GetFunction( context ).ToLocalChecked();
         assert( !constFunc.IsEmpty() );
-        auto inst = constFunc->NewInstance( context );
+        const int argc = 1;
+        V8Value argv[argc] = { v8::Uint32::New( isolate, static_cast<uint32_t>( id ) ) };
+        auto inst = constFunc->NewInstance( context, argc, argv );
         assert( !inst.IsEmpty() );
         V8Object object;
         inst.ToLocal( &object );
@@ -148,7 +150,9 @@ namespace neko {
         auto context = isolate->GetCurrentContext();
         auto constFunc = constructor.Get( isolate )->GetFunction( context ).ToLocalChecked();
         assert( !constFunc.IsEmpty() );
-        auto inst = constFunc->NewInstance( context );
+        const int argc = 1;
+        V8Value argv[argc] = { v8::Uint32::New( isolate, static_cast<uint32_t>( id ) ) };
+        auto inst = constFunc->NewInstance( context, argc, argv );
         assert( !inst.IsEmpty() );
         V8Object object;
         inst.ToLocal( &object );

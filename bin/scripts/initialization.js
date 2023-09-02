@@ -55,8 +55,13 @@ class DemoScene extends Scene
     ]
     this._text = new Text({ translate: vec3( 200, 200, 0), str: "beep beep boop boop" } );
     Console.print( this._text );
+    Console.print( "ENTTEST" );
+    const gc = Game.getEntity( "gamecam" );
+    Console.print( gc );
     this._enttest = new TransformComponent( 1 );
     Console.print( this._enttest );
+    this._lolo = Game.createEntity( "loloooooooool" );
+    Console.print( this._lolo );
   }
   enter()
   {

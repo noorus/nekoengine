@@ -85,6 +85,9 @@ namespace neko {
     #define JS_DYNAMICOBJECT_MEMBERFUNCTION_END() \
         args.GetReturnValue().Set( ret ); \
       }
+    
+    #define JS_DYNAMICOBJECT_MEMBERFUNCTION_END_NO_RETSET() \
+      }
 
     #define JS_DYNAMICOBJECT_CONSTRUCTBODY_BEGIN( T )       \
       const utf8String funcName( #T "::Constructor" );       \

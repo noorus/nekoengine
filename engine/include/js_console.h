@@ -21,13 +21,13 @@ namespace neko {
       explicit Console( ConsolePtr console );
     public:
       //! JavaScript Console.print.
-      void js_print( Isolate* isolate, const V8CallbackArgs& args );
+      void js_print( const V8CallbackArgs& args );
       //! JavaScript Console.getVariable.
-      void js_getVariable( Isolate* isolate, const V8CallbackArgs& args );
+      void js_getVariable( const V8CallbackArgs& args );
       //! JavaScript Console.setVariable.
-      void js_setVariable( Isolate* isolate, const V8CallbackArgs& args );
+      void js_setVariable( const V8CallbackArgs& args );
       //! JavaScript Console.execute.
-      void js_execute( Isolate* isolate, const V8CallbackArgs& args );
+      void js_execute( const V8CallbackArgs& args );
     public:
       static JSConsolePtr create( ConsolePtr console, Isolate* isolate, V8Object global );
     };
