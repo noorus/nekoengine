@@ -15,8 +15,8 @@ using namespace neko;
 const string c_consoleThreadName = "nekoConsole";
 const string c_consoleTitle      = "nekoengine//console";
 const string c_errorTitle        = "nekoengine//exception";
-const vec2i  c_consolePos        = { 220, 220 };
-const vec2i  c_consoleDims       = { 640, 320 };
+const vec2i  c_consolePos        = { 60, 140 };
+const vec2i  c_consoleDims       = { 960, 480 };
 
 #ifdef NEKO_PLATFORM_WINDOWS
 

@@ -22,6 +22,8 @@ namespace neko {
     public:
       //! JavaScript Console.print.
       void js_print( const V8CallbackArgs& args );
+      //! JavaScript Console.dump.
+      void js_dump( const V8CallbackArgs& args );
       //! JavaScript Console.getVariable.
       void js_getVariable( const V8CallbackArgs& args );
       //! JavaScript Console.setVariable.

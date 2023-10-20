@@ -25,11 +25,11 @@ namespace neko {
     void Mesh::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
       // Properties
-      //JS_WRAPPER_SETACCESSOR( tpl, Mesh, x, X );
-      //JS_WRAPPER_SETACCESSOR( tpl, Mesh, y, Y );
+      //JS_DYNAMICOBJECT_SETACCESSOR( tpl, Mesh, x, X );
+      //JS_DYNAMICOBJECT_SETACCESSOR( tpl, Mesh, y, Y );
 
       // Methods
-      JS_WRAPPER_SETMEMBER( tpl, Mesh, toString );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Mesh, toString );
     }
 
     inline void extractVBO_2D( v8::Array& arr, V8Context& context, VBOPtr& vbo )

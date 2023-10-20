@@ -17,22 +17,22 @@ namespace neko {
     void Quaternion::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
       // Properties
-      JS_WRAPPER_SETACCESSOR( tpl, Quaternion, x, X );
-      JS_WRAPPER_SETACCESSOR( tpl, Quaternion, y, Y );
-      JS_WRAPPER_SETACCESSOR( tpl, Quaternion, z, Z );
-      JS_WRAPPER_SETACCESSOR( tpl, Quaternion, w, W );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Quaternion, x, X );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Quaternion, y, Y );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Quaternion, z, Z );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Quaternion, w, W );
 
       // Methods
-      JS_WRAPPER_SETMEMBER( tpl, Quaternion, toString );
-      JS_WRAPPER_SETMEMBER( tpl, Quaternion, length );
-      JS_WRAPPER_SETMEMBER( tpl, Quaternion, dotProduct );
-      JS_WRAPPER_SETMEMBER( tpl, Quaternion, normalise );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Quaternion, normalise, normalize );
-      JS_WRAPPER_SETMEMBER( tpl, Quaternion, normalisedCopy );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Quaternion, normalisedCopy, normalizedCopy );
-      JS_WRAPPER_SETMEMBER( tpl, Quaternion, lerp );
-      JS_WRAPPER_SETMEMBER( tpl, Quaternion, slerp );
-      JS_WRAPPER_SETMEMBER( tpl, Quaternion, fromAngleAxis );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Quaternion, toString );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Quaternion, length );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Quaternion, dotProduct );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Quaternion, normalise );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Quaternion, normalise, normalize );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Quaternion, normalisedCopy );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Quaternion, normalisedCopy, normalizedCopy );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Quaternion, lerp );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Quaternion, slerp );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Quaternion, fromAngleAxis );
     }
 
     //! \verbatim

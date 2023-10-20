@@ -239,7 +239,8 @@
     <ClCompile Include="src\gameviewport.cpp" />
     <ClCompile Include="src\imguihelpers.cpp" />
     <ClCompile Include="src\imguistyle.cpp" />
-    <ClCompile Include="src\js_component.cpp" />
+    <ClCompile Include="src\js_c_camera.cpp" />
+    <ClCompile Include="src\js_c_transform.cpp" />
     <ClCompile Include="src\js_entity.cpp" />
     <ClCompile Include="src\js_text.cpp" />
     <ClCompile Include="src\js_utils.cpp" />

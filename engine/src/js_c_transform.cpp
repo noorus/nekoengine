@@ -17,22 +17,22 @@ namespace neko {
 
   namespace js {
 
-    JS_MAPPEDDYNAMICOBJECT_DECLARE_STATICS( TransformComponent, JSComponent )
+    JS_MAPPEDDYNAMICOBJECT_DECLARE_STATICS( TransformComponent, JSTransformComponent )
 
     void TransformComponent::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
       // Properties
-      JS_WRAPPER_SETACCESSOR( tpl, TransformComponent, scale, Scale );
-      JS_WRAPPER_SETACCESSOR( tpl, TransformComponent, translate, Translate );
-      JS_WRAPPER_SETACCESSOR( tpl, TransformComponent, rotate, Rotate );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, TransformComponent, scale, Scale );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, TransformComponent, translate, Translate );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, TransformComponent, rotate, Rotate );
 
       // Methods
-      JS_WRAPPER_SETMEMBER( tpl, TransformComponent, toString );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, TransformComponent, toString );
     }
 
     JS_DYNAMICOBJECT_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS_WITH_CALLBACKS( TransformComponent, Scale, local_.scale )
     JS_DYNAMICOBJECT_VEC3_PROPERTY_GETSET_IMPLEMENTATIONS_WITH_CALLBACKS( TransformComponent, Translate, local_.translate )
-    JS_DYNAMICOBJECT_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS( TransformComponent, Rotate, local_.rotate )
+    JS_DYNAMICOBJECT_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS_WITH_CALLBACKS( TransformComponent, Rotate, local_.rotate )
 
     void TransformComponent::jsConstructor( const v8::FunctionCallbackInfo<v8::Value>& args )
     {
@@ -42,7 +42,7 @@ namespace neko {
       vec3 defaultTranslate( 0.0f, 0.0f, 0.0f );
       quaternion defaultRotate( glm::quat_identity<Real, glm::defaultp>() );
 
-      JSComponent loc( 0xFFFFFFFF );
+      JSTransformComponent loc( 0xFFFFFFFF );
       WrappedType wrappedType = Max_WrappedType;
       if ( args.Length() == 1 )
       {
@@ -88,7 +88,9 @@ namespace neko {
 
     void TransformComponent::js_afterSetScale( const PropertyCallbackInfo<void>& info )
     {
-      //
+      auto ctx = scriptContext( info.GetIsolate() );
+      auto& node = ctx->scene().tn( local_.eid );
+      node.scale = local_.scale->v();
     }
 
     void TransformComponent::js_afterSetTranslate( const PropertyCallbackInfo<void>& info )
@@ -100,7 +102,9 @@ namespace neko {
 
     void TransformComponent::js_afterSetRotate( const PropertyCallbackInfo<void>& info )
     {
-      //
+      auto ctx = scriptContext( info.GetIsolate() );
+      auto& node = ctx->scene().tn( local_.eid );
+      node.rotate = local_.rotate->q();
     }
 
     void TransformComponent::js_toString( const V8CallbackArgs& args )
@@ -110,7 +114,7 @@ namespace neko {
 
     int32_t TransformComponent::jsEstimateSize() const
     {
-      int64_t result = sizeof( JSComponent ) + sizeof( js::Vector3 ) + sizeof( js::Vector3 ) + sizeof( js::Quaternion );
+      int64_t result = sizeof( JSTransformComponent ) + sizeof( js::Vector3 ) + sizeof( js::Vector3 ) + sizeof( js::Quaternion );
       return static_cast<int32_t>( std::min( static_cast<int64_t>( std::numeric_limits<int32_t>::max() ), result ) );
     }
 

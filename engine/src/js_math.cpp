@@ -75,6 +75,14 @@ namespace neko {
       JS_WRAPPER_SETOBJMEMBER( tpl, Math, sub );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, sub, subtraction );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, sub, minus );
+      // Degrees to Radians
+      JS_WRAPPER_SETOBJMEMBER( tpl, Math, radians );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, radians, radian );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, radians, deg2rad );
+      // Radians to Degrees
+      JS_WRAPPER_SETOBJMEMBER( tpl, Math, degrees );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, degrees, degree );
+      JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Math, degrees, rad2deg );
     }
 
     //! \verbatim
@@ -169,6 +177,26 @@ namespace neko {
       mathShared::jsmath_subtract( args, scriptCtx, c_addMessages, args[0], args[1] );
     }
     JS_DYNAMICOBJECT_MEMBERFUNCTION_END_NO_RETSET()
+
+    //! \verbatim
+    //! bool Math.radians( degrees )
+    //! \endverbatim
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Math, radians )
+    {
+      auto deg = util::extractNumberArg( context, args, 0, 0.0f );
+      ret = v8::Number::New( isolate, math::radians( deg ) );
+    }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
+
+    //! \verbatim
+    //! bool Math.degrees( radians )
+    //! \endverbatim
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Math, degrees )
+    {
+      auto rad = util::extractNumberArg( context, args, 0, 0.0f );
+      ret = v8::Number::New( isolate, math::degrees( rad ) );
+    }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
   }
 

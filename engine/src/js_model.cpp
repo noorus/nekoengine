@@ -25,12 +25,12 @@ namespace neko {
     void Model::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
       // Properties
-      JS_WRAPPER_SETACCESSOR( tpl, Model, scale, Scale );
-      JS_WRAPPER_SETACCESSOR( tpl, Model, translate, Translate );
-      JS_WRAPPER_SETACCESSOR( tpl, Model, rotate, Rotate );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Model, scale, Scale );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Model, translate, Translate );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Model, rotate, Rotate );
 
       // Methods
-      JS_WRAPPER_SETMEMBER( tpl, Model, toString );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Model, toString );
     }
 
     void Model::jsConstructor( const v8::FunctionCallbackInfo<v8::Value>& args )

@@ -69,63 +69,57 @@ namespace neko {
     }
   }
 
+  # define REG_INIT( name, type ) if ( ! ## name ## Registry_ ) \
+    name ## Registry_ = make_shared<js:: ## type ## ::RegistryType>(); \
+    name ## Registry_->initialize( isolate, global );
+
+  # define REG_CLEAR( name ) name ## Registry_->clear();
+
+  # define REG_RESET( name ) name ## Registry_.reset();
+
   void ScriptContextBaseRegistries::initializeRegistries( Isolate* isolate, Local<ObjectTemplate>& global )
   {
-    if ( !vec2Registry_ )
-      vec2Registry_ = make_shared<js::Vector2::RegistryType>();
-    vec2Registry_->initialize( isolate, global );
+    REG_INIT( vec2, Vector2 )
+    REG_INIT( vec3, Vector3 )
+    REG_INIT( quaternion, Quaternion )
+    REG_INIT( mesh, Mesh )
+    REG_INIT( model, Model )
+    REG_INIT( text, Text )
+    REG_INIT( entity, Entity )
 
-    if ( !vec3Registry_ )
-      vec3Registry_ = make_shared<js::Vector3::RegistryType>();
-    vec3Registry_->initialize( isolate, global );
-
-    if ( !quaternionRegistry_ )
-      quaternionRegistry_ = make_shared<js::Quaternion::RegistryType>();
-    quaternionRegistry_->initialize( isolate, global );
-
-    if ( !meshRegistry_ )
-      meshRegistry_ = make_shared<js::Mesh::RegistryType>();
-    meshRegistry_->initialize( isolate, global );
-
-    if ( !modelRegistry_ )
-      modelRegistry_ = make_shared<js::Model::RegistryType>();
-    modelRegistry_->initialize( isolate, global );
-
-    if ( !textRegistry_ )
-      textRegistry_ = make_shared<js::Text::RegistryType>();
-    textRegistry_->initialize( isolate, global );
-
-    if ( !entityRegistry_ )
-      entityRegistry_ = make_shared<js::Entity::RegistryType>();
-    entityRegistry_->initialize( isolate, global );
-
-    if ( !componentRegistry_ )
-      componentRegistry_ = make_shared<js::TransformComponent::RegistryType>();
-    componentRegistry_->initialize( isolate, global );
+    // Entity components
+    REG_INIT( transform_c, TransformComponent )
+    REG_INIT( camera_c, CameraComponent )
   }
 
   void ScriptContextBaseRegistries::clearRegistries()
   {
-    vec2Registry_->clear();
-    vec3Registry_->clear();
-    quaternionRegistry_->clear();
-    meshRegistry_->clear();
-    modelRegistry_->clear();
-    textRegistry_->clear();
-    entityRegistry_->clear();
-    componentRegistry_->clear();
+    REG_CLEAR( vec2 )
+    REG_CLEAR( vec3 )
+    REG_CLEAR( quaternion )
+    REG_CLEAR( mesh )
+    REG_CLEAR( model )
+    REG_CLEAR( text )
+    REG_CLEAR( entity )
+
+    // Entity components
+    REG_CLEAR( transform_c )
+    REG_CLEAR( camera_c )
   }
 
   void ScriptContextBaseRegistries::destroyRegistries()
   {
-    vec2Registry_.reset();
-    vec3Registry_.reset();
-    quaternionRegistry_.reset();
-    meshRegistry_.reset();
-    modelRegistry_.reset();
-    textRegistry_.reset();
-    entityRegistry_.reset();
-    componentRegistry_.reset();
+    REG_RESET( vec2 )
+    REG_RESET( vec3 )
+    REG_RESET( quaternion )
+    REG_RESET( mesh )
+    REG_RESET( model )
+    REG_RESET( text )
+    REG_RESET( entity )
+
+    // Entity components
+    REG_RESET( transform_c )
+    REG_RESET( camera_c )
   }
 
   void ScriptingContext::registerTemplateGlobals( Local<ObjectTemplate>& global )
@@ -199,7 +193,7 @@ namespace neko {
 
     isolate_->Exit();
 
-    for ( auto& [key, value] : compreg()->items() )
+    for ( auto& [key, value] : transformComponents()->items() )
     {
       if ( !value || !value->dirty() )
         continue;
@@ -209,6 +203,9 @@ namespace neko {
       tn.scale = value->ent().scale->v();
       tn.rotate = value->ent().rotate->q();
       tn.translate = value->ent().translate->v();
+      value->ent().scale->markClean();
+      value->ent().rotate->markClean();
+      value->ent().translate->markClean();
       scene.reg().emplace_or_replace<c::dirty_transform>( value->ent().eid );
     }
 

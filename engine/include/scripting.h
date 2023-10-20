@@ -95,7 +95,8 @@ public:                                                        \
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Model, model )
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Text, text )
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Entity, entity )
-    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::TransformComponent, component )
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::TransformComponent, transform_c )
+    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::CameraComponent, camera_c )
   protected:
     void initializeRegistries( js::Isolate* isolate, js::Local<js::ObjectTemplate>& global );
     void clearRegistries();
@@ -135,7 +136,8 @@ public:                                                        \
     inline js::Mesh::RegistryPtrType meshreg() { return registry<js::Mesh>( type<js::Mesh>() ); }
     inline js::Model::RegistryPtrType modelreg() { return registry<js::Model>( type<js::Model>() ); }
     inline js::Text::RegistryPtrType textreg() { return registry<js::Text>( type<js::Text>() ); }
-    inline js::TransformComponent::RegistryPtrType compreg() { return registry<js::TransformComponent>( type<js::TransformComponent>() ); }
+    inline js::TransformComponent::RegistryPtrType transformComponents() { return registry<js::TransformComponent>( type<js::TransformComponent>() ); }
+    inline js::CameraComponent::RegistryPtrType cameraComponents() { return registry<js::CameraComponent>( type<js::CameraComponent>() ); }
     inline RenderSyncContext& renderSync() { return director_->renderSync(); }
     inline SManager& scene()
     {

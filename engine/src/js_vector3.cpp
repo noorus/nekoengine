@@ -25,49 +25,49 @@ namespace neko {
     void Vector3::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
       // Properties
-      JS_WRAPPER_SETACCESSOR( tpl, Vector3, x, X );
-      JS_WRAPPER_SETACCESSOR( tpl, Vector3, y, Y );
-      JS_WRAPPER_SETACCESSOR( tpl, Vector3, z, Z );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Vector3, x, X );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Vector3, y, Y );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Vector3, z, Z );
 
       // Operations
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, add );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, add, addition );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, add, plus );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, sub );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, sub, subtraction );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, sub, subtract );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, sub, minus );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, add );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, add, addition );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, add, plus );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, sub );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, sub, subtraction );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, sub, subtract );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, sub, minus );
 
       // Methods
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, toString );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, length );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, distance );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, normalise );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, normalise, normalize );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, normalisedCopy );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, normalisedCopy, normalizedCopy );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, midPoint );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, makeFloor );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, makeCeil );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, inverse );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, inverse, invert );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, inverse, inverted );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, toString );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, length );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, distance );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, normalise );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, normalise, normalize );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, normalisedCopy );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, normalisedCopy, normalizedCopy );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, midPoint );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, makeFloor );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, makeCeil );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, inverse );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, inverse, invert );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, inverse, inverted );
 
       // Comparisons
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, equals );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, equals, eq );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, greater );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, greater, greaterThan );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, greater, gt );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, greaterOrEqual );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, greater, greaterThanOrEqual );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, greater, gte );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, lesser );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, lesser, lessThan );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, lesser, lt );
-      JS_WRAPPER_SETMEMBER( tpl, Vector3, lesserOrEqual );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, lesser, lessThanOrEqual );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector3, lesser, lte );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, equals );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, equals, eq );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, greater );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, greater, greaterThan );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, greater, gt );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, greaterOrEqual );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, greater, greaterThanOrEqual );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, greater, gte );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, lesser );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, lesser, lessThan );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, lesser, lt );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector3, lesserOrEqual );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, lesser, lessThanOrEqual );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector3, lesser, lte );
     }
 
     //! \verbatim

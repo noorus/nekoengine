@@ -1,6 +1,4 @@
-Console.log("initialization.js");
-
-// include("math.js");
+const nm = NekoMath;
 
 class Scene
 {
@@ -14,54 +12,25 @@ class Scene
   }
 }
 
-let toRadians = (degrees) => {
-  return (degrees * (Math.PI / 180));
-}
-
-class DemoScene extends Scene
+class TestScene extends Scene
 {
   constructor( name )
   {
     super( name );
-    this._mesh = null;
-    this._model = null;
-    this._text = null;
-    this._enttest = null;
+    this._camera = null;
   }
   initialize( time )
   {
-    Console.print( "DemoScene.initialize: " + time );
-    /*const verts = [
-      [-128,  90,  90, 0, 0.7, -0.7, 0, 0],
-      [-128, -90, -90, 0, 0.7, -0.7, 0, 1],
-      [128, 90, 90, 0, 0.7, -0.7, 1, 0],
-      [128, -90, -90, 0, 0.7, -0.7, 1, 1],
-    ];
-    const indices = [
-      0, 2, 1, 1, 2, 3
-    ];
-    this._mesh = new mesh(verts, indices);*/
-    //this._mesh = new mesh("ground", vec3(16, 16, 0.2), vec2(32));
-    //this._mesh = new mesh("plane", vec2(16, 16), vec2(32), vec3(0, 1, 0));
-    this._mesh = new Mesh("box", vec3(3, 3, 3), vec2(1));
-    this._ctr = 0;
-    Console.print(this._mesh);
-    this._models = [
-      new Model({
-        mesh: this._mesh,
-        scale: vec3(1, 1, 1),
-        translate: vec3(0, 1, 0)
-      })
-    ]
-    this._text = new Text({ translate: vec3( 200, 200, 0), str: "beep beep boop boop" } );
-    Console.print( this._text );
+    Console.print( "TestScene.initialize: " + time );
+    /*Console.print( this._text );
     Console.print( "ENTTEST" );
     const gc = Game.getEntity( "gamecam" );
     Console.print( gc );
     this._enttest = new TransformComponent( 1 );
-    Console.print( this._enttest );
-    this._lolo = Game.createEntity( "loloooooooool" );
-    Console.print( this._lolo );
+    Console.print( this._enttest );*/
+    this._camera = Game.getEntity( "gamecam" ); // Game.createEntity( "loloooooooool" );
+    Console.dump( this._camera );
+    Console.dump( this._camera.transform );
   }
   enter()
   {
@@ -73,21 +42,11 @@ class DemoScene extends Scene
   }
   update( time, delta )
   {
-    this._enttest.translate.x = Math.sin( time * 2 ) * 2;
-    this._enttest.translate.y = Math.cos( time * 2 ) * 2;
-    // Console.print( this._enttest.translate );
-    //this._models[1].rotate.fromAngleAxis(toRadians(time * 50), vec3(0, 0, 1));
-    //this._models[2].translate.z = Math.sin(time * 2) * 2;
-    /*if (this._ctr < 12) {
-      Console.print("update " + this._ctr + " - time " + time);
-      Console.print(this._mesh);
-    }
-    if (this._ctr == 11) {
-      this._mesh = null;
-    }
-    this._ctr++;*/
+    //this._enttest.translate.x = Math.sin( time * 2 ) * 2;
+//this._enttest.translate.y = Math.cos( time * 2 ) * 2;
+   // this._enttest.rotate.fromAngleAxis( nm.radians( time * 50 ), vec3( 0, 0, 1 ) );
+    this._camera.transform.rotate.fromAngleAxis( nm.radians( time * 50 ), vec3( 0, 0, 1 ) );
   }
 }
 
-const demoscene = new DemoScene( "demo" );
-Game.registerScene( demoscene );
+Game.registerScene( new TestScene( "demo" ) );

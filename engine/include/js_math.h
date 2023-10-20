@@ -37,6 +37,10 @@ namespace neko {
       void js_add( const V8CallbackArgs& args );
       //! JavaScript Math.sub
       void js_sub( const V8CallbackArgs& args );
+      //! JavaScript Math.radians
+      void js_radians( const V8CallbackArgs& args );
+      //! JavaScript Math.degrees
+      void js_degrees( const V8CallbackArgs& args );
     public:
       static JSMathPtr create( Isolate* isolate, V8Object global );
     };
@@ -48,10 +52,8 @@ namespace neko {
       vec2 v_; //!< Internal vec2.
     protected:
       //! Properties
-      void js_getX( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
-      void js_setX( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
-      void js_getY( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
-      void js_setY( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      JS_DYNAMICOBJECT_DECLAREACCESSORS( X )
+      JS_DYNAMICOBJECT_DECLAREACCESSORS( Y )
       //! Comparisons
       void js_equals( const V8CallbackArgs& args );
       void js_greater( const V8CallbackArgs& args );

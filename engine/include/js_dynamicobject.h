@@ -177,6 +177,27 @@ namespace neko {
        varname = Quaternion::unwrap( object )->shared_from_this();                                       \
       }
 
+    #define JS_DYNAMICOBJECT_QUATERNION_PROPERTY_GETSET_IMPLEMENTATIONS_WITH_CALLBACKS( cls, propname, varname ) \
+      void cls::js_get##propname( V8String prop, const PropertyCallbackInfo<v8::Value>& info )                  \
+      {                                                                                                         \
+       info.GetReturnValue().Set( varname->handle( info.GetIsolate() ) );                                       \
+       js_afterGet##propname( info );                                                                        \
+      }                                                                                                         \
+      void cls::js_set##propname( V8String prop, Local<v8::Value> value, const PropertyCallbackInfo<void>& info ) \
+      {                                                                                                         \
+       auto isolate = info.GetIsolate();                                                                        \
+       auto context = isolate->GetCurrentContext();                                                             \
+       WrappedType argWrapType = Max_WrappedType;                                                               \
+       if ( !util::getWrappedType( context, value, argWrapType ) || argWrapType != Wrapped_Quaternion )         \
+       {                                                                                                        \
+        isolate->ThrowException( util::staticStr( isolate, "Passed argument is not a quaternion" ) );           \
+        return;                                                                                                 \
+       }                                                                                                        \
+       auto object = value->ToObject( context ).ToLocalChecked();                                               \
+       varname = Quaternion::unwrap( object )->shared_from_this();                                       \
+       js_afterSet##propname( info );                                                                        \
+      }
+
     template <typename T>
     T::PtrType unwrapDynamic( V8Context& context, V8Value value, bool shouldThrow = true )
     {

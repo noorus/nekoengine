@@ -28,15 +28,16 @@ namespace neko {
       JSEntity local_;
     protected:
       //! Properties
-      void js_getID( V8String prop, const PropertyCallbackInfo<v8::Value>& info );
-      void js_setID( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
+      JS_DYNAMICOBJECT_DECLAREACCESSORS( ID )
+      JS_DYNAMICOBJECT_DECLAREACCESSORS( Transform )
+      JS_DYNAMICOBJECT_DECLAREACCESSORS( Camera )
       //! Functions
       void js_toString( const V8CallbackArgs& args );
       void js_has( const V8CallbackArgs& args );
     public:
       static void jsConstructor( const V8CallbackArgs& info );
-      virtual int32_t jsEstimateSize() const;
-      virtual void jsOnDestruct( Isolate* isolate );
+      int32_t jsEstimateSize() const override;
+      void jsOnDestruct( Isolate* isolate ) override;
       static void registerExport( Isolate* isolate, V8FunctionTemplate& obj );
     public:
       Entity( const JSEntity& source ): local_( source ) {}

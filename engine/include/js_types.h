@@ -20,6 +20,7 @@ namespace neko {
       Wrapped_Text, //!< Dynamic: Text
       Wrapped_Entity,
       Wrapped_TransformComponent,
+      Wrapped_CameraComponent,
       Max_WrappedType
     };
 

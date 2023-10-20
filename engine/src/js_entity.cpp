@@ -20,12 +20,14 @@ namespace neko {
     void Entity::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
       // Properties
-      JS_WRAPPER_SETACCESSOR( tpl, Entity, id, ID );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Entity, id, ID );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Entity, transform, Transform );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Entity, camera, Camera );
 
       // Methods
-      JS_WRAPPER_SETMEMBER( tpl, Entity, toString );
-      JS_WRAPPER_SETMEMBER( tpl, Entity, has );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Entity, has, contains );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Entity, toString );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Entity, has );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Entity, has, contains );
     }
 
     void Entity::jsConstructor( const V8CallbackArgs& args )
@@ -72,6 +74,30 @@ namespace neko {
       auto eid = static_cast<c::entity>( util::uint32FromValue( context, value, 0, true ) );
       if ( eid != local_.eid )
         util::throwException( info.GetIsolate(), "Cannot assign to entity.id" );
+    }
+
+    void Entity::js_getTransform( V8String prop, const PropertyCallbackInfo<v8::Value>& info )
+    {
+      auto scriptCtx = scriptContext( info.GetIsolate() );
+      auto ptr = scriptCtx->transformComponents()->create( static_cast<uint64_t>( local_.eid ) );
+      info.GetReturnValue().Set( ptr->handle() );
+    }
+
+    void Entity::js_setTransform( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info )
+    {
+      util::throwException( info.GetIsolate(), "Cannot assign to entity.transform" );
+    }
+
+    void Entity::js_getCamera( V8String prop, const PropertyCallbackInfo<v8::Value>& info )
+    {
+      info.GetReturnValue().Set( static_cast<uint32_t>( local_.eid ) );
+    }
+
+    void Entity::js_setCamera( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info )
+    {
+      auto scriptCtx = scriptContext( info.GetIsolate() );
+      auto ptr = scriptCtx->cameraComponents()->create( static_cast<uint64_t>( local_.eid ) );
+      info.GetReturnValue().Set( ptr->handle() );
     }
 
     JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Entity, has )

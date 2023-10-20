@@ -25,54 +25,54 @@ namespace neko {
     void Vector2::registerExport( Isolate* isolate, V8FunctionTemplate& tpl )
     {
       // Properties
-      JS_WRAPPER_SETACCESSOR( tpl, Vector2, x, X );
-      JS_WRAPPER_SETACCESSOR( tpl, Vector2, y, Y );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Vector2, x, X );
+      JS_DYNAMICOBJECT_SETACCESSOR( tpl, Vector2, y, Y );
 
       // Operations
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, add );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, add, addition );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, add, plus );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, sub );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, sub, subtraction );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, sub, subtract );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, sub, minus );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, add );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, add, addition );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, add, plus );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, sub );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, sub, subtraction );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, sub, subtract );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, sub, minus );
 
       // Methods
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, toString );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, length );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, distance );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, dotProduct );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, crossProduct );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, normalise );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, normalise, normalize );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, normalisedCopy );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, normalisedCopy, normalizedCopy );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, midPoint );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, angleBetween );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, angleTo );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, perpendicular );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, reflect );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, makeFloor );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, makeCeil );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, inverse );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, inverse, invert );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, inverse, inverted );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, toString );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, length );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, distance );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, dotProduct );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, crossProduct );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, normalise );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, normalise, normalize );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, normalisedCopy );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, normalisedCopy, normalizedCopy );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, midPoint );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, angleBetween );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, angleTo );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, perpendicular );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, reflect );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, makeFloor );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, makeCeil );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, inverse );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, inverse, invert );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, inverse, inverted );
 
       // Comparisons
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, equals );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, equals, eq );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, greater );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, greater, greaterThan );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, greater, gt );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, greaterOrEqual );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, greater, greaterThanOrEqual );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, greater, gte );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, lesser );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, lesser, lessThan );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, lesser, lt );
-      JS_WRAPPER_SETMEMBER( tpl, Vector2, lesserOrEqual );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, lesser, lessThanOrEqual );
-      JS_WRAPPER_SETMEMBERNAMED( tpl, Vector2, lesser, lte );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, equals );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, equals, eq );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, greater );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, greater, greaterThan );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, greater, gt );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, greaterOrEqual );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, greater, greaterThanOrEqual );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, greater, gte );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, lesser );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, lesser, lessThan );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, lesser, lt );
+      JS_DYNAMICOBJECT_SETMEMBER( tpl, Vector2, lesserOrEqual );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, lesser, lessThanOrEqual );
+      JS_DYNAMICOBJECT_SETMEMBERNAMED( tpl, Vector2, lesser, lte );
     }
 
     //! \verbatim

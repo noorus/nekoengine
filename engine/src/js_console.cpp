@@ -24,12 +24,24 @@ namespace neko {
 
     void Console::registerGlobals( Isolate* isolate, V8FunctionTemplate& tpl )
     {
+      JS_WRAPPER_SETOBJMEMBER( tpl, Console, dump );
       JS_WRAPPER_SETOBJMEMBER( tpl, Console, print );
       JS_WRAPPER_SETOBJMEMBERNAMED( tpl, Console, print, log );
       JS_WRAPPER_SETOBJMEMBER( tpl, Console, getVariable );
       JS_WRAPPER_SETOBJMEMBER( tpl, Console, setVariable );
       JS_WRAPPER_SETOBJMEMBER( tpl, Console, execute );
     }
+
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Console, dump )
+    {
+      HandleScope handleScope( isolate );
+
+      for ( int i = 0; i < args.Length(); i++ )
+      {
+        util::debugDumpVariable( console_, isolate, "", args[i] );
+      }
+    }
+    JS_DYNAMICOBJECT_MEMBERFUNCTION_END()
 
     JS_DYNAMICOBJECT_MEMBERFUNCTION_BEGIN( Console, print )
     {

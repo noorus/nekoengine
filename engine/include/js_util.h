@@ -313,6 +313,25 @@ namespace neko {
         return ( *value ? *value : defaultValue );
       }
 
+      inline Real extractNumberArg(
+        V8Context& context, const V8CallbackArgs& args, int index, Real defaultValue )
+      {
+        auto isolate = context->GetIsolate();
+        if ( index >= args.Length() )
+        {
+          isolate->ThrowException( util::staticStr( isolate, "Bad argument count" ) );
+          return defaultValue;
+        }
+        if ( !args[index]->IsNumber() )
+        {
+          util::throwExceptionFmt( isolate, "Argument %i is not a number", index );
+          return defaultValue;
+        }
+
+        return static_cast<Real>(
+          args[index]->NumberValue( isolate->GetCurrentContext() ).FromMaybe( static_cast<double>( defaultValue ) ) );
+      }
+
       inline utf8String extractStringMember( Isolate* isolate, const utf8String& func,
         v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow = true )
       {
@@ -332,6 +351,26 @@ namespace neko {
         }
         v8::String::Utf8Value value( isolate, object.ToLocalChecked() );
         return ( *value ? *value : emptyString );
+      }
+
+      inline optional<Real> extractNumberMember(
+        Isolate* isolate, const utf8String& func, v8::MaybeLocal<v8::Object>& maybeObject, const utf8String& name, bool shouldThrow )
+      {
+        if ( maybeObject.IsEmpty() )
+        {
+          if ( shouldThrow )
+            util::throwException( isolate, ( "Syntax error: " + func + ": passed object is empty" ).c_str() );
+          return {};
+        }
+        auto object =
+          maybeObject.ToLocalChecked()->Get( isolate->GetCurrentContext(), util::allocStringConserve( name, isolate ) );
+        if ( object.IsEmpty() || !object.ToLocalChecked()->IsNumber() )
+        {
+          if ( shouldThrow )
+            util::throwException( isolate, ( func + ": passed object has no number member \"" + name + "\"" ).c_str() );
+          return {};
+        }
+        return static_cast<Real>( object.ToLocalChecked()->NumberValue( isolate->GetCurrentContext() ).FromJust() );
       }
 
       inline optional<int> extractIntMember(
@@ -459,7 +498,7 @@ namespace neko {
       v8::External::New( isolate_, static_cast<void*>( this ) ) ) )
 
   //! Use this to create member functions for variables in dynamic-wrapped objects' templates.
-  #define JS_WRAPPER_SETMEMBER( obj, cls, x )                                                          \
+  #define JS_DYNAMICOBJECT_SETMEMBER( obj, cls, x )                                                          \
     obj->PrototypeTemplate()->Set(                                                                     \
     util::utf8Literal( isolate, #x ), FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
     auto self = args.This();                                                                           \
@@ -470,7 +509,7 @@ namespace neko {
   } ) )
 
   //! Use this to create member functions for variables in dynamic-wrapped objects' templates.
-  #define JS_WRAPPER_SETMEMBERNAMED( obj, cls, x, y )                                                   \
+  #define JS_DYNAMICOBJECT_SETMEMBERNAMED( obj, cls, x, y )                                                   \
    obj->PrototypeTemplate()->Set(                                                                       \
      util::utf8Literal( isolate, #y ), FunctionTemplate::New( isolate, []( const V8CallbackArgs& args ) { \
      auto self = args.This();                                                                           \
@@ -497,7 +536,7 @@ namespace neko {
     }, v8::External::New( isolate, (void*)this ) ) )
 
   //! Use this to create accessors for variables in dynamic-wrapped objects' templates.
-  #define JS_WRAPPER_SETACCESSOR(obj,cls,x,valInternal) obj->PrototypeTemplate()->SetAccessor( \
+  #define JS_DYNAMICOBJECT_SETACCESSOR(obj,cls,x,valInternal) obj->PrototypeTemplate()->SetAccessor( \
     util::utf8Literal( isolate, #x ), []( V8String prop, const PropertyCallbackInfo<v8::Value>& info ) { \
       auto self = info.This(); \
       if ( !util::isWrappedType( info.GetIsolate()->GetCurrentContext(), self, internalType ) ) \
@@ -511,6 +550,10 @@ namespace neko {
       auto obj = static_cast<cls*>( self->GetAlignedPointerFromInternalField( WrapField_Pointer ) ); \
       obj->js_set##valInternal( prop, value, info ); \
     } )
+
+  #define JS_DYNAMICOBJECT_DECLAREACCESSORS( x ) \
+    void js_get##x( V8String prop, const PropertyCallbackInfo<v8::Value>& info ); \
+    void js_set##x( V8String prop, V8Value value, const PropertyCallbackInfo<void>& info );
 
   // clang-format off
 
