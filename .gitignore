@@ -329,4 +329,6 @@ publish*
 /bin/imgui.ini
 junk/*
 
+!extern
 !extern/
+!extern/**/*
