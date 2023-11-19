@@ -460,13 +460,10 @@
     <None Include="..\bin\shaders\dbg_showvertextangents.vert" />
     <None Include="..\bin\shaders\editor_bgline.frag" />
     <None Include="..\bin\shaders\editor_bgline.vert" />
-    <None Include="..\bin\shaders\gaussblur2d.frag" />
     <None Include="..\bin\shaders\inc.buffers.glsl" />
     <None Include="..\bin\shaders\inc.colorutils.glsl" />
     <None Include="..\bin\shaders\inc.math.glsl" />
     <None Include="..\bin\shaders\mainframebuf2d.frag" />
-    <None Include="..\bin\shaders\mat_screentone.frag" />
-    <None Include="..\bin\shaders\mat_screentone.vert" />
     <None Include="..\bin\shaders\paint2d_default.frag" />
     <None Include="..\bin\shaders\paint2d_default.vert" />
     <None Include="..\bin\shaders\particle.frag" />

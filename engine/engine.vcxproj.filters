@@ -913,9 +913,6 @@
     <None Include="..\bin\shaders\passthrough2d.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\shaders\gaussblur2d.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\bin\data\materials.json">
       <Filter>Data</Filter>
     </None>
@@ -935,12 +932,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\shaders\dbg_line.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\mat_screentone.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\mat_screentone.vert">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\shaders\text.frag">

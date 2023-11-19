@@ -1,14 +1,5 @@
 [
   {
-    "name": "gaussblur2d",
-    "vert": "passthrough2d.vert",
-    "frag": "gaussblur2d.frag",
-    "uniforms": [
-      "tex_image",
-      "horizontal"
-    ]
-  },
-  {
     "name": "gui",
     "vert": "gui.vert",
     "frag": "gui.frag",
@@ -70,14 +61,6 @@
     "uniforms": [
       "model",
       "tex"
-    ]
-  },
-  {
-    "name": "mat_screentone",
-    "vert": "mat_screentone.vert",
-    "frag": "mat_screentone.frag",
-    "uniforms": [
-      "model"
     ]
   },
   {
