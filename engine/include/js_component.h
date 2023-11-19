@@ -8,7 +8,6 @@
 # include "js_dynamicobject.h"
 # include "js_dynamicregistry.h"
 # include "js_math.h"
-# include "js_mesh.h"
 # include "components.h"
 # include "locator.h"
 

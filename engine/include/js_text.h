@@ -7,6 +7,7 @@
 #include "mesh_primitives.h"
 #include "locator.h"
 #include "js_dynamicobject.h"
+#include "js_math.h"
 
 namespace neko {
 

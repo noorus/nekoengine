@@ -7,6 +7,8 @@
 #include "console.h"
 #include "tiny_gltf.h"
 
+#if 0
+
 namespace neko::loaders {
 
   static size_t ComponentTypeByteSize( int type )
@@ -284,3 +286,5 @@ namespace neko::loaders {
   }
 
 }
+
+#endif

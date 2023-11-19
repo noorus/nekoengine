@@ -1,7 +1,6 @@
 #include "pch.h"
 
 #include "gfx_types.h"
-#include "modelmanager.h"
 #include "renderer.h"
 #include "neko_exception.h"
 #include "console.h"

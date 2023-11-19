@@ -6,8 +6,6 @@
 #include "subsystem.h"
 #include "js_console.h"
 #include "js_math.h"
-#include "js_mesh.h"
-#include "js_model.h"
 #include "js_game.h"
 #include "js_text.h"
 #include "js_entity.h"
@@ -91,8 +89,6 @@ public:                                                        \
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Vector2, vec2 )
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Vector3, vec3 )
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Quaternion, quaternion )
-    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Mesh, mesh )
-    SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Model, model )
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Text, text )
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::Entity, entity )
     SCRIPTCONTEXTBASE_DECLARE_REGISTRY( js::TransformComponent, transform_c )
@@ -133,8 +129,6 @@ public:                                                        \
     inline js::Vector3::RegistryPtrType vec3reg() { return registry<js::Vector3>( type<js::Vector3>() ); }
     inline js::Quaternion::RegistryPtrType quatreg() { return registry<js::Quaternion>( type<js::Quaternion>() ); }
     inline js::Entity::RegistryPtrType entreg() { return registry<js::Entity>( type<js::Entity>() ); }
-    inline js::Mesh::RegistryPtrType meshreg() { return registry<js::Mesh>( type<js::Mesh>() ); }
-    inline js::Model::RegistryPtrType modelreg() { return registry<js::Model>( type<js::Model>() ); }
     inline js::Text::RegistryPtrType textreg() { return registry<js::Text>( type<js::Text>() ); }
     inline js::TransformComponent::RegistryPtrType transformComponents() { return registry<js::TransformComponent>( type<js::TransformComponent>() ); }
     inline js::CameraComponent::RegistryPtrType cameraComponents() { return registry<js::CameraComponent>( type<js::CameraComponent>() ); }

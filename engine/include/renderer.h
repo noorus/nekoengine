@@ -6,8 +6,6 @@
 #include "framebuffer.h"
 #include "renderbuffer.h"
 #include "materials.h"
-#include "meshmanager.h"
-#include "modelmanager.h"
 #include "scripting.h"
 #include "shaders.h"
 #include "viewport.h"
@@ -46,21 +44,6 @@ namespace neko {
     int64_t maxComputeWorkgroupInvocations = 0;
   };
 
-  class MeshNode;
-  using MeshNodePtr = shared_ptr<MeshNode>;
-
-  class MeshNode {
-  public:
-    utf8String name;
-    vec3 scale;
-    quat rotate;
-    vec3 translate;
-    vector<Vertex3D> vertices;
-    vector<GLuint> indices;
-    StaticMeshPtr mesh;
-    set<MeshNodePtr> children;
-  };
-
   class Renderer {
     friend class Texture;
     friend class Renderbuffer;
@@ -68,12 +51,17 @@ namespace neko {
   private:
     struct StaticData {
       MaterialPtr placeholderTexture_;
-      StaticMeshPtr screenQuad_;
-      StaticMeshPtr screenFourthQuads_[4];
       GLuint emptyVAO_ = 0;
-      StaticMeshPtr unitSphere_;
-      StaticMeshPtr skybox_;
-      StaticMeshPtr unitQuad_;
+      unique_ptr<Indexed2DVertexBuffer> screenQuad_;
+      unique_ptr<Indexed2DVertexBuffer> screenFourthQuads_[4];
+      inline void reset()
+      {
+        screenQuad_.reset();
+        for ( auto& screenFourthQuad : screenFourthQuads_ )
+          screenFourthQuad.reset();
+        emptyVAO_ = 0;
+        placeholderTexture_.reset();
+      }
     } builtin_;
     GLuint implCreateTexture2D( int width, int height,
       GLGraphicsFormat format, GLGraphicsFormat internalFormat,
@@ -99,9 +87,7 @@ namespace neko {
     ThreadedLoaderPtr loader_;
     FontManagerPtr fonts_;
     ShadersPtr shaders_;
-    MeshManagerPtr meshes_;
 #ifndef NEKO_NO_SCRIPTING
-    ModelManagerPtr models_;
     TextManagerPtr texts_;
 #endif
     platform::RWLock loadLock_;
@@ -123,8 +109,6 @@ namespace neko {
       MaterialPtr image_;
     } userData_;
     void implClearAndPrepare( const vec3& color );
-    void uploadModelsEnterNode( MeshNodePtr node );
-    void sceneDrawEnterNode( MeshNodePtr node, Pipeline& pipeline );
     void prepareSceneDraw( GameTime time, Camera& camera, const ViewportDrawParameters& drawparams );
     void prepareSceneDraw( GameTime time, const ViewportDrawParameters& drawparams );
     void sceneDraw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams,
@@ -147,7 +131,6 @@ namespace neko {
     MaterialPtr createMaterialWithData( const utf8String& name, int width, int height, int depth,
       PixelFormat format, const void* data, const Texture::Wrapping wrapping = Texture::Repeat,
       const Texture::Filtering filtering = Texture::Linear );
-    inline MeshManager& meshes() noexcept { return *( meshes_.get() ); }
     inline MaterialManager& materials() noexcept { return *( materials_.get() ); }
     inline ThreadedLoaderPtr loader() noexcept { return loader_; }
     Pipeline& useMaterial( const utf8String& name );
@@ -165,13 +148,12 @@ namespace neko {
     }
     void update( SManager& scene, GameTime delta, GameTime time );
     void uploadTextures();
-    void uploadModels();
     void jsRestart();
     inline Shaders& shaders() noexcept { return *( shaders_.get() ); }
     void drawGame( GameTime time, SManager& scene, Camera& camera, const Viewport* viewport,
       const ViewportDrawParameters& params, const RenderVisualizations& vis, bool showVis );
     void draw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams,
-      const RenderVisualizations& vis, bool showVis, StaticMeshPtr viewportQuad );
+      const RenderVisualizations& vis, bool showVis, Indexed2DVertexBuffer* viewportQuad ); // StaticMeshPtr
     void reset( int width, int height );
     ~Renderer();
   };

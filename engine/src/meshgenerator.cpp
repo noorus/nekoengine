@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "gfx_types.h"
-#include "meshmanager.h"
+#include "mesh_primitives.h"
 #include "neko_exception.h"
 #include "console.h"
 

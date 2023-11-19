@@ -262,8 +262,6 @@
     <ClCompile Include="src\js_game.cpp" />
     <ClCompile Include="src\js_math.cpp" />
     <ClCompile Include="src\js_mathutil.cpp" />
-    <ClCompile Include="src\js_mesh.cpp" />
-    <ClCompile Include="src\js_model.cpp" />
     <ClCompile Include="src\js_quaternion.cpp" />
     <ClCompile Include="src\js_vector2.cpp" />
     <ClCompile Include="src\js_vector3.cpp" />
@@ -274,9 +272,7 @@
     <ClCompile Include="src\material.cpp" />
     <ClCompile Include="src\memory.cpp" />
     <ClCompile Include="src\meshgenerator.cpp" />
-    <ClCompile Include="src\meshmanager.cpp" />
     <ClCompile Include="src\messaging.cpp" />
-    <ClCompile Include="src\modelmanager.cpp" />
     <ClCompile Include="src\MyGUI_NekoDataManager.cpp" />
     <ClCompile Include="src\MyGUI_NekoPlatform.cpp" />
     <ClCompile Include="src\MyGUI_NekoRenderManager.cpp" />
@@ -291,7 +287,6 @@
     <ClCompile Include="src\scripting.cpp" />
     <ClCompile Include="src\scriptingcontext.cpp" />
     <ClCompile Include="src\shaders.cpp" />
-    <ClCompile Include="src\staticmesh.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -406,8 +401,6 @@
     <ClInclude Include="include\js_game.h" />
     <ClInclude Include="include\js_math.h" />
     <ClInclude Include="include\js_mathutil.h" />
-    <ClInclude Include="include\js_mesh.h" />
-    <ClInclude Include="include\js_model.h" />
     <ClInclude Include="include\js_staticobject.h" />
     <ClInclude Include="include\js_text.h" />
     <ClInclude Include="include\js_types.h" />
@@ -416,10 +409,8 @@
     <ClInclude Include="include\locator.h" />
     <ClInclude Include="include\materials.h" />
     <ClInclude Include="include\memory.h" />
-    <ClInclude Include="include\meshmanager.h" />
     <ClInclude Include="include\mesh_primitives.h" />
     <ClInclude Include="include\messaging.h" />
-    <ClInclude Include="include\modelmanager.h" />
     <ClInclude Include="include\MyGUI_NekoPlatform.h" />
     <ClInclude Include="include\MyGUI_NekoRTTexture.h" />
     <ClInclude Include="include\neatlywrappedsteamapi.h" />

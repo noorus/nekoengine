@@ -82,8 +82,6 @@ namespace neko {
     REG_INIT( vec2, Vector2 )
     REG_INIT( vec3, Vector3 )
     REG_INIT( quaternion, Quaternion )
-    REG_INIT( mesh, Mesh )
-    REG_INIT( model, Model )
     REG_INIT( text, Text )
     REG_INIT( entity, Entity )
 
@@ -97,8 +95,6 @@ namespace neko {
     REG_CLEAR( vec2 )
     REG_CLEAR( vec3 )
     REG_CLEAR( quaternion )
-    REG_CLEAR( mesh )
-    REG_CLEAR( model )
     REG_CLEAR( text )
     REG_CLEAR( entity )
 
@@ -112,8 +108,6 @@ namespace neko {
     REG_RESET( vec2 )
     REG_RESET( vec3 )
     REG_RESET( quaternion )
-    REG_RESET( mesh )
-    REG_RESET( model )
     REG_RESET( text )
     REG_RESET( entity )
 

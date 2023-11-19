@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "gfx_types.h"
 #include "renderer.h"
-#include "meshmanager.h"
 #include "shaders.h"
 #include "camera.h"
 #include "loader.h"
@@ -282,27 +281,23 @@ namespace neko {
     shaders_->initialize();
 
     materials_ = make_shared<MaterialManager>( this, loader_ );
-    meshes_ = make_shared<MeshManager>( console_ );
-#ifndef NEKO_NO_SCRIPTING
-    models_ = make_shared<ModelManager>( console_ );
+
     // texts_ = make_shared<TextManager>( fonts_, console_ );
-#endif
 
     glCreateVertexArrays( 1, &builtin_.emptyVAO_ );
 
     builtin_.placeholderTexture_ = createMaterialWithData( "int_placeholder", 2, 2, PixFmtColorRGBA8,
       (const void*)BuiltinData::placeholderImage2x2.data() );
 
-    builtin_.screenQuad_ = meshes_->createStatic( GL_TRIANGLES, BuiltinData::screenQuad2D, BuiltinData::quadIndices );
+    builtin_.screenQuad_ = make_unique<Indexed2DVertexBuffer>( 4, 6 );
+    builtin_.screenQuad_->setFrom( 4, BuiltinData::screenQuad2D.data(), 6, BuiltinData::quadIndices.data() );
+
     for ( int i = 0; i < 4; ++i )
-      builtin_.screenFourthQuads_[i] =
-        meshes_->createStatic( GL_TRIANGLES, BuiltinData::fourthScreenQuads2D[i], BuiltinData::quadIndices );
-
-    auto unitSphere = Locator::meshGenerator().makeSphere( 1.0f, vec2u( 32, 32 ) );
-    builtin_.unitSphere_ = meshes_->createStatic( GL_TRIANGLE_STRIP, unitSphere.first, unitSphere.second );
-
-    auto skybox = Locator::meshGenerator().makeBox( vec3( 1.0f ), vec2u( 1 ), true, vec4( 1.0f ) );
-    builtin_.skybox_ = meshes_->createStatic( GL_TRIANGLES, skybox.first, skybox.second );
+    {
+      builtin_.screenFourthQuads_[i] = make_unique<Indexed2DVertexBuffer>( 4, 6 );
+      builtin_.screenFourthQuads_[i]->setFrom(
+        4, BuiltinData::fourthScreenQuads2D[i].data(), 6, BuiltinData::quadIndices.data() );
+    }
 
     particles_ = make_shared<ParticleSystemManager>();
     sprites_ = make_shared<SpriteManager>( this );
@@ -330,9 +325,6 @@ namespace neko {
     sprites_->initialize();
     sprites_->loadAnimdefFile( R"(spriteanimdefs.json)" );
     sprites_->loadAnimsetFile( R"(spriteanimsets.json)" );
-
-    //loader_->addLoadTask( { LoadTask( new SceneNode(), R"(dbg_normaltestblock.gltf)" ) } );
-    loader_->addLoadTask( { LoadTask( make_shared<MeshNode>(), R"(camera.gltf)" ) } );
 
     if ( g_CVar_vid_msaa.as_i() > 1 )
       ctx_.fboMainMultisampled_ = make_unique<Framebuffer>( this, 2, c_bufferFormat, true, g_CVar_vid_msaa.as_i() );
@@ -392,42 +384,10 @@ namespace neko {
     }
   }
 
-  void Renderer::uploadModelsEnterNode( MeshNodePtr node )
-  {
-    if ( !node->mesh )
-      node->mesh = meshes_->createStatic( GL_TRIANGLES, node->vertices, node->indices );
-    for ( auto& child : node->children )
-      uploadModelsEnterNode( child );
-  }
-
-  void Renderer::uploadModels()
-  {
-    vector<MeshNodePtr> nodes;
-    loader_->getFinishedModels( nodes );
-    if ( nodes.empty() )
-      return;
-
-    console_->printf( srcGfx, "Renderer::uploadModels got %d new models", nodes.size() );
-
-    for ( auto& node : nodes )
-      uploadModelsEnterNode( node );
-
-    // sceneGraph_.insert( nodes.begin(), nodes.end() );
-  }
-
   void Renderer::update( SManager& scene, GameTime delta, GameTime time )
   {
     // Upload any new textures. Could this be parallellized?
     uploadTextures();
-
-#ifndef NEKO_NO_SCRIPTING
-    meshes_->jsUpdate( director_->renderSync() );
-#endif
-
-    // Delete all handles for which our buffer objects were already destroyed
-    meshes_->destroyFreed();
-
-    uploadModels();
 
     scene.primitives().update();
 
@@ -439,14 +399,7 @@ namespace neko {
     scene.sprites().update( *materials_ );
     scene.paintables().update( *this );
 
-    // VAOs can and will refer to VBOs and EBOs, and those must have been uploaded by the point at which we try to create the VAO.
-    // Thus uploading the VAOs should always come last.
-    meshes_->uploadVBOs();
-    meshes_->uploadEBOs();
-    meshes_->uploadVAOs();
-
 #ifndef NEKO_NO_SCRIPTING
-    models_->jsUpdate( director_->renderSync() );
     //texts_->jsUpdate( director_->renderSync() );
 #endif
 
@@ -458,8 +411,6 @@ namespace neko {
 #ifndef NEKO_NO_SCRIPTING
     director_->renderSync().resetFromRenderer();
     //texts_->jsReset();
-    models_->jsReset();
-    meshes_->jsReset();
 #endif
   }
 
@@ -524,25 +475,6 @@ namespace neko {
     uniform.nearDist = camera.frustum().near();
     uniform.farDist = camera.frustum().far();
     uniform.exposure = camera.exposure();
-  }
-
-  /* void Renderer::setUserData( uint64_t id, const utf8String name, rainet::Image& image )
-  {
-    userData_.name_ = name;
-    userData_.image_ = createTextureWithData( "rainet_avatar_" + id, image.width_, image.height_, PixFmtColorRGBA8, image.buffer_.data() );
-  }*/
-
-  void Renderer::sceneDrawEnterNode( MeshNodePtr node, Pipeline& pipeline )
-  {
-    /* if ( node->mesh_ && node->mesh_->mesh_ )
-    {
-      node->mesh_->mesh_->begin();
-      mat4 model = node->getFullTransform();
-      pipeline.setUniform( "model", model );
-      node->mesh_->mesh_->draw();
-    }
-    for ( auto child : node->children_ )
-      sceneDrawEnterNode( child, pipeline );*/
   }
 
   void setGLDrawState( bool depthtest, bool depthwrite, bool facecull, bool wireframe )
@@ -681,50 +613,6 @@ namespace neko {
     auto wire = ( drawparams.drawopShouldDrawWireframe() );
 
     setGLDrawState( true, true, true, wire );
-
-    auto fn_drawModels = [&]( Pipeline& pipeline ) -> void
-    {
-#ifndef NEKO_NO_SCRIPTING
-      if ( models_ )
-      {
-        for ( auto& modelptr : models_->models() )
-        {
-          if ( !modelptr.second )
-            continue;
-
-          auto& model = modelptr.second->model();
-          auto mesh = model.mesh_.get();
-
-          if ( !mesh || !mesh->mesh().vao_ || !mesh->mesh().vao_->uploaded_ )
-            continue;
-
-          mesh->mesh().vao_->begin();
-
-          mat4 mdl( 1.0f );
-          mdl = glm::translate( mdl, model.translate_->v() );
-          mdl = glm::scale( mdl, model.scale_->v() );
-          mdl *= glm::toMat4( model.rotate_->q() );
-
-          pipeline.setUniform( "model", mdl );
-
-          mesh->mesh().vao_->draw( GL_TRIANGLES );
-        }
-      }
-#endif
-    };
-
-    if ( false )
-    {
-      auto& pipeline = useMaterial( "demo_uvtest" );
-      fn_drawModels( pipeline );
-    }
-
-    if ( true )
-    {
-      auto& pipeline = useMaterial( "demo_uvtest" );
-      //for ( auto node : sceneGraph_ )
-      //  sceneDrawEnterNode( node, pipeline );
-    }
 
     drawSceneRecurse( scene, camera, drawparams, vis, showVis, scene.root() );
 
@@ -910,7 +798,7 @@ namespace neko {
   }
 
   void Renderer::draw( GameTime time, SManager& scene, Camera& camera, const ViewportDrawParameters& drawparams,
-    const RenderVisualizations& vis, bool showVis, StaticMeshPtr viewportQuad )
+    const RenderVisualizations& vis, bool showVis, Indexed2DVertexBuffer* viewportQuad )
   {
     // check that the drawcontext is ready (fbo's available etc)
     if ( !ctx_.ready() )
@@ -979,8 +867,8 @@ namespace neko {
       pipeline.setUniform( "tex", 0 );
       GLuint handle =
         ( ctx_.fboMainMultisampled_ ? ctx_.fboMainMultisampled_->depth()->handle() : ctx_.fboMain_->depth()->handle() );
-      glBindTextures( 0, 1, &handle );
       viewportQuad->begin();
+      glBindTextures( 0, 1, &handle );
       viewportQuad->draw();
       return;
     }
@@ -998,9 +886,9 @@ namespace neko {
       setGLDrawState( false, false, false, false );
       auto& pipeline = shaders_->usePipeline( "mainframebuf2d" );
       pipeline.setUniform( "tex", 0 );
+      builtin_.screenQuad_->begin();
       const GLuint hndl = ctx_.fboMain_->texture( 0 )->handle();
       glBindTextures( 0, 1, &hndl );
-      builtin_.screenQuad_->begin();
       builtin_.screenQuad_->draw();
       ctx_.mergedMain_->end();
     }
@@ -1013,9 +901,9 @@ namespace neko {
       setGLDrawState( false, false, false, false );
       auto& pipeline = shaders_->usePipeline( "passthrough2d" );
       pipeline.setUniform( "tex", 0 );
+      viewportQuad->begin();
       const GLuint hndl = ctx_.mergedMain_->texture( 0 )->handle();
       glBindTextures( 0, 1, &hndl );
-      viewportQuad->begin();
       viewportQuad->draw();
     }
 
@@ -1038,13 +926,7 @@ namespace neko {
     sprites_->shutdown();
     fonts_->shutdownRender();
 
-    builtin_.placeholderTexture_.reset();
-    for ( int i = 0; i < 4; ++i )
-      builtin_.screenFourthQuads_[i].reset();
-    builtin_.screenQuad_.reset();
-    builtin_.skybox_.reset();
-    builtin_.unitQuad_.reset();
-    builtin_.unitSphere_.reset();
+    builtin_.reset();
   }
 
   Renderer::~Renderer()
@@ -1064,12 +946,7 @@ namespace neko {
 
 #ifndef NEKO_NO_SCRIPTING
     //texts_->teardown();
-    models_->teardown();
 #endif
-
-    meshes_->teardown();
-
-    meshes_->destroyFreed();
 
     materials_.reset();
 

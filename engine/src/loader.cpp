@@ -94,32 +94,6 @@ namespace neko {
     finishedFontsEvent_.reset();
   }
 
-  void ThreadedLoader::getFinishedModels( vector<MeshNodePtr>& models )
-  {
-    if ( !finishedModelsEvent_.check() )
-      return;
-
-    finishedTasksLock_.lock();
-    models.swap( finishedModels_ );
-    finishedTasksLock_.unlock();
-
-    finishedModels_.clear();
-    finishedModelsEvent_.reset();
-  }
-
-  void ThreadedLoader::getFinishedAnimations( AnimationVector& animations )
-  {
-    if ( !finishedAnimationsEvent_.check() )
-      return;
-
-    finishedTasksLock_.lock();
-    animations.swap( finishedAnimations_ );
-    finishedTasksLock_.unlock();
-
-    finishedAnimations_.clear();
-    finishedAnimationsEvent_.reset();
-  }
-
   void ThreadedLoader::getFinishedSpritesheets( SpriteAnimationSetDefinitionVector& sheets )
   {
     if ( !finishedSpritesheetsEvent_.check() )
@@ -152,29 +126,6 @@ namespace neko {
 
     finishedTasksLock_.lock();
     finishedFonts_.push_back( task.font_ );
-    finishedTasksLock_.unlock();
-  }
-
-  void ThreadedLoader::loadModel( LoadTask::ModelLoad& task )
-  {
-    auto& path = task.path_;
-
-    auto filename = utils::extractFilename( path );
-    auto filepath = utils::extractFilepath( R"(assets\meshes\)" + path );
-    auto ext = utils::extractExtension( path );
-
-    if ( ext == L"gltf" )
-    {
-      vector<uint8_t> input;
-      Locator::fileSystem().openFile( Dir_Meshes, path )->readFullVector( input );
-      loaders::loadGLTFModel(
-        input, platform::wideToUtf8( filename ), platform::wideToUtf8( filepath ), task.node_ );
-    }
-    else
-      NEKO_EXCEPT( "Unsupported mesh format in load model task" );
-
-    finishedTasksLock_.lock();
-    finishedModels_.push_back( task.node_ );
     finishedTasksLock_.unlock();
   }
 
@@ -309,10 +260,6 @@ namespace neko {
       {
         loadFontFace( task.fontfaceLoad );
       }
-      else if ( task.type_ == LoadTask::Load_Model )
-      {
-        loadModel( task.modelLoad );
-      }
       else if ( task.type_ == LoadTask::Load_Spritesheet )
       {
         loadSpritesheet( task.spriteLoad );
@@ -325,12 +272,6 @@ namespace neko {
     if ( !finishedFonts_.empty() )
       finishedFontsEvent_.set();
 
-    if ( !finishedModels_.empty() )
-      finishedModelsEvent_.set();
-
-    if ( !finishedAnimations_.empty() )
-      finishedAnimationsEvent_.set();
-
     if ( !finishedSpritesheets_.empty() )
       finishedSpritesheetsEvent_.set();
   }
@@ -341,9 +282,7 @@ namespace neko {
     finishedTasksLock_.lock();
     newTasks_.clear();
     finishedMaterials_.clear();
-    finishedModels_.clear();
     finishedFonts_.clear();
-    finishedAnimations_.clear();
     finishedSpritesheets_.clear();
     finishedTasksLock_.unlock();
     addTaskLock_.unlock();

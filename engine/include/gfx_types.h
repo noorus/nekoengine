@@ -22,7 +22,7 @@ namespace neko {
 
   struct Vertex2D
   {
-    static constexpr size_t element_count = 4;
+    static constexpr size_t ElementCount = 4;
     float x, y; //!< Vertex coordinates
     float s, t; //!< Texture coordinates
     Vertex2D(): x( 0.0f ), y( 0.0f ), s( 0.0f ), t( 0.0f ) {}
@@ -31,7 +31,7 @@ namespace neko {
 
   struct Vertex3D
   {
-    static constexpr size_t element_count = 19;
+    static constexpr size_t ElementCount = 19;
     vec3 position; //!< 0: Vertex coordinates
     vec3 normal; //!< 1: Vertex normal
     vec2 texcoord; //!< 2: UV coordinates
@@ -47,7 +47,7 @@ namespace neko {
 
   struct VertexText
   {
-    static constexpr size_t element_count = 9;
+    static constexpr size_t ElementCount = 9;
     vec3 position; //!< 0: Vertex coordinates
     vec2 texcoord; //!< 1: UV coordinates
     vec4 color; //!< 2: Vertex color
@@ -66,7 +66,7 @@ namespace neko {
 
   struct VertexPointParticle
   {
-    static constexpr size_t element_count = 14;
+    static constexpr size_t ElementCount = 14;
     vec3 pos;
     glm::f32quat orient;
     vec3 size;
@@ -75,7 +75,7 @@ namespace neko {
 
   struct VertexLine
   {
-    static constexpr size_t element_count = 7;
+    static constexpr size_t ElementCount = 7;
     vec3 pos;
     vec4 color;
     VertexLine( const vec3& p, const vec4& c )

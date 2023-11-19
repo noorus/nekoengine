@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "gfx_types.h"
 #include "renderer.h"
-#include "meshmanager.h"
+#include "mesh_primitives.h"
 #include "shaders.h"
 #include "camera.h"
 #include "loader.h"

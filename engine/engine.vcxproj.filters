@@ -231,12 +231,6 @@
     <ClCompile Include="src\font.cpp">
       <Filter>Source Files\gfx\fonts</Filter>
     </ClCompile>
-    <ClCompile Include="src\staticmesh.cpp">
-      <Filter>Source Files\gfx\meshes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\meshmanager.cpp">
-      <Filter>Source Files\gfx\meshes</Filter>
-    </ClCompile>
     <ClCompile Include="src\meshgenerator.cpp">
       <Filter>Source Files\gfx\meshes</Filter>
     </ClCompile>
@@ -249,17 +243,8 @@
     <ClCompile Include="src\js_vector3.cpp">
       <Filter>Source Files\scripting</Filter>
     </ClCompile>
-    <ClCompile Include="src\js_mesh.cpp">
-      <Filter>Source Files\scripting</Filter>
-    </ClCompile>
     <ClCompile Include="src\director.cpp">
       <Filter>Source Files\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\js_model.cpp">
-      <Filter>Source Files\scripting</Filter>
-    </ClCompile>
-    <ClCompile Include="src\modelmanager.cpp">
-      <Filter>Source Files\gfx\meshes</Filter>
     </ClCompile>
     <ClCompile Include="src\js_quaternion.cpp">
       <Filter>Source Files\scripting</Filter>
@@ -518,9 +503,6 @@
     <ClInclude Include="include\gfx_types.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
-    <ClInclude Include="include\meshmanager.h">
-      <Filter>Header Files\gfx</Filter>
-    </ClInclude>
     <ClInclude Include="include\renderer.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
@@ -584,20 +566,11 @@
     <ClInclude Include="..\shared\include\neko_algorithm.h">
       <Filter>Header Files\shared</Filter>
     </ClInclude>
-    <ClInclude Include="include\js_mesh.h">
-      <Filter>Header Files\scripting</Filter>
-    </ClInclude>
     <ClInclude Include="include\mesh_primitives.h">
       <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="include\director.h">
       <Filter>Header Files\engine</Filter>
-    </ClInclude>
-    <ClInclude Include="include\js_model.h">
-      <Filter>Header Files\scripting</Filter>
-    </ClInclude>
-    <ClInclude Include="include\modelmanager.h">
-      <Filter>Header Files\gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\include\neko_compilerdef.h">
       <Filter>Header Files\shared</Filter>

@@ -6,8 +6,6 @@
 #include "framebuffer.h"
 #include "renderbuffer.h"
 #include "materials.h"
-#include "meshmanager.h"
-#include "modelmanager.h"
 #include "scripting.h"
 #include "shaders.h"
 #include "math_aabb.h"

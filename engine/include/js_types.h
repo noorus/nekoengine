@@ -15,8 +15,6 @@ namespace neko {
       Wrapped_Vector2, //!< Dynamic: Vector2
       Wrapped_Vector3, //!< Dynamic: Vector3
       Wrapped_Quaternion, //!< Dynamic: Quaternion
-      Wrapped_Mesh, //!< Dynamic: DynamicMesh
-      Wrapped_Model, //!< Dynamic: Model
       Wrapped_Text, //!< Dynamic: Text
       Wrapped_Entity,
       Wrapped_TransformComponent,

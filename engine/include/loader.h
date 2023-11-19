@@ -7,21 +7,6 @@
 
 namespace neko {
 
-  // Unused atm
-  struct AnimationEntry
-  {
-  };
-
-  using AnimationEntryPtr = shared_ptr<AnimationEntry>;
-  using AnimationVector = vector<AnimationEntryPtr>;
-
-  namespace loaders {
-
-    void loadGLTFModel(
-      const vector<uint8_t>& input, const utf8String& filename, const utf8String& basedir, MeshNodePtr out );
-
-  }
-
   struct FontLoadSpec
   {
     Real size;
@@ -34,8 +19,6 @@ namespace neko {
     enum LoadType {
       Load_Texture,
       Load_Fontface,
-      Load_Model,
-      Load_Animation,
       Load_Spritesheet
     } type_;
     struct TextureLoad {
@@ -47,14 +30,6 @@ namespace neko {
       utf8String path_;
       vector<FontLoadSpec> specs_;
     } fontfaceLoad;
-    struct ModelLoad {
-      MeshNodePtr node_;
-      utf8String path_;
-    } modelLoad;
-    struct AnimationLoad {
-      AnimationEntryPtr animation_;
-      utf8String path_;
-    } animationLoad;
     struct SpritesheetLoad
     {
       SpriteAnimationSetDefinitionPtr def_;
@@ -69,16 +44,6 @@ namespace neko {
       fontfaceLoad.font_ = move( font );
       fontfaceLoad.path_ = path;
       fontfaceLoad.specs_ = specs;
-    }
-    LoadTask( MeshNodePtr modelRootNode, const utf8String& path ): type_( Load_Model )
-    {
-      modelLoad.node_ = modelRootNode;
-      modelLoad.path_ = path;
-    }
-    LoadTask( AnimationEntryPtr animation, const utf8String& path ): type_( Load_Animation )
-    {
-      animationLoad.animation_ = move( animation );
-      animationLoad.path_ = path;
     }
     LoadTask( SpriteAnimationSetDefinitionPtr ptr ): type_( Load_Spritesheet )
     {
@@ -101,12 +66,9 @@ namespace neko {
     platform::RWLock finishedTasksLock_;
     LoadTaskVector newTasks_;
     MaterialVector finishedMaterials_;
-    vector<MeshNodePtr> finishedModels_;
     FontVector finishedFonts_;
-    AnimationVector finishedAnimations_;
     SpriteAnimationSetDefinitionVector finishedSpritesheets_;
     void loadFontFace( LoadTask::FontfaceLoad& task );
-    void loadModel( LoadTask::ModelLoad& task );
     Pixmap loadTexture( const utf8String& path );
     void loadMaterial( LoadTask::TextureLoad& task );
     void loadSpritesheet( LoadTask::SpritesheetLoad& task );
@@ -119,8 +81,6 @@ namespace neko {
     void stop();
     void getFinishedMaterials( MaterialVector& materials );
     void getFinishedFonts( FontVector& fonts );
-    void getFinishedModels( vector<MeshNodePtr>& models );
-    void getFinishedAnimations( AnimationVector& animations );
     void getFinishedSpritesheets( SpriteAnimationSetDefinitionVector& sheets );
     void addLoadTask( const LoadTaskVector& resources );
     void clear();
