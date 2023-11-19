@@ -949,12 +949,6 @@
     <None Include="..\bin\shaders\particle.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\bin\shaders\particle_world.geom">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\bin\shaders\particle_world.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\bin\shaders\particle_billboard.geom">
       <Filter>Shaders</Filter>
     </None>

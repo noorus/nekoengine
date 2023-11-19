@@ -481,8 +481,6 @@
     <None Include="..\bin\shaders\particle.frag" />
     <None Include="..\bin\shaders\particle_billboard.geom" />
     <None Include="..\bin\shaders\particle_billboard.vert" />
-    <None Include="..\bin\shaders\particle_world.geom" />
-    <None Include="..\bin\shaders\particle_world.vert" />
     <None Include="..\bin\shaders\passthrough2d.frag" />
     <None Include="..\bin\shaders\passthrough2d.vert" />
     <None Include="..\bin\shaders\mat_unlitdefault.frag" />

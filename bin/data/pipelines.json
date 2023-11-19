@@ -63,16 +63,6 @@
     ]
   },
   {
-    "name": "particle_world",
-    "vert": "particle_world.vert",
-    "geom": "particle_world.geom",
-    "frag": "particle.frag",
-    "uniforms": [
-      "model",
-      "tex"
-    ]
-  },
-  {
     "name": "particle_billboard",
     "vert": "particle_billboard.vert",
     "geom": "particle_billboard.geom",

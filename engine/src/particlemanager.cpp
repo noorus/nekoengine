@@ -23,20 +23,14 @@ namespace neko {
 
   void ParticleSystemManager::update( GameTime delta, GameTime time )
   {
-    if ( !sakura_ )
-      sakura_ = make_unique<SakuraSystem>( aabb( vec3( -10.0f, -2.0f, -10.0f ), vec3( 10.0f, 10.0f, 10.0f ) ) );
-    sakura_->update( delta, time );
   }
 
   void ParticleSystemManager::draw( Shaders& shaders, MaterialManager& materials )
   {
-    const auto partmat = materials.get( "demo_sakura" );
-    sakura_->draw( shaders, *partmat );
   }
 
   ParticleSystemManager::~ParticleSystemManager()
   {
-    //
   }
 
 }
