@@ -13,36 +13,36 @@ namespace neko {
     static const utf8String c_toolPipelineName = "paint2d_tool";
     static const utf8String c_drawPipelineName = "paint2d_default";
 
-    paintables_system::paintables_system( manager* m ): mgr_( m )
+    worldplanes_system::worldplanes_system( manager* m ): mgr_( m )
     {
-      mgr_->reg().on_construct<paintable>().connect<&paintables_system::addSurface>( this );
-      mgr_->reg().on_update<paintable>().connect<&paintables_system::updateSurface>( this );
-      mgr_->reg().on_destroy<paintable>().connect<&paintables_system::removeSurface>( this );
+      mgr_->reg().on_construct<worldplane>().connect<&worldplanes_system::addSurface>( this );
+      mgr_->reg().on_update<worldplane>().connect<&worldplanes_system::updateSurface>( this );
+      mgr_->reg().on_destroy<worldplane>().connect<&worldplanes_system::removeSurface>( this );
     }
 
-    paintables_system::~paintables_system()
+    worldplanes_system::~worldplanes_system()
     {
-      mgr_->reg().on_construct<paintable>().disconnect<&paintables_system::addSurface>( this );
-      mgr_->reg().on_update<paintable>().disconnect<&paintables_system::updateSurface>( this );
-      mgr_->reg().on_destroy<paintable>().disconnect<&paintables_system::removeSurface>( this );
+      mgr_->reg().on_construct<worldplane>().disconnect<&worldplanes_system::addSurface>( this );
+      mgr_->reg().on_update<worldplane>().disconnect<&worldplanes_system::updateSurface>( this );
+      mgr_->reg().on_destroy<worldplane>().disconnect<&worldplanes_system::removeSurface>( this );
     }
 
-    void paintables_system::addSurface( registry& r, entity e )
+    void worldplanes_system::addSurface( registry& r, entity e )
     {
-      mgr_->reg().emplace_or_replace<dirty_paintable>( e );
+      mgr_->reg().emplace_or_replace<dirty_worldplane>( e );
     }
 
-    void paintables_system::updateSurface( registry& r, entity e )
+    void worldplanes_system::updateSurface( registry& r, entity e )
     {
-      mgr_->reg().emplace_or_replace<dirty_paintable>( e );
+      mgr_->reg().emplace_or_replace<dirty_worldplane>( e );
     }
 
-    void paintables_system::removeSurface( registry& r, entity e )
+    void worldplanes_system::removeSurface( registry& r, entity e )
     {
-      mgr_->reg().emplace_or_replace<dirty_paintable>( e );
+      mgr_->reg().emplace_or_replace<dirty_worldplane>( e );
     }
 
-    void paintable::mouseClickTest(
+    void worldplane::mouseClickTest(
       manager* m, entity e, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button )
     {
       bool hit = false;
@@ -92,7 +92,7 @@ namespace neko {
       "ground_grasslands2"
     };
 
-    void paintable::applyPaint( Renderer& renderer, const vec2& pos )
+    void worldplane::applyPaint( Renderer& renderer, const vec2& pos )
     {
       if ( !blendMap )
         return;
@@ -119,11 +119,11 @@ namespace neko {
       glMemoryBarrier( gl::MemoryBarrierMask::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
     }
 
-    void paintables_system::update( Renderer& renderer )
+    void worldplanes_system::update( Renderer& renderer )
     {
       set<entity> bad;
 
-      auto view = mgr_->reg().view<dirty_paintable>();
+      auto view = mgr_->reg().view<dirty_worldplane>();
       for ( auto e : view )
       {
         auto& pt = mgr_->paintable2d( e );
@@ -159,14 +159,14 @@ namespace neko {
         pt.textures[4] = pt.blendMap->handle();
       }
 
-      mgr_->reg().clear<dirty_paintable>();
+      mgr_->reg().clear<dirty_worldplane>();
       for ( auto& e : bad )
-        mgr_->reg().emplace_or_replace<dirty_paintable>( e );
+        mgr_->reg().emplace_or_replace<dirty_worldplane>( e );
     }
 
-    void paintables_system::draw( Renderer& renderer, const Camera& cam )
+    void worldplanes_system::draw( Renderer& renderer, const Camera& cam )
     {
-      auto view = mgr_->reg().view<paintable>();
+      auto view = mgr_->reg().view<worldplane>();
       for ( auto e : view )
       {
         auto& pt = mgr_->paintable2d( e );
@@ -194,9 +194,9 @@ namespace neko {
 
     const char* c_brushNames[PaintBrushType::MAX_Brush] = { "classic", "circle", "rhombus" };
 
-    void paintables_system::imguiPaintableSurfaceEditor( entity e )
+    void worldplanes_system::imguiPaintableSurfaceEditor( entity e )
     {
-      auto& pt = mgr_->reg().get<paintable>( e );
+      auto& pt = mgr_->reg().get<worldplane>( e );
 
       bool changed = false;
       {
@@ -238,7 +238,7 @@ namespace neko {
         changed |= ImGui::Checkbox( "edges only", &pt.paintBrushNoiseEdgesOnly );
       }
       if ( changed )
-        mgr_->reg().emplace_or_replace<dirty_paintable>( e );
+        mgr_->reg().emplace_or_replace<dirty_worldplane>( e );
     }
 
   }

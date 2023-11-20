@@ -62,6 +62,8 @@ namespace neko {
     "1 = 64px"
   };
 
+  // clang-format on
+
   namespace ig {
 
     enum PredefinedNormal : int
@@ -354,7 +356,7 @@ namespace neko {
       void imguiSpriteEditor( entity e );
     };
 
-    // paintables
+    // worldplanes
 
     enum PaintBrushType: int
     {
@@ -364,10 +366,26 @@ namespace neko {
       MAX_Brush
     };
 
-    struct paintable
+    struct worldplane;
+
+    class WorldplaneLayer {
+    protected:
+    public:
+      virtual void mouseClick( manager* m, entity e, Renderer& renderer, const vec2& pos, int button ) = 0;
+    };
+
+    class WorldplaneTexturePaintLayer : public WorldplaneLayer {
+    public:
+      void mouseClick( manager* m, entity e, Renderer& renderer, const vec2& pos, int button ) override;
+    };
+
+    using WorldplaneLayerPtr = unique_ptr<WorldplaneLayer>;
+
+    struct worldplane
     {
       PixelScale pixelScaleBase = PixelScale_32;
       unique_ptr<Indexed3DVertexBuffer> mesh;
+      vector<WorldplaneLayerPtr> layers;
       PaintableTexturePtr blendMap;
       vec2i dimensions { 0, 0 };
       vec2 worldDimensions { 0.0f, 0.0f };
@@ -390,21 +408,21 @@ namespace neko {
       void mouseClickTest( manager* m, entity e, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button );
     };
 
-    struct dirty_paintable
+    struct dirty_worldplane
     {
     };
 
-    class paintables_system {
+    class worldplanes_system {
     protected:
       manager* mgr_ = nullptr;
       void addSurface( registry& r, entity e );
       void updateSurface( registry& r, entity e );
       void removeSurface( registry& r, entity e );
     public:
-      paintables_system( manager* m );
+      worldplanes_system( manager* m );
       void update( Renderer& renderer );
       void draw( Renderer& renderer, const Camera& cam );
-      ~paintables_system();
+      ~worldplanes_system();
       void imguiPaintableSurfaceEditor( entity e );
     };
 
@@ -425,7 +443,7 @@ namespace neko {
       unique_ptr<text_system> txtsys_;
       unique_ptr<primitive_system> primsys_;
       unique_ptr<sprite_system> sprsys_;
-      unique_ptr<paintables_system> ptbsys_;
+      unique_ptr<worldplanes_system> ptbsys_;
       void imguiSceneGraphRecurse( entity e, entity& clicked );
       void imguiNodeSelectorRecurse( entity e, entity& selected );
       void imguiNodeEditor( entity e );
@@ -439,7 +457,7 @@ namespace neko {
       inline text& tt( entity e ) { return registry_.get<text>( e ); } //!< Get text by entity
       inline primitive& pt( entity e ) { return registry_.get<primitive>( e ); }
       inline sprite& s( entity e ) { return registry_.get<sprite>( e ); }
-      inline paintable& paintable2d( entity e ) { return registry_.get<paintable>( e ); }
+      inline worldplane& paintable2d( entity e ) { return registry_.get<worldplane>( e ); }
       inline bool validAndTransform( entity e )
       {
         if ( e == null || e == tombstone )
@@ -487,7 +505,7 @@ namespace neko {
       inline text_system& texts() const { return *txtsys_; }
       inline primitive_system& primitives() const { return *primsys_; }
       inline sprite_system& sprites() const { return *sprsys_; }
-      inline paintables_system& paintables() const { return *ptbsys_; }
+      inline worldplanes_system& paintables() const { return *ptbsys_; }
     };
 
   }
