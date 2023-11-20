@@ -54,7 +54,7 @@ namespace neko {
             auto parts = Locator::meshGenerator().makePlane( vals.dimensions, vals.segments, vals.normal );
             if ( !p.mesh || p.mesh->buffer().size() != parts.first.size() ||
                  p.mesh->indices().size() != parts.second.size() )
-              p.mesh = make_unique<BasicIndexedVertexbuffer>( parts.first.size(), parts.second.size() );
+              p.mesh = make_unique<Indexed3DVertexBuffer>( parts.first.size(), parts.second.size() );
             const auto& verts = p.mesh->buffer().lock();
             const auto& indces = p.mesh->indices().lock();
             memcpy( verts.data(), parts.first.data(), parts.first.size() * sizeof( Vertex3D ) );

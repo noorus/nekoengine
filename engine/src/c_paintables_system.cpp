@@ -46,37 +46,27 @@ namespace neko {
       manager* m, entity e, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button )
     {
       bool hit = false;
-      vec2 hitpos { 0.0f };
-      if ( mesh && mesh->indices().size() == 6 )
+      float u, v, w = 0.0f;
+      if ( mesh && mesh->indices().size() % 6 == 0 )
       {
         auto& t = m->tn( e );
         const auto& verts = mesh->buffer().lock();
         const auto& indices = mesh->indices().lock();
         auto reverse = false;
-        for ( int i = 0; i < 2; ++i )
+        for ( int i = 0; i < ( mesh->indices().size() / 3 ); ++i )
         {
-          // this will definitely not work for any other purpose
           auto triangle = ( i * 3 );
-          vec3 v[3] = { { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
-          if ( reverse )
-          {
-            v[0] = vec3( t.model() * vec4( verts.data()[indices.data()[triangle + 0]].position, 1.0f ) );
-            v[1] = vec3( t.model() * vec4( verts.data()[indices.data()[triangle + 1]].position, 1.0f ) );
-            v[2] = vec3( t.model() * vec4( verts.data()[indices.data()[triangle + 2]].position, 1.0f ) );
-            hit = math::rayTriangleIntersection( ray, v[0], v[1], v[2], hitpos.y, hitpos.x );
-          }
-          else
-          {
-            v[0] = vec3( t.model() * vec4( verts.data()[indices.data()[triangle + 1]].position, 1.0f ) );
-            v[1] = vec3( t.model() * vec4( verts.data()[indices.data()[triangle + 2]].position, 1.0f ) );
-            v[2] = vec3( t.model() * vec4( verts.data()[indices.data()[triangle + 0]].position, 1.0f ) );
-            hit = math::rayTriangleIntersection( ray, v[0], v[1], v[2], hitpos.y, hitpos.x );
-            hitpos.x = ( 1.0f - hitpos.x );
-            hitpos.y = ( 1.0f - hitpos.y );
-          }
+          Vertex3D* vt0 = &verts.data()[indices.data()[triangle + ( reverse ? 0 : 1 )]];
+          Vertex3D* vt1 = &verts.data()[indices.data()[triangle + ( reverse ? 1 : 2 )]];
+          Vertex3D* vt2 = &verts.data()[indices.data()[triangle + ( reverse ? 2 : 0 )]];
+          hit = math::rayTriangleIntersection( ray, vt0->position, vt1->position, vt2->position, v, u );
           reverse = ( !reverse );
           if ( hit )
+          {
+            u = math::interpolateLinear( vt0->texcoord.x, vt1->texcoord.x, u );
+            v = math::interpolateLinear( vt2->texcoord.y, vt0->texcoord.y, v );
             break;
+          }
         }
         mesh->buffer().unlock();
         mesh->indices().unlock();
@@ -84,7 +74,7 @@ namespace neko {
       if ( hit && lastPaintPos != mousepos )
       {
         lastPaintPos = mousepos;
-        applyPaint( renderer, hitpos );
+        applyPaint( renderer, vec2( u, v ) );
       }
     }
 
@@ -129,28 +119,6 @@ namespace neko {
       glMemoryBarrier( gl::MemoryBarrierMask::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
     }
 
-    void PaintableVerterbuffer::draw(
-      Renderer& renderer, const span<GLuint> textures, const mat4& model, const vec2& pxdimensions, float pxscale )
-    {
-      assert( textures.size() == 5 );
-      gl::glBindVertexArray( vao_ );
-      auto& pipeline = renderer.shaders().usePipeline( c_drawPipelineName );
-      gl::glBindTextures( 0, static_cast<GLsizei>( textures.size() ), textures.data() );
-      pipeline.setUniform( "texture_layer0_diffuse", 0 );
-      glActiveTexture( GL_TEXTURE0 );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-      pipeline.setUniform( "texture_layer1_diffuse", 1 );
-      pipeline.setUniform( "texture_layer2_diffuse", 2 );
-      pipeline.setUniform( "texture_layer3_diffuse", 3 );
-      pipeline.setUniform( "texture_blendmap", 4 );
-      pipeline.setUniform( "texture_dimensions", pxdimensions );
-      pipeline.setUniform( "pixelscale", pxscale );
-      pipeline.setUniform( "model", model );
-      gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
-      gl::glBindVertexArray( 0 );
-    }
-
     void paintables_system::update( Renderer& renderer )
     {
       set<entity> bad;
@@ -179,20 +147,13 @@ namespace neko {
           pt.textures.clear();
           continue;
         }
-        auto parts =
-          Locator::meshGenerator().makePlane(
-            vec2( pt.dimensions ) * c_pixelScaleValues[pt.pixelScaleBase],
-            { 1, 1 },
-            { 0.0f, 0.0f, 1.0f } );
+        pt.worldDimensions = vec2( pt.dimensions ) * c_pixelScaleValues[pt.pixelScaleBase];
+        auto parts = Locator::meshGenerator().makePlane(
+          pt.worldDimensions, vec2u( math::ceil( pt.worldDimensions ) ), { 0.0f, 0.0f, 1.0f } );
         if ( !pt.mesh || pt.mesh->buffer().size() != parts.first.size() ||
               pt.mesh->indices().size() != parts.second.size() )
-          pt.mesh = make_unique<PaintableVerterbuffer>( parts.first.size(), parts.second.size() );
-        const auto& verts = pt.mesh->buffer().lock();
-        const auto& indces = pt.mesh->indices().lock();
-        memcpy( verts.data(), parts.first.data(), parts.first.size() * sizeof( Vertex3D ) );
-        memcpy( indces.data(), parts.second.data(), parts.second.size() * sizeof( GLuint ) );
-        pt.mesh->buffer().unlock();
-        pt.mesh->indices().unlock();
+          pt.mesh = make_unique<Indexed3DVertexBuffer>( parts.first.size(), parts.second.size() );
+        pt.mesh->setFrom( parts );
         if ( !pt.blendMap || pt.blendMap->width() != pt.dimensions.x || pt.blendMap->height() != pt.dimensions.y )
           pt.blendMap = make_shared<PaintableTexture>( renderer, pt.dimensions.x, pt.dimensions.y, PixFmtColorRGBA32f );
         pt.textures[4] = pt.blendMap->handle();
@@ -212,9 +173,22 @@ namespace neko {
         if ( !pt.mesh || !pt.blendMap || pt.textures.size() < 5 )
           continue;
         auto& t = mgr_->tn( e );
-        pt.mesh->draw( renderer, pt.textures, t.model(),
-          vec2( pt.blendMap->width(), pt.blendMap->height() ),
-          c_pixelScaleValues[pt.pixelScaleBase] );
+        pt.mesh->begin();
+        auto& pipeline = renderer.shaders().usePipeline( c_drawPipelineName );
+        gl::glBindTextures( 0, static_cast<GLsizei>( pt.textures.size() ), pt.textures.data() );
+        pipeline.setUniform( "texture_layer0_diffuse", 0 );
+        glActiveTexture( GL_TEXTURE0 );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+        //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        pipeline.setUniform( "texture_layer1_diffuse", 1 );
+        pipeline.setUniform( "texture_layer2_diffuse", 2 );
+        pipeline.setUniform( "texture_layer3_diffuse", 3 );
+        pipeline.setUniform( "texture_blendmap", 4 );
+        pipeline.setUniform( "texture_dimensions", vec2( pt.blendMap->width(), pt.blendMap->height() ) );
+        pipeline.setUniform( "pixelscale", c_pixelScaleValues[pt.pixelScaleBase] );
+        pipeline.setUniform( "model", t.model() );
+        pt.mesh->draw();
       }
     }
 
