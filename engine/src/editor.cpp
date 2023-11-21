@@ -22,19 +22,19 @@ namespace neko {
   {
     {
       .name = "top",
-      .position = vec3( 0.0f, 10.0f, 0.0f ),
+      .position = vec3( 0.0f, 0.0f, 0.0f ),
       .eye = vec3( 0.0f, -1.0f, 0.0f ),
       .up = vec3( 0.0f, 0.0f, 1.0f )
     },
     {
       .name = "front",
-      .position = vec3( 0.0f, 0.0f, 10.0f ),
+      .position = vec3( 0.0f, 0.0f, 0.0f ),
       .eye = vec3( 0.0f, 0.0f, -1.0f ),
       .up = vec3( 0.0f, 1.0f, 0.0f )
     },
     {
       .name = "left",
-      .position = vec3( 10.0f, 0.0f, 0.0f ),
+      .position = vec3( 0.0f, 0.0f, 0.0f ),
       .eye = vec3( -1.0f, 0.0f, 0.0f ),
       .up = vec3( 0.0f, 1.0f, 0.0f )
     }

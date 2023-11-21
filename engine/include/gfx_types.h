@@ -87,6 +87,11 @@ namespace neko {
     uint8_t r, g, b, a;
   };
 
+  constexpr vec4 colorFromRGBA( uint8 r, uint8 g, uint8 b, uint8 a )
+  {
+    return vec4( (float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)a / 255.0f );
+  }
+
 #pragma pack( pop )
 
   enum PixelFormat

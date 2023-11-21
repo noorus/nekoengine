@@ -427,6 +427,19 @@ namespace neko {
       return true;
     }
 
+    // this could probably be much faster
+    inline bool pointOnLine( const vec3& pt, const vec3& v0, const vec3& v1 )
+    {
+      constexpr auto c_epsilon = std::numeric_limits<Real>::epsilon();
+      auto AB =
+        sqrt( ( v1.x - v0.x ) * ( v1.x - v0.x ) + ( v1.y - v0.y ) * ( v1.y - v0.y ) + ( v1.z - v0.z ) * ( v1.z - v0.z ) );
+      auto AP =
+        sqrt( ( pt.x - v0.x ) * ( pt.x - v0.x ) + ( pt.y - v0.y ) * ( pt.y - v0.y ) + ( pt.z - v0.z ) * ( pt.z - v0.z ) );
+      auto PB =
+        sqrt( ( v1.x - pt.x ) * ( v1.x - pt.x ) + ( v1.y - pt.y ) * ( v1.y - pt.y ) + ( v1.z - pt.z ) * ( v1.z - pt.z ) );
+      return ( abs( AB - ( AP + PB ) ) < c_epsilon );
+    }
+
     //! \fn inline quaternion quaternionFrom( Real pitch, Real yaw, Real roll )
     //! \brief Build a quaternion from pitch/yaw/roll rotation values.
     //! \param [in] pitch Rotation along X axis.

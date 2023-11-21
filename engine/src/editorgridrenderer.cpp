@@ -68,7 +68,7 @@ namespace neko {
   {
     if ( camera.frustum().type() != Projection_Orthographic )
       return;
-
+    
     if ( camera.frustum().radius() < 1.0f )
     {
       drawCount_ = 0;
@@ -77,12 +77,14 @@ namespace neko {
 
     auto area = math::ceil( camera.frustum().aspect() * camera.frustum().radius() );
     auto normal = math::normalize( -camera.direction() );
-    auto& origin = camera.position(); // viewport.ndcPointToWorld( { 0.0f, 0.0f, 0.0f } );
+    auto& origin = camera.position();
 
     auto color = viewport.drawopGridColor();
 
     int count = math::iround( area ) + 1;
     auto verts = viz_->buffer().lock();
+
+    constexpr auto centerLineColor = colorFromRGBA( 35, 152, 126, 110 );
 
     drawCount_ = math::min( count * 4 + 4, 1024 );
 
@@ -99,25 +101,33 @@ namespace neko {
     auto delta2 = vec3( dimensions.y / (Real)segments.y * vy );
 
     size_t i = 0;
-    auto fit = vec3( math::floor( origin.x ), math::floor( origin.y ), math::floor( origin.z ) );
-    auto orig = fit + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
+    auto fit = origin + vec3( -0.5f * dimensions.x * vx - 0.5f * dimensions.y * vy );
+    auto orig = vec3( math::floor( fit.x ), math::floor( fit.y ), math::floor( fit.z ) );
     for ( auto x = 0; x <= segments.x; ++x )
     {
-      verts[i++].pos = orig + (Real)x * delta1;
-      if ( i >= drawCount_ )
+      if ( i > ( drawCount_ - 2 ) )
         break;
-      verts[i++].pos = orig + (Real)x * delta1 + dimensions.y * delta2;
-      if ( i >= drawCount_ )
-        break;
+      verts[i].pos = orig + (Real)x * delta1;
+      verts[i + 1].pos = orig + (Real)x * delta1 + dimensions.y * delta2;
+      if ( math::pointOnLine( vec3( 0.0f ), verts[i].pos, verts[i + 1].pos ) )
+      {
+        verts[i].color = centerLineColor;
+        verts[i + 1].color = centerLineColor;
+      }
+      i += 2;
     }
     for ( auto y = 0; y <= segments.y; ++y )
     {
-      verts[i++].pos = orig + (Real)y * delta2;
-      if ( i >= drawCount_ )
+      if ( i > ( drawCount_ - 2 ) )
         break;
-      verts[i++].pos = orig + dimensions.x * delta1 + (Real)y * delta2;
-      if ( i >= drawCount_ )
-        break;
+      verts[i].pos = orig + (Real)y * delta2;
+      verts[i + 1].pos = orig + dimensions.x * delta1 + (Real)y * delta2;
+      if ( math::pointOnLine( vec3( 0.0f ), verts[i].pos, verts[i + 1].pos ) )
+      {
+        verts[i].color = centerLineColor;
+        verts[i + 1].color = centerLineColor;
+      }
+      i += 2;
     }
 
     viz_->buffer().unlock();
