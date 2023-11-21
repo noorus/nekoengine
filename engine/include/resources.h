@@ -61,6 +61,10 @@ namespace neko {
         return {};
       return ( ( *it ).second );
     }
+    inline const MapType& items() const
+    {
+      return map_;
+    }
   };
 
 }

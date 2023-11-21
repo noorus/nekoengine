@@ -59,7 +59,7 @@ namespace neko {
       if ( !loaded_ )
         return false;
       for ( const auto& layer : layers_ )
-        if ( !layer.uploaded() )
+        if ( !layer.uploaded() || !layer.texture_ )
           return false;
       return true;
     }

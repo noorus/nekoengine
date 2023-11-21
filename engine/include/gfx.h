@@ -208,6 +208,12 @@ namespace neko {
     }
   };
 
+  struct EditorMaterialSelectionOp
+  {
+    MaterialPtr result;
+    bool open = true;
+  };
+
   class Editor: public enable_shared_from_this<Editor> {
   public:
     struct Visualizations: public RenderVisualizations
@@ -228,6 +234,7 @@ namespace neko {
     Visualizations visSettings_;
     EditorToolsWindow toolWindow_;
     EditorToolOptionsWindow toolOptionsWindow_;
+    map<uintptr_t, EditorMaterialSelectionOp> matSelectOps_;
   public:
     void initialize( RendererPtr renderer, const vec2& realResolution );
     void resize( const Viewport& windowViewport, GameViewport& gameViewport );
@@ -240,6 +247,11 @@ namespace neko {
     inline vec3& clearColorRef() { return clearColor_; }
     inline vec4& gridColorRef() { return gridColor_; }
     inline Visualizations& visSettingsRef() { return visSettings_; }
+    inline void startSelectOp( uintptr_t key ) { matSelectOps_[key] = EditorMaterialSelectionOp(); }
+    inline bool hasSelectOp( uintptr_t key ) const { return matSelectOps_.find( key ) != matSelectOps_.end(); }
+    inline EditorMaterialSelectionOp& getSelectOp( uintptr_t key ) { return matSelectOps_[key]; }
+    inline void eraseSelectOp( uintptr_t key ) { matSelectOps_.erase( key ); }
+    void ops( Renderer& renderer );
     void shutdown();
     void updateRealtime( Renderer& renderer, GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene,
       const Viewport& window,

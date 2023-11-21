@@ -60,7 +60,7 @@ namespace neko {
     {
       const auto& name = scriptContext( args.GetIsolate() )->scene().nd( local_.eid ).name;
       args.GetReturnValue().Set(
-        util::allocString( utils::ilprinf( R"(entity[%i,"%s"])", local_.eid, name.c_str() ), args.GetIsolate() ) );
+        util::allocString( utils::ilprintf( R"(entity[%i,"%s"])", local_.eid, name.c_str() ), args.GetIsolate() ) );
     }
 
     void Entity::js_getID( V8String prop, const PropertyCallbackInfo<v8::Value>& info )

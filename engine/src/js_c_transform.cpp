@@ -109,7 +109,7 @@ namespace neko {
 
     void TransformComponent::js_toString( const V8CallbackArgs& args )
     {
-      args.GetReturnValue().Set( util::allocString( utils::ilprinf( "component[%i]", local_.eid ), args.GetIsolate() ) );
+      args.GetReturnValue().Set( util::allocString( utils::ilprintf( "component[%i]", local_.eid ), args.GetIsolate() ) );
     }
 
     int32_t TransformComponent::jsEstimateSize() const

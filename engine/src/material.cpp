@@ -39,6 +39,8 @@ namespace neko {
   {
     MaterialPtr mat = make_shared<Material>( name );
     mat->type_ = Material::UnlitSimple;
+    mat->width_ = width;
+    mat->height_ = height;
     MaterialLayer layer( move( Pixmap( width, height, format, static_cast<uint8_t*>( const_cast<void*>( data ) ) ) ) );
     layer.texture_ = make_shared<Texture>(
       renderer_, layer.width(), layer.height(), layer.image_.format(), layer.image_.data().data(), wrapping, filtering );
@@ -53,6 +55,8 @@ namespace neko {
   {
     MaterialPtr mat = make_shared<Material>( name );
     mat->type_ = Material::UnlitSimple;
+    mat->width_ = width;
+    mat->height_ = height;
     MaterialLayer layer( move( Pixmap( width * depth, height, format, static_cast<uint8_t*>( const_cast<void*>( data ) ) ) ) );
     layer.texture_ = make_shared<Texture>(
       renderer_, width, layer.height(), depth, layer.image_.format(), layer.image_.data().data(), wrapping, filtering );

@@ -189,7 +189,7 @@ namespace neko {
     void CameraComponent::js_toString( const V8CallbackArgs& args )
     {
       args.GetReturnValue().Set( util::allocString(
-        utils::ilprinf( "camera[%i,%.3f,%.3f,%.2f]", local_.eid, local_.nearDist, local_.farDist, local_.exposure ),
+        utils::ilprintf( "camera[%i,%.3f,%.3f,%.2f]", local_.eid, local_.nearDist, local_.farDist, local_.exposure ),
         args.GetIsolate() ) );
     }
 

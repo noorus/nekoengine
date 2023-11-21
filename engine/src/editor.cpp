@@ -80,6 +80,45 @@ namespace neko {
     //gameViewport.camera()->setViewport( vec2( static_cast<Real>( halfsize.x ), static_cast<Real>( halfsize.y ) ) );
   }
 
+  void Editor::ops( Renderer& renderer )
+  {
+    auto pad = 6.0f;
+    ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( pad, pad ) );
+    ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( pad, pad ) );
+    ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0 );
+    ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, 1 );
+    ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( pad, pad ) );
+    for ( auto& [key, op] : matSelectOps_ )
+    {
+      if ( !op.open || op.result )
+        continue;
+
+      ImGui::Begin( "material selector", &op.open );
+      auto w = ImGui::GetContentRegionAvail().x;
+      auto itemsize = 128.0f;
+      auto times = math::max( 0, math::iceil( w / ( itemsize + pad ) ) - 1 );
+      auto ctr = 0;
+      for ( const auto& [key, m] : renderer.materials().items() )
+      {
+        if ( !m || !m->uploaded() || m->width() < 1 || m->height() < 1 || m->depth() > 1 )
+          continue;
+        if ( ImGui::ImageButton( m->name().c_str(), (ImTextureID)m->textureHandle( 0 ), ImVec2( itemsize, itemsize ) ) )
+        {
+          op.result = m;
+          op.open = false;
+        }
+        ImGui::SetItemTooltip( utils::ilprintf( "%s\n%ix%i", m->name().c_str(), m->width(), m->height() ).c_str() );
+        ctr++;
+        if ( ctr < times )
+          ImGui::SameLine();
+        else
+          ctr = 0;
+      }
+      ImGui::End();
+    }
+    ImGui::PopStyleVar( 5 );
+  }
+
   void Editor::updateRealtime( Renderer& renderer, GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene,
     const Viewport& window,
     GameViewport& gameViewport, bool ignoreInput )
@@ -166,7 +205,7 @@ namespace neko {
       auto mousepoint = vp->mapPointByWindow( mousePos_ );
       auto ndc = vp->ndcPointToWorld( { 0.0f, 0.0f, 0.0f } );
       ImGui::GetBackgroundDrawList()->AddText( topleft + 10.0f, ImColor( 1.0f, 1.0f, 1.0f ),
-        utils::ilprinf( "%s - mouse %.2f %.2f camera %.2f %.2f %.2f dir %.2f %.2f %.2f aspect %.2f radius %.2f ndc %.2f %.2f %.2f", vp->name().c_str(),
+        utils::ilprintf( "%s - mouse %.2f %.2f camera %.2f %.2f %.2f dir %.2f %.2f %.2f aspect %.2f radius %.2f ndc %.2f %.2f %.2f", vp->name().c_str(),
           mousepoint.x, mousepoint.y,
           vp->camera()->position().x, vp->camera()->position().y, vp->camera()->position().z,
           vp->camera()->direction().x, vp->camera()->direction().y, vp->camera()->direction().z,

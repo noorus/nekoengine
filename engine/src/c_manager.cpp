@@ -212,21 +212,21 @@ namespace neko {
       }
     }
 
-    void manager::imguiNodeEditor( entity e )
+    void manager::imguiNodeEditor( Editor& editor, entity e )
     {
       if ( e == null )
         return;
 
       auto& node = nd( e );
-      ImGui::Text( "ID: %i", static_cast<uint32_t>( e ) );
-      ImGui::Text( "Name: %s", node.name.c_str() );
-      ImGui::TextUnformatted( "Components" );
+      ImGui::Text( "id: %i", static_cast<uint32_t>( e ) );
+      ImGui::Text( "name: %s", node.name.c_str() );
+      ImGui::TextUnformatted( "components" );
       
       if ( registry_.any_of<transform>( e ) )
       {
         auto& t = tn( e );
         auto ww = ImGui::GetContentRegionAvail().x * 0.5f;
-        ig::ComponentChildWrapper wrap( "Transform", 120.0f + ww );
+        ig::ComponentChildWrapper wrap( "transform", 120.0f + ww );
         ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 4, 4 ) );
         ig::dragVector( "translate", t.translate, 0.1f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
         ig::dragVector( "scale", t.scale, 0.01f, 0.0f, 0.0f, "%.4f", ImGuiSliderFlags_None );
@@ -271,15 +271,15 @@ namespace neko {
       }
       if ( registry_.any_of<worldplane>( e ) )
       {
-        ptbsys_->imguiPaintableSurfaceEditor( e );
+        ptbsys_->imguiWorldplaneEditor( editor, e, &selectedLayer_ );
       }
     }
 
-    void manager::imguiSelectedNodes()
+    void manager::imguiSelectedNodes( Editor& editor )
     {
       for ( auto e : imguiSelectedNodes_ )
       {
-        imguiNodeEditor( e );
+        imguiNodeEditor( editor, e );
         ImGui::Separator();
       }
     }

@@ -7,7 +7,7 @@ namespace neko {
 
     thread_local char tls_ilprintfBuffer[16384];
 
-    utf8String ilprinf( const char* fmt, ... )
+    utf8String ilprintf( const char* fmt, ... )
     {
       va_list va_alist;
       va_start( va_alist, fmt );

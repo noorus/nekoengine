@@ -514,8 +514,8 @@ namespace neko {
       ImGui::ShowDemoWindow( &show_demo_window );
 
     auto gamma = g_CVar_vid_gamma.as_f();
-    ImGui::Begin( "Environment" );
-    ImGui::Text( "Editor" );
+    ImGui::Begin( "environment" );
+    ImGui::Text( "editor" );
     ImGui::Separator();
     ImGui::ColorEdit3(
       "background", &editor_->clearColorRef().x, ImGuiColorEditFlags_Float | ImGuiColorEditFlags_DisplayHSV );
@@ -529,7 +529,7 @@ namespace neko {
     ImGui::Checkbox( "show nodes", &editor_->visSettingsRef().nodes );
     ImGui::Checkbox( "show in game vp", &editor_->visSettingsRef().gameViewport );
     
-    ImGui::Text( "Rendering" );
+    ImGui::Text( "rendering" );
     ImGui::Separator();
     scene->cams().imguiCameraSelector();
     ImGui::DragFloat( "gamma", &gamma, 0.0025f, 0.0f, 10.0f );
@@ -538,19 +538,21 @@ namespace neko {
     ImGui::End();
 
     ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 6.0f, ImGui::GetStyle().WindowPadding.y ) );
-    ImGui::Begin( "Nodes" );
+    ImGui::Begin( "nodes" );
     auto fullw = ImGui::GetContentRegionAvail().x;
-    ImGui::BeginChild( "Scenegraph", ImVec2( math::max( fullw * 0.32f, 200.0f ), ImGui::GetContentRegionAvail().y ), false,
+    ImGui::BeginChild( "scenegraph", ImVec2( math::max( fullw * 0.32f, 200.0f ), ImGui::GetContentRegionAvail().y ), false,
       ImGuiWindowFlags_HorizontalScrollbar );
     scene->imguiSceneGraph();
     ImGui::EndChild();
     ImGui::SameLine();
-    ImGui::BeginChild( "Node Editor", ImVec2( ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y ), false,
+    ImGui::BeginChild( "node editor", ImVec2( ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y ), false,
       ImGuiWindowFlags_HorizontalScrollbar );
-    scene->imguiSelectedNodes();
+    scene->imguiSelectedNodes( *editor_ );
     ImGui::EndChild();
     ImGui::End();
     ImGui::PopStyleVar( 1 );
+
+    editor_->ops( *renderer_ );
 
     editor_->toolsWindow().draw();
     editor_->toolOptsWindow().draw( editor_->toolsWindow().selection() );
@@ -563,7 +565,7 @@ namespace neko {
       ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
       ImGui::SetNextWindowContentSize( wndsize );
       ImGui::SetNextWindowSizeConstraints( wndsize, wndsize );
-      ImGui::Begin( "Game", nullptr,
+      ImGui::Begin( "game", nullptr,
         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
           0 ); //ImGuiWindowFlags_NoDocking );
       ImGui::Image( reinterpret_cast<ImTextureID>( static_cast<intptr_t>( gameMainTexture->handle() ) ), wndsize,

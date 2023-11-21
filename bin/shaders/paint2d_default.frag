@@ -39,8 +39,9 @@ void main()
   vec2 stc = pixeledSamplingWrapped( tc * blendmap_dimensions, diffuse_dimensions );
 
   {
-    r += texture( diffuse_tex, stc ).rgb;
-    alpha += blend.r;
+    vec4 val = texture( diffuse_tex, stc );
+    r += val.rgb;
+    alpha += blend.r * val.a;
   }
 
   out_color = ( vs_out.color * clamp( vec4( r, alpha ), 0.0, 1.0 ) );

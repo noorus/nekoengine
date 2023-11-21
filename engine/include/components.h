@@ -419,16 +419,21 @@ namespace neko {
 
     // worldplanes
 
-
     struct worldplane;
 
     class WorldplaneLayer {
     protected:
+      bool selected_ = false;
     public:
+      inline bool selected() const { return selected_; }
+      inline void selected( bool sel ) { selected_ = sel; }
       virtual void recreate( Renderer& renderer, vec2i dimensions ) = 0;
       virtual void draw(
         Renderer& renderer, const Camera& cam, const Indexed3DVertexBuffer& mesh, const mat4& model, Real pixelScale ) const = 0;
       virtual void applyBrush( Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts ) = 0;
+      virtual MaterialPtr icon() const = 0;
+      virtual const char* caption() const = 0;
+      virtual void setMaterial( MaterialPtr newmat ) = 0;
     };
 
     class WorldplaneTexturePaintLayer : public WorldplaneLayer {
@@ -443,6 +448,9 @@ namespace neko {
       void draw( Renderer& renderer, const Camera& cam, const Indexed3DVertexBuffer& mesh, const mat4& model,
         Real pixelScale ) const override;
       void applyBrush( Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts ) override;
+      MaterialPtr icon() const override;
+      const char* caption() const override;
+      void setMaterial( MaterialPtr newmat ) override;
     };
 
     using WorldplaneLayerPtr = unique_ptr<WorldplaneLayer>;
@@ -452,6 +460,7 @@ namespace neko {
       PixelScale pixelScaleBase = PixelScale_32;
       unique_ptr<Indexed3DVertexBuffer> mesh;
       vector<WorldplaneLayerPtr> layers;
+      unique_ptr<LineRenderBuffer<8>> viz_;
       vec2i dimensions { 0, 0 };
       vec2 worldDimensions { 0.0f, 0.0f };
       int normal_sel = ig::PredefNormal_PlusZ;
@@ -477,7 +486,7 @@ namespace neko {
       void update( Renderer& renderer );
       void draw( Renderer& renderer, const Camera& cam );
       ~worldplanes_system();
-      void imguiPaintableSurfaceEditor( entity e );
+      void imguiWorldplaneEditor( Editor& editor, entity e, WorldplaneLayer** selection );
     };
 
     // hittestable
@@ -498,9 +507,10 @@ namespace neko {
       unique_ptr<primitive_system> primsys_;
       unique_ptr<sprite_system> sprsys_;
       unique_ptr<worldplanes_system> ptbsys_;
+      WorldplaneLayer* selectedLayer_ = nullptr;
       void imguiSceneGraphRecurse( entity e, entity& clicked );
       void imguiNodeSelectorRecurse( entity e, entity& selected );
-      void imguiNodeEditor( entity e );
+      void imguiNodeEditor( Editor& editor, entity e );
     public:
       manager( vec2 viewportResolution );
       inline registry& reg() { return registry_; }
@@ -553,7 +563,7 @@ namespace neko {
       void update();
       void markDirty( entity e );
       void imguiSceneGraph();
-      void imguiSelectedNodes();
+      void imguiSelectedNodes( Editor& editor );
       void imguiNodeSelector( const char* title, entity& selected );
       inline camera_system& cams() const { return *camsys_; }
       inline text_system& texts() const { return *txtsys_; }

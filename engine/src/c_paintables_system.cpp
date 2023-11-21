@@ -4,6 +4,49 @@
 #include "utilities.h"
 #include "renderer.h"
 
+namespace ImGui {
+
+  bool iconListButton( const char* str_id, const char* caption, bool selected, ImTextureID texture_id, ImVec2 btnsize, const ImVec2& iconsize, const ImVec2& uv0, const ImVec2& uv1,
+    ImGuiButtonFlags flags )
+  {
+    ImGuiContext& g = *GImGui;
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if ( window->SkipItems )
+      return false;
+
+    auto id = window->GetID( str_id );
+
+    const ImVec2 padding = g.Style.FramePadding;
+    const ImRect bb( window->DC.CursorPos, window->DC.CursorPos + btnsize );
+    btnsize -= padding * 2.0f;
+    ItemSize( bb );
+    if ( !ItemAdd( bb, id ) )
+      return false;
+
+    bool hovered, held;
+    bool pressed = ButtonBehavior( bb, id, &hovered, &held, flags );
+
+    const ImU32 col = GetColorU32( ( held && hovered ) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button );
+
+    ImVec4 background = ImVec4( 0.5f, 0.5f, 0.5f, ( held && hovered ) ? 0.65f : hovered ? 0.5f : 0.2f );
+    ImVec4 tint = ImVec4( 1.0f, 1.0f, 1.0f, 1.0f );
+
+    RenderNavHighlight( bb, id );
+    RenderFrame( bb.Min, bb.Max, selected ? col : GetColorU32( background ), true,
+      ImClamp( (float)ImMin( padding.x, padding.y ), 0.0f, g.Style.FrameRounding ) );
+
+    //window->DrawList->AddRectFilled( bb.Min + padding, bb.Max - padding, GetColorU32( background ) );
+    auto offset = ( ( btnsize.y - iconsize.y ) * 0.5f );
+    auto icmin = bb.Min + padding + ImVec2( offset, offset );
+    window->DrawList->AddImage( texture_id, icmin, icmin + iconsize, uv0, uv1, GetColorU32( tint ) );
+
+    RenderTextClipped( icmin + ImVec2( offset + iconsize.x + padding.x, 0.0f ), bb.Max, caption, nullptr, nullptr );
+
+    return pressed;
+  }
+
+}
+
 namespace neko {
 
   using namespace gl;
@@ -151,6 +194,22 @@ namespace neko {
         blendMap_ = make_shared<PaintableTexture>( renderer, dimensions_.x, dimensions_.y, PixFmtColorRGBA32f );
     }
 
+    MaterialPtr WorldplaneTexturePaintLayer::icon() const
+    {
+      return material_;
+    }
+
+    const char* WorldplaneTexturePaintLayer::caption() const
+    {
+      return materialName_.c_str();
+    }
+
+    void WorldplaneTexturePaintLayer::setMaterial( MaterialPtr newmat )
+    {
+      material_ = newmat;
+      materialName_ = material_->name();
+    }
+
     void WorldplaneTexturePaintLayer::draw(
       Renderer& renderer, const Camera& cam, const Indexed3DVertexBuffer& mesh, const mat4& model, Real pixelScale ) const
     {
@@ -185,6 +244,7 @@ namespace neko {
     {
       for ( int i = 0; i < 4; ++i )
         layers.push_back( make_unique<WorldplaneTexturePaintLayer>( c_layerTextures[i] ) );
+      viz_ = make_unique<LineRenderBuffer<8>>();
     }
 
     bool worldplane::editorMouseClickTest( Editor& editor,  manager* m, entity e,
@@ -223,7 +283,9 @@ namespace neko {
       if ( hit && lastPaintPos != mousepos )
       {
         lastPaintPos = mousepos;
-        layers[paintSelectedLayerIndex]->applyBrush( renderer, hit_uv, editor.toolOptsWindow() );
+        for ( auto& l : layers )
+          if ( l->selected() )
+            l->applyBrush( renderer, hit_uv, editor.toolOptsWindow() );
         return true;
       }
       return false;
@@ -244,6 +306,18 @@ namespace neko {
               pt.mesh->indices().size() != parts.second.size() )
           pt.mesh = make_unique<Indexed3DVertexBuffer>( parts.first.size(), parts.second.size() );
         pt.mesh->setFrom( parts );
+        auto visverts = pt.viz_->buffer().lock();
+        visverts[0].pos = vec3( -pt.worldDimensions.x * 0.5f, -pt.worldDimensions.y * 0.5f, 0.0f );
+        visverts[1].pos = vec3( pt.worldDimensions.x * 0.5f, -pt.worldDimensions.y * 0.5f, 0.0f );
+        visverts[2].pos = vec3( pt.worldDimensions.x * 0.5f, -pt.worldDimensions.y * 0.5f, 0.0f );
+        visverts[3].pos = vec3( pt.worldDimensions.x * 0.5f, pt.worldDimensions.y * 0.5f, 0.0f );
+        visverts[4].pos = vec3( pt.worldDimensions.x * 0.5f, pt.worldDimensions.y * 0.5f, 0.0f );
+        visverts[5].pos = vec3( -pt.worldDimensions.x * 0.5f, pt.worldDimensions.y * 0.5f, 0.0f );
+        visverts[6].pos = vec3( -pt.worldDimensions.x * 0.5f, pt.worldDimensions.y * 0.5f, 0.0f );
+        visverts[7].pos = vec3( -pt.worldDimensions.x * 0.5f, -pt.worldDimensions.y * 0.5f, 0.0f );
+        for ( int i = 0; i < 8; ++i )
+          visverts[i].color = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+        pt.viz_->buffer().unlock();
         for ( auto& l : pt.layers )
         {
           l->recreate( renderer, pt.dimensions );
@@ -252,6 +326,11 @@ namespace neko {
       mgr_->reg().clear<dirty_worldplane>();
       for ( auto& e : bad )
         mgr_->reg().emplace_or_replace<dirty_worldplane>( e );
+    }
+
+    inline ImTextureID imtex( GLuint tex )
+    {
+      return reinterpret_cast<ImTextureID>( static_cast<uintptr_t>( tex ) );
     }
 
     void worldplanes_system::draw( Renderer& renderer, const Camera& cam )
@@ -267,23 +346,103 @@ namespace neko {
         {
           l->draw( renderer, cam, *pt.mesh, t.model(), c_pixelScaleValues[pt.pixelScaleBase] );
         }
+        auto pl = &renderer.shaders().usePipeline( "dbg_line" );
+        pt.viz_->draw( *pl, t.model(), 8, 0, gl::GL_LINES );
       }
     }
 
-    void worldplanes_system::imguiPaintableSurfaceEditor( entity e )
+    void worldplanes_system::imguiWorldplaneEditor( Editor& editor, entity e, WorldplaneLayer** selection )
     {
       auto& pt = mgr_->reg().get<worldplane>( e );
 
       bool changed = false;
       {
-        ig::ComponentChildWrapper wrap( "Paintable", 200.0f );
+        ig::ComponentChildWrapper wrap( "worldplane", 200.0f );
         changed |= ig::imguiPixelScaleSelector( pt.pixelScaleBase );
         changed |= ImGui::DragInt2( "dimensions", &pt.dimensions[0], 1.0f, 0, 4096 );
         changed |= ig::normalSelector( "normal", pt.normal_sel, pt.normal );
       }
       {
-        ig::ComponentChildWrapper wrap( "Brush", 200.0f );
-        changed |= ImGui::SliderInt( "layer", &pt.paintSelectedLayerIndex, 0, 3 );
+        float pad = 8.0f;
+        float sep = 4.0f;
+        ig::ComponentChildWrapper wrap( "layers", 200.0f );
+        ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( pad + 1.0f, pad ) );
+        ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( pad, pad ) );
+        ImGui::BeginChild( "current layer", ImVec2( 0, 102.0f ), true, ImGuiWindowFlags_MenuBar );
+        if ( ImGui::BeginMenuBar() )
+        {
+          if ( ImGui::BeginMenu( "selected" ) )
+            ImGui::EndMenu();
+          ImGui::EndMenuBar();
+          if ( *selection )
+          {
+            ImGui::Image( imtex( ( *selection )->icon()->textureHandle( 0 ) ), ImVec2( 64.0f, 64.0f ) );
+            ImGui::SameLine();
+            ImGui::Text( ( *selection )->caption() );
+          }
+          if ( (*selection) )
+          {
+            ImGui::SameLine( ImGui::GetContentRegionAvail().x - 80.0f );
+            auto ptp = ImGui::GetCursorPos();
+            if ( ImGui::Button( "deselect", ImVec2( 80.0f, 24.0f ) ) )
+            {
+              *selection = nullptr;
+              for ( auto& l : pt.layers )
+                l->selected( false );
+            }
+            ImGui::SetCursorPos( ptp + ImVec2( 0.0f, 24.0f + sep ) );
+            auto key = (uintptr_t)( *selection );
+            if ( editor.hasSelectOp( key ) )
+            {
+              if ( ImGui::Button( "cancel", ImVec2( 80.0f, 24.0f ) ) )
+                editor.eraseSelectOp( key );
+              else if ( editor.getSelectOp( key ).result )
+              {
+                ( *selection )->setMaterial( editor.getSelectOp( key ).result );
+                editor.eraseSelectOp( key );
+              }
+              else if ( !editor.getSelectOp( key ).open )
+                editor.eraseSelectOp( key );
+            }
+            else
+            {
+              if ( ImGui::Button( "change", ImVec2( 80.0f, 24.0f ) ) )
+                editor.startSelectOp( key );
+            }
+          }
+        }
+        ImGui::EndChild();
+        ImGui::PopStyleVar( 2 );
+        ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 2.0f, 2.0f ) );
+        //ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 2.0f, 2.0f ) );
+        if ( !pt.layers.empty() )
+        {
+          auto fullw = ImGui::GetContentRegionAvail().x;
+          ImGui::BeginChild( "list", ImVec2( fullw, 200.0f ), false, 0 );
+          for ( auto i = static_cast<int>( pt.layers.size() - 1 ); i >= 0; --i )
+          {
+            const auto& l = pt.layers[i];
+            if ( !l->icon() )
+              continue;
+            ImVec2 btnsize = ImVec2( fullw - 16.0f, 40.0f );
+            ImVec2 iconsize = ImVec2( 32.0f, 32.0f );
+            ImVec2 uv0 = ImVec2( 0.0f, 0.0f );
+            ImVec2 uv1 = ImVec2(
+              iconsize.x / static_cast<Real>( l->icon()->width() ), iconsize.y / static_cast<Real>( l->icon()->height() ) );
+            if ( ImGui::iconListButton( utils::ilprintf( "wp/%i/lr/%i", e, i ).c_str(),
+              utils::ilprintf( "layer %i: %s", i, l->caption() ).c_str(), l->selected(),
+                imtex( l->icon()->textureHandle( 0 ) ), btnsize, iconsize, uv0, uv1, 0 ) )
+            {
+              l->selected( !l->selected() );
+              *selection = ( l->selected() ? l.get() : nullptr );
+              for ( int j = 0; j < pt.layers.size(); ++j )
+                if ( j != i )
+                  pt.layers[j]->selected( false );
+            }
+          }
+          ImGui::EndChild();
+        }
+        ImGui::PopStyleVar();
       }
       if ( changed )
         mgr_->reg().emplace_or_replace<dirty_worldplane>( e );

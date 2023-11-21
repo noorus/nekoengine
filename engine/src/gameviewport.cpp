@@ -18,7 +18,7 @@ namespace neko {
 
   void GameViewport::_update()
   {
-    debugStr_ = utils::ilprinf( "game | %ix%i | %s", width_, height_, camdata_ ? camdata_->name.c_str() : "no camera" );
+    debugStr_ = utils::ilprintf( "game | %ix%i | %s", width_, height_, camdata_ ? camdata_->name.c_str() : "no camera" );
   }
 
   void GameViewport::setCameraData( const c::CameraData* data )
