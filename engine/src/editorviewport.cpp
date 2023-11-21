@@ -15,8 +15,6 @@ namespace neko {
 
   using namespace gl;
 
-  constexpr mat4 c_flipMat = mat4( 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f );
-
   vec2 ViewportDragOperation::remapNormal( vec2 vpcoord ) const
   {
     return ( vpcoord + 1.0f ) * 0.5f;
@@ -120,7 +118,10 @@ namespace neko {
 
   void EditorViewport::drawopPostSceneDraw( Shaders& shaders ) const
   {
-    axesGizmo_->draw( shaders, viewportPointToWorld( { 40.0f, 70.0f, 0.0f } ), vec3( 0.0f, 1.0f, 0.0f ), vec3( 1.0f, 0.0f, 0.0f ) );
+    axesGizmo_->draw( shaders,
+      viewportPointToWorld( { 40.0f, 70.0f, 0.0f } ),
+      vec3( 0.0f, 1.0f, 0.0f ),
+      vec3( 1.0f, 0.0f, 0.0f ) );
   }
 
   vec2 EditorViewport::drawopViewportPosition() const
@@ -160,7 +161,7 @@ namespace neko {
     auto out = m * in;
     assert( out.w != 0.0f );
     out.w = 1.0f / out.w;
-    return ( c_flipMat * ( out * out.w * axisMask_ ) );
+    return ( out * out.w * axisMask_ );
   }
 
   bool EditorViewport::ndcRay( vec2 ndc_viewcoord, Ray& ray ) const

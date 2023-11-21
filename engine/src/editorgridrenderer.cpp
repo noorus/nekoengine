@@ -31,7 +31,6 @@ namespace neko {
 
   void AxesPointerRenderer::draw( Shaders& shaders, vec3 origin, vec3 up, vec3 right )
   {
-    origin = vec3( -origin.z, -origin.y, -origin.x );
     auto verts = viz_->buffer().lock();
     Real length = 0.5f;
     verts[0].color = vec4( 1.0f, 0.0f, 0.0f, 1.0f );

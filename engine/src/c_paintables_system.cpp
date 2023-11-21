@@ -46,25 +46,30 @@ namespace neko {
       manager* m, entity e, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button )
     {
       bool hit = false;
-      float u, v, w = 0.0f;
+      auto hit_uv = vec2( 0.0f );
+      // auto hit_pos = vec3( 0.0f );
       if ( mesh && mesh->indices().size() % 6 == 0 )
       {
         auto& t = m->tn( e );
         const auto& verts = mesh->buffer().lock();
         const auto& indices = mesh->indices().lock();
-        auto reverse = false;
         for ( int i = 0; i < ( mesh->indices().size() / 3 ); ++i )
         {
           auto triangle = ( i * 3 );
-          Vertex3D* vt0 = &verts.data()[indices.data()[triangle + ( reverse ? 0 : 1 )]];
-          Vertex3D* vt1 = &verts.data()[indices.data()[triangle + ( reverse ? 1 : 2 )]];
-          Vertex3D* vt2 = &verts.data()[indices.data()[triangle + ( reverse ? 2 : 0 )]];
-          hit = math::rayTriangleIntersection( ray, vt0->position, vt1->position, vt2->position, v, u );
-          reverse = ( !reverse );
+          float u, v = 0.0f;
+          Vertex3D* A = &verts.data()[indices.data()[triangle + 0]];
+          Vertex3D* B = &verts.data()[indices.data()[triangle + 1]];
+          Vertex3D* C = &verts.data()[indices.data()[triangle + 2]];
+          hit = math::rayTriangleIntersection( ray,
+            t.model() * vec4( A->position, 1.0f ),
+            t.model() * vec4( B->position, 1.0f ),
+            t.model() * vec4( C->position, 1.0f ),
+            u, v );
           if ( hit )
           {
-            u = math::interpolateLinear( vt0->texcoord.x, vt1->texcoord.x, u );
-            v = math::interpolateLinear( vt2->texcoord.y, vt0->texcoord.y, v );
+            auto w = ( 1.0f - u - v );
+            hit_uv = u * A->texcoord + v * B->texcoord + w * C->texcoord;
+            // hit_pos = t.model() * vec4( u * A->position + v * B->position + w * C->position, 1.0f );
             break;
           }
         }
@@ -74,7 +79,7 @@ namespace neko {
       if ( hit && lastPaintPos != mousepos )
       {
         lastPaintPos = mousepos;
-        applyPaint( renderer, vec2( u, v ) );
+        applyPaint( renderer, hit_uv );
       }
     }
 
@@ -180,7 +185,7 @@ namespace neko {
         glActiveTexture( GL_TEXTURE0 );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-        //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        // glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         pipeline.setUniform( "texture_layer1_diffuse", 1 );
         pipeline.setUniform( "texture_layer2_diffuse", 2 );
         pipeline.setUniform( "texture_layer3_diffuse", 3 );
