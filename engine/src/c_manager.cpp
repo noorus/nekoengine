@@ -284,15 +284,17 @@ namespace neko {
       }
     }
 
-    void manager::executeMouseClick( Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button )
+    void manager::executeEditorMouseClick(
+      Editor& editor, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button )
     {
       auto view = registry_.view<hittestable>();
       for ( auto e : view )
       {
         if ( registry_.any_of<worldplane>( e ) )
         {
-          auto& pt = paintable2d( e );
-          pt.mouseClickTest( this, e, renderer, ray, mousepos, button );
+          auto& pt = wp( e );
+          if ( pt.editorMouseClickTest( editor, this, e, renderer, ray, mousepos, button ) )
+            return;
         }
       }
     }

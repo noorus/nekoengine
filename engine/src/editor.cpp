@@ -127,7 +127,7 @@ namespace neko {
         {
           Ray ray;
           if ( vp->ndcRay( mousepoint, ray ) )
-            scene.executeMouseClick( renderer, ray, mousePosPx, 0 );
+            scene.executeEditorMouseClick( *this, renderer, ray, mousePosPx, 0 );
         }
       }
     }

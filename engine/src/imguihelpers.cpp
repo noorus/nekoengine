@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "utilities.h"
 #include "font.h"
+#include "gfx.h"
 
 namespace neko::ig {
 
@@ -98,6 +99,27 @@ namespace neko::ig {
     auto scaleName = ( scale >= 0 && scale < MAX_PixelScale ? c_pixelScaleNames[scale] : "Unknown" );
     return ImGui::SliderInt( "pixel scale", reinterpret_cast<int*>( &scale ), PixelScale_1,
       MAX_PixelScale - 1, scaleName, ImGuiSliderFlags_NoInput );
+  }
+
+  bool imguiIconButton( const char* label, const char* tooltip, bool& selected )
+  {
+    if ( selected )
+    {
+      ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.22f, 1.00f, 0.94f, 0.63f ) );
+      ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ImVec4( 0.54f, 1.00f, 0.92f, 0.80f ) );
+      ImGui::PushStyleColor( ImGuiCol_ButtonActive, ImVec4( 0.54f, 1.00f, 0.92f, 0.80f ) );
+    }
+    ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 0.0f, 4.0f ) );
+    ImGui::PushFont( g_imguiIconFont );
+    auto ret = ImGui::Button( label, ImVec2( 36.0f, 36.0f ) );
+    ImGui::PopFont();
+    ImGui::SetItemTooltip( tooltip );
+    ImGui::PopStyleVar( 1 );
+    if ( selected )
+      ImGui::PopStyleColor( 3 );
+    if ( ret )
+      selected = !selected;
+    return ret;
   }
 
 }

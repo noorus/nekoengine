@@ -11,6 +11,7 @@
 
 namespace neko {
 
+  class Editor;
   class BasicGameCamera;
 
   // clang-format off
@@ -64,6 +65,28 @@ namespace neko {
 
   // clang-format on
 
+  enum PaintBrushType : int
+  {
+    Brush_Classic = 0,
+    Brush_Circle,
+    Brush_Rhombus,
+    MAX_Brush
+  };
+
+  struct PaintBrushToolOptions
+  {
+    PaintBrushType paintBrushType = Brush_Classic;
+    int paintBrushSize = 8;
+    float paintBrushOpacity = 0.3f;
+    float paintBrushSoftness = 0.2f;
+    bool paintBrushNoiseLockSeed = true;
+    float paintBrushNoiseAmount = 0.8f;
+    float paintBrushNoiseSeed = 125.0f;
+    int paintBrushNoiseDetail = 115;
+    float paintBrushNoiseOffset = 0.05f;
+    bool paintBrushNoiseEdgesOnly = true;
+  };
+
   namespace ig {
 
     enum PredefinedNormal : int
@@ -97,6 +120,44 @@ namespace neko {
         return ImGui::DragScalarN( label, ImGuiDataType_Double, const_cast<void*>( reinterpret_cast<const void*>( &v[0] ) ),
           static_cast<int>( v.length() ), v_speed, &v_min, &v_max, format, flags );
     }
+
+    extern bool imguiIconButton( const char* label, const char* tooltip, bool& selected );
+
+    struct SelectableButtonGroup
+    {
+      struct SelectableButton
+      {
+        int value = 0;
+        utf8String text;
+        utf8String tooltip;
+        bool selected = false;
+      };
+      vector<SelectableButton> buttons;
+      inline void addButton( int value, const utf8String& text, const utf8String& tooltip )
+      {
+        buttons.emplace_back( value, text, tooltip, false );
+      }
+      inline int selection() const
+      {
+        for ( const auto& b : buttons )
+          if ( b.selected )
+            return b.value;
+        return 0;
+      }
+      inline void draw()
+      {
+        for ( int i = 0; i < buttons.size(); ++i )
+        {
+          SelectableButton& b = buttons[i];
+          if ( imguiIconButton( b.text.c_str(), b.tooltip.c_str(), b.selected ) && b.selected )
+          {
+            for ( int j = 0; j < buttons.size(); ++j )
+              if ( i != j )
+                buttons[j].selected = false;
+          }
+        }
+      }
+    };
 
     class ComponentChildWrapper {
     public:
@@ -358,25 +419,30 @@ namespace neko {
 
     // worldplanes
 
-    enum PaintBrushType: int
-    {
-      Brush_Classic = 0,
-      Brush_Circle,
-      Brush_Rhombus,
-      MAX_Brush
-    };
 
     struct worldplane;
 
     class WorldplaneLayer {
     protected:
     public:
-      virtual void mouseClick( manager* m, entity e, Renderer& renderer, const vec2& pos, int button ) = 0;
+      virtual void recreate( Renderer& renderer, vec2i dimensions ) = 0;
+      virtual void draw(
+        Renderer& renderer, const Camera& cam, const Indexed3DVertexBuffer& mesh, const mat4& model, Real pixelScale ) const = 0;
+      virtual void applyBrush( Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts ) = 0;
     };
 
     class WorldplaneTexturePaintLayer : public WorldplaneLayer {
+    protected:
+      vec2i dimensions_;
+      utf8String materialName_;
+      MaterialPtr material_;
+      PaintableTexturePtr blendMap_;
     public:
-      void mouseClick( manager* m, entity e, Renderer& renderer, const vec2& pos, int button ) override;
+      WorldplaneTexturePaintLayer( const utf8String& textureName );
+      void recreate( Renderer& renderer, vec2i dimensions ) override;
+      void draw( Renderer& renderer, const Camera& cam, const Indexed3DVertexBuffer& mesh, const mat4& model,
+        Real pixelScale ) const override;
+      void applyBrush( Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts ) override;
     };
 
     using WorldplaneLayerPtr = unique_ptr<WorldplaneLayer>;
@@ -386,26 +452,14 @@ namespace neko {
       PixelScale pixelScaleBase = PixelScale_32;
       unique_ptr<Indexed3DVertexBuffer> mesh;
       vector<WorldplaneLayerPtr> layers;
-      PaintableTexturePtr blendMap;
       vec2i dimensions { 0, 0 };
       vec2 worldDimensions { 0.0f, 0.0f };
       int normal_sel = ig::PredefNormal_PlusZ;
       vec3 normal { 0.0f, 0.0f, 1.0f };
       vec2i lastPaintPos = { 0, 0 };
       int paintSelectedLayerIndex = 0;
-      int paintBrushSize = 8;
-      float paintBrushSoftness = 0.2f;
-      float paintBrushOpacity = 0.3f;
-      bool paintBrushNoiseLockSeed = true;
-      float paintBrushNoiseSeed = 125.0f;
-      float paintBrushNoiseOffset = 0.05f;
-      float paintBrushNoiseAmount = 0.8f;
-      int paintBrushNoiseDetail = 115;
-      bool paintBrushNoiseEdgesOnly = true;
-      PaintBrushType paintBrushType = Brush_Classic;
-      vector<GLuint> textures;
-      void applyPaint( Renderer& renderer, const vec2& pos );
-      void mouseClickTest( manager* m, entity e, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button );
+      worldplane();
+      bool editorMouseClickTest( Editor& editor, manager* m, entity e, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button );
     };
 
     struct dirty_worldplane
@@ -457,7 +511,7 @@ namespace neko {
       inline text& tt( entity e ) { return registry_.get<text>( e ); } //!< Get text by entity
       inline primitive& pt( entity e ) { return registry_.get<primitive>( e ); }
       inline sprite& s( entity e ) { return registry_.get<sprite>( e ); }
-      inline worldplane& paintable2d( entity e ) { return registry_.get<worldplane>( e ); }
+      inline worldplane& wp( entity e ) { return registry_.get<worldplane>( e ); }
       inline bool validAndTransform( entity e )
       {
         if ( e == null || e == tombstone )
@@ -485,7 +539,7 @@ namespace neko {
           return false;
         return registry_.any_of<node>( e );
       }
-      void executeMouseClick( Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button );
+      void executeEditorMouseClick( Editor& editor, Renderer& renderer, const Ray& ray, const vec2i& mousepos, int button );
       entity createNode( entity parent, string_view name );
       entity createRenderable( entity parent, string_view name );
       entity createNode( string_view name );

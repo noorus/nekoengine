@@ -214,6 +214,8 @@ namespace neko {
 
   // clang-format on
 
+  ImFont* g_imguiIconFont = nullptr;
+
   void Gfx::postInitialize( Engine& engine )
   {
     renderer_ = make_shared<Renderer>( loader_, fonts_, director_, console_ );
@@ -235,6 +237,7 @@ namespace neko {
     auto& igIO = ImGui::GetIO();
     igIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     igIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
     //igIO.ConfigFlags |= ImGuiConfigFlags_IsSRGB;
     //igIO.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ImGui::StyleColorsDark();
@@ -249,6 +252,23 @@ namespace neko {
 
     ImGui_ImplWin32_InitForOpenGL( window_->getSystemHandle() );
     ImGui_ImplOpenGL3_Init( c_imguiGlslVersion );
+
+    {
+      igIO.Fonts->AddFontDefault();
+      auto file = Locator::fileSystem().openFile( Dir_Fonts, FONT_ICON_FILE_NAME_FK );
+      auto buf = IM_ALLOC( file->size() );
+      file->read( buf, static_cast<uint32_t>( file->size() ) );
+      ImFontConfig config;
+      config.MergeMode = false;
+      config.GlyphMinAdvanceX = 24.0f;
+      config.FontDataOwnedByAtlas = true;
+      static const ImWchar icon_ranges[] = { ICON_MIN_FK, ICON_MAX_FK, 0 };
+      g_imguiIconFont =
+        igIO.Fonts->AddFontFromMemoryTTF( buf, static_cast<int>( file->size() ), 24.0f, &config, icon_ranges );
+      if ( !g_imguiIconFont )
+        NEKO_EXCEPT( "Loading icon font failed" );
+      igIO.Fonts->Build();
+    }
 
     gameViewport_.setCameraData( scene->cams().getActiveData() );
     engine.director()->renderSync().unlockSceneWrite();
@@ -476,6 +496,8 @@ namespace neko {
       {
         if ( ImGui::MenuItem( "Wireframe", "F9", g_CVar_dbg_wireframe.as_b() ) )
           g_CVar_dbg_wireframe.toggle();
+        ImGui::MenuItem( "Tools", nullptr, &editor_->toolsWindow().enabled );
+        ImGui::MenuItem( "Tool Options", nullptr, &editor_->toolOptsWindow().enabled );
         ImGui::EndMenu();
       }
       ImGui::EndMainMenuBar();
@@ -529,6 +551,9 @@ namespace neko {
     ImGui::EndChild();
     ImGui::End();
     ImGui::PopStyleVar( 1 );
+
+    editor_->toolsWindow().draw();
+    editor_->toolOptsWindow().draw( editor_->toolsWindow().selection() );
 
     auto gameMainTexture = renderer_->getMergedMainFramebuffer();
     if ( gameMainTexture && false )

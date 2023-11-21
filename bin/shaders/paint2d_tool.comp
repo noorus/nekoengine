@@ -11,7 +11,6 @@ uniform ivec2 paint_mousepos;
 uniform int paint_brushsize;
 uniform float paint_brushsoften;
 uniform float paint_brushopacity;
-uniform vec4 paint_brushcolor;
 
 uniform int paint_brushtype;
 uniform float paint_noiseseed;
@@ -172,5 +171,5 @@ void main()
 
   float value = clamp( paint_brushopacity * s, 0.0, 1.0 );
 
-  imageStore( out_image, tc, mix( previous_value, paint_brushcolor, value ) );
+  imageStore( out_image, tc, mix( previous_value, vec4( 1.0, 0.0, 0.0, 0.0 ), value ) );
 }

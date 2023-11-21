@@ -15,6 +15,8 @@ namespace neko {
 
   constexpr int32_t c_glVersion[2] = { 4, 6 };
 
+  extern ImFont* g_imguiIconFont;
+
   class ViewportDrawParameters {
   public:
     virtual bool drawopShouldDrawWireframe() const = 0;
@@ -62,6 +64,61 @@ namespace neko {
     inline EditorViewportPtr viewport() const { return vp_; }
     vec2 getRelative() const;
     void end();
+  };
+
+  enum EditorTool
+  {
+    Tool_None,
+    Tool_Pencil,
+    Tool_Brush,
+    Tool_Eraser
+  };
+
+  struct EditorToolsWindow
+  {
+    bool enabled = true;
+    ig::SelectableButtonGroup buttons;
+    EditorToolsWindow()
+    {
+      buttons.addButton( Tool_Pencil, ICON_FK_PENCIL, "Pencil [p]" );
+      buttons.addButton( Tool_Brush, ICON_FK_PAINT_BRUSH, "Brush [b]" );
+      buttons.addButton( Tool_Eraser, ICON_FK_ERASER, "Eraser [e]" );
+    }
+    inline EditorTool selection() const
+    {
+      if ( !enabled )
+        return Tool_None;
+      return static_cast<EditorTool>( buttons.selection() );
+    }
+    inline void draw()
+    {
+      if ( !enabled )
+        return;
+      ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 7.0f, 6.0f ) );
+      ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( 6, 4 ) );
+      ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0 );
+      ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, 1 );
+      ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 4, 6 ) );
+      auto wndsize = ImVec2( 50.0f, 512.0f );
+      ImGui::SetNextWindowContentSize( wndsize );
+      ImGui::SetNextWindowSizeConstraints( wndsize, wndsize );
+      ImGui::Begin( "tools", nullptr,
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse |
+          ImGuiWindowFlags_NoScrollWithMouse );
+      ImGui::BeginDisabled( false );
+      buttons.draw();
+      ImGui::EndDisabled();
+      ImGui::End();
+      ImGui::PopStyleVar( 5 );
+    }
+  };
+
+  struct EditorToolOptionsWindow: public PaintBrushToolOptions
+  {
+    bool enabled = true;
+    // pen
+    int penSize = 1;
+    void draw( EditorTool activeTool );
   };
 
   class EditorViewport: public Viewport, public ViewportDrawParameters {
@@ -169,9 +226,14 @@ namespace neko {
     ViewportDragOperation dragOp_;
     vec2 lastDragopPos_ { 0.0f, 0.0f };
     Visualizations visSettings_;
+    EditorToolsWindow toolWindow_;
+    EditorToolOptionsWindow toolOptionsWindow_;
   public:
     void initialize( RendererPtr renderer, const vec2& realResolution );
     void resize( const Viewport& windowViewport, GameViewport& gameViewport );
+    inline EditorTool activeTool() const { return toolWindow_.selection(); }
+    inline EditorToolsWindow& toolsWindow() { return toolWindow_; }
+    inline EditorToolOptionsWindow& toolOptsWindow() { return toolOptionsWindow_; }
     inline void mainMenuHeight( float height ) { mainMenuHeight_ = height; }
     inline bool enabled() const { return enabled_; }
     inline void enabled( bool enable ) { enabled_ = enable; }

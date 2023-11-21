@@ -11,13 +11,11 @@ in VertexData {
 
 layout ( location = 0 ) out vec4 out_color;
 
-uniform sampler2D texture_layer0_diffuse;
-uniform sampler2D texture_layer1_diffuse;
-uniform sampler2D texture_layer2_diffuse;
-uniform sampler2D texture_layer3_diffuse;
-uniform vec2 texture_dimensions;
+uniform sampler2D diffuse_tex;
+uniform vec2 diffuse_dimensions;
+uniform sampler2D blendmap_tex;
+uniform vec2 blendmap_dimensions;
 uniform float pixelscale;
-uniform sampler2D texture_blendmap;
 
 #include "inc.colorutils.glsl"
 
@@ -32,33 +30,17 @@ vec2 pixeledSamplingWrapped( vec2 tc, vec2 texdims )
 void main()
 {
   vec2 tc = interpolateAtSample( vs_out.texcoord, gl_SampleID );
-  vec2 layer_dimensions = vec2( 80.0, 80.0 );
-  vec2 btc = pixeledSamplingWrapped( tc * texture_dimensions, texture_dimensions );
-  vec4 b = texture( texture_blendmap, btc );
+  vec2 btc = pixeledSamplingWrapped( tc * blendmap_dimensions, blendmap_dimensions );
+  vec4 blend = texture( blendmap_tex, btc );
   vec3 r = vec3( 0.0, 0.0, 0.0 );
 
   float alpha = 0.0;
   
-  vec2 stc = pixeledSamplingWrapped( tc * texture_dimensions, layer_dimensions );
+  vec2 stc = pixeledSamplingWrapped( tc * blendmap_dimensions, diffuse_dimensions );
+
   {
-    vec3 diffuse = texture( texture_layer3_diffuse, stc ).rgb;
-    r = mix( r, diffuse, b.a );
-    alpha += b.a;
-  }
-  {
-    vec3 diffuse = texture( texture_layer2_diffuse, stc ).rgb;
-    r = mix( r, diffuse, b.b );
-    alpha += b.b;
-  }
-  {
-    vec3 diffuse = texture( texture_layer1_diffuse, stc ).rgb;
-    r = mix( r, diffuse, b.g );
-    alpha += b.g;
-  }
-  {
-    vec3 diffuse = texture( texture_layer0_diffuse, stc ).rgb;
-    r = mix( r, diffuse, b.r );
-    alpha += b.r;
+    r += texture( diffuse_tex, stc ).rgb;
+    alpha += blend.r;
   }
 
   out_color = ( vs_out.color * clamp( vec4( r, alpha ), 0.0, 1.0 ) );

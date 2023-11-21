@@ -80,16 +80,16 @@ namespace neko {
     {
       setFrom( source.first.size(), source.first.data(), source.second.size(), source.second.data() );
     }
-    void begin()
+    void begin() const
     {
       gl::glBindVertexArray( vao_ );
     }
-    void draw()
+    void draw() const
     {
       gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
       gl::glBindVertexArray( 0 );
     }
-    void draw( Shaders& shaders, const Material& mat, const mat4& model )
+    void draw( Shaders& shaders, const Material& mat, const mat4& model ) const
     {
       gl::glBindVertexArray( vao_ );
       auto ppl = &shaders.usePipeline( "mat_unlit" );
@@ -100,7 +100,7 @@ namespace neko {
       gl::glDrawElements( gl::GL_TRIANGLES, static_cast<gl::GLsizei>( indices_->size() ), gl::GL_UNSIGNED_INT, nullptr );
       gl::glBindVertexArray( 0 );
     }
-    void draw( Shaders& shaders, GLuint texture, const mat4& model )
+    void draw( Shaders& shaders, GLuint texture, const mat4& model ) const
     {
       gl::glBindVertexArray( vao_ );
       auto ppl = &shaders.usePipeline( "mat_unlit" );
