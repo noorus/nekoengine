@@ -18,6 +18,11 @@ namespace neko {
   using GLGraphicsFormat = gl::GLenum;
   using GLWrapMode = gl::GLenum;
 
+  inline ImTextureID imtex( GLuint tex )
+  {
+    return reinterpret_cast<ImTextureID>( static_cast<uintptr_t>( tex ) );
+  }
+
 #pragma pack( push, 1 )
 
   struct Vertex2D

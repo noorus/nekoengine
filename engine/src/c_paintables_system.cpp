@@ -60,9 +60,14 @@ namespace neko {
     ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0 );
     ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, 1 );
     ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 4, 6 ) );
-    ImGui::Begin( "tool options" );
+    ImGui::Begin( "tool options", &enabled );
     bool changed = false;
-    if ( activeTool == Tool_Pencil )
+    if ( activeTool == Tool_Move )
+    {
+      ImGui::Text( "tool: move" );
+      ImGui::Separator();
+    }
+    else if ( activeTool == Tool_Pencil )
     {
       ImGui::Text( "tool: pen" );
       ImGui::Separator();
@@ -146,7 +151,8 @@ namespace neko {
       mgr_->reg().emplace_or_replace<dirty_worldplane>( e );
     }
 
-    void WorldplaneTexturePaintLayer::applyBrush( Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts )
+    void WorldplaneTexturePaintLayer::applyBrush(
+      Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts, bool erase )
     {
       if ( !blendMap_ )
         return;
@@ -158,6 +164,7 @@ namespace neko {
       );
 
       pipeline.setUniform( "paint_mousepos", pxpos );
+      pipeline.setUniform( "paint_erase", erase );
       pipeline.setUniform( "paint_brushtype", (int)opts.paintBrushType );
       pipeline.setUniform( "paint_brushsize", opts.paintBrushSize );
       pipeline.setUniform( "paint_brushsoften", opts.paintBrushSoftness );
@@ -285,7 +292,10 @@ namespace neko {
         lastPaintPos = mousepos;
         for ( auto& l : layers )
           if ( l->selected() )
-            l->applyBrush( renderer, hit_uv, editor.toolOptsWindow() );
+          {
+            Locator::console().printf( srcEngine, "btn %i", button );
+            l->applyBrush( renderer, hit_uv, editor.toolOptsWindow(), button == 1 );
+          }
         return true;
       }
       return false;
@@ -326,11 +336,6 @@ namespace neko {
       mgr_->reg().clear<dirty_worldplane>();
       for ( auto& e : bad )
         mgr_->reg().emplace_or_replace<dirty_worldplane>( e );
-    }
-
-    inline ImTextureID imtex( GLuint tex )
-    {
-      return reinterpret_cast<ImTextureID>( static_cast<uintptr_t>( tex ) );
     }
 
     void worldplanes_system::draw( Renderer& renderer, const Camera& cam )
@@ -380,7 +385,7 @@ namespace neko {
             ImGui::SameLine();
             ImGui::Text( ( *selection )->caption() );
           }
-          if ( (*selection) )
+          if ( *selection )
           {
             ImGui::SameLine( ImGui::GetContentRegionAvail().x - 80.0f );
             auto ptp = ImGui::GetCursorPos();

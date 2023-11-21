@@ -102,7 +102,7 @@ namespace neko {
       {
         if ( !m || !m->uploaded() || m->width() < 1 || m->height() < 1 || m->depth() > 1 )
           continue;
-        if ( ImGui::ImageButton( m->name().c_str(), (ImTextureID)m->textureHandle( 0 ), ImVec2( itemsize, itemsize ) ) )
+        if ( ImGui::ImageButton( m->name().c_str(), imtex( m->textureHandle( 0 ) ), ImVec2( itemsize, itemsize ) ) )
         {
           op.result = m;
           op.open = false;
@@ -117,6 +117,11 @@ namespace neko {
       ImGui::End();
     }
     ImGui::PopStyleVar( 5 );
+  }
+
+  void Editor::changeTool( EditorTool tool )
+  {
+    toolWindow_.select( tool );
   }
 
   void Editor::updateRealtime( Renderer& renderer, GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene,
@@ -162,11 +167,17 @@ namespace neko {
       {
         if ( vpidx < 3 )
           reinterpret_cast<EditorViewport*>( vp )->camera()->applyInputZoom( static_cast<int>( input->movement().z ) );
-        if ( input->mousebtn( 0 ) && mousepoint.x >= -1.0f && mousepoint.y >= -1.0f && mousepoint.x <= 1.0f && mousepoint.y <= 1.0f )
+        if ( ( input->mousebtn( 0 ) || input->mousebtn( 1 ) ) && mousepoint.x >= -1.0f && mousepoint.y >= -1.0f &&
+             mousepoint.x <= 1.0f && mousepoint.y <= 1.0f )
         {
           Ray ray;
           if ( vp->ndcRay( mousepoint, ray ) )
-            scene.executeEditorMouseClick( *this, renderer, ray, mousePosPx, 0 );
+          {
+            if ( input->mousebtn( 0 ) )
+              scene.executeEditorMouseClick( *this, renderer, ray, mousePosPx, 0 );
+            else if ( input->mousebtn( 1 ) )
+              scene.executeEditorMouseClick( *this, renderer, ray, mousePosPx, 1 );
+          }
         }
       }
     }

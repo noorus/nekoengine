@@ -144,6 +144,11 @@ namespace neko {
             return b.value;
         return 0;
       }
+      inline void select( int value )
+      {
+        for ( auto& b : buttons )
+          b.selected = ( b.value == value );
+      }
       inline void draw()
       {
         for ( int i = 0; i < buttons.size(); ++i )
@@ -430,7 +435,7 @@ namespace neko {
       virtual void recreate( Renderer& renderer, vec2i dimensions ) = 0;
       virtual void draw(
         Renderer& renderer, const Camera& cam, const Indexed3DVertexBuffer& mesh, const mat4& model, Real pixelScale ) const = 0;
-      virtual void applyBrush( Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts ) = 0;
+      virtual void applyBrush( Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts, bool erase ) = 0;
       virtual MaterialPtr icon() const = 0;
       virtual const char* caption() const = 0;
       virtual void setMaterial( MaterialPtr newmat ) = 0;
@@ -447,7 +452,7 @@ namespace neko {
       void recreate( Renderer& renderer, vec2i dimensions ) override;
       void draw( Renderer& renderer, const Camera& cam, const Indexed3DVertexBuffer& mesh, const mat4& model,
         Real pixelScale ) const override;
-      void applyBrush( Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts ) override;
+      void applyBrush( Renderer& renderer, const vec2& pos, PaintBrushToolOptions& opts, bool erase ) override;
       MaterialPtr icon() const override;
       const char* caption() const override;
       void setMaterial( MaterialPtr newmat ) override;

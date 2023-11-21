@@ -361,6 +361,17 @@ namespace neko {
           messaging_->send( M_Debug_ToggleDevMode );
         if ( evt.key.code == sf::Keyboard::F9 )
           g_CVar_dbg_wireframe.toggle();
+        if ( editor_ )
+        {
+          if ( evt.key.code == sf::Keyboard::V )
+            editor_->changeTool( Tool_Move );
+          if ( evt.key.code == sf::Keyboard::P )
+            editor_->changeTool( Tool_Pencil );
+          if ( evt.key.code == sf::Keyboard::B )
+            editor_->changeTool( Tool_Brush );
+          if ( evt.key.code == sf::Keyboard::E )
+            editor_->changeTool( Tool_Eraser );
+        }
       }
     }
   }
@@ -538,7 +549,7 @@ namespace neko {
     ImGui::End();
 
     ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2( 6.0f, ImGui::GetStyle().WindowPadding.y ) );
-    ImGui::Begin( "nodes" );
+    ImGui::Begin( "nodes", nullptr, ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoNavInputs );
     auto fullw = ImGui::GetContentRegionAvail().x;
     ImGui::BeginChild( "scenegraph", ImVec2( math::max( fullw * 0.32f, 200.0f ), ImGui::GetContentRegionAvail().y ), false,
       ImGuiWindowFlags_HorizontalScrollbar );

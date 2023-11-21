@@ -69,6 +69,7 @@ namespace neko {
   enum EditorTool
   {
     Tool_None,
+    Tool_Move,
     Tool_Pencil,
     Tool_Brush,
     Tool_Eraser
@@ -80,15 +81,20 @@ namespace neko {
     ig::SelectableButtonGroup buttons;
     EditorToolsWindow()
     {
-      buttons.addButton( Tool_Pencil, ICON_FK_PENCIL, "Pencil [p]" );
-      buttons.addButton( Tool_Brush, ICON_FK_PAINT_BRUSH, "Brush [b]" );
-      buttons.addButton( Tool_Eraser, ICON_FK_ERASER, "Eraser [e]" );
+      buttons.addButton( Tool_Move, ICON_FK_MOUSE_POINTER , "move [v]" );
+      buttons.addButton( Tool_Pencil, ICON_FK_PENCIL, "pencil [p]" );
+      buttons.addButton( Tool_Brush, ICON_FK_PAINT_BRUSH, "brush [b]" );
+      buttons.addButton( Tool_Eraser, ICON_FK_ERASER, "eraser [e]" );
     }
     inline EditorTool selection() const
     {
       if ( !enabled )
         return Tool_None;
       return static_cast<EditorTool>( buttons.selection() );
+    }
+    inline void select( EditorTool tool )
+    {
+      buttons.select( static_cast<int>( tool ) );
     }
     inline void draw()
     {
@@ -104,7 +110,7 @@ namespace neko {
       ImGui::SetNextWindowSizeConstraints( wndsize, wndsize );
       ImGui::Begin( "tools", nullptr,
         ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoCollapse |
-          ImGuiWindowFlags_NoScrollWithMouse );
+          ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoNavFocus );
       ImGui::BeginDisabled( false );
       buttons.draw();
       ImGui::EndDisabled();
@@ -251,6 +257,7 @@ namespace neko {
     inline bool hasSelectOp( uintptr_t key ) const { return matSelectOps_.find( key ) != matSelectOps_.end(); }
     inline EditorMaterialSelectionOp& getSelectOp( uintptr_t key ) { return matSelectOps_[key]; }
     inline void eraseSelectOp( uintptr_t key ) { matSelectOps_.erase( key ); }
+    void changeTool( EditorTool tool );
     void ops( Renderer& renderer );
     void shutdown();
     void updateRealtime( Renderer& renderer, GameTime realTime, GameTime delta, GfxInputPtr input, SManager& scene,

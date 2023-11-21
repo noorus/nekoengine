@@ -8,6 +8,7 @@ layout ( local_size_x = 8, local_size_y = 8, local_size_z = 1 ) in;
 layout ( rgba32f, binding = 0 ) uniform image2D out_image;
 
 uniform ivec2 paint_mousepos;
+uniform bool paint_erase;
 uniform int paint_brushsize;
 uniform float paint_brushsoften;
 uniform float paint_brushopacity;
@@ -169,7 +170,7 @@ void main()
       s = mix( v, noise * v, paint_noisemultiplier );
   }
 
-  float value = clamp( paint_brushopacity * s, 0.0, 1.0 );
+  vec4 value = clamp( previous_value + vec4( ( paint_erase ? -1.0 : 1.0 ) * ( paint_brushopacity * s ), 0.0, 0.0, 0.0 ), 0.0, 1.0 );
 
-  imageStore( out_image, tc, mix( previous_value, vec4( 1.0, 0.0, 0.0, 0.0 ), value ) );
+  imageStore( out_image, tc, value );
 }
