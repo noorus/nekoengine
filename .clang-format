@@ -100,9 +100,6 @@ SeparateDefinitionBlocks: Leave
 SortIncludes: false
 SortUsingDeclarations: true
 
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
-AlignEscapedNewlinesLeft: false
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
