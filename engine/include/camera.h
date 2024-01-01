@@ -30,13 +30,13 @@ namespace neko {
     virtual vec3 up() const = 0;
   };
 
-  class BasicGameCamera: public Camera {
+  class GameCamera: public Camera {
   protected:
     Entity ent_ = c::null;
     vec3 direction_ { 0.0f, 0.0f, -1.0f };
     vec3 up_ = vec3::unit_y();
   public:
-    BasicGameCamera( vec2 viewport, SManager& manager, Entity e );
+    GameCamera( vec2 viewport, SManager& manager, Entity e );
     void setViewport( vec2 resolution ) override;
     void update( SManager& manager, GameTime delta, GameTime time ) override;
     vec3 direction() const override;

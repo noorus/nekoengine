@@ -12,7 +12,7 @@
 namespace neko {
 
   class Editor;
-  class BasicGameCamera;
+  class GameCamera;
 
   // clang-format off
   
@@ -262,7 +262,7 @@ namespace neko {
     {
       entity ent;
       utf8String name;
-      shared_ptr<BasicGameCamera> instance;
+      shared_ptr<GameCamera> instance;
     };
 
     using CameraDataMap = map<entity, CameraData>;
@@ -281,8 +281,8 @@ namespace neko {
     public:
       camera_system( manager* m, vec2 resolution );
       void update();
-      const shared_ptr<BasicGameCamera> getActive() const;
-      void setActive( shared_ptr<BasicGameCamera> cam );
+      const shared_ptr<GameCamera> getActive() const;
+      void setActive( shared_ptr<GameCamera> cam );
       void setActive( entity e );
       const CameraData* getActiveData() const;
       ~camera_system();

@@ -107,7 +107,7 @@ public:                                                        \
     Scripting* owner_;
     DirectorPtr director_;
     ScriptMap scripts_;
-    SManager* sceneRuntimeDontTouch_ = nullptr;
+    SManager* sceneRuntimeDontTouch_ = nullptr; // christ almighty... FIXME TEMP HACK
     void initialize();
   private:
     void registerTemplateGlobals( v8::Local<v8::ObjectTemplate>& global );

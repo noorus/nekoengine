@@ -189,17 +189,30 @@ namespace neko {
 
     for ( auto& [key, value] : transformComponents()->items() )
     {
-      if ( !value || !value->dirty() )
+      if ( !value )
         continue;
+
+      // value->dirty is currently not ever set anyway, see next comment
       if ( !value->dirty() && !value->ent().scale->dirty() && !value->ent().rotate->dirty() && !value->ent().translate->dirty() )
         continue;
+
       auto& tn = scene.tn( value->ent().eid );
-      tn.scale = value->ent().scale->v();
-      tn.rotate = value->ent().rotate->q();
-      tn.translate = value->ent().translate->v();
+
+      if ( value->ent().scale->dirty() )
+        tn.scale = value->ent().scale->v();
+      if ( value->ent().rotate->dirty() )
+        tn.rotate = value->ent().rotate->q();
+      if ( value->ent().translate->dirty() )
+        tn.translate = value->ent().translate->v();
+
       value->ent().scale->markClean();
       value->ent().rotate->markClean();
       value->ent().translate->markClean();
+
+      // we don't actually care about the component's dirty flag because the members' dirty state
+      // does not propagate there in the first place, but let's clear it for completeness' sake
+      value->markClean();
+
       scene.reg().emplace_or_replace<c::dirty_transform>( value->ent().eid );
     }
 

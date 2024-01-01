@@ -378,7 +378,7 @@
     <ClCompile Include="src\camera.cpp">
       <Filter>Source Files\gfx\cameras</Filter>
     </ClCompile>
-    <ClCompile Include="src\basicgamecamera.cpp">
+    <ClCompile Include="src\gamecamera.cpp">
       <Filter>Source Files\gfx\cameras</Filter>
     </ClCompile>
     <ClCompile Include="src\editororthocamera.cpp">

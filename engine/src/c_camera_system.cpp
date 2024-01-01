@@ -34,14 +34,14 @@ namespace neko {
       cameras_.at( selectedCamera_ ).instance->update( *mgr_, 0.0f, 0.0f );
     }
 
-    const shared_ptr<BasicGameCamera> camera_system::getActive() const
+    const shared_ptr<GameCamera> camera_system::getActive() const
     {
       if ( !valid( selectedCamera_ ) )
         return {};
       return cameras_.at( selectedCamera_ ).instance;
     }
 
-    void camera_system::setActive( shared_ptr<BasicGameCamera> cam )
+    void camera_system::setActive( shared_ptr<GameCamera> cam )
     {
       for ( auto& [key, value] : cameras_ )
         if ( value.instance == cam )
@@ -153,7 +153,7 @@ namespace neko {
       }
       else if ( c.tracking == camera::CameraTracking::Node )
       {
-        mgr_->imguiNodeSelector( "target note", c.node_target );
+        mgr_->imguiNodeSelector( "target node", c.node_target );
       }
 
       ig::normalSelector( "up", c.up_sel, c.up );
@@ -173,7 +173,7 @@ namespace neko {
         CameraData d;
         d.ent = entity;
         d.name = n.name;
-        d.instance = make_shared<BasicGameCamera>( resolution_, *mgr_, d.ent );
+        d.instance = make_shared<GameCamera>( resolution_, *mgr_, d.ent );
         cameras_[entity] = move( d );
       }
     }

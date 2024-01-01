@@ -216,7 +216,7 @@
     <ClCompile Include="..\shared\src\exception.cpp" />
     <ClCompile Include="..\shared\src\platform_windows.cpp" />
     <ClCompile Include="..\shared\src\platform_windows_errorhandling.cpp" />
-    <ClCompile Include="src\basicgamecamera.cpp" />
+    <ClCompile Include="src\gamecamera.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\console.cpp" />
     <ClCompile Include="src\consolewindow_windows.cpp" />

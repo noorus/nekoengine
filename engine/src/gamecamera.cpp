@@ -7,18 +7,18 @@
 
 namespace neko {
 
-  BasicGameCamera::BasicGameCamera( vec2 viewport, SManager& manager, Entity e ):
+  GameCamera::GameCamera( vec2 viewport, SManager& manager, Entity e ):
   Camera( viewport ), ent_( e )
   {
     setViewport( viewport );
   }
 
-  void BasicGameCamera::setViewport( vec2 resolution )
+  void GameCamera::setViewport( vec2 resolution )
   {
     resolution_ = resolution;
   }
 
-  void BasicGameCamera::update( SManager& manager, GameTime delta, GameTime time )
+  void GameCamera::update( SManager& manager, GameTime delta, GameTime time )
   {
     const auto& tfm = manager.tn( ent_ );
     position_ = tfm.translate;
@@ -54,17 +54,17 @@ namespace neko {
     frustum_.update( view_, model() );
   }
 
-  vec3 BasicGameCamera::direction() const
+  vec3 GameCamera::direction() const
   {
     return direction_;
   }
 
-  vec3 BasicGameCamera::right() const
+  vec3 GameCamera::right() const
   {
     return math::cross( direction(), up() );
   }
 
-  vec3 BasicGameCamera::up() const
+  vec3 GameCamera::up() const
   {
     return up_;
   }

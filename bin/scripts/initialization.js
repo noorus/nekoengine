@@ -22,13 +22,7 @@ class TestScene extends Scene
   initialize( time )
   {
     Console.print( "TestScene.initialize: " + time );
-    /*Console.print( this._text );
-    Console.print( "ENTTEST" );
-    const gc = Game.getEntity( "gamecam" );
-    Console.print( gc );
-    this._enttest = new TransformComponent( 1 );
-    Console.print( this._enttest );*/
-    this._camera = Game.getEntity( "gamecam" ); // Game.createEntity( "loloooooooool" );
+    this._camera = Game.getEntity( "gamecam" );
     Console.dump( this._camera );
     Console.dump( this._camera.transform );
   }
@@ -42,9 +36,6 @@ class TestScene extends Scene
   }
   update( time, delta )
   {
-    //this._enttest.translate.x = Math.sin( time * 2 ) * 2;
-//this._enttest.translate.y = Math.cos( time * 2 ) * 2;
-   // this._enttest.rotate.fromAngleAxis( nm.radians( time * 50 ), vec3( 0, 0, 1 ) );
     this._camera.transform.rotate.fromAngleAxis( nm.radians( time * 50 ), vec3( 0, 0, 1 ) );
   }
 }

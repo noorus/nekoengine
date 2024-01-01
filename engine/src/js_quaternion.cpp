@@ -311,6 +311,7 @@ namespace neko {
         return;
       }
       q_ = glm::angleAxis( angle, axis->v() );
+      markDirty();
     }
 
   }
