@@ -627,7 +627,7 @@ namespace neko {
 
     glEnable( GL_LINE_SMOOTH );
 
-    #if 0
+#if 0
     if ( g_CVar_dbg_shownormals.as_b() )
     {
       auto& pipeline = shaders_->usePipeline( "dbg_showvertexnormals" );

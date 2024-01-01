@@ -308,12 +308,12 @@ namespace neko {
       flags_.mainbufResized = true;
     }
 
-    input_->setWindowSi{}ze( windowViewport_.size() );
+    input_->setWindowSize( windowViewport_.size() );
 
     editor_->resize( windowViewport_, gameViewport_ );
 
     auto realResolution = vec2( (Real)width, (Real)height );
-    auto scene = engine.directo{}r()->renderSync().lockSceneWrite();
+    auto scene = engine.director()->renderSync().lockSceneWrite();
     scene->cams().setResolution( realResolution );
     engine.director()->renderSync().unlockSceneWrite();
 

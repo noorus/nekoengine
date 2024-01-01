@@ -223,20 +223,21 @@ namespace neko {
       if ( !blendMap_ || !material_ )
         return;
       mesh.begin();
-      auto& pipeline = renderer.shaders().usePipeline( c_drawPipelineName );
-      vector<GLuint> textures = { material_->textureHandle( 0 ), blendMap_->handle() };
-      gl::glBindTextures( 0, static_cast<GLsizei>( textures.size() ), textures.data() );
-      pipeline.setUniform( "diffuse_tex", 0 );
-      pipeline.setUniform( "diffuse_dimensions", vec2( material_->width(), material_->height() ) );
-      glActiveTexture( GL_TEXTURE0 );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-      // glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-      pipeline.setUniform( "blendmap_tex", 1 );
-      pipeline.setUniform( "blendmap_dimensions", vec2( blendMap_->width(), blendMap_->height() ) );
-      pipeline.setUniform( "pixelscale", pixelScale );
-      pipeline.setUniform( "model", model );
-      mesh.draw();
+      {
+        auto& pipeline = renderer.shaders().usePipeline( c_drawPipelineName );
+        vector<GLuint> textures = { material_->textureHandle( 0 ), blendMap_->handle() };
+        gl::glBindTextures( 0, static_cast<GLsizei>( textures.size() ), textures.data() );
+        pipeline.setUniform( "diffuse_tex", 0 );
+        pipeline.setUniform( "diffuse_dimensions", vec2( material_->width(), material_->height() ) );
+        glActiveTexture( GL_TEXTURE0 );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+        pipeline.setUniform( "blendmap_tex", 1 );
+        pipeline.setUniform( "blendmap_dimensions", vec2( blendMap_->width(), blendMap_->height() ) );
+        pipeline.setUniform( "pixelscale", pixelScale );
+        pipeline.setUniform( "model", model );
+        mesh.draw();
+      }
     }
 
     static const char* c_layerTextures[4] =
@@ -293,7 +294,6 @@ namespace neko {
         for ( auto& l : layers )
           if ( l->selected() )
           {
-            Locator::console().printf( srcEngine, "btn %i", button );
             l->applyBrush( renderer, hit_uv, editor.toolOptsWindow(), button == 1 );
           }
         return true;
