@@ -190,6 +190,13 @@
 // EnTT
 #include <entt.hpp>
 
+// SIMDJSON
+#include <simdjson.h>
+
+#include <fastgltf/types.hpp>
+#include <fastgltf/tools.hpp>
+#include <fastgltf/parser.hpp>
+
 // JSON
 #include <json.hpp>
 

@@ -62,7 +62,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)extern\stackwalker;$(SolutionDir)extern\steamworks\sdk\public;$(SolutionDir)extern\glm\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)shared\include;$(SolutionDir)extern;$(SolutionDir)extern\lodepng;$(SolutionDir)extern\nlohmann;$(SolutionDir)extern\tinytiff;$(SolutionDir)extern\miniz;$(SolutionDir)extern\tinyexr;$(SolutionDir)extern\imgui;$(SolutionDir)extern\imgui\backends;$(SolutionDir)extern\entt\src\entt;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)extern\stackwalker;$(SolutionDir)extern\steamworks\sdk\public;$(SolutionDir)extern\glm;$(SolutionDir)extern\simdjson;$(SolutionDir)extern\fastgltf\include;$(SolutionDir)..\SDK\glbinding\include;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty;$(SolutionDir)..\SDK\sfml\include;$(SolutionDir)..\SDK\v8\include;$(SolutionDir)..\SDK\v8\include\include;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc;$(SolutionDir)..\SDK\libpng\include;$(SolutionDir)nil\include;$(SolutionDir)..\SDK\MyGUI\include;$(SolutionDir)bin\shaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>DEBUG;_DEBUG;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -124,7 +124,7 @@
       <SDLCheck>
       </SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)include\;$(SolutionDir)shared\include\;$(SolutionDir)extern\;$(SolutionDir)extern\lodepng\;$(SolutionDir)extern\nlohmann\;$(SolutionDir)extern\tinytiff\;$(SolutionDir)extern\tinygltf\;$(SolutionDir)extern\miniz\;$(SolutionDir)extern\tinyexr\;$(SolutionDir)extern\imgui\;$(SolutionDir)extern\imgui\backends\;$(SolutionDir)extern\entt\src\entt\;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)extern\stackwalker;$(SolutionDir)extern\steamworks\sdk\public;$(SolutionDir)extern\glm\;$(SolutionDir)..\SDK\glbinding\include\;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty\;$(SolutionDir)..\SDK\sfml\include\;$(SolutionDir)..\SDK\v8\include\;$(SolutionDir)..\SDK\v8\include\include\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc\;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc\;$(SolutionDir)..\SDK\libpng\include\;$(SolutionDir)nil\include\;$(SolutionDir)..\SDK\MyGUI\include\;$(SolutionDir)bin\shaders\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)shared\include;$(SolutionDir)extern;$(SolutionDir)extern\lodepng;$(SolutionDir)extern\nlohmann;$(SolutionDir)extern\tinytiff;$(SolutionDir)extern\miniz;$(SolutionDir)extern\tinyexr;$(SolutionDir)extern\imgui;$(SolutionDir)extern\imgui\backends;$(SolutionDir)extern\entt\src\entt;$(SolutionDir)extern\custom_fthb\include\harfbuzz;$(SolutionDir)extern\custom_fthb\include\freetype2;$(SolutionDir)extern\imguizmo;$(SolutionDir)extern\imguizmo-quat\imGuIZMO.quat;$(SolutionDir)extern\stackwalker;$(SolutionDir)extern\steamworks\sdk\public;$(SolutionDir)extern\glm;$(SolutionDir)extern\simdjson;$(SolutionDir)extern\fastgltf\include;$(SolutionDir)..\SDK\glbinding\include;$(SolutionDir)..\SDK\glbinding\include\glbinding\3rdparty;$(SolutionDir)..\SDK\sfml\include;$(SolutionDir)..\SDK\v8\include;$(SolutionDir)..\SDK\v8\include\include;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\core\inc;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\studio\inc;$(SolutionDir)..\SDK\FMOD SoundSystem\FMOD Studio API Windows\api\fsbank\inc;$(SolutionDir)..\SDK\libpng\include;$(SolutionDir)nil\include;$(SolutionDir)..\SDK\MyGUI\include;$(SolutionDir)bin\shaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessorDefinitions>NDEBUG;RELEASE;_RELEASE;_WINDOWS;WIN32;_WIN32;WIN64;_WIN64;LODEPNG_NO_COMPILE_DISK;MYGUI_USE_FREETYPE;SFML_STATIC;V8_COMPRESS_POINTERS;V8_31BIT_SMIS_ON_64BIT_ARCH;V8_INTL_SUPPORT;V8_USE_SNAPSHOT;V8_TARGET_ARCH_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -179,6 +179,8 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\extern\fastgltf\src\base64.cpp" />
+    <ClCompile Include="..\extern\fastgltf\src\fastgltf.cpp" />
     <ClCompile Include="..\extern\imguizmo-quat\imGuIZMO.quat\imGuIZMOquat.cpp">
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">26812;4819; 4005;</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">26812;4819; 4005;</DisableSpecificWarnings>
@@ -204,9 +206,9 @@
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4267</DisableSpecificWarnings>
     </ClCompile>
     <ClCompile Include="..\extern\miniz\miniz.cpp" />
+    <ClCompile Include="..\extern\simdjson\simdjson.cpp" />
     <ClCompile Include="..\extern\stackwalker\StackWalker.cpp" />
     <ClCompile Include="..\extern\tinyexr\tinyexr.cpp" />
-    <ClCompile Include="..\extern\tinygltf\tiny_gltf.cc" />
     <ClCompile Include="..\extern\tinytiff\tinytiffreader.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
